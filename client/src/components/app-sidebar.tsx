@@ -372,7 +372,7 @@ export function AppSidebar() {
         </Link>
         {isInsegnante && user && (
           <div className="flex flex-col items-center mt-4">
-            <span className="font-bold text-slate-800">Ciao {((user as any).lastName || user.firstName) ? `${(user as any).lastName || ""} ${user.firstName || ""}`.trim() : user.username} 👋</span>
+            <span className="font-bold text-foreground">Ciao {((user as any).lastName || user.firstName) ? `${(user as any).lastName || ""} ${user.firstName || ""}`.trim() : user.username} 👋</span>
             <span className="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded mt-1 shadow-sm border border-amber-200">STAFF</span>
           </div>
         )}
@@ -664,7 +664,7 @@ export function AppSidebar() {
                 </p>
                 <Dialog>
                   <DialogTrigger asChild>
-                    <Button variant="outline" size="sm" className="h-[18px] px-1.5 text-[9px] bg-white hover:bg-slate-50 border-slate-300 text-slate-600 font-medium tracking-tight shadow-sm">
+                    <Button variant="outline" size="sm" className="h-[18px] px-1.5 text-[9px] bg-background hover:bg-muted border-border text-muted-foreground font-medium tracking-tight shadow-sm">
                       <Activity className="w-2.5 h-2.5 mr-1 text-primary" /> Processi
                     </Button>
                   </DialogTrigger>
@@ -713,7 +713,7 @@ export function AppSidebar() {
                         ) : (
                            <PowerOff className="w-2.5 h-2.5 shrink-0 text-slate-400" />
                         )}
-                        <span className={`truncate ${isOnline ? "text-slate-700 font-medium" : isPausa ? "text-slate-500 font-medium" : "text-slate-400 opacity-80"}`}>
+                        <span className={`truncate ${isOnline ? "text-foreground/80 font-medium" : isPausa ? "text-muted-foreground font-medium" : "text-slate-400 opacity-80"}`}>
                           {isMe ? "Tu" : ((u.lastName || u.firstName) ? `${u.lastName || ""} ${u.firstName || ""}`.trim() : u.username)}
                         </span>
                       </div>
@@ -757,7 +757,7 @@ export function AppSidebar() {
                         }
 
                         return (
-                          <span className={`text-[9px] shrink-0 ${isOnline ? 'text-slate-700 font-medium' : 'text-slate-400'}`}>
+                          <span className={`text-[9px] shrink-0 ${isOnline ? 'text-foreground/80 font-medium' : 'text-slate-400'}`}>
                             {text}
                           </span>
                         );
@@ -772,9 +772,9 @@ export function AppSidebar() {
         })()}
 
         {user && (
-          <div className="mt-2 bg-slate-50 border border-sidebar-border rounded-lg shadow-sm overflow-hidden flex-shrink-0">
+          <div className="mt-2 bg-muted border border-sidebar-border rounded-lg shadow-sm overflow-hidden flex-shrink-0">
             {!isInsegnante && latestActivity && (
-              <div className="px-3 pt-2 pb-1.5 text-[9px] text-muted-foreground/80 leading-tight space-y-1 select-none bg-white/50 border-b border-sidebar-border/50">
+              <div className="px-3 pt-2 pb-1.5 text-[9px] text-muted-foreground/80 leading-tight space-y-1 select-none bg-background/50 border-b border-sidebar-border/50">
                 <p className="flex justify-between items-center text-[8.5px]">
                   <span className="opacity-80">Aggiornato:</span>
                   <span className="font-medium text-slate-400 font-mono opacity-80">{new Intl.DateTimeFormat('it-IT', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(__BUILD_DATE__))}</span>
@@ -791,7 +791,7 @@ export function AppSidebar() {
             <div className="px-2 py-1.5 flex items-center justify-between gap-2">
               <UserProfileDialog>
                 <div className="flex items-center gap-2 min-w-0 cursor-pointer hover:bg-slate-200/50 p-1 rounded-md transition-colors flex-1">
-                  <div className="w-6 h-6 rounded-full bg-sidebar-accent flex items-center justify-center flex-shrink-0 border border-slate-300 shadow-sm overflow-hidden">
+                  <div className="w-6 h-6 rounded-full bg-sidebar-accent flex items-center justify-center flex-shrink-0 border border-border shadow-sm overflow-hidden">
                     {user.profileImageUrl ? (
                       <img src={user.profileImageUrl} alt="avatar" className="w-full h-full object-cover" />
                     ) : (
@@ -831,7 +831,7 @@ export function AppSidebar() {
                 onClick={() => logoutMutation.mutate()}
                 disabled={logoutMutation.isPending}
                 data-testid="button-logout"
-                className="flex-shrink-0 h-7 w-7 rounded-md hover:bg-red-100 hover:text-red-700 bg-white border border-slate-200 shadow-sm"
+                className="flex-shrink-0 h-7 w-7 rounded-md hover:bg-red-100 hover:text-red-700 bg-background border border-border shadow-sm"
                 title="Scollegati"
               >
                 <LogOut className="w-3.5 h-3.5" />

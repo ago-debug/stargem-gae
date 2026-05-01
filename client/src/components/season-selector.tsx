@@ -29,7 +29,7 @@ export function SeasonSelector({ selectedSeasonId, onSeasonChange, showLabel = f
     if (isLoading) {
         return (
             <div className="flex flex-col gap-1.5">
-                {showLabel && <span className="text-xs font-medium text-slate-500 uppercase tracking-widest px-1">Stagione</span>}
+                {showLabel && <span className="text-xs font-medium text-muted-foreground uppercase tracking-widest px-1">Stagione</span>}
                 <div className="w-[180px] h-10 bg-slate-100 animate-pulse rounded-md"></div>
             </div>
         );
@@ -37,9 +37,9 @@ export function SeasonSelector({ selectedSeasonId, onSeasonChange, showLabel = f
 
     return (
         <div className="flex flex-col gap-1.5 shrink-0">
-            {showLabel && <span className="text-xs font-bold text-slate-500 uppercase tracking-[0.1em] px-1">Stagione Fiscale</span>}
+            {showLabel && <span className="text-xs font-bold text-muted-foreground uppercase tracking-[0.1em] px-1">Stagione Fiscale</span>}
             <Select value={selectedSeasonId.toString()} onValueChange={handleValueChange}>
-                <SelectTrigger className="w-[180px] bg-white border-slate-300 shadow-sm font-medium">
+                <SelectTrigger className="w-[180px] bg-background border-border shadow-sm font-medium">
                     <CalendarIcon className="w-4 h-4 mr-2 text-primary" />
                     <SelectValue placeholder="Stagione" />
                 </SelectTrigger>
@@ -50,7 +50,7 @@ export function SeasonSelector({ selectedSeasonId, onSeasonChange, showLabel = f
                             <SelectItem 
                                 key={s.id} 
                                 value={isActiveFallback ? "active" : s.id.toString()} 
-                                className={isActiveFallback ? "font-bold text-primary" : "font-medium text-slate-700"}
+                                className={isActiveFallback ? "font-bold text-primary" : "font-medium text-foreground/80"}
                             >
                                 {getSeasonLabel(s, seasons)}
                             </SelectItem>

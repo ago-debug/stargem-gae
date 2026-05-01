@@ -23,7 +23,7 @@ function BasePricesView({ seasonId }: { seasonId: number | "active" }) {
   });
 
   if (error) {
-     return <div className="p-8 text-center text-slate-500">Endpoint /api/price-matrix/full-catalog non ancora disponibile o non implementato (404)</div>;
+     return <div className="p-8 text-center text-muted-foreground">Endpoint /api/price-matrix/full-catalog non ancora disponibile o non implementato (404)</div>;
   }
 
   if (isLoading) return <div className="p-8"><Skeleton className="h-64 w-full" /></div>;
@@ -43,7 +43,7 @@ function BasePricesView({ seasonId }: { seasonId: number | "active" }) {
     <div className="p-6">
       <div className="rounded-md border overflow-hidden">
         <Table>
-          <TableHeader className="bg-slate-50">
+          <TableHeader className="bg-muted">
             <TableRow>
               <TableHead>Categoria</TableHead>
               <TableHead>1 corso</TableHead>
@@ -65,7 +65,7 @@ function BasePricesView({ seasonId }: { seasonId: number | "active" }) {
           </TableBody>
         </Table>
       </div>
-      <p className="text-sm text-slate-500 mt-4 text-center italic">
+      <p className="text-sm text-muted-foreground mt-4 text-center italic">
         Prezzi aggiornati al mese di {currentMonthName.charAt(0).toUpperCase() + currentMonthName.slice(1)}
       </p>
     </div>
@@ -107,7 +107,7 @@ export function ListinoTab({ seasonId }: ListinoTabProps) {
       </div>
 
       <Card>
-        <CardHeader className="flex flex-row justify-between items-center bg-slate-50 border-b pb-4">
+        <CardHeader className="flex flex-row justify-between items-center bg-muted border-b pb-4">
           <div>
             <CardTitle className="text-xl">Listino Prezzi</CardTitle>
             <CardDescription>
@@ -119,7 +119,7 @@ export function ListinoTab({ seasonId }: ListinoTabProps) {
           {viewMode === "mensile" && (
             <div className="w-64">
                <Select value={selectedType} onValueChange={setSelectedType}>
-                  <SelectTrigger className="bg-white font-semibold">
+                  <SelectTrigger className="bg-background font-semibold">
                      <SelectValue placeholder="Seleziona Categoria..." />
                   </SelectTrigger>
                   <SelectContent>

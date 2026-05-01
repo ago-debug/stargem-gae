@@ -43,7 +43,7 @@ export default function QuotePromo() {
             Hub centrale prezzi, sconti, carnet e accordi maestri
           </p>
         </div>
-        <div className="shrink-0 flex items-center bg-slate-50/50 p-2 rounded-lg border border-slate-100 shadow-sm">
+        <div className="shrink-0 flex items-center bg-muted/50 p-2 rounded-lg border border-slate-100 shadow-sm">
           <SeasonSelector
             selectedSeasonId={selectedSeasonId}
             onSeasonChange={setSelectedSeasonId}
@@ -55,22 +55,22 @@ export default function QuotePromo() {
       <Tabs defaultValue="listino" className="w-full">
         <div className="flex justify-start border-b pb-4 mb-4">
           <TabsList className="bg-slate-100 p-1 h-12 flex-wrap sm:flex-nowrap justify-start overflow-x-auto">
-            <TabsTrigger value="listino" className="px-6 gap-2 text-sm font-semibold data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm">
+            <TabsTrigger value="listino" className="px-6 gap-2 text-sm font-semibold data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm">
               Listino prezzi
             </TabsTrigger>
-            <TabsTrigger value="promo" className="px-6 gap-2 text-sm font-semibold data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm">
+            <TabsTrigger value="promo" className="px-6 gap-2 text-sm font-semibold data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm">
               Promo e convenzioni
             </TabsTrigger>
-            <TabsTrigger value="welfare" className="px-6 gap-2 text-sm font-semibold data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm">
+            <TabsTrigger value="welfare" className="px-6 gap-2 text-sm font-semibold data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm">
               Welfare
             </TabsTrigger>
-            <TabsTrigger value="carnet" className="px-6 gap-2 text-sm font-semibold data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm">
+            <TabsTrigger value="carnet" className="px-6 gap-2 text-sm font-semibold data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm">
               Carnet attivi
             </TabsTrigger>
-            <TabsTrigger value="convenzioni" className="px-6 gap-2 text-sm font-semibold data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm">
+            <TabsTrigger value="convenzioni" className="px-6 gap-2 text-sm font-semibold data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm">
               Convenzioni aziende
             </TabsTrigger>
-            <TabsTrigger value="accordi" className="px-6 gap-2 text-sm font-semibold data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm">
+            <TabsTrigger value="accordi" className="px-6 gap-2 text-sm font-semibold data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm">
               Accordi maestri
             </TabsTrigger>
             <TabsTrigger value="online" className="px-6 gap-2 text-sm font-semibold data-[state=active]:bg-emerald-50 data-[state=active]:text-emerald-700 data-[state=active]:shadow-sm">
@@ -81,9 +81,9 @@ export default function QuotePromo() {
 
         {/* Visual Feedback Banner */}
         {isPast && (
-          <Alert variant="default" className="mb-6 bg-slate-50 border-slate-200">
-            <HistoryIcon className="h-4 w-4 text-slate-500" />
-            <AlertDescription className="text-slate-600 font-medium">
+          <Alert variant="default" className="mb-6 bg-muted border-border">
+            <HistoryIcon className="h-4 w-4 text-muted-foreground" />
+            <AlertDescription className="text-muted-foreground font-medium">
               Stai visualizzando dati storici — Stagione {selectedSeason?.name}. Solo lettura.
             </AlertDescription>
           </Alert>

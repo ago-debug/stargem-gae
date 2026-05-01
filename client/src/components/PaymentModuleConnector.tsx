@@ -102,7 +102,7 @@ export function PaymentModuleConnector({ basePrice, itemName, onPaymentComplete,
               <Popover>
                 <PopoverTrigger asChild>
                   <Button type="button" size="icon" variant="ghost" className="h-5 w-5">
-                    <Edit className="w-3 h-3 text-slate-500" />
+                    <Edit className="w-3 h-3 text-muted-foreground" />
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start" onInteractOutside={(e) => e.stopPropagation()}>

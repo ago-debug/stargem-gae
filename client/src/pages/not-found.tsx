@@ -23,10 +23,10 @@ export default function NotFound() {
             </div>
           </div>
           
-          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 mb-2">
+          <h1 className="text-3xl font-extrabold tracking-tight text-foreground mb-2">
             Pagina Non Trovata
           </h1>
-          <p className="text-slate-500 mb-8 max-w-[280px] mx-auto leading-relaxed">
+          <p className="text-muted-foreground mb-8 max-w-[280px] mx-auto leading-relaxed">
             L'indirizzo inserito non esiste, è stato rimosso, oppure l'URL è errato. Verifica il link.
           </p>
           

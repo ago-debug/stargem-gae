@@ -156,7 +156,7 @@ export function PromoRuleModal({
              <p className="text-[10px] text-muted-foreground">Lascia vuoto per infiniti</p>
           </div>
 
-          <div className="flex items-center justify-between border p-3 rounded-md bg-slate-50">
+          <div className="flex items-center justify-between border p-3 rounded-md bg-muted">
             <Label htmlFor="excludeOpen" className="flex flex-col gap-1 cursor-pointer">
               <span>Escludi da OPEN</span>
               <span className="font-normal text-xs text-muted-foreground">Non applicabile sui pacchetti OPEN</span>
@@ -164,7 +164,7 @@ export function PromoRuleModal({
             <Switch id="excludeOpen" checked={formData.excludeOpen} onCheckedChange={(c) => setFormData({ ...formData, excludeOpen: c })} />
           </div>
 
-          <div className="flex items-center justify-between border p-3 rounded-md bg-slate-50">
+          <div className="flex items-center justify-between border p-3 rounded-md bg-muted">
             <Label htmlFor="notCumulative" className="flex flex-col gap-1 cursor-pointer">
               <span>Non Cumulabile</span>
               <span className="font-normal text-xs text-muted-foreground">Blocca altri sconti paralleli</span>

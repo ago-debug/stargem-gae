@@ -384,7 +384,7 @@ export function PaymentDialog({
         <>
             <Dialog open={open} onOpenChange={onOpenChange}>
                 <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto p-0">
-                    <DialogHeader className="bg-slate-50 px-6 py-4 rounded-t-lg border-b m-0 sticky top-0 z-10">
+                    <DialogHeader className="bg-muted px-6 py-4 rounded-t-lg border-b m-0 sticky top-0 z-10">
                         <DialogTitle className="text-xl text-primary flex flex-col gap-1">
                             {memberDetails ? (
                                 <span className="font-bold flex items-center gap-2">
@@ -413,13 +413,13 @@ export function PaymentDialog({
                         {memberId && (
                             <div className="space-y-3">
                                 {isLoadingDebts ? (
-                                    <div className="h-20 bg-slate-100 animate-pulse rounded-md w-full border border-slate-200"></div>
+                                    <div className="h-20 bg-slate-100 animate-pulse rounded-md w-full border border-border"></div>
                                 ) : pendingDebts && pendingDebts.length > 0 ? (
                                     <div className="border rounded-md divide-y overflow-hidden shadow-sm">
                                         {pendingDebts.map((debt, idx) => (
                                             <div
                                                 key={debt.id || idx}
-                                                className="p-4 hover:bg-slate-50 cursor-pointer transition-colors relative"
+                                                className="p-4 hover:bg-muted cursor-pointer transition-colors relative"
                                                 onClick={() => {
                                                     // Popolamento rapido se si tratta di un debito esistente
                                                     handleChange("totaleQuota", parseFloat(debt.amount));
@@ -428,7 +428,7 @@ export function PaymentDialog({
                                                 }}
                                             >
                                                 <div className="flex justify-between items-start mb-2">
-                                                    <span className="font-bold text-slate-800 text-base">{debt.description || debt.type || "Debito Generico"}</span>
+                                                    <span className="font-bold text-foreground text-base">{debt.description || debt.type || "Debito Generico"}</span>
                                                     <Badge className="bg-black text-white px-3 font-semibold tracking-wide">
                                                         Da pagare: €{parseFloat(debt.amount).toFixed(2)}
                                                     </Badge>
@@ -443,7 +443,7 @@ export function PaymentDialog({
                                         ))}
                                     </div>
                                 ) : (
-                                    <div className="border border-dashed p-4 rounded-md bg-slate-50 text-center text-sm text-slate-500">
+                                    <div className="border border-dashed p-4 rounded-md bg-muted text-center text-sm text-muted-foreground">
                                         Nessun debito pendente per questo cliente. Procedi inserendo i dati manualmente.
                                     </div>
                                 )}
@@ -451,8 +451,8 @@ export function PaymentDialog({
                         )}
 
                         {/* === SEZIONE 2: DATI CORSO E ATTIVITA === */}
-                        <div className="space-y-4 bg-white p-5 rounded-lg border shadow-sm">
-                            <h3 className="text-lg font-bold text-slate-800 border-b pb-2 flex items-center gap-2">
+                        <div className="space-y-4 bg-background p-5 rounded-lg border shadow-sm">
+                            <h3 className="text-lg font-bold text-foreground border-b pb-2 flex items-center gap-2">
                                 <span className="bg-primary/10 text-primary w-6 h-6 rounded-full flex items-center justify-center text-sm">2</span>
                                 Dati Corso e Attività
                             </h3>
@@ -565,7 +565,7 @@ export function PaymentDialog({
                                     <Label className="text-xs truncate">Totale Quota (S) *</Label>
                                     <Input
                                         type="number"
-                                        className={cn("h-9 bg-slate-50 font-bold", touched && (formData.totaleQuota === undefined || formData.totaleQuota === null || Number.isNaN(formData.totaleQuota)) ? "border-red-500 animate-pulse" : "")}
+                                        className={cn("h-9 bg-muted font-bold", touched && (formData.totaleQuota === undefined || formData.totaleQuota === null || Number.isNaN(formData.totaleQuota)) ? "border-red-500 animate-pulse" : "")}
                                         value={formData.totaleQuota ?? ''}
                                         onChange={(e) => handleChange("totaleQuota", e.target.value === '' ? undefined : parseFloat(e.target.value))}
                                     />
@@ -583,8 +583,8 @@ export function PaymentDialog({
                         </div>
 
                         {/* === SEZIONE 3: SCONTI E AGEVOLAZIONI === */}
-                        <div className="space-y-4 bg-white p-5 rounded-lg border shadow-sm">
-                            <h3 className="text-lg font-bold text-slate-800 border-b pb-2 flex items-center justify-between">
+                        <div className="space-y-4 bg-background p-5 rounded-lg border shadow-sm">
+                            <h3 className="text-lg font-bold text-foreground border-b pb-2 flex items-center justify-between">
                                 <div className="flex items-center gap-2">
                                     <span className="bg-primary/10 text-primary w-6 h-6 rounded-full flex items-center justify-center text-sm">3</span>
                                     Sconti e Agevolazioni
@@ -626,14 +626,14 @@ export function PaymentDialog({
                         </div>
 
                         {/* === SEZIONE 4: CHIUSURA E CALCOLO === */}
-                        <div className="space-y-4 bg-slate-50/50 p-5 rounded-lg border border-slate-200/60 shadow-inner">
-                            <h3 className="text-lg font-bold text-slate-800 border-b pb-2 flex items-center gap-2 border-slate-200">
+                        <div className="space-y-4 bg-muted/50 p-5 rounded-lg border border-border/60 shadow-inner">
+                            <h3 className="text-lg font-bold text-foreground border-b pb-2 flex items-center gap-2 border-border">
                                 <span className="bg-primary/20 text-primary w-6 h-6 rounded-full flex items-center justify-center text-sm">4</span>
                                 Eventi Esterni e Chiusura
                             </h3>
 
                             {/* Eventi Esterni Header */}
-                            <div className="flex flex-col xl:flex-row gap-6 bg-white p-4 rounded-md border shadow-sm">
+                            <div className="flex flex-col xl:flex-row gap-6 bg-background p-4 rounded-md border shadow-sm">
                                 <div className="flex items-center space-x-2">
                                     <Checkbox id="quotaTessera" checked={formData.quotaTesseraCheck} onCheckedChange={(c) => handleChange("quotaTesseraCheck", c === true)} />
                                     <Label htmlFor="quotaTessera" className="cursor-pointer">Quota Tessera (+€25)</Label>
@@ -642,7 +642,7 @@ export function PaymentDialog({
                                     <Checkbox id="lezioneProva" checked={formData.lezioneProvaCheck} onCheckedChange={(c) => handleChange("lezioneProvaCheck", c === true)} />
                                     <Label htmlFor="lezioneProva" className="cursor-pointer text-red-600">Sottrai Prova (-€20)</Label>
                                 </div>
-                                <div className="flex items-center space-x-2 xl:border-l xl:pl-6 xl:ml-auto border-slate-200">
+                                <div className="flex items-center space-x-2 xl:border-l xl:pl-6 xl:ml-auto border-border">
                                     <Checkbox id="integrazioneAttiva" checked={formData.integrazioneAttiva} onCheckedChange={(c) => handleChange("integrazioneAttiva", c === true)} />
                                     <Label htmlFor="integrazioneAttiva" className="cursor-pointer font-semibold text-indigo-700">Modalità Integrazione</Label>
                                 </div>
@@ -666,7 +666,7 @@ export function PaymentDialog({
                                             }
                                         }}
                                     >
-                                        <SelectTrigger className="bg-white">
+                                        <SelectTrigger className="bg-background">
                                             <SelectValue placeholder="Scegli pagamento dal passato..." />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -800,7 +800,7 @@ export function PaymentDialog({
                         </div>
                     </div>
 
-                    <DialogFooter className="bg-slate-50 border-t p-4 rounded-b-lg">
+                    <DialogFooter className="bg-muted border-t p-4 rounded-b-lg">
                         <Button variant="outline" onClick={() => onOpenChange(false)}>Annulla</Button>
                         <Button
                             className={cn("gold-3d-button", isMissingFields && !isGratuito ? "opacity-50 cursor-not-allowed" : "")}
@@ -820,10 +820,10 @@ export function PaymentDialog({
                         <AlertDialogDescription>
                             Stai per registrare un {initialData ? "aggiornamento al" : "nuovo"} pagamento.
                             <br /><br />
-                            <b className="text-slate-800">Importo:</b> € {(isGratuito ? 0 : formData.saldoTotale).toFixed(2)}<br />
-                            <b className="text-slate-800">Attività:</b> {optionsToRender.find(c => c.id.toString() === formData.dettaglioId)?.name || "N/A"}
+                            <b className="text-foreground">Importo:</b> € {(isGratuito ? 0 : formData.saldoTotale).toFixed(2)}<br />
+                            <b className="text-foreground">Attività:</b> {optionsToRender.find(c => c.id.toString() === formData.dettaglioId)?.name || "N/A"}
                             {memberDetails ? (
-                                <><br /><b className="text-slate-800">Per:</b> {memberDetails.lastName} {memberDetails.firstName}</>
+                                <><br /><b className="text-foreground">Per:</b> {memberDetails.lastName} {memberDetails.firstName}</>
                             ) : ""}
                         </AlertDialogDescription>
                     </AlertDialogHeader>

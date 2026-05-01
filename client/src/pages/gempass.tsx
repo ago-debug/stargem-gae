@@ -197,7 +197,7 @@ export default function GemPass() {
     if (typeLower === 'adulto' || typeLower === 'adult') return { label: 'ADU', className: 'bg-blue-500 hover:bg-blue-600 text-white' };
     if (typeLower === 'minore' || typeLower === 'minor') return { label: 'MIN', className: 'bg-purple-500 hover:bg-purple-600 text-white' };
     if (typeLower === 'b2b') return { label: 'B2B', className: 'bg-orange-500 hover:bg-orange-600 text-white' };
-    return { label: '—', className: 'bg-slate-300 text-slate-700 hover:bg-slate-400' };
+    return { label: '—', className: 'bg-slate-300 text-foreground/80 hover:bg-slate-400' };
   };
 
   const filtered = memberships.filter(m => {
@@ -356,7 +356,7 @@ export default function GemPass() {
           </p>
         </div>
         <div className="shrink-0 flex items-center">
-          <Badge variant="outline" className="text-sm px-3 py-1 bg-slate-50/50">
+          <Badge variant="outline" className="text-sm px-3 py-1 bg-muted/50">
             Stagione {formSeasons.length > 0 ? formSeasons[0].name.replace('Stagione ', '') : '2025-2026'}
           </Badge>
         </div>
@@ -371,19 +371,19 @@ export default function GemPass() {
         </TabsList>
         
         <TabsContent value="tessere-attive" className="mt-4 space-y-4">
-          <div className="flex flex-col sm:flex-row gap-3 items-end bg-slate-50/50 p-4 rounded-lg border border-slate-100">
+          <div className="flex flex-col sm:flex-row gap-3 items-end bg-muted/50 p-4 rounded-lg border border-slate-100">
             <div className="relative flex-1 min-w-[200px]">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 placeholder="Cerca numero o nome utente..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-9 bg-white"
+                className="pl-9 bg-background"
               />
             </div>
             <div className="w-full sm:w-[160px]">
               <Select value={filterTipo} onValueChange={setFilterTipo}>
-                <SelectTrigger className="bg-white">
+                <SelectTrigger className="bg-background">
                   <SelectValue placeholder="Tipo tessera" />
                 </SelectTrigger>
                 <SelectContent>
@@ -396,7 +396,7 @@ export default function GemPass() {
             </div>
             <div className="w-full sm:w-[160px]">
               <Select value={filterStato} onValueChange={setFilterStato}>
-                <SelectTrigger className="bg-white">
+                <SelectTrigger className="bg-background">
                   <SelectValue placeholder="Stato" />
                 </SelectTrigger>
                 <SelectContent>
@@ -412,7 +412,7 @@ export default function GemPass() {
             </Badge>
           </div>
 
-          <div className="border rounded-md bg-white overflow-hidden">
+          <div className="border rounded-md bg-background overflow-hidden">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -485,7 +485,7 @@ export default function GemPass() {
         </TabsContent>
 
         <TabsContent value="nuova-domanda" className="mt-4">
-          <div className="bg-white border rounded-lg shadow-sm p-6 space-y-8">
+          <div className="bg-background border rounded-lg shadow-sm p-6 space-y-8">
             
             {/* SEZIONE A - Ricerca / Lookup */}
             <div className="space-y-4">
@@ -546,7 +546,7 @@ export default function GemPass() {
                     className={`p-4 rounded-lg border-2 text-left transition-all ${
                       membershipType === opt.value
                         ? 'border-primary bg-primary/5'
-                        : 'border-gray-200 hover:border-gray-300'
+                        : 'border-border hover:border-border'
                     }`}
                   >
                     <div className="font-semibold text-sm">{opt.label}</div>
@@ -624,14 +624,14 @@ export default function GemPass() {
 
               {/* FLUSSO MINORE - DATI GENITORI */}
               {membershipType === 'minore' && (
-                <div className="mt-8 space-y-4 border-t pt-6 bg-slate-50/50 p-4 rounded-lg">
-                  <h3 className="font-bold text-base text-gray-800">
+                <div className="mt-8 space-y-4 border-t pt-6 bg-muted/50 p-4 rounded-lg">
+                  <h3 className="font-bold text-base text-foreground">
                     👨‍👩‍👧 Dati Genitori / Tutori Legali <span className="text-red-500">*</span>
                   </h3>
                   <p className="text-xs text-muted-foreground mb-4">Campi obbligatori per tesseramento socio minore.</p>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <h4 className="col-span-1 md:col-span-2 font-semibold text-sm text-gray-700 pb-2 border-b">Tutore 1</h4>
+                    <h4 className="col-span-1 md:col-span-2 font-semibold text-sm text-foreground/80 pb-2 border-b">Tutore 1</h4>
                     <div>
                       <Label>Cognome tutore 1 <span className="text-red-500">*</span></Label>
                       <Input value={tutore1.cognome} onChange={e => setTutore1(p => ({ ...p, cognome: e.target.value }))} placeholder="Cognome" />
@@ -654,7 +654,7 @@ export default function GemPass() {
                     </div>
 
                     {/* Tutore 2 */}
-                    <h4 className="col-span-1 md:col-span-2 font-semibold text-sm text-gray-700 mt-6 pb-2 border-b">Tutore 2</h4>
+                    <h4 className="col-span-1 md:col-span-2 font-semibold text-sm text-foreground/80 mt-6 pb-2 border-b">Tutore 2</h4>
                     <div>
                       <Label>Cognome tutore 2 <span className="text-red-500">*</span></Label>
                       <Input value={tutore2.cognome} onChange={e => setTutore2(p => ({ ...p, cognome: e.target.value }))} placeholder="Cognome" />
@@ -712,7 +712,7 @@ export default function GemPass() {
                     </SelectContent>
                   </Select>
                   
-                  <div className="mt-4 p-4 bg-slate-50 border rounded-md text-sm space-y-2 max-w-sm">
+                  <div className="mt-4 p-4 bg-muted border rounded-md text-sm space-y-2 max-w-sm">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Scadenza naturale tessera:</span>
                       <span className="font-medium">31/08/{targetSeasonInfo ? targetSeasonInfo.endYear : 2026}</span>
@@ -825,8 +825,8 @@ export default function GemPass() {
           </div>
         </TabsContent>
 
-        <TabsContent value="documenti-firme" className="mt-4 border rounded-md min-h-[400px] bg-white">
-          <div className="p-4 border-b bg-slate-50/50 flex flex-col sm:flex-row gap-4 items-end justify-between">
+        <TabsContent value="documenti-firme" className="mt-4 border rounded-md min-h-[400px] bg-background">
+          <div className="p-4 border-b bg-muted/50 flex flex-col sm:flex-row gap-4 items-end justify-between">
             <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
               {/* Cerca Socio */}
               <div className="flex flex-col max-w-xs space-y-1">
@@ -886,7 +886,7 @@ export default function GemPass() {
           <div className="overflow-x-auto min-h-[300px]">
              <Table>
                <TableHeader>
-                 <TableRow className="bg-slate-50 hover:bg-slate-50">
+                 <TableRow className="bg-muted hover:bg-muted">
                    <TableHead className="w-[80px]">ID</TableHead>
                    <TableHead className="min-w-[200px]">Socio / ID</TableHead>
                    <TableHead>Tipo Documento</TableHead>
@@ -914,14 +914,14 @@ export default function GemPass() {
                            : `Utente ID: ${f.memberId}`}
                        </TableCell>
                        <TableCell>
-                         <Badge variant="outline" className="font-normal bg-slate-100 text-slate-800 border-none">
+                         <Badge variant="outline" className="font-normal bg-slate-100 text-foreground border-none">
                            {f.formType.replace('_', ' ')}
                          </Badge>
                        </TableCell>
-                       <TableCell className="text-sm text-slate-500 whitespace-nowrap">{f.formVersion}</TableCell>
+                       <TableCell className="text-sm text-muted-foreground whitespace-nowrap">{f.formVersion}</TableCell>
                        <TableCell className="text-sm">{f.seasonId}</TableCell>
-                       <TableCell className="text-sm text-slate-500">Gestore #{f.createdBy}</TableCell>
-                       <TableCell className="text-sm text-slate-500 whitespace-nowrap">
+                       <TableCell className="text-sm text-muted-foreground">Gestore #{f.createdBy}</TableCell>
+                       <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
                          {f.signedAt ? format(parseISO(f.signedAt), "dd/MM/yyyy HH:mm") : "—"}
                        </TableCell>
                        <TableCell className="text-right">
@@ -930,7 +930,7 @@ export default function GemPass() {
                              FIRMATO
                            </Badge>
                          ) : (
-                           <Badge variant="outline" className="bg-slate-100 text-slate-500 hover:bg-slate-100 border-none px-3">
+                           <Badge variant="outline" className="bg-slate-100 text-muted-foreground hover:bg-slate-100 border-none px-3">
                              DA FIRMARE
                            </Badge>
                          )}
@@ -960,10 +960,10 @@ export default function GemPass() {
               <div className="text-4xl font-bold text-red-700">{statScadute}</div>
               <p className="text-sm font-medium text-red-600 mt-1 uppercase tracking-wide">Scadute</p>
             </div>
-            <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 flex flex-col items-center justify-center text-center shadow-sm">
-              <Users className="w-8 h-8 text-slate-500 mb-3" />
-              <div className="text-4xl font-bold text-slate-700">{statTotale}</div>
-              <p className="text-sm font-medium text-slate-500 mt-1 uppercase tracking-wide">Totale Stagione</p>
+            <div className="bg-muted border border-border rounded-xl p-6 flex flex-col items-center justify-center text-center shadow-sm">
+              <Users className="w-8 h-8 text-muted-foreground mb-3" />
+              <div className="text-4xl font-bold text-foreground/80">{statTotale}</div>
+              <p className="text-sm font-medium text-muted-foreground mt-1 uppercase tracking-wide">Totale Stagione</p>
             </div>
           </div>
         </TabsContent>
@@ -982,11 +982,11 @@ export default function GemPass() {
           {selectedTessera && (
             <div className="space-y-4 py-4 text-sm">
               <div className="grid grid-cols-2 gap-2">
-                <span className="font-semibold text-slate-500">Socio:</span>
+                <span className="font-semibold text-muted-foreground">Socio:</span>
                 <span>{selectedTessera.memberLastName} {selectedTessera.memberFirstName}</span>
-                <span className="font-semibold text-slate-500">Tessera Attuale:</span>
+                <span className="font-semibold text-muted-foreground">Tessera Attuale:</span>
                 <span>{selectedTessera.membershipNumber} (Scadenza: {selectedTessera.expiryDate ? format(parseISO(selectedTessera.expiryDate), 'dd/MM/yyyy') : '—'})</span>
-                <span className="font-semibold text-slate-500">Stagione Rinnovo:</span>
+                <span className="font-semibold text-muted-foreground">Stagione Rinnovo:</span>
                 <span className="font-medium">2026-2027 (2627)</span>
               </div>
             </div>

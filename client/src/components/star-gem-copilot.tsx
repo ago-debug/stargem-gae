@@ -37,7 +37,7 @@ export function StarGemCopilot({ onSelect, className = "" }: StarGemCopilotProps
                     <Sparkles className="w-4 h-4 fill-current" />
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-52 border-amber-200/50 bg-white/95 backdrop-blur-sm">
+            <DropdownMenuContent align="end" className="w-52 border-amber-200/50 bg-background/95 backdrop-blur-sm">
                 <div className="px-2 py-1.5 text-xs font-semibold text-amber-600 border-b border-amber-100 flex items-center gap-2">
                     <Sparkles className="w-3 h-3" />
                     StarGem CoPilot

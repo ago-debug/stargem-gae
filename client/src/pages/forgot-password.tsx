@@ -39,20 +39,20 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden bg-slate-50 pt-10 pb-16">
+    <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden bg-muted pt-10 pb-16">
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-slate-50 to-blue-500/5 z-0" />
       
       <div className="relative w-full max-w-md mx-4 z-10 animate-in fade-in zoom-in-95 duration-500">
-        <Card className="shadow-2xl border-none bg-white/95 backdrop-blur-sm rounded-xl py-4">
+        <Card className="shadow-2xl border-none bg-background/95 backdrop-blur-sm rounded-xl py-4">
            <CardHeader className="text-center pb-2">
               <div className="flex justify-center mb-2">
                   <div className="overflow-hidden h-20 w-48 flex items-center justify-center">
                      <img src={logoStarGem} alt="StarGem" className="w-full h-full object-contain mix-blend-multiply" />
                   </div>
               </div>
-              <CardTitle className="text-2xl font-extrabold tracking-tight text-slate-900 mt-2">Recupera accesso</CardTitle>
+              <CardTitle className="text-2xl font-extrabold tracking-tight text-foreground mt-2">Recupera accesso</CardTitle>
               {!success && (
-                <CardDescription className="text-sm font-medium text-slate-500 mt-1">
+                <CardDescription className="text-sm font-medium text-muted-foreground mt-1">
                    Inserisci la tua email.<br/>Riceverai un codice per reimpostare la password.
                 </CardDescription>
               )}
@@ -94,7 +94,7 @@ export default function ForgotPassword() {
              )}
              
              <div className="mt-8 text-center border-t pt-4">
-                <Link href="/" className="text-sm text-slate-500 hover:text-slate-800 font-medium flex items-center justify-center gap-1">
+                <Link href="/" className="text-sm text-muted-foreground hover:text-foreground font-medium flex items-center justify-center gap-1">
                    <ArrowLeft className="w-4 h-4" /> Torna al login
                 </Link>
              </div>

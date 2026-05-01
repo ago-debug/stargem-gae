@@ -894,21 +894,21 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
 
           <TabsContent value="details" className="pt-2">
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div className={cn("flex flex-col gap-4 p-4 rounded-md border-2", (isCopy && opStates.length > 0) ? "bg-red-50/50 border-red-400" : "border-yellow-400 bg-white")}>
+              <div className={cn("flex flex-col gap-4 p-4 rounded-md border-2", (isCopy && opStates.length > 0) ? "bg-red-50/50 border-red-400" : "border-yellow-400 bg-background")}>
                 <div className="flex gap-4 w-full">
                   <MultiSelectStatus selectedStatuses={opStates} onChange={setOpStates} testIdPrefix="course" />
                   <MultiSelectInternal selectedTags={internalTags} onChange={setInternalTags} />
                 </div>
 
                 <div className="flex items-center gap-4 flex-wrap mt-1">
-                  <Label className="font-semibold text-slate-800">Flags Marketing:</Label>
+                  <Label className="font-semibold text-foreground">Flags Marketing:</Label>
                   <div className="flex items-center space-x-2">
                     <Checkbox id="promo-gratuita" checked={promoFlags.includes("GRATUITA")} onCheckedChange={(c) => handlePromoChange("GRATUITA", !!c)} />
-                    <label htmlFor="promo-gratuita" className="text-xs leading-none font-medium cursor-pointer text-slate-600 uppercase">Prova Gratuita</label>
+                    <label htmlFor="promo-gratuita" className="text-xs leading-none font-medium cursor-pointer text-muted-foreground uppercase">Prova Gratuita</label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Checkbox id="promo-online" checked={promoFlags.includes("ONLINE")} onCheckedChange={(c) => handlePromoChange("ONLINE", !!c)} />
-                    <label htmlFor="promo-online" className="text-xs leading-none font-medium cursor-pointer text-slate-600 uppercase">Iscrizione Online</label>
+                    <label htmlFor="promo-online" className="text-xs leading-none font-medium cursor-pointer text-muted-foreground uppercase">Iscrizione Online</label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Checkbox id="promo-badge" checked={promoFlags.includes("PROMO")} onCheckedChange={(c) => handlePromoChange("PROMO", !!c)} />
@@ -920,7 +920,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                  <Label className="font-semibold text-slate-800 shrink-0">
+                  <Label className="font-semibold text-foreground shrink-0">
                       {activityType === "allenamenti" ? "GENERE ALLENAMENTO" : activityType === "prenotazioni" ? "GENERE LEZIONE" : "GENERE / NOME CORSO"} *
                     </Label>
                   <InlineListEditorDialog listCode={nameListType} listName="Genere Corso" showColors={false} penninoType="tipo A" />
@@ -937,13 +937,13 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label className="font-semibold text-slate-800">Stagione <span className="text-red-500 ml-1">*</span></Label>
+                  <Label className="font-semibold text-foreground">Stagione <span className="text-red-500 ml-1">*</span></Label>
                   <div className={(isCopy && !!formData.seasonId) ? "rounded-md border border-red-400 bg-red-50" : ""}>
                   <Select 
                      value={formData.seasonId?.toString() || "none"}
                      onValueChange={val => updateForm("seasonId", val === "none" ? null : parseInt(val))}
                   >
-                     <SelectTrigger className="bg-white">
+                     <SelectTrigger className="bg-background">
                         <SelectValue placeholder="Seleziona la stagione..." />
                      </SelectTrigger>
                      <SelectContent>
@@ -963,7 +963,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <Label className="font-semibold text-slate-800 shrink-0">Categoria <span className="text-red-500 ml-1">*</span></Label>
+                    <Label className="font-semibold text-foreground shrink-0">Categoria <span className="text-red-500 ml-1">*</span></Label>
                     <InlineListEditorDialog listCode="categorie" listName="Categorie Corsi" showColors={true} penninoType="tipo C" />
                   </div>
                   <div className={(isCopy && !!formData.categoryId) ? "rounded-md border border-red-400 bg-red-50" : ""}>
@@ -988,7 +988,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                   />
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
-                      <Label className="font-semibold text-slate-800 shrink-0">NUMERO PERSONE</Label>
+                      <Label className="font-semibold text-foreground shrink-0">NUMERO PERSONE</Label>
                       <InlineListEditorDialog listCode="numero_persone" listName="Numero Persone" showColors={false} />
                     </div>
                     <div className={(isCopy && !!formData.numberOfPeople && formData.numberOfPeople !== "none") ? "rounded-md border border-red-400 bg-red-50" : ""}>
@@ -1023,7 +1023,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <div className="flex items-center justify-between gap-2">
-                      <Label className="font-semibold text-slate-800">NOME ALLIEVO 1</Label>
+                      <Label className="font-semibold text-foreground">NOME ALLIEVO 1</Label>
                       <Button variant="outline" size="sm" type="button" onClick={() => { setQuickMemberTarget("member1"); setIsQuickMemberAddOpen(true); }}>➕ Nuovo</Button>
                     </div>
                     <div className="space-y-1 relative">
@@ -1034,7 +1034,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                         onChange={e => setSearchMember1(e.target.value)}
                       />
                       {searchMember1.length >= 2 && searchResults1?.members?.length > 0 && (
-                        <div className="border rounded-md max-h-40 overflow-y-auto bg-white shadow absolute z-50 w-full">
+                        <div className="border rounded-md max-h-40 overflow-y-auto bg-background shadow absolute z-50 w-full">
                           {searchResults1.members.map((m: any) => (
                             <div
                               key={m.id}
@@ -1053,7 +1053,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                   </div>
                   <div className="space-y-2">
                     <div className="flex items-center justify-between gap-2">
-                      <Label className="font-semibold text-slate-800">NOME ALLIEVO 2</Label>
+                      <Label className="font-semibold text-foreground">NOME ALLIEVO 2</Label>
                       <Button variant="outline" size="sm" type="button" onClick={() => { setQuickMemberTarget("member2"); setIsQuickMemberAddOpen(true); }}>➕ Nuovo</Button>
                     </div>
                     <div className="space-y-1 relative">
@@ -1064,7 +1064,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                         onChange={e => setSearchMember2(e.target.value)}
                       />
                       {searchMember2.length >= 2 && searchResults2?.members?.length > 0 && (
-                        <div className="border rounded-md max-h-40 overflow-y-auto bg-white shadow absolute z-50 w-full">
+                        <div className="border rounded-md max-h-40 overflow-y-auto bg-background shadow absolute z-50 w-full">
                           {searchResults2.members.map((m: any) => (
                             <div
                               key={m.id}
@@ -1086,7 +1086,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <Label className="font-semibold text-slate-800 shrink-0">{activityType === "campus" ? "Gruppo" : "Livello"}</Label>
+                    <Label className="font-semibold text-foreground shrink-0">{activityType === "campus" ? "Gruppo" : "Livello"}</Label>
                     <InlineListEditorDialog listCode={activityType === "campus" ? "campus" : "livello"} listName={activityType === "campus" ? "Gruppo Campus" : "Livello"} showColors={false} penninoType="tipo A" />
                   </div>
                   <Combobox
@@ -1101,7 +1101,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <Label className="font-semibold text-slate-800 shrink-0">Fascia d'età</Label>
+                    <Label className="font-semibold text-foreground shrink-0">Fascia d'età</Label>
                     <InlineListEditorDialog listCode="fascia_eta" listName="Fascia d'Età" showColors={false} penninoType="tipo A" />
                   </div>
                   <Combobox
@@ -1118,7 +1118,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <div className="flex items-center justify-between gap-2">
-                    <Label className="font-semibold text-slate-800">Insegnante Principale <span className="text-red-500 ml-1">*</span></Label>
+                    <Label className="font-semibold text-foreground">Insegnante Principale <span className="text-red-500 ml-1">*</span></Label>
                     <Button variant="outline" size="sm" type="button" onClick={() => { setQuickMemberTarget("instructor"); setIsQuickMemberAddOpen(true); }}>➕ Nuovo</Button>
                   </div>
                   <div className={(isCopy && !!formData.instructorId) ? "rounded-md border border-red-400 bg-red-50" : ""}>
@@ -1133,7 +1133,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between gap-2">
-                    <Label className="font-semibold text-slate-800">Insegnante Secondario</Label>
+                    <Label className="font-semibold text-foreground">Insegnante Secondario</Label>
                     <Button variant="outline" size="sm" type="button" onClick={() => { setQuickMemberTarget("secondaryInstructor"); setIsQuickMemberAddOpen(true); }}>➕ Nuovo</Button>
                   </div>
                   <Combobox
@@ -1175,7 +1175,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <Label htmlFor="maxCapacity" className="font-semibold text-slate-800 shrink-0">Posti Disponibili <span className="text-red-500 ml-1">*</span></Label>
+                    <Label htmlFor="maxCapacity" className="font-semibold text-foreground shrink-0">Posti Disponibili <span className="text-red-500 ml-1">*</span></Label>
                     <InlineListEditorDialog listCode="posti_disponibili" listName="Posti Disponibili" showColors={false} penninoType="tipo A" />
                   </div>
                   <Select value={formData.maxCapacity?.toString() || "none"} onValueChange={v => updateForm("maxCapacity", v === "none" ? null : parseInt(v))}>
@@ -1189,9 +1189,9 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
               </div>
               )}
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 p-4 border rounded-md relative bg-slate-50/50">
-                <div className="absolute -top-3 left-3 bg-white px-2">
-                  <span className="text-xs font-semibold text-slate-500 uppercase">Pianificazione Oraria</span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 p-4 border rounded-md relative bg-muted/50">
+                <div className="absolute -top-3 left-3 bg-background px-2">
+                  <span className="text-xs font-semibold text-muted-foreground uppercase">Pianificazione Oraria</span>
                 </div>
                 <div className="space-y-2">
                   <Label>Giorno <span className="text-red-500 ml-1">*</span></Label>
@@ -1262,7 +1262,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
 
               <DialogFooter className="sticky bottom-0 bg-background pt-4 border-t flex flex-col sm:flex-row items-center justify-between w-full mt-6 gap-2">
                 <div className="w-full sm:w-auto flex items-center justify-between sm:justify-start gap-4">
-                  <span className="text-xs text-slate-500 hidden sm:inline-block"><span className="text-red-500 font-bold mr-1">*</span> Campi obbligatori</span>
+                  <span className="text-xs text-muted-foreground hidden sm:inline-block"><span className="text-red-500 font-bold mr-1">*</span> Campi obbligatori</span>
                   {isEdit && onDelete && canWrite && !(course?.currentEnrollment > 0) && !(formData.member1Id !== null && formData.member1Id !== undefined && formData.member1Id !== "none" && formData.member1Id !== "") && (
                     <div className="flex items-center">
                        {!confirmDelete ? (
@@ -1281,7 +1281,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                   )}
                 </div>
                 <div className="flex flex-wrap gap-2 w-full sm:w-auto justify-end">
-                  <span className="text-xs text-slate-500 sm:hidden block w-full text-right"><span className="text-red-500 font-bold mr-1">*</span> Campi obbligatori</span>
+                  <span className="text-xs text-muted-foreground sm:hidden block w-full text-right"><span className="text-red-500 font-bold mr-1">*</span> Campi obbligatori</span>
                   <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Annulla</Button>
                   {/* Il tasto Duplica è stato rimosso da qui e spostato all'esterno sulla card */}
                   <Button type="submit" disabled={updateMutation.isPending || createMutation.isPending} className="gold-3d-button text-black">

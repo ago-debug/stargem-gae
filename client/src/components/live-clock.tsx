@@ -16,7 +16,7 @@ export function LiveClock() {
   const displayTime = formattedTime.charAt(0).toUpperCase() + formattedTime.slice(1);
 
   return (
-    <div className="ml-4 text-[13px] font-semibold text-slate-700 tracking-tight flex items-center">
+    <div className="ml-4 text-[13px] font-semibold text-foreground/80 tracking-tight flex items-center">
       {displayTime}
     </div>
   );

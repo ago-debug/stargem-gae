@@ -689,7 +689,7 @@ export default function AccountingSheet() {
                                 </TableHeader>
                                 <TableBody>
                                     {sortedMovements.map((m: any) => (
-                                        <TableRow key={m.id} className="hover:bg-accent/30 transition-colors bg-slate-50/50">
+                                        <TableRow key={m.id} className="hover:bg-accent/30 transition-colors bg-muted/50">
                                             <TableCell className="font-medium">
                                                 <div className="flex flex-col">
                                                     <span>{m.date ? new Date(m.date).toLocaleDateString('it-IT') : "-"}</span>
@@ -724,7 +724,7 @@ export default function AccountingSheet() {
                                                 ) : m.paid > 0.01 ? (
                                                     <Badge variant="outline" className="font-bold px-3 text-orange-700 border-orange-300 bg-orange-100">PARZIALE</Badge>
                                                 ) : (
-                                                    <Badge variant="outline" className="font-bold px-3 text-slate-500 border-slate-300 bg-slate-100">DA SALDARE</Badge>
+                                                    <Badge variant="outline" className="font-bold px-3 text-muted-foreground border-border bg-slate-100">DA SALDARE</Badge>
                                                 )}
                                             </TableCell>
                                             <TableCell className="text-right print:hidden">
@@ -768,7 +768,7 @@ export default function AccountingSheet() {
                     </DialogHeader>
                     <div className="space-y-4">
                         <div className="grid grid-cols-3 gap-4 mb-4">
-                            <div className="bg-slate-50 p-3 rounded-lg border">
+                            <div className="bg-muted p-3 rounded-lg border">
                                 <p className="text-xs text-muted-foreground uppercase font-bold">Totale</p>
                                 <p className="text-lg font-black">€{detailsItem ? parseFloat(detailsItem.originalAmount).toFixed(2) : "0.00"}</p>
                             </div>

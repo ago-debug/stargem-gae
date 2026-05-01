@@ -106,7 +106,7 @@ export function UserProfileDialog({ children, targetUser }: UserProfileDialogPro
         </DialogHeader>
 
         <div className="flex flex-col items-center gap-6 py-4">
-          <div className="relative group cursor-pointer w-24 h-24 rounded-full overflow-hidden border-2 border-slate-200">
+          <div className="relative group cursor-pointer w-24 h-24 rounded-full overflow-hidden border-2 border-border">
             {previewImage || user?.profileImageUrl ? (
               <img src={previewImage || user?.profileImageUrl!} alt="Avatar" className="w-full h-full object-cover" />
             ) : (
@@ -131,12 +131,12 @@ export function UserProfileDialog({ children, targetUser }: UserProfileDialogPro
           <div className="w-full space-y-4">
             <div className="grid gap-2">
               <Label htmlFor="username">Username</Label>
-              <Input id="username" value={user?.username || ""} disabled className="bg-slate-50 text-slate-500" />
+              <Input id="username" value={user?.username || ""} disabled className="bg-muted text-muted-foreground" />
             </div>
             {(user?.firstName || user?.lastName) && (
               <div className="grid gap-2">
                 <Label htmlFor="name">Nome completo</Label>
-                <Input id="name" value={`${user.firstName || ""} ${user.lastName || ""}`.trim()} disabled className="bg-slate-50 text-slate-500" />
+                <Input id="name" value={`${user.firstName || ""} ${user.lastName || ""}`.trim()} disabled className="bg-muted text-muted-foreground" />
               </div>
             )}
             <div className="grid gap-2">

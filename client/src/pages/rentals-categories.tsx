@@ -172,7 +172,7 @@ export default function RentalsCategories() {
                       <Button
                         variant="outline"
                         size="icon"
-                        className="h-8 w-8 bg-white text-muted-foreground border-border/50 hover:bg-gray-50 hover:text-destructive transition-colors shadow-sm"
+                        className="h-8 w-8 bg-background text-muted-foreground border-border/50 hover:bg-gray-50 hover:text-destructive transition-colors shadow-sm"
                         onClick={() => {
                           if (confirm("Sei sicuro di voler eliminare questa categoria?")) {
                             deleteMutation.mutate(category.id);
@@ -219,7 +219,7 @@ export default function RentalsCategories() {
                             <Button
                               variant="outline"
                               size="icon"
-                              className="h-7 w-7 bg-white text-muted-foreground border-border/50 hover:text-destructive"
+                              className="h-7 w-7 bg-background text-muted-foreground border-border/50 hover:text-destructive"
                               onClick={() => {
                                 if (confirm("Sei sicuro di voler eliminare questa categoria?")) {
                                   deleteMutation.mutate(child.id);

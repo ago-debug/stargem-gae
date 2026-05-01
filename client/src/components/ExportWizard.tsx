@@ -193,7 +193,7 @@ export function ExportWizard({
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant={variant} size="sm" data-testid="button-export-wizard" className="bg-white">
+        <Button variant={variant} size="sm" data-testid="button-export-wizard" className="bg-background">
           {triggerIcon}
           <span className="hidden sm:inline">{triggerLabel}</span>
         </Button>

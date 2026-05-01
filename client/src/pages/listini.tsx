@@ -126,7 +126,7 @@ export default function PriceLists() {
                                     {list.active ? (
                                         <Badge variant="outline" className="mt-2 text-[8px] h-4 bg-green-50 text-green-700 border-green-200">ATTIVO</Badge>
                                     ) : (
-                                        <Badge variant="outline" className="mt-2 text-[8px] h-4 bg-gray-50 text-gray-500 border-gray-200">NON ATTIVO</Badge>
+                                        <Badge variant="outline" className="mt-2 text-[8px] h-4 bg-gray-50 text-muted-foreground border-border">NON ATTIVO</Badge>
                                     )}
                                 </button>
                             ))}
@@ -524,7 +524,7 @@ function PriceItemManager({ type, entities, activeItems, quotes, onUpsert, onDel
                 />
             </div>
 
-            <div className="border rounded-lg overflow-hidden bg-white shadow-sm">
+            <div className="border rounded-lg overflow-hidden bg-background shadow-sm">
                 <Table>
                     <TableHeader className="bg-muted/30">
                         <TableRow>
@@ -747,7 +747,7 @@ function QuotesManager() {
                 </CardContent>
             </Card>
 
-            <div className="border rounded-lg overflow-hidden bg-white shadow-sm">
+            <div className="border rounded-lg overflow-hidden bg-background shadow-sm">
                 <Table>
                     <TableHeader>
                         <TableRow className="bg-muted/50 hover:bg-muted/50">

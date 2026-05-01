@@ -105,7 +105,7 @@ export function MultiSelectPaymentNotes({ selectedNotes, onChange, testIdPrefix 
               <Edit className="h-3.5 w-3.5" />
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-64 p-3 bg-white border shadow-md z-[60]" side="right">
+          <PopoverContent className="w-64 p-3 bg-background border shadow-md z-[60]" side="right">
             <div className="space-y-3">
               <h4 className="font-semibold text-sm text-yellow-700">Nuova Nota Pagamento</h4>
               <div className="flex gap-2">

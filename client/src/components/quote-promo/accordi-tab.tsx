@@ -62,8 +62,8 @@ function AgreementDetails({ agreement, onRegisterPayment }: { agreement: Expande
    const monthsToDisplay = [currentMonth - 1 <= 0 ? 12 : currentMonth - 1, currentMonth, currentMonth === 12 ? 1 : currentMonth + 1];
 
    return (
-      <Card className="flex flex-col border-slate-200">
-         <CardHeader className="bg-slate-50 border-b pb-3 flex flex-row items-start justify-between">
+      <Card className="flex flex-col border-border">
+         <CardHeader className="bg-muted border-b pb-3 flex flex-row items-start justify-between">
             <div>
                <CardTitle className="text-base font-bold text-indigo-900">{agreement.instructorName}</CardTitle>
                <span className="text-xs text-muted-foreground uppercase tracking-widest">{agreement.activityName || 'Multi-Attività'}</span>
@@ -78,7 +78,7 @@ function AgreementDetails({ agreement, onRegisterPayment }: { agreement: Expande
               <div className="space-y-3">
                  <div className="flex justify-between items-end mb-1">
                    <span className="text-sm font-semibold">Ore Consumate</span>
-                   <span className="text-lg font-black text-slate-700">{agreement.usedHours || 0} / {agreement.totalHours || 0}h</span>
+                   <span className="text-lg font-black text-foreground/80">{agreement.usedHours || 0} / {agreement.totalHours || 0}h</span>
                  </div>
                  <div className="h-3 w-full bg-slate-100 rounded-full overflow-hidden border">
                    <div className="h-full bg-indigo-500" style={{ width: `${Math.min(100, Math.round(((agreement.usedHours || 0) / (agreement.totalHours || 1)) * 100))}%` }}></div>
@@ -92,7 +92,7 @@ function AgreementDetails({ agreement, onRegisterPayment }: { agreement: Expande
                        const st = getMonthStatus(m);
                        const monthName = new Date(2000, m - 1).toLocaleString('it-IT', { month: 'long' });
                        
-                       let bg = "bg-white border-dashed opacity-70";
+                       let bg = "bg-background border-dashed opacity-70";
                        let icon = <Circle className="w-4 h-4 text-slate-300" />;
                        let text = `Aperto: € ${st.expected}`;
                        let textColor = "text-muted-foreground font-mono";
@@ -126,7 +126,7 @@ function AgreementDetails({ agreement, onRegisterPayment }: { agreement: Expande
                      <span className="text-xs font-bold text-muted-foreground uppercase flex items-center gap-1"><History className="w-3 h-3"/> Storico Recente</span>
                      {recentPayments.map(p => (
                         <div key={p.id} className="flex justify-between text-xs p-1">
-                           <span className="text-slate-500">{new Date(p.paymentDate).toLocaleDateString('it-IT')}</span>
+                           <span className="text-muted-foreground">{new Date(p.paymentDate).toLocaleDateString('it-IT')}</span>
                            <span className="font-medium">€ {p.amount} <span className="text-slate-400 capitalize">({p.paymentMethod})</span></span>
                         </div>
                      ))}
@@ -135,11 +135,11 @@ function AgreementDetails({ agreement, onRegisterPayment }: { agreement: Expande
               </div>
             )}
          </CardContent>
-         <CardFooter className="border-t bg-slate-50 pt-4">
+         <CardFooter className="border-t bg-muted pt-4">
             {agreement.agreementType === 'pack_hours' ? (
                <Button className="w-full bg-indigo-600 hover:bg-indigo-700">Scala 1 Ora</Button>
             ) : (
-               <Button variant="outline" className="w-full border-indigo-200 text-indigo-700 bg-white" onClick={() => onRegisterPayment(agreement, currentMonth)}>
+               <Button variant="outline" className="w-full border-indigo-200 text-indigo-700 bg-background" onClick={() => onRegisterPayment(agreement, currentMonth)}>
                   Registra Pagamento
                </Button>
             )}
@@ -222,9 +222,9 @@ export function AccordiTab({ seasonId }: AccordiTabProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center bg-white p-4 rounded-lg border shadow-sm">
+      <div className="flex justify-between items-center bg-background p-4 rounded-lg border shadow-sm">
         <div>
-          <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+          <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
             <FileSignature className="w-5 h-5 text-indigo-600" /> Accordi e Contratti Maestri
           </h2>
           <p className="text-sm text-muted-foreground">Schematizzazione patti economici e avanzamento pagamenti staff</p>
@@ -244,7 +244,7 @@ export function AccordiTab({ seasonId }: AccordiTabProps) {
              </Card>
            ))
         ) : is404 || !agreements || agreements.length === 0 ? (
-           <div className="col-span-full h-48 border border-dashed rounded-lg bg-slate-50 flex flex-col items-center justify-center text-muted-foreground opacity-60">
+           <div className="col-span-full h-48 border border-dashed rounded-lg bg-muted flex flex-col items-center justify-center text-muted-foreground opacity-60">
               <FileSignature className="h-10 w-10 mb-3 text-slate-300" />
               <span className="font-medium">Nessun accordo maestro stipulato.</span>
               <span className="text-xs mt-1">L'endpoint API /api/instructor-agreements non è ancora mappato (404).</span>
@@ -261,7 +261,7 @@ export function AccordiTab({ seasonId }: AccordiTabProps) {
             <DialogHeader>
                <DialogTitle>Registra Pagamento Staff</DialogTitle>
                <DialogDescription>
-                  Maestro: <strong className="text-slate-800">{selectedAgreement?.instructorName}</strong>
+                  Maestro: <strong className="text-foreground">{selectedAgreement?.instructorName}</strong>
                </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 pt-4">

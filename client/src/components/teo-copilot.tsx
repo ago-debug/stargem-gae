@@ -35,56 +35,56 @@ export function TeoCopilot() {
   if (!isOpen) return null;
 
   return (
-      <aside className="w-[400px] border-l border-slate-200 bg-white flex flex-col flex-shrink-0 animate-in slide-in-from-right duration-300 shadow-[-10px_0_30px_-15px_rgba(0,0,0,0.05)] z-20">
+      <aside className="w-[400px] border-l border-border bg-background flex flex-col flex-shrink-0 animate-in slide-in-from-right duration-300 shadow-[-10px_0_30px_-15px_rgba(0,0,0,0.05)] z-20">
         <div className="p-4 border-b bg-primary/5 flex items-center justify-between">
           <div className="flex items-center gap-3 text-primary text-xl font-semibold">
             <div className="relative">
                 <Avatar className="h-9 w-9 border-2 border-primary/20 shadow-sm">
-                    <AvatarImage src="/assets/teo-head-new.png" alt="Teo Copilot" className="object-cover bg-white" />
+                    <AvatarImage src="/assets/teo-head-new.png" alt="Teo Copilot" className="object-cover bg-background" />
                     <AvatarFallback className="bg-primary text-white"><Bot className="w-5 h-5" /></AvatarFallback>
                 </Avatar>
             </div>
             <div>
                <div>TeoCopilot</div>
-               <div className="text-xs text-slate-500 font-normal">
+               <div className="text-xs text-muted-foreground font-normal">
                   Assistente AI del Gestionale • {user?.role?.toUpperCase()} Access
                </div>
             </div>
           </div>
-          <Button variant="ghost" size="icon" onClick={closeCopilot} className="text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-200/50">
+          <Button variant="ghost" size="icon" onClick={closeCopilot} className="text-slate-400 hover:text-muted-foreground rounded-full hover:bg-slate-200/50">
              <X className="w-5 h-5" />
           </Button>
         </div>
 
         {/* Area Messaggi */}
-        <ScrollArea className="flex-1 p-4 bg-slate-50/50">
+        <ScrollArea className="flex-1 p-4 bg-muted/50">
           <div className="flex flex-col gap-4 pb-4">
             {messages.map((msg: any) => (
               <div key={msg.id} className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
                 {msg.role !== 'user' ? (
-                    <Avatar className="w-8 h-8 shrink-0 border border-slate-200 shadow-sm">
-                        <AvatarImage src="/assets/teo-head-new.png" alt="Teo" className="object-cover bg-white" />
+                    <Avatar className="w-8 h-8 shrink-0 border border-border shadow-sm">
+                        <AvatarImage src="/assets/teo-head-new.png" alt="Teo" className="object-cover bg-background" />
                         <AvatarFallback className="bg-primary text-white"><Bot className="w-4 h-4" /></AvatarFallback>
                     </Avatar>
                 ) : (
-                    <Avatar className="w-8 h-8 shrink-0 border border-slate-200 shadow-sm">
-                        <AvatarFallback className="bg-slate-200 text-slate-700 font-semibold text-xs">
+                    <Avatar className="w-8 h-8 shrink-0 border border-border shadow-sm">
+                        <AvatarFallback className="bg-slate-200 text-foreground/80 font-semibold text-xs">
                            {user?.username ? user.username.substring(0, 2).toUpperCase() : 'ME'}
                         </AvatarFallback>
                     </Avatar>
                 )}
-                <div className={`filter max-w-[80%] rounded-xl p-3 text-sm shadow-sm whitespace-pre-wrap ${msg.role !== 'user' ? 'bg-white border text-slate-800' : 'bg-primary text-white'}`}>
+                <div className={`filter max-w-[80%] rounded-xl p-3 text-sm shadow-sm whitespace-pre-wrap ${msg.role !== 'user' ? 'bg-background border text-foreground' : 'bg-primary text-white'}`}>
                   {msg.content}
                 </div>
               </div>
             ))}
             {isLoading && messages[messages.length - 1]?.role === 'user' && (
                 <div className="flex gap-3">
-                    <Avatar className="w-8 h-8 shrink-0 border border-slate-200 shadow-sm">
-                        <AvatarImage src="/assets/teo-head-new.png" alt="Teo" className="object-cover bg-white" />
+                    <Avatar className="w-8 h-8 shrink-0 border border-border shadow-sm">
+                        <AvatarImage src="/assets/teo-head-new.png" alt="Teo" className="object-cover bg-background" />
                         <AvatarFallback className="bg-primary text-white"><Bot className="w-4 h-4" /></AvatarFallback>
                     </Avatar>
-                    <div className="bg-white border max-w-[80%] rounded-xl p-3 text-sm shadow-sm flex items-center gap-2">
+                    <div className="bg-background border max-w-[80%] rounded-xl p-3 text-sm shadow-sm flex items-center gap-2">
                         <Loader2 className="w-4 h-4 animate-spin text-primary" /> 
                         <span className="text-slate-400">Teo sta scrivendo...</span>
                     </div>
@@ -95,9 +95,9 @@ export function TeoCopilot() {
         </ScrollArea>
 
         {/* Input Bar */}
-        <div className="p-4 bg-white border-t space-y-3">
+        <div className="p-4 bg-background border-t space-y-3">
            <div className="flex gap-2">
-                <Button variant="outline" size="icon" onClick={handleSimulateFileUpload} title="Simula caricamento ricevuta/PDF" className="shrink-0 text-slate-500 rounded-full">
+                <Button variant="outline" size="icon" onClick={handleSimulateFileUpload} title="Simula caricamento ricevuta/PDF" className="shrink-0 text-muted-foreground rounded-full">
                     <Paperclip className="w-4 h-4" />
                 </Button>
                 <form 
@@ -108,7 +108,7 @@ export function TeoCopilot() {
                         value={input}
                         onChange={handleInputChange}
                         placeholder="Chiedi a Teo..."
-                        className="rounded-full pr-10 focus-visible:ring-primary/50 border-slate-300"
+                        className="rounded-full pr-10 focus-visible:ring-primary/50 border-border"
                         disabled={isLoading}
                     />
                     <Button 

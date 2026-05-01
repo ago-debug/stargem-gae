@@ -64,18 +64,18 @@ export default function GemStaffMe() {
   if (isMeError || !meData) {
     return (
       <div className="p-8 max-w-3xl mx-auto mt-12">
-        <Card className="bg-slate-50 border-slate-200 shadow-sm text-center py-10 px-6">
+        <Card className="bg-muted border-border shadow-sm text-center py-10 px-6">
           <div className="flex justify-center mb-6">
              <div className="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center">
-                <Wrench className="w-8 h-8 text-slate-500" />
+                <Wrench className="w-8 h-8 text-muted-foreground" />
              </div>
           </div>
-          <h2 className="text-2xl font-bold text-slate-800 mb-2">Profilo in configurazione</h2>
-          <p className="text-slate-600 mb-6 max-w-md mx-auto">
+          <h2 className="text-2xl font-bold text-foreground mb-2">Profilo in configurazione</h2>
+          <p className="text-muted-foreground mb-6 max-w-md mx-auto">
             I tuoi dati saranno disponibili a breve. La segreteria sta completando il tuo profilo.<br/><br/>
             Per assistenza: <a href="mailto:info@studio-gem.it" className="text-primary hover:underline font-semibold">info@studio-gem.it</a>
           </p>
-          <Button onClick={() => logoutMutation.mutate()} variant="outline" className="bg-white hover:bg-slate-100 flex items-center gap-2 mx-auto">
+          <Button onClick={() => logoutMutation.mutate()} variant="outline" className="bg-background hover:bg-slate-100 flex items-center gap-2 mx-auto">
             <LogOut className="w-4 h-4" /> Torna al login
           </Button>
         </Card>
@@ -135,8 +135,8 @@ export default function GemStaffMe() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         
         {/* CARD 1: DATI PERSONALI */}
-        <Card className="shadow-sm border-slate-200">
-          <CardHeader className="bg-slate-50/50 border-b">
+        <Card className="shadow-sm border-border">
+          <CardHeader className="bg-muted/50 border-b">
             <CardTitle className="flex items-center gap-2 text-lg">
               <Info className="w-5 h-5 text-blue-500" /> Dati Personali
             </CardTitle>
@@ -179,8 +179,8 @@ export default function GemStaffMe() {
         </Card>
 
         {/* CARD 4: IL MIO CEDOLINO */}
-        <Card className="shadow-sm border-slate-200 overflow-hidden flex flex-col">
-          <CardHeader className="bg-slate-50/50 border-b">
+        <Card className="shadow-sm border-border overflow-hidden flex flex-col">
+          <CardHeader className="bg-muted/50 border-b">
             <CardTitle className="flex items-center gap-2 text-lg">
               <Banknote className="w-5 h-5 text-green-600" /> Il Mio Cedolino
             </CardTitle>
@@ -189,14 +189,14 @@ export default function GemStaffMe() {
             {isPayslipLoading ? (
                <Skeleton className="h-32 w-full" />
             ) : !payslip ? (
-              <div className="text-center text-slate-500 py-8">
+              <div className="text-center text-muted-foreground py-8">
                 <Banknote className="w-12 h-12 text-slate-200 mx-auto mb-3" />
                 Nessun cedolino registrato per {format(new Date(2025, parseInt(selectedMonth)-1, 1), "MMMM", {locale: it})} {selectedYear}.
               </div>
             ) : (
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
-                  <div className="text-lg font-semibold text-slate-700">Competenze Mensili</div>
+                  <div className="text-lg font-semibold text-foreground/80">Competenze Mensili</div>
                   <Badge variant={payslip.status === "PAGATO" ? "default" : (payslip.status === "CONFERMATO" ? "secondary" : "outline")}>
                     {payslip.status || "BOZZA"}
                   </Badge>
@@ -236,8 +236,8 @@ export default function GemStaffMe() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         
         {/* CARD 2: LE MIE PRESENZE */}
-        <Card className="shadow-sm border-slate-200 flex flex-col">
-          <CardHeader className="bg-slate-50/50 border-b flex-none">
+        <Card className="shadow-sm border-border flex flex-col">
+          <CardHeader className="bg-muted/50 border-b flex-none">
             <CardTitle className="flex items-center gap-2 text-lg">
               <CalendarIcon className="w-5 h-5 text-indigo-500" /> Le Mie Presenze
             </CardTitle>
@@ -246,7 +246,7 @@ export default function GemStaffMe() {
             {isPresenzeLoading ? (
               <div className="p-6"><Skeleton className="h-32 w-full" /></div>
             ) : presenzeArray.length === 0 ? (
-              <div className="text-center text-slate-500 py-12 px-4">
+              <div className="text-center text-muted-foreground py-12 px-4">
                 <Clock className="w-10 h-10 text-slate-200 mx-auto mb-3" />
                 Nessuna presenza registrata in questo mese.
               </div>
@@ -254,7 +254,7 @@ export default function GemStaffMe() {
               <div>
                 <Table>
                   <TableHeader>
-                    <TableRow className="bg-slate-50 hover:bg-slate-50">
+                    <TableRow className="bg-muted hover:bg-muted">
                       <TableHead>Data</TableHead>
                       <TableHead>Corso</TableHead>
                       <TableHead className="text-center">Ore</TableHead>
@@ -279,8 +279,8 @@ export default function GemStaffMe() {
                   </TableBody>
                 </Table>
                 
-                <div className="p-4 bg-slate-50 border-t flex justify-end">
-                   <div className="font-semibold text-slate-700 flex items-center gap-2">
+                <div className="p-4 bg-muted border-t flex justify-end">
+                   <div className="font-semibold text-foreground/80 flex items-center gap-2">
                      <Clock className="w-4 h-4 text-slate-400" /> Totale Mese: <span className="text-lg">{totOreMes} ore</span>
                    </div>
                 </div>
@@ -290,8 +290,8 @@ export default function GemStaffMe() {
         </Card>
 
         {/* CARD 3: I MIEI DOCUMENTI */}
-        <Card className="shadow-sm border-slate-200">
-          <CardHeader className="bg-slate-50/50 border-b">
+        <Card className="shadow-sm border-border">
+          <CardHeader className="bg-muted/50 border-b">
             <CardTitle className="flex items-center gap-2 text-lg">
               <FileCheck className="w-5 h-5 text-purple-500" /> Documenti e Compliance
             </CardTitle>

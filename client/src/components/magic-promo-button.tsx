@@ -81,14 +81,14 @@ export function MagicPromoButton({ eventName, eventDate }: MagicPromoButtonProps
             </DialogDescription>
           </DialogHeader>
 
-          <div className="min-h-[100px] flex items-center justify-center p-4 bg-slate-50 rounded-md border border-slate-100 mt-2">
+          <div className="min-h-[100px] flex items-center justify-center p-4 bg-muted rounded-md border border-slate-100 mt-2">
             {loading ? (
               <div className="flex flex-col items-center gap-2 text-slate-400">
                 <Loader2 className="w-6 h-6 animate-spin text-indigo-500" />
                 <span className="text-sm">Teo ci sta pensando...</span>
               </div>
             ) : result ? (
-              <p className="whitespace-pre-wrap text-sm text-slate-700 w-full">{result}</p>
+              <p className="whitespace-pre-wrap text-sm text-foreground/80 w-full">{result}</p>
             ) : null}
           </div>
 

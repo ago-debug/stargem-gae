@@ -32,8 +32,8 @@ const CATEGORY_COLORS: Record<string, string> = {
     "AEREAL": "bg-pink-100 text-pink-800 border-pink-300",
     "BAMBINI": "bg-orange-100 text-orange-800 border-orange-300",
     "TEEN": "bg-orange-100 text-orange-800 border-orange-300",
-    "PROVE": "bg-gray-100 text-gray-800 border-gray-300",
-    "DEFAULT": "bg-slate-100 text-slate-800 border-slate-300"
+    "PROVE": "bg-gray-100 text-foreground border-border",
+    "DEFAULT": "bg-slate-100 text-foreground border-border"
 };
 
 interface QuoteListiniProps {
@@ -191,14 +191,14 @@ export default function QuoteListini(props: QuoteListiniProps) {
     }
 
     return (
-        <div className={`flex flex-col ${props.embeddedMode ? 'h-[75vh] p-0' : 'h-[calc(100vh-4rem)] p-4 sm:p-6 lg:p-8'} overflow-hidden bg-slate-50 relative`}>
+        <div className={`flex flex-col ${props.embeddedMode ? 'h-[75vh] p-0' : 'h-[calc(100vh-4rem)] p-4 sm:p-6 lg:p-8'} overflow-hidden bg-muted relative`}>
             {!props.embeddedMode ? (
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 shrink-0">
                     <div>
-                        <h1 className="text-3xl font-bold tracking-tight text-slate-900 mb-1">
+                        <h1 className="text-3xl font-bold tracking-tight text-foreground mb-1">
                             Quote e Agevolazioni Corsi
                         </h1>
-                        <p className="text-sm text-slate-500">
+                        <p className="text-sm text-muted-foreground">
                             Replica interattiva Q1C - Gestione Listini Mensili
                         </p>
                     </div>
@@ -242,24 +242,24 @@ export default function QuoteListini(props: QuoteListiniProps) {
             </Alert>
 
             {/* Scorrevole orizzontale e verticale */}
-            <div className="flex-1 bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col">
+            <div className="flex-1 bg-background border border-border rounded-xl shadow-sm overflow-hidden flex flex-col">
                 <div className="overflow-auto max-h-full">
                     <Table className="relative min-w-max text-xs sm:text-sm">
                         <TableHeader className="sticky top-0 z-20 bg-slate-100 outline outline-1 outline-slate-200">
                             <TableRow className="hover:bg-transparent">
-                                <TableHead className="bg-slate-100 z-30 font-semibold min-w-24 border-r border-slate-200 sticky left-0">Categoria</TableHead>
-                                <TableHead className="bg-slate-100 z-30 font-semibold min-w-48 border-r border-slate-200 sticky left-[96px]">Descrizione</TableHead>
-                                <TableHead className="bg-slate-100 font-semibold min-w-48 border-r border-slate-200">Dettagli</TableHead>
+                                <TableHead className="bg-slate-100 z-30 font-semibold min-w-24 border-r border-border sticky left-0">Categoria</TableHead>
+                                <TableHead className="bg-slate-100 z-30 font-semibold min-w-48 border-r border-border sticky left-[96px]">Descrizione</TableHead>
+                                <TableHead className="bg-slate-100 font-semibold min-w-48 border-r border-border">Dettagli</TableHead>
 
                                 {/* C-V: Colonne Mesi (2 colonne per ogni mese: Quota / Lezioni) */}
                                 {PERIODS.map(p => (
-                                    <TableHead key={`head-${p}`} colSpan={2} className="bg-slate-100 text-center font-bold border-r border-slate-200 border-b">
+                                    <TableHead key={`head-${p}`} colSpan={2} className="bg-slate-100 text-center font-bold border-r border-border border-b">
                                         {p}
                                     </TableHead>
                                 ))}
 
-                                <TableHead className="bg-slate-100 font-bold min-w-24 text-center border-r border-slate-200" rowSpan={2}>
-                                    Corsi/Sett.<br /><span className="text-slate-500 font-normal">(Par. W)</span>
+                                <TableHead className="bg-slate-100 font-bold min-w-24 text-center border-r border-border" rowSpan={2}>
+                                    Corsi/Sett.<br /><span className="text-muted-foreground font-normal">(Par. W)</span>
                                 </TableHead>
 
                                 {/* X-AG: Calcolo Costo per Corso (10 periodi) */}
@@ -274,18 +274,18 @@ export default function QuoteListini(props: QuoteListiniProps) {
                             {/* Second Level Header for Quota / Lezioni */}
                             <TableRow className="hover:bg-transparent shadow-sm">
                                 {/* Vuoti per le prime 3 colonne fisse che usano sticky in the first row implicitly (Wait, HTML table non gestisce bene rowSpan\colSpan con sticky left, per semplicità abbiamo un solo thead row o thead fix) */}
-                                <TableHead className="bg-slate-100 z-30 border-r border-slate-200 sticky left-0 p-0 top-[40px]"></TableHead>
-                                <TableHead className="bg-slate-100 z-30 border-r border-slate-200 sticky left-[96px] p-0 top-[40px]"></TableHead>
-                                <TableHead className="bg-slate-100 border-r border-slate-200 top-[40px]"></TableHead>
+                                <TableHead className="bg-slate-100 z-30 border-r border-border sticky left-0 p-0 top-[40px]"></TableHead>
+                                <TableHead className="bg-slate-100 z-30 border-r border-border sticky left-[96px] p-0 top-[40px]"></TableHead>
+                                <TableHead className="bg-slate-100 border-r border-border top-[40px]"></TableHead>
 
                                 {PERIODS.map(p => (
                                     <React.Fragment key={`subhead-${p}`}>
-                                        <TableHead className="bg-slate-50 text-slate-600 text-center text-xs border-r border-slate-200 min-w-[80px] p-2 top-[40px]">Quota €</TableHead>
-                                        <TableHead className="bg-slate-50 text-slate-600 text-center text-xs border-r border-slate-300 min-w-[70px] p-2 top-[40px]">n° Lez.</TableHead>
+                                        <TableHead className="bg-muted text-muted-foreground text-center text-xs border-r border-border min-w-[80px] p-2 top-[40px]">Quota €</TableHead>
+                                        <TableHead className="bg-muted text-muted-foreground text-center text-xs border-r border-border min-w-[70px] p-2 top-[40px]">n° Lez.</TableHead>
                                     </React.Fragment>
                                 ))}
 
-                                <TableHead className="bg-slate-100 border-r border-slate-200 top-[40px]"></TableHead>
+                                <TableHead className="bg-slate-100 border-r border-border top-[40px]"></TableHead>
 
                                 {PERIODS.map(p => (
                                     <TableHead key={`calcr-${p}`} className="bg-emerald-50 border-r border-emerald-200 min-w-[90px] top-[40px]"></TableHead>
@@ -304,15 +304,15 @@ export default function QuoteListini(props: QuoteListiniProps) {
                                 const colorClass = CATEGORY_COLORS[catKey];
 
                                 return (
-                                    <TableRow key={rowIndex} className="hover:bg-slate-50/50 group">
-                                        <TableCell className="p-2 border-r border-slate-200 bg-white group-hover:bg-slate-50 sticky left-0 z-10 w-28">
+                                    <TableRow key={rowIndex} className="hover:bg-muted/50 group">
+                                        <TableCell className="p-2 border-r border-border bg-background group-hover:bg-muted sticky left-0 z-10 w-28">
                                             <Input
                                                 value={row.category}
                                                 onChange={(e) => handleChange(rowIndex, "category", e.target.value)}
                                                 className={`h-8 font-semibold uppercase text-xs ${colorClass}`}
                                             />
                                         </TableCell>
-                                        <TableCell className="p-2 border-r border-slate-200 bg-white group-hover:bg-slate-50 sticky left-[96px] z-10 w-56">
+                                        <TableCell className="p-2 border-r border-border bg-background group-hover:bg-muted sticky left-[96px] z-10 w-56">
                                             <Input
                                                 value={row.description}
                                                 onChange={(e) => handleChange(rowIndex, "description", e.target.value)}
@@ -320,11 +320,11 @@ export default function QuoteListini(props: QuoteListiniProps) {
                                                 placeholder="es. 1 LEZIONE SETT."
                                             />
                                         </TableCell>
-                                        <TableCell className="p-2 border-r border-slate-200 w-56">
+                                        <TableCell className="p-2 border-r border-border w-56">
                                             <Input
                                                 value={row.details || ""}
                                                 onChange={(e) => handleChange(rowIndex, "details", e.target.value)}
-                                                className="h-8 text-xs text-slate-500"
+                                                className="h-8 text-xs text-muted-foreground"
                                                 placeholder="(sconti, note, etc.)"
                                             />
                                         </TableCell>
@@ -334,7 +334,7 @@ export default function QuoteListini(props: QuoteListiniProps) {
                                             const mData = monthsData[p] || { quota: null, lezioni: null };
                                             return (
                                                 <React.Fragment key={`input-${p}`}>
-                                                    <TableCell className="p-1 border-r border-slate-200">
+                                                    <TableCell className="p-1 border-r border-border">
                                                         <Input
                                                             type="number"
                                                             step="any"
@@ -343,24 +343,24 @@ export default function QuoteListini(props: QuoteListiniProps) {
                                                             className="h-8 text-right w-20 text-blue-700 font-medium"
                                                         />
                                                     </TableCell>
-                                                    <TableCell className="p-1 border-r border-slate-300">
+                                                    <TableCell className="p-1 border-r border-border">
                                                         <Input
                                                             type="number"
                                                             value={mData.lezioni ?? ""}
                                                             onChange={(e) => handleCellChange(rowIndex, p, "lezioni", e.target.value)}
-                                                            className="h-8 text-right w-16 text-slate-600 bg-slate-50"
+                                                            className="h-8 text-right w-16 text-muted-foreground bg-muted"
                                                         />
                                                     </TableCell>
                                                 </React.Fragment>
                                             );
                                         })}
 
-                                        <TableCell className="p-2 border-r border-slate-200 bg-slate-50">
+                                        <TableCell className="p-2 border-r border-border bg-muted">
                                             <Input
                                                 type="number"
                                                 value={row.corsiWeek ?? ""}
                                                 onChange={(e) => handleChange(rowIndex, "corsiWeek", parseInt(e.target.value) || 1)}
-                                                className="h-8 text-center font-bold bg-white"
+                                                className="h-8 text-center font-bold bg-background"
                                             />
                                         </TableCell>
 

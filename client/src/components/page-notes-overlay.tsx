@@ -222,7 +222,7 @@ export function PageNotesOverlay() {
                                     <Textarea
                                         value={editContent}
                                         onChange={(e) => setEditContent(e.target.value)}
-                                        className="min-h-[80px] text-xs resize-none bg-white/80 border-amber-300 focus-visible:ring-amber-400"
+                                        className="min-h-[80px] text-xs resize-none bg-background/80 border-amber-300 focus-visible:ring-amber-400"
                                         autoFocus
                                     />
                                     <div className="flex justify-end gap-1">
@@ -246,7 +246,7 @@ export function PageNotesOverlay() {
 
             {/* Add New Note inline */}
             {isAdding && (
-                <div className="bg-white border shadow-xl shadow-amber-900/10 rounded-lg p-3 flex flex-col gap-3 relative mt-2 animate-in fade-in slide-in-from-top-4">
+                <div className="bg-background border shadow-xl shadow-amber-900/10 rounded-lg p-3 flex flex-col gap-3 relative mt-2 animate-in fade-in slide-in-from-top-4">
                     <div className="flex items-center gap-2">
                         <Input
                             value={newTitle}
@@ -296,7 +296,7 @@ export function PageNotesOverlay() {
                 <Button
                     variant="outline"
                     size="sm"
-                    className="bg-white/90 hover:bg-amber-50 text-xs text-amber-700/80 hover:text-amber-800 w-full py-1 h-8 border-dashed border-2 border-amber-200 transition-all flex items-center justify-center gap-1.5 shadow-sm mt-1 mx-auto max-w-[90%]"
+                    className="bg-background/90 hover:bg-amber-50 text-xs text-amber-700/80 hover:text-amber-800 w-full py-1 h-8 border-dashed border-2 border-amber-200 transition-all flex items-center justify-center gap-1.5 shadow-sm mt-1 mx-auto max-w-[90%]"
                     onClick={() => setIsAdding(true)}
                 >
                     <Plus className="w-3.5 h-3.5" /> Nuova Nota Qui

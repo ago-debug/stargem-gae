@@ -238,18 +238,18 @@ export default function StrategicProgrammingTable() {
                         <CalendarDays className="w-8 h-8 text-primary" />
                     </div>
                     <div>
-                        <h1 className="text-3xl font-bold tracking-tight text-slate-900">
+                        <h1 className="text-3xl font-bold tracking-tight text-foreground">
                             Programmazione Date
                         </h1>
-                        <p className="text-sm text-slate-500 mt-1">
+                        <p className="text-sm text-muted-foreground mt-1">
                             Tabella master per la gestione annuale di ferie, chiusure e sospensioni didattiche.
                         </p>
                     </div>
                 </div>
                 <div className="flex items-center gap-3 overflow-x-auto hide-scrollbar flex-nowrap w-full md:w-auto pb-1 md:pb-0">
-                    <div className="flex items-center bg-white rounded-md border shadow-sm p-1 shrink-0 h-9">
+                    <div className="flex items-center bg-background rounded-md border shadow-sm p-1 shrink-0 h-9">
                         <Select value={selectedSeasonId} onValueChange={setSelectedSeasonId}>
-                            <SelectTrigger className="h-7 border-0 bg-transparent shadow-none w-[180px] font-bold text-slate-800 uppercase tracking-wide focus:ring-0">
+                            <SelectTrigger className="h-7 border-0 bg-transparent shadow-none w-[180px] font-bold text-foreground uppercase tracking-wide focus:ring-0">
                                 <SelectValue placeholder="Seleziona stagione" />
                             </SelectTrigger>
                             <SelectContent>
@@ -271,10 +271,10 @@ export default function StrategicProgrammingTable() {
                         onClick={() => {
                             document.getElementById('current-week-row')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
                         }}
-                        className="font-medium text-slate-700 bg-white border-slate-200 hover:bg-slate-50 gap-2 shrink-0 h-9"
+                        className="font-medium text-foreground/80 bg-background border-border hover:bg-muted gap-2 shrink-0 h-9"
                     >
                         <span className="text-red-500 font-bold hidden sm:inline">Oggi:</span> 
-                        <span className="text-red-600 sm:text-slate-700">{format(new Date(), "d MMM", { locale: it })}</span>
+                        <span className="text-red-600 sm:text-foreground/80">{format(new Date(), "d MMM", { locale: it })}</span>
                     </Button>
 
                     <ActivityColorLegend variant="popover" />
@@ -286,14 +286,14 @@ export default function StrategicProgrammingTable() {
             </div>
 
             <Card className="flex-1 overflow-hidden flex flex-col shadow-xl">
-                <div className="flex-1 overflow-auto bg-white p-0 relative">
-                    <table className="w-full text-xs text-left border-collapse border-slate-200">
+                <div className="flex-1 overflow-auto bg-background p-0 relative">
+                    <table className="w-full text-xs text-left border-collapse border-border">
                         <thead className="sticky top-0 bg-slate-100 shadow-sm z-10">
                             <tr>
-                                <th className="border p-2 w-[50px] text-center text-slate-500">Sett</th>
-                                <th className="border p-2 min-w-[120px] text-slate-600">Periodo</th>
+                                <th className="border p-2 w-[50px] text-center text-muted-foreground">Sett</th>
+                                <th className="border p-2 min-w-[120px] text-muted-foreground">Periodo</th>
                                 {['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'].map(d => (
-                                    <th key={d} className={`border p-2 min-w-[150px] text-center font-bold uppercase ${d === 'Dom' ? 'bg-red-50 text-red-700/80 tracking-wide' : 'text-slate-700'}`}>{d}</th>
+                                    <th key={d} className={`border p-2 min-w-[150px] text-center font-bold uppercase ${d === 'Dom' ? 'bg-red-50 text-red-700/80 tracking-wide' : 'text-foreground/80'}`}>{d}</th>
                                 ))}
                                 <th className="border p-2 min-w-[250px]">Note (Chiusure / Eventi)</th>
                             </tr>
@@ -314,10 +314,10 @@ export default function StrategicProgrammingTable() {
                                     <tr 
                                         key={row.weekNum} 
                                         id={isCurrentWeek ? "current-week-row" : undefined}
-                                        className={`hover:bg-slate-50/80 transition-all duration-300 group ${isCurrentWeek ? 'bg-yellow-50/40 ring-1 ring-yellow-400' : ''} ${isPastWeek ? 'opacity-40 grayscale hover:opacity-100 hover:grayscale-0 bg-slate-50/50' : ''}`}
+                                        className={`hover:bg-muted/80 transition-all duration-300 group ${isCurrentWeek ? 'bg-yellow-50/40 ring-1 ring-yellow-400' : ''} ${isPastWeek ? 'opacity-40 grayscale hover:opacity-100 hover:grayscale-0 bg-muted/50' : ''}`}
                                     >
                                         <td className="border p-2 text-center font-bold text-slate-400">{row.weekNum}</td>
-                                        <td className="border p-2 font-mono text-[10px] text-slate-600 font-medium">
+                                        <td className="border p-2 font-mono text-[10px] text-muted-foreground font-medium">
                                             {format(row.start, "dd/MM")} - {format(row.end, "dd/MM/yy")}
                                         </td>
                                         {row.days.map(day => {
@@ -362,7 +362,7 @@ export default function StrategicProgrammingTable() {
                                                                             : (() => {
                                                                                 const t = (evt.title || '').toUpperCase();
                                                                                 const type = evt.eventType;
-                                                                                let color = 'bg-white/95 text-slate-800'; // Default
+                                                                                let color = 'bg-background/95 text-foreground'; // Default
                                                                                 if (type === 'chiusura' || t.includes('STRAORDINARI')) color = 'bg-orange-100 text-orange-800 border-l border-orange-400';
                                                                                 else if (type === 'ferie' || t.includes('FERIE')) color = 'bg-[#9D174D]/10 text-[#9D174D] border-l border-[#9D174D]/50';
                                                                                 else if (type === 'campus' || t.includes('CAM')) color = 'bg-sky-100 text-sky-800 border-l border-sky-400';
@@ -371,7 +371,7 @@ export default function StrategicProgrammingTable() {
                                                                                 else if (t.includes('VAC')) color = 'bg-emerald-100 text-emerald-800 border-l border-emerald-400';
                                                                                 else if (type === 'nota' || t.includes('PROMO')) color = 'bg-yellow-100 text-yellow-800 border-l border-yellow-400';
                                                                                 else if (type === 'evento') color = 'bg-indigo-50 text-indigo-800 border-l border-indigo-400';
-                                                                                else if (t.includes('AFT')) color = 'bg-slate-200 text-slate-800 border-l border-slate-400';
+                                                                                else if (t.includes('AFT')) color = 'bg-slate-200 text-foreground border-l border-slate-400';
                                                                                 
                                                                                 return `cursor-pointer rounded px-1.5 py-1 font-medium transition-all hover:opacity-90 shadow-sm ${color}`;
                                                                               })()
@@ -386,16 +386,16 @@ export default function StrategicProgrammingTable() {
                                                 </td>
                                             );
                                         })}
-                                        <td className="border p-2 align-top text-[11px] text-slate-700 bg-slate-50/30">
+                                        <td className="border p-2 align-top text-[11px] text-foreground/80 bg-muted/30">
                                             <div className="flex flex-col gap-1">
                                                 {uniqueEvents.length === 0 ? (
                                                     <span className="text-slate-400 italic text-[10px]">Nessuna nota in questa settimana</span>
                                                 ) : (
                                                     uniqueEvents.map(evt => (
-                                                        <div key={evt?.id} className="font-medium bg-white p-1.5 rounded shadow-sm border border-slate-100 flex items-start justify-between group/evt">
+                                                        <div key={evt?.id} className="font-medium bg-background p-1.5 rounded shadow-sm border border-slate-100 flex items-start justify-between group/evt">
                                                             <div className="flex flex-col text-[12px] leading-tight mt-0.5">
                                                                 <span>{getEventLabel(evt)}</span>
-                                                                {evt?.description && <span className="text-slate-500 font-medium text-[11px]">({evt.description})</span>}
+                                                                {evt?.description && <span className="text-muted-foreground font-medium text-[11px]">({evt.description})</span>}
                                                             </div>
                                                             <div className="flex gap-1 ml-2 shrink-0 transition-opacity">
                                                                 {(() => {
@@ -439,7 +439,7 @@ export default function StrategicProgrammingTable() {
                                                                 <Button 
                                                                     size="icon" 
                                                                     variant="ghost" 
-                                                                    className="h-6 w-6 text-slate-400 hover:text-slate-600 hover:bg-slate-100" 
+                                                                    className="h-6 w-6 text-slate-400 hover:text-muted-foreground hover:bg-slate-100" 
                                                                     onClick={() => openEditModal(evt)} 
                                                                     title="Modifica Data Strategica"
                                                                 >
@@ -457,7 +457,7 @@ export default function StrategicProgrammingTable() {
                         </tbody>
                         <tfoot className="sticky bottom-0 bg-slate-100 shadow-[0_-1px_3px_rgba(0,0,0,0.1)] z-10">
                             <tr>
-                                <td colSpan={2} className="border p-2 font-bold text-slate-700 text-right">Totale Lezioni (Adulti)</td>
+                                <td colSpan={2} className="border p-2 font-bold text-foreground/80 text-right">Totale Lezioni (Adulti)</td>
                                 {['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'].map((d, index) => {
                                     const totalWeeks = gridRows.length;
                                     let excluded = 0;
@@ -471,12 +471,12 @@ export default function StrategicProgrammingTable() {
                                         });
                                         if (isClosed) excluded++;
                                     });
-                                    return <td key={d} className="border p-2 text-center font-bold text-slate-900 bg-white">{totalWeeks - excluded}</td>;
+                                    return <td key={d} className="border p-2 text-center font-bold text-foreground bg-background">{totalWeeks - excluded}</td>;
                                 })}
                                 <td className="border p-2 bg-slate-100"></td>
                             </tr>
                             <tr>
-                                <td colSpan={2} className="border p-2 font-bold text-slate-700 text-right">Totale Lezioni (Bambini)</td>
+                                <td colSpan={2} className="border p-2 font-bold text-foreground/80 text-right">Totale Lezioni (Bambini)</td>
                                 {['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'].map((d, index) => {
                                     const totalWeeks = gridRows.length;
                                     let excluded = 0;
@@ -491,7 +491,7 @@ export default function StrategicProgrammingTable() {
                                         const isKidsExcluded = evts.some(e => (e.title || "").toUpperCase().includes('NO BAMBINI'));
                                         if (isAdultExcluded || isKidsExcluded) excluded++;
                                     });
-                                    return <td key={`kids-${d}`} className="border p-2 text-center font-bold text-slate-900 bg-teal-50">{totalWeeks - excluded}</td>;
+                                    return <td key={`kids-${d}`} className="border p-2 text-center font-bold text-foreground bg-teal-50">{totalWeeks - excluded}</td>;
                                 })}
                                 <td className="border p-2 bg-slate-100"></td>
                             </tr>

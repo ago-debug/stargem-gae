@@ -382,7 +382,7 @@ export default function Memberships() {
                           }
                           const isZeroFee = !membership.fee || parseFloat(membership.fee.toString()) === 0;
                           if (isZeroFee && expiryInfo.variant === 'default') {
-                            return { className: 'bg-slate-100 text-slate-800 border-slate-300', label: 'IMPORTA DATI DATABASE' };
+                            return { className: 'bg-slate-100 text-foreground border-border', label: 'IMPORTA DATI DATABASE' };
                           }
                           return { className: 'bg-yellow-100 text-yellow-800 border-yellow-200', label: 'Da Saldare' };
                         };

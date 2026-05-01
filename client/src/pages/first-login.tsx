@@ -75,13 +75,13 @@ export default function FirstLogin() {
 
   if (success) {
      return (
-        <div className="min-h-screen flex items-center justify-center p-4 bg-slate-50">
+        <div className="min-h-screen flex items-center justify-center p-4 bg-muted">
            <Card className="w-full max-w-md shadow-lg border-emerald-200">
               <CardContent className="pt-10 pb-10 flex flex-col items-center justify-center space-y-4 text-center">
                  <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mb-2">
                     <PartyPopper className="w-8 h-8 text-emerald-600" />
                  </div>
-                 <h2 className="text-2xl font-bold text-slate-800">Account Attivato!</h2>
+                 <h2 className="text-2xl font-bold text-foreground">Account Attivato!</h2>
                  <p className="text-muted-foreground">La tua password è stata impostata con successo. Tra pochi secondi sarai reindirizzato al tuo spazio personale.</p>
               </CardContent>
            </Card>
@@ -90,20 +90,20 @@ export default function FirstLogin() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden bg-slate-50 pt-10 pb-16">
+    <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden bg-muted pt-10 pb-16">
       {/* Sfondo decorativo vettoriale premium */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-slate-50 to-blue-500/5 z-0" />
       
       <div className="relative w-full max-w-md mx-4 z-10 animate-in fade-in zoom-in-95 duration-500">
-        <Card className="shadow-2xl border-none bg-white/95 backdrop-blur-sm rounded-xl">
+        <Card className="shadow-2xl border-none bg-background/95 backdrop-blur-sm rounded-xl">
            <CardHeader className="text-center pb-4">
               <div className="flex justify-center mb-4">
                   <div className="w-16 h-16 bg-amber-100 rounded-2xl flex items-center justify-center shadow-inner">
                      <Lock className="w-8 h-8 text-amber-600" />
                   </div>
               </div>
-              <CardTitle className="text-2xl font-extrabold tracking-tight text-slate-900">Primo accesso — Imposta la tua password</CardTitle>
-              <CardDescription className="text-sm font-medium text-slate-500">
+              <CardTitle className="text-2xl font-extrabold tracking-tight text-foreground">Primo accesso — Imposta la tua password</CardTitle>
+              <CardDescription className="text-sm font-medium text-muted-foreground">
                  Imposta la tua password personale per continuare
               </CardDescription>
            </CardHeader>
@@ -132,7 +132,7 @@ export default function FirstLogin() {
                     maxLength={10}
                     required
                   />
-                  <p className="text-xs text-slate-500 italic mt-1">Il codice OTP ti è stato comunicato dalla segreteria. È valido 24 ore.</p>
+                  <p className="text-xs text-muted-foreground italic mt-1">Il codice OTP ti è stato comunicato dalla segreteria. È valido 24 ore.</p>
                </div>
 
                <div className="space-y-2 pt-2 border-t">
@@ -178,7 +178,7 @@ export default function FirstLogin() {
                 <a href="mailto:info@studio-gem.it" className="text-sm font-semibold text-primary hover:underline flex items-center gap-2">
                    Non hai ancora il codice? &rarr; Contatta la segreteria
                 </a>
-                <a href="/" className="text-sm font-medium text-slate-500 hover:text-slate-800 flex items-center gap-1">
+                <a href="/" className="text-sm font-medium text-muted-foreground hover:text-foreground flex items-center gap-1">
                    &larr; Torna al login
                 </a>
              </div>

@@ -125,15 +125,15 @@ export default function GemTeamMe() {
       
       <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
          <div className="text-center md:text-left">
-           <h1 className="text-4xl md:text-5xl font-black text-slate-800 tracking-tight">
+           <h1 className="text-4xl md:text-5xl font-black text-foreground tracking-tight">
              Ciao {(user as any)?.firstName || "Team"} 👋
            </h1>
-           <p className="text-lg md:text-xl text-slate-500 font-medium mt-2 capitalize">
+           <p className="text-lg md:text-xl text-muted-foreground font-medium mt-2 capitalize">
              {todayString}
            </p>
          </div>
          
-         <Button onClick={() => logoutMutation.mutate()} variant="outline" size="lg" className="bg-white border-2 hover:bg-slate-50 rounded-2xl h-14 px-6 text-lg font-bold shadow-sm text-slate-600">
+         <Button onClick={() => logoutMutation.mutate()} variant="outline" size="lg" className="bg-background border-2 hover:bg-muted rounded-2xl h-14 px-6 text-lg font-bold shadow-sm text-muted-foreground">
            <LogOut className="w-5 h-5 mr-3" /> Esci
          </Button>
       </div>
@@ -143,7 +143,7 @@ export default function GemTeamMe() {
         {/* BIG CHECKIN CARD */}
         <div className="md:col-span-8">
           <Card className={`border-4 shadow-xl overflow-hidden rounded-[2rem] transition-all duration-500 ${
-            checkInState === "NOT_STARTED" ? "border-slate-200 bg-white" :
+            checkInState === "NOT_STARTED" ? "border-border bg-background" :
             checkInState === "IN_PROGRESS" ? "border-emerald-500 bg-emerald-50" :
             "border-blue-500 bg-blue-50"
           }`}>
@@ -151,14 +151,14 @@ export default function GemTeamMe() {
               
               {checkInState === "NOT_STARTED" && (
                 <>
-                  <Badge variant="outline" className="mb-8 text-lg px-4 py-1.5 bg-slate-100 text-slate-600 border-2 rounded-xl">Inizio Turno</Badge>
+                  <Badge variant="outline" className="mb-8 text-lg px-4 py-1.5 bg-slate-100 text-muted-foreground border-2 rounded-xl">Inizio Turno</Badge>
                   <Button 
                     onClick={handleAction}
                     className="w-full max-w-sm h-32 text-3xl font-black rounded-3xl bg-emerald-500 hover:bg-emerald-600 shadow-[0_8px_30px_rgb(16,185,129,0.3)] transition-transform active:scale-95"
                   >
                     <Play className="w-12 h-12 mr-4 fill-current" /> ENTRATA
                   </Button>
-                  <p className="mt-8 text-2xl font-bold text-slate-500 flex items-center justify-center gap-3">
+                  <p className="mt-8 text-2xl font-bold text-muted-foreground flex items-center justify-center gap-3">
                     <Clock className="w-8 h-8" /> {currentTime.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}
                   </p>
                 </>
@@ -194,13 +194,13 @@ export default function GemTeamMe() {
                   <p className="text-xl text-blue-700 font-medium mb-8">Ottimo lavoro per oggi.</p>
                   
                   <div className="grid grid-cols-2 gap-4 w-full max-w-md mt-4">
-                    <div className="bg-white p-4 rounded-2xl border-2 border-blue-100 shadow-sm text-center">
+                    <div className="bg-background p-4 rounded-2xl border-2 border-blue-100 shadow-sm text-center">
                       <span className="block text-sm font-bold text-blue-400 uppercase tracking-widest mb-1">Inizio</span>
-                      <span className="text-2xl font-black text-slate-700">{inTime?.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}</span>
+                      <span className="text-2xl font-black text-foreground/80">{inTime?.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}</span>
                     </div>
-                    <div className="bg-white p-4 rounded-2xl border-2 border-blue-100 shadow-sm text-center">
+                    <div className="bg-background p-4 rounded-2xl border-2 border-blue-100 shadow-sm text-center">
                       <span className="block text-sm font-bold text-blue-400 uppercase tracking-widest mb-1">Fine</span>
-                      <span className="text-2xl font-black text-slate-700">{currentTime.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}</span>
+                      <span className="text-2xl font-black text-foreground/80">{currentTime.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}</span>
                     </div>
                   </div>
                 </>
@@ -213,28 +213,28 @@ export default function GemTeamMe() {
         {/* SIDE PANELS */}
         <div className="md:col-span-4 space-y-8">
           
-          <Card className="border-2 border-slate-200 shadow-none rounded-[2rem] bg-white">
+          <Card className="border-2 border-border shadow-none rounded-[2rem] bg-background">
             <CardContent className="p-6">
               <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Il mio turno oggi</h3>
-              <div className="bg-slate-50 border-2 border-slate-100 rounded-2xl p-5">
+              <div className="bg-muted border-2 border-slate-100 rounded-2xl p-5">
                 <span className="inline-block bg-blue-100 text-blue-800 font-bold px-3 py-1 rounded-lg text-sm mb-3">RECEPTION</span>
-                <div className="text-3xl font-black text-slate-700 tracking-tight">08:30 <span className="text-slate-300">→</span> 14:30</div>
+                <div className="text-3xl font-black text-foreground/80 tracking-tight">08:30 <span className="text-slate-300">→</span> 14:30</div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-2 border-slate-200 shadow-none rounded-[2rem] bg-white">
+          <Card className="border-2 border-border shadow-none rounded-[2rem] bg-background">
             <CardContent className="p-6">
               <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Questo mese</h3>
               
               <div className="space-y-4">
                 <div className="flex justify-between items-center border-b-2 border-slate-50 pb-4">
-                  <span className="text-slate-500 font-semibold text-lg">Ore Totali</span>
-                  <span className="text-2xl font-black text-slate-800">120.5</span>
+                  <span className="text-muted-foreground font-semibold text-lg">Ore Totali</span>
+                  <span className="text-2xl font-black text-foreground">120.5</span>
                 </div>
                 <div className="flex justify-between items-center pt-2">
-                  <span className="text-slate-500 font-semibold text-lg">Giorni Lavorati</span>
-                  <span className="text-2xl font-black text-slate-800">15</span>
+                  <span className="text-muted-foreground font-semibold text-lg">Giorni Lavorati</span>
+                  <span className="text-2xl font-black text-foreground">15</span>
                 </div>
               </div>
 
@@ -247,23 +247,23 @@ export default function GemTeamMe() {
 
       {/* MODULO RICHIESTE (PERMESSI/FERIE) */}
       <div className="mt-8">
-        <Card className="border-4 shadow-xl overflow-hidden rounded-[2rem] border-slate-200 bg-white">
+        <Card className="border-4 shadow-xl overflow-hidden rounded-[2rem] border-border bg-background">
           <CardContent className="p-6 md:p-10">
-            <h2 className="text-2xl font-black text-slate-800 mb-8 flex items-center gap-3">
+            <h2 className="text-2xl font-black text-foreground mb-8 flex items-center gap-3">
               <FileText className="w-8 h-8 text-blue-500" /> Le mie richieste
             </h2>
             
             <div className="grid grid-cols-1 md:grid-cols-12 gap-12">
               
               {/* FORM NUOVA RICHIESTA */}
-              <div className="md:col-span-5 space-y-6 bg-slate-50 p-6 rounded-3xl border-2 border-slate-100">
-                <h3 className="text-lg font-bold text-slate-700 mb-4">Nuova Richiesta</h3>
+              <div className="md:col-span-5 space-y-6 bg-muted p-6 rounded-3xl border-2 border-slate-100">
+                <h3 className="text-lg font-bold text-foreground/80 mb-4">Nuova Richiesta</h3>
                 
                 <div className="space-y-4">
                   <div>
-                    <label className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-1 block">Tipo</label>
+                    <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-1 block">Tipo</label>
                     <Select value={reqTipo} onValueChange={setReqTipo}>
-                      <SelectTrigger className="bg-white border-2 border-slate-200 h-12 rounded-xl font-semibold">
+                      <SelectTrigger className="bg-background border-2 border-border h-12 rounded-xl font-semibold">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -277,18 +277,18 @@ export default function GemTeamMe() {
                   
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-1 block">Dal</label>
-                      <Input type="date" value={reqInizio} onChange={e => setReqInizio(e.target.value)} className="bg-white border-2 border-slate-200 h-12 rounded-xl text-sm" />
+                      <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-1 block">Dal</label>
+                      <Input type="date" value={reqInizio} onChange={e => setReqInizio(e.target.value)} className="bg-background border-2 border-border h-12 rounded-xl text-sm" />
                     </div>
                     <div>
-                      <label className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-1 block">Al</label>
-                      <Input type="date" value={reqFine} onChange={e => setReqFine(e.target.value)} className="bg-white border-2 border-slate-200 h-12 rounded-xl text-sm" />
+                      <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-1 block">Al</label>
+                      <Input type="date" value={reqFine} onChange={e => setReqFine(e.target.value)} className="bg-background border-2 border-border h-12 rounded-xl text-sm" />
                     </div>
                   </div>
 
                   <div>
-                    <label className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-1 block">Dettagli / Note</label>
-                    <Input placeholder="Motivazione o orari..." value={reqNote} onChange={e => setReqNote(e.target.value)} className="bg-white border-2 border-slate-200 h-12 rounded-xl" />
+                    <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-1 block">Dettagli / Note</label>
+                    <Input placeholder="Motivazione o orari..." value={reqNote} onChange={e => setReqNote(e.target.value)} className="bg-background border-2 border-border h-12 rounded-xl" />
                   </div>
 
                   <Button 
@@ -303,13 +303,13 @@ export default function GemTeamMe() {
 
               {/* LISTA RICHIESTE */}
               <div className="md:col-span-7">
-                <h3 className="text-lg font-bold text-slate-700 mb-6">Storico Richieste</h3>
+                <h3 className="text-lg font-bold text-foreground/80 mb-6">Storico Richieste</h3>
                 <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
                   {isLoadingPermessi ? (
-                    <p className="text-slate-500 text-center py-8 font-medium">Caricamento...</p>
+                    <p className="text-muted-foreground text-center py-8 font-medium">Caricamento...</p>
                   ) : permessiData.length === 0 ? (
-                    <div className="text-center py-12 border-2 border-dashed border-slate-200 rounded-3xl bg-slate-50">
-                      <p className="text-slate-500 font-medium">Nessuna richiesta inviata. <br/>Il tuo storico apparirà qui.</p>
+                    <div className="text-center py-12 border-2 border-dashed border-border rounded-3xl bg-muted">
+                      <p className="text-muted-foreground font-medium">Nessuna richiesta inviata. <br/>Il tuo storico apparirà qui.</p>
                     </div>
                   ) : (
                     permessiData.map((req: any, index: number) => {
@@ -318,16 +318,16 @@ export default function GemTeamMe() {
                       const isRejected = req.stato === 'REJECTED';
                       
                       return (
-                        <div key={index} className="flex justify-between items-center bg-white border-2 border-slate-100 p-5 rounded-2xl shadow-sm hover:border-blue-100 hover:shadow-md transition-all">
+                        <div key={index} className="flex justify-between items-center bg-background border-2 border-slate-100 p-5 rounded-2xl shadow-sm hover:border-blue-100 hover:shadow-md transition-all">
                           <div>
                             <div className="flex items-center gap-3 mb-1">
-                              <Badge variant="outline" className="bg-slate-100 font-black text-slate-700">{req.tipo}</Badge>
-                              <span className="text-sm font-semibold text-slate-600">
+                              <Badge variant="outline" className="bg-slate-100 font-black text-foreground/80">{req.tipo}</Badge>
+                              <span className="text-sm font-semibold text-muted-foreground">
                                 {req.data_inizio ? new Date(req.data_inizio).toLocaleDateString('it-IT') : ''}
                                 {req.data_fine && req.data_fine !== req.data_inizio ? ` → ${new Date(req.data_fine).toLocaleDateString('it-IT')}` : ''}
                               </span>
                             </div>
-                            {req.note && <p className="text-sm text-slate-500 mt-2 truncate w-64">{req.note}</p>}
+                            {req.note && <p className="text-sm text-muted-foreground mt-2 truncate w-64">{req.note}</p>}
                           </div>
                           <div>
                             {isPending && <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200 font-bold border-0 px-3 py-1">IN ATTESA</Badge>}

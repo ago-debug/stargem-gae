@@ -71,7 +71,7 @@ export default function AreaTesserati() {
                   {user?.lastName?.charAt(0) || ""}
                 </div>
                 <div>
-                  <CardTitle className="text-xl text-slate-800">{user?.lastName} {user?.firstName}</CardTitle>
+                  <CardTitle className="text-xl text-foreground">{user?.lastName} {user?.firstName}</CardTitle>
                   <p className="text-sm text-muted-foreground mt-0.5">{user?.email}</p>
                 </div>
               </div>
@@ -81,7 +81,7 @@ export default function AreaTesserati() {
                 <div>
                   <p className="text-sm text-muted-foreground mb-1.5">Tessera Inscritti</p>
                   <div className="flex items-center gap-3">
-                    <span className="font-mono text-xl font-bold tracking-tight text-slate-800">{member?.cardNumber || 'N/A'}</span>
+                    <span className="font-mono text-xl font-bold tracking-tight text-foreground">{member?.cardNumber || 'N/A'}</span>
                     {member?.status === 'ATTIVA' && <Badge className="bg-emerald-500 font-bold tracking-wider">ATTIVA</Badge>}
                     {isExpired && <Badge variant="destructive" className="font-bold tracking-wider">SCADUTA</Badge>}
                     {member?.status === 'IN SCADENZA' && <Badge className="bg-amber-500 font-bold tracking-wider">IN SCADENZA</Badge>}
@@ -89,7 +89,7 @@ export default function AreaTesserati() {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Scadenza Medica</p>
-                  <p className="font-medium text-slate-700">{member?.expirationDate ? new Date(member.expirationDate).toLocaleDateString() : 'Non impostata'}</p>
+                  <p className="font-medium text-foreground/80">{member?.expirationDate ? new Date(member.expirationDate).toLocaleDateString() : 'Non impostata'}</p>
                 </div>
                 {isExpired && (
                   <Button className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white shadow-md font-semibold tracking-wide border-0 mt-3">
@@ -102,19 +102,19 @@ export default function AreaTesserati() {
 
           <Card>
             <CardHeader className="py-4 border-b">
-              <CardTitle className="text-lg flex items-center gap-2 text-slate-800">
-                <FileText className="w-5 h-5 text-slate-500" />
+              <CardTitle className="text-lg flex items-center gap-2 text-foreground">
+                <FileText className="w-5 h-5 text-muted-foreground" />
                 I miei documenti
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4">
               <div className="space-y-3">
-                <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-100">
-                  <span className="text-sm font-medium text-slate-700">Regolamento Generale</span>
+                <div className="flex items-center justify-between p-3 bg-muted rounded-lg border border-slate-100">
+                  <span className="text-sm font-medium text-foreground/80">Regolamento Generale</span>
                   <Badge variant="outline" className="text-emerald-600 border-emerald-200 bg-emerald-50 text-[10px] uppercase font-bold tracking-wider">FIRMATO</Badge>
                 </div>
-                <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-100">
-                  <span className="text-sm font-medium text-slate-700">Certificato Medico</span>
+                <div className="flex items-center justify-between p-3 bg-muted rounded-lg border border-slate-100">
+                  <span className="text-sm font-medium text-foreground/80">Certificato Medico</span>
                   {documents.find((d:any) => d.type === 'medical') ? (
                     <Badge variant="outline" className="text-emerald-600 border-emerald-200 bg-emerald-50 text-[10px] uppercase font-bold tracking-wider">CARICATO</Badge>
                   ) : (
@@ -131,8 +131,8 @@ export default function AreaTesserati() {
         {/* DX COL - 8/12 */}
         <div className="md:col-span-8 space-y-6">
           <Card>
-            <CardHeader className="py-4 border-b bg-slate-50/50">
-              <CardTitle className="text-lg flex items-center gap-2 text-slate-800">
+            <CardHeader className="py-4 border-b bg-muted/50">
+              <CardTitle className="text-lg flex items-center gap-2 text-foreground">
                 <CalendarDays className="w-5 h-5 text-indigo-500" />
                 Le mie iscrizioni
               </CardTitle>
@@ -145,11 +145,11 @@ export default function AreaTesserati() {
               ) : (
                 <div className="space-y-3">
                   {enrollments.map((enr: any, i: number) => (
-                    <div key={i} className="p-4 border rounded-xl flex justify-between items-center bg-white shadow-sm hover:border-indigo-200 transition-colors">
+                    <div key={i} className="p-4 border rounded-xl flex justify-between items-center bg-background shadow-sm hover:border-indigo-200 transition-colors">
                       <div>
-                        <p className="font-semibold text-slate-800 text-base">{enr.courseName}</p>
+                        <p className="font-semibold text-foreground text-base">{enr.courseName}</p>
                         <p className="text-xs text-muted-foreground mt-1 flex items-center gap-2">
-                          <span className="bg-slate-100 px-2 py-0.5 rounded text-slate-600 font-medium">{enr.schedule}</span>
+                          <span className="bg-slate-100 px-2 py-0.5 rounded text-muted-foreground font-medium">{enr.schedule}</span>
                           <span>•</span>
                           <span>{enr.instructor}</span>
                           <span>•</span>
@@ -165,8 +165,8 @@ export default function AreaTesserati() {
           </Card>
 
           <Card>
-            <CardHeader className="py-4 border-b bg-slate-50/50">
-              <CardTitle className="text-lg flex items-center gap-2 text-slate-800">
+            <CardHeader className="py-4 border-b bg-muted/50">
+              <CardTitle className="text-lg flex items-center gap-2 text-foreground">
                 <CreditCard className="w-5 h-5 text-emerald-500" />
                 I miei pagamenti (Ultimi 5)
               </CardTitle>
@@ -179,15 +179,15 @@ export default function AreaTesserati() {
               ) : (
                 <div className="divide-y">
                   {payments.slice(0, 5).map((pay: any, i: number) => (
-                    <div key={i} className="flex justify-between items-center p-4 hover:bg-slate-50/80 transition-colors">
+                    <div key={i} className="flex justify-between items-center p-4 hover:bg-muted/80 transition-colors">
                       <div>
-                        <p className="text-sm font-medium text-slate-800">{pay.description || 'Quota'}</p>
+                        <p className="text-sm font-medium text-foreground">{pay.description || 'Quota'}</p>
                         <p className="text-xs text-muted-foreground mt-0.5">
                           {new Date(pay.date).toLocaleDateString()}
                           {pay.method && <span className="ml-2 px-1.5 py-0.5 bg-slate-100 rounded border text-[10px] uppercase font-semibold">{pay.method}</span>}
                         </p>
                       </div>
-                      <span className="font-bold text-slate-800">€ {Number(pay.amount).toFixed(2)}</span>
+                      <span className="font-bold text-foreground">€ {Number(pay.amount).toFixed(2)}</span>
                     </div>
                   ))}
                 </div>
@@ -197,19 +197,19 @@ export default function AreaTesserati() {
 
           <Card id="chat" className="border-amber-200 overflow-hidden flex flex-col h-[400px] shadow-sm">
             <CardHeader className="bg-amber-50/50 border-b py-3 px-4">
-              <CardTitle className="text-lg flex items-center gap-2 text-slate-800">
+              <CardTitle className="text-lg flex items-center gap-2 text-foreground">
                 <MessageCircle className="w-5 h-5 text-amber-600" />
                 GemChat Segreteria
               </CardTitle>
             </CardHeader>
-            <CardContent className="flex-1 p-0 flex flex-col overflow-hidden bg-slate-50 focus-within:bg-white transition-colors duration-300">
+            <CardContent className="flex-1 p-0 flex flex-col overflow-hidden bg-muted focus-within:bg-background transition-colors duration-300">
               {!activeConversation ? (
                 <div className="flex-1 flex flex-col justify-center items-center p-6 text-center">
                   <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mb-4 shadow-[0_0_15px_rgba(252,211,77,0.5)]">
                     <MessageCircle className="w-8 h-8 text-amber-500" />
                   </div>
-                  <p className="text-slate-800 font-bold mb-1 text-lg">Hai bisogno di aiuto?</p>
-                  <p className="text-sm text-slate-500 mb-6 max-w-sm">Inizia una conversazione diretta con lo staff del centro. Ti risponderemo il prima possibile.</p>
+                  <p className="text-foreground font-bold mb-1 text-lg">Hai bisogno di aiuto?</p>
+                  <p className="text-sm text-muted-foreground mb-6 max-w-sm">Inizia una conversazione diretta con lo staff del centro. Ti risponderemo il prima possibile.</p>
                   <Button 
                     onClick={() => createConversationMutation.mutate()}
                     disabled={createConversationMutation.isPending}
@@ -229,7 +229,7 @@ export default function AreaTesserati() {
                     ) : (
                       activeConversation.messages?.map((msg: any) => (
                         <div key={msg.id} className={`flex ${msg.senderType === 'member' ? 'justify-end' : 'justify-start'}`}>
-                          <div className={`max-w-[80%] px-4 py-2 text-sm shadow-sm ${msg.senderType === 'member' ? 'bg-gradient-to-b from-amber-500 to-amber-600 text-white rounded-2xl rounded-br-sm' : 'bg-white border text-slate-800 rounded-2xl rounded-bl-sm pb-3 text-left'}`}>
+                          <div className={`max-w-[80%] px-4 py-2 text-sm shadow-sm ${msg.senderType === 'member' ? 'bg-gradient-to-b from-amber-500 to-amber-600 text-white rounded-2xl rounded-br-sm' : 'bg-background border text-foreground rounded-2xl rounded-bl-sm pb-3 text-left'}`}>
                             {msg.content}
                             <div className={`text-[9px] mt-1 text-right block ${msg.senderType === 'member' ? 'text-amber-100' : 'text-slate-400'}`}>
                               {new Date(msg.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
@@ -239,13 +239,13 @@ export default function AreaTesserati() {
                       ))
                     )}
                   </div>
-                  <div className="p-3 bg-white border-t flex gap-2 items-center">
+                  <div className="p-3 bg-background border-t flex gap-2 items-center">
                     <Input 
                       placeholder="Scrivi un messaggio qui..." 
                       value={messageText}
                       onChange={(e) => setMessageText(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                      className="bg-slate-50 border-slate-200 focus-visible:ring-amber-500 rounded-full px-4 h-11"
+                      className="bg-muted border-border focus-visible:ring-amber-500 rounded-full px-4 h-11"
                     />
                     <Button 
                       onClick={handleSendMessage}

@@ -108,7 +108,7 @@ export default function AuthPage() {
     };
 
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden bg-slate-50 pt-10 pb-16">
+        <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden bg-muted pt-10 pb-16">
             <style dangerouslySetInnerHTML={{__html: `
                 @keyframes float {
                     0% { transform: translateY(0px) rotate(0deg); }
@@ -133,7 +133,7 @@ export default function AuthPage() {
                     </div>
                 )}
                 
-                <Card className={`w-full shadow-2xl border-none bg-white/90 backdrop-blur-sm relative z-30 flex flex-col lg:flex-row !overflow-visible items-center rounded-xl ${highlightForm ? 'ring-4 ring-amber-400 shadow-amber-200/50 transition-all duration-300' : 'transition-all duration-300'}`}>
+                <Card className={`w-full shadow-2xl border-none bg-background/90 backdrop-blur-sm relative z-30 flex flex-col lg:flex-row !overflow-visible items-center rounded-xl ${highlightForm ? 'ring-4 ring-amber-400 shadow-amber-200/50 transition-all duration-300' : 'transition-all duration-300'}`}>
                     
                     
                     {/* COLONNA SINISTRA: IL FORM DI LOGIN */}
@@ -145,8 +145,8 @@ export default function AuthPage() {
                         </div>
                     </div>
                     <div className="space-y-1">
-                        <CardTitle className="text-2xl font-extrabold tracking-tight text-slate-900">La suite di StarGem</CardTitle>
-                        <CardDescription className="text-sm font-medium text-slate-500">
+                        <CardTitle className="text-2xl font-extrabold tracking-tight text-foreground">La suite di StarGem</CardTitle>
+                        <CardDescription className="text-sm font-medium text-muted-foreground">
                             The integrated platform for your activities.
                         </CardDescription>
                     </div>
@@ -159,12 +159,12 @@ export default function AuthPage() {
                                 name="username"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel className="text-slate-700 font-semibold text-xs uppercase tracking-wider">EMAIL O USERNAME</FormLabel>
+                                        <FormLabel className="text-foreground/80 font-semibold text-xs uppercase tracking-wider">EMAIL O USERNAME</FormLabel>
                                         <FormControl>
                                             <Input 
                                                 autoComplete="off" 
                                                 placeholder="Email o username"
-                                                className="h-11 bg-slate-50/50 border-slate-200 focus:bg-white transition-all shadow-sm" 
+                                                className="h-11 bg-muted/50 border-border focus:bg-background transition-all shadow-sm" 
                                                 {...field} 
                                             />
                                         </FormControl>
@@ -177,12 +177,12 @@ export default function AuthPage() {
                                 name="password"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel className="text-slate-700 font-semibold text-xs uppercase tracking-wider">Password</FormLabel>
+                                        <FormLabel className="text-foreground/80 font-semibold text-xs uppercase tracking-wider">Password</FormLabel>
                                         <FormControl>
                                             <Input 
                                                 type="password" 
                                                 autoComplete="off" 
-                                                className="h-11 bg-slate-50/50 border-slate-200 focus:bg-white transition-all shadow-sm" 
+                                                className="h-11 bg-muted/50 border-border focus:bg-background transition-all shadow-sm" 
                                                 {...field} 
                                             />
                                         </FormControl>
@@ -208,7 +208,7 @@ export default function AuthPage() {
                 </div>
 
                 {/* COLONNA DESTRA: TEO COPILOT (Visibile anche da Mobile) */}
-                <div className="flex flex-1 w-full h-full relative items-center justify-center border-t lg:border-t-0 lg:border-l border-slate-200/60 bg-gradient-to-b lg:bg-gradient-to-r from-white/10 to-white/50 min-h-[320px] lg:min-h-[400px] rounded-b-xl lg:rounded-b-none lg:rounded-r-xl">
+                <div className="flex flex-1 w-full h-full relative items-center justify-center border-t lg:border-t-0 lg:border-l border-border/60 bg-gradient-to-b lg:bg-gradient-to-r from-white/10 to-white/50 min-h-[320px] lg:min-h-[400px] rounded-b-xl lg:rounded-b-none lg:rounded-r-xl">
                     <div className="absolute inset-0 w-full h-full flex items-center justify-center cursor-pointer group" onClick={handleVideoClick}>
                         <video 
                             key={teoVideo} /* Forza il reload del video quando cambia il src per browser più vecchi */
@@ -222,7 +222,7 @@ export default function AuthPage() {
                         {/* Audio Toggle Button */}
                         <button 
                             onClick={toggleAudio}
-                            className="absolute bottom-4 right-4 p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-700 rounded-full shadow-md transition-colors z-50 border border-slate-200"
+                            className="absolute bottom-4 right-4 p-2.5 bg-slate-100 hover:bg-slate-200 text-muted-foreground hover:text-foreground/80 rounded-full shadow-md transition-colors z-50 border border-border"
                             title={isMuted ? "Attiva audio" : "Disattiva audio"}
                         >
                             {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
@@ -258,13 +258,13 @@ export default function AuthPage() {
                             } else {
                                 window.scrollTo({ top: 0, behavior: 'smooth' });
                             }
-                        }} className="cursor-pointer flex flex-col items-center justify-center p-4 bg-white/80 backdrop-blur-md rounded-[24px] shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-2 transition-all duration-300 min-w-[120px] max-w-[140px] flex-1 group">
+                        }} className="cursor-pointer flex flex-col items-center justify-center p-4 bg-background/80 backdrop-blur-md rounded-[24px] shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-2 transition-all duration-300 min-w-[120px] max-w-[140px] flex-1 group">
                             
                             {/* Icona 3D Dorata */}
                             <div className="relative w-16 h-16 rounded-[20px] bg-gradient-to-br from-yellow-100 via-amber-400 to-yellow-600 shadow-[inset_0_2px_4px_rgba(255,255,255,0.7),inset_0_-4px_6px_rgba(180,100,0,0.5),0_10px_20px_rgba(245,158,11,0.3)] flex items-center justify-center mb-4 group-hover:scale-105 transition-transform duration-300 transform-gpu" style={{ transformStyle: 'preserve-3d' }}>
                                 <div className="absolute inset-0 rounded-[20px] bg-gradient-to-t from-black/10 to-transparent pointer-events-none mix-blend-overlay"></div>
                                 {mod.name === "TeoCopilot" ? (
-                                    <Avatar className="w-11 h-11 border-2 border-white shadow-sm relative z-10 bg-white">
+                                    <Avatar className="w-11 h-11 border-2 border-white shadow-sm relative z-10 bg-background">
                                         <AvatarImage src="/assets/teo-head-new.png" alt="Teo" className="object-cover" />
                                     </Avatar>
                                 ) : (
@@ -272,7 +272,7 @@ export default function AuthPage() {
                                 )}
                             </div>
 
-                            <span className="font-extrabold text-slate-800 text-[15px]">{mod.name}</span>
+                            <span className="font-extrabold text-foreground text-[15px]">{mod.name}</span>
                             <span className="text-[10px] uppercase tracking-wider text-slate-400 font-bold text-center mt-1 leading-tight">{mod.desc}</span>
                             {(mod as any).subLabel && (
                                <span style={{ color: '#F59E0B', fontSize: 9, fontStyle: 'italic' }} className="mt-1 font-bold">
