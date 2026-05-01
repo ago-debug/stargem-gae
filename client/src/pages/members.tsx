@@ -808,7 +808,7 @@ export default function Members() {
 
   return (
     <div className="p-6 md:p-8 space-y-6">
-      <div className="flex items-center justify-between gap-4 flex-wrap bg-gradient-to-r from-slate-50 to-white p-6 rounded-2xl border border-slate-100 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] relative overflow-hidden mb-6">
+      <div className="flex items-center justify-between gap-4 flex-wrap bg-gradient-to-r from-slate-50 dark:from-background to-white dark:to-background p-6 rounded-2xl border border-slate-100 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] relative overflow-hidden mb-6">
         <div className="absolute top-0 right-[-5%] -mt-8 w-40 h-40 rounded-full bg-primary/5 blur-[40px] pointer-events-none" />
         <div className="flex items-center gap-4 relative z-10">
           <div className="hidden sm:flex bg-gradient-to-br from-primary/10 to-primary/5 p-3 rounded-xl border border-primary/10 shadow-inner">
@@ -1291,7 +1291,7 @@ export default function Members() {
                                     <AlertTriangle className="w-4 h-4 text-amber-500 cursor-help" />
                                   </TooltipTrigger>
                                   <TooltipContent>
-                                    <div className="text-sm border-amber-200 bg-amber-50 text-amber-900 shadow-sm p-3">
+                                    <div className="text-sm border-amber-200 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-950/20 text-amber-900 dark:text-amber-300 shadow-sm p-3">
                                       <p className="font-semibold mb-1">Dati Mancanti ({getMissingData(member).length}):</p>
                                       <ul className="list-disc pl-4 space-y-0.5">
                                         {getMissingData(member).map((item, i) => (
@@ -2815,7 +2815,7 @@ function EnrollmentDialog({
                                       "In sospeso"}
                                 </Badge>
                                 {payment.status !== "paid" && member && (
-                                  <Button asChild size="sm" variant="outline" className="h-7 text-xs px-2 cursor-pointer bg-amber-50 hover:bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:hover:bg-amber-900/50 dark:text-amber-300 dark:border-amber-800">
+                                  <Button asChild size="sm" variant="outline" className="h-7 text-xs px-2 cursor-pointer bg-amber-50 dark:bg-amber-950/20 hover:bg-amber-100 dark:bg-amber-900/30 text-amber-700 border-amber-200 dark:border-amber-900/50 dark:bg-amber-900/30 dark:hover:bg-amber-900/50 dark:text-amber-300 dark:border-amber-800">
                                     <Link href={`/?memberId=${member.id}&action=payment`}>Paga Ora</Link>
                                   </Button>
                                 )}

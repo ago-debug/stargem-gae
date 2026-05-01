@@ -533,7 +533,7 @@ export function NuovoPagamentoModal({
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="max-w-[1400px] w-[95vw] h-[95vh] overflow-y-auto bg-slate-100/50 p-0 border-0">
+            <DialogContent className="max-w-[1400px] w-[95vw] h-[95vh] overflow-y-auto bg-slate-100 dark:bg-slate-800/50 p-0 border-0">
                 <div className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b px-6 py-4 flex items-center justify-between shadow-sm">
                     <div className="flex items-center gap-3">
                         <div className="p-2 bg-primary/10 rounded-full">
@@ -544,7 +544,7 @@ export function NuovoPagamentoModal({
                             <p className="text-sm text-muted-foreground hidden sm:block">Gestione Checkout Unificato e Carrello Iscrizioni</p>
                         </div>
                     </div>
-                    <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full bg-slate-100 hover:bg-slate-200">
+                    <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200">
                         <X className="h-5 w-5" />
                     </Button>
                 </div>
@@ -718,7 +718,7 @@ export function NuovoPagamentoModal({
                                         Nessun debito pendente per questo cliente. Procedi inserendo i dati manualmente.
                                     </div>
                                 ) : isLoadingDebts ? (
-                                    <div className="h-20 bg-slate-100 animate-pulse rounded-md w-full border border-border"></div>
+                                    <div className="h-20 bg-slate-100 dark:bg-slate-800 animate-pulse rounded-md w-full border border-border"></div>
                                 ) : calculatedDebts && calculatedDebts.length > 0 ? (
                                     <div className="border rounded-md divide-y overflow-hidden shadow-sm bg-background">
                                         {calculatedDebts.map((debt: any, idx: number) => (
@@ -749,7 +749,7 @@ export function NuovoPagamentoModal({
                                                             variant="ghost" 
                                                             size="icon" 
                                                             onClick={(e) => handleDeleteDebt(e, debt.type, debt.id)}
-                                                            className="h-7 w-7 text-muted-foreground hover:text-red-600 hover:bg-red-50 -mr-2 opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                                                            className="h-7 w-7 text-muted-foreground hover:text-red-600 hover:bg-red-50 dark:bg-red-950/20 -mr-2 opacity-0 group-hover:opacity-100 transition-opacity z-10"
                                                             title="Annulla ed elimina voce pendente dal Database"
                                                             disabled={deletePendingDebtMutation.isPending}
                                                         >
@@ -816,7 +816,7 @@ export function NuovoPagamentoModal({
                             </Card>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <Card className="shadow-sm bg-blue-50/30 border-blue-100">
+                                <Card className="shadow-sm bg-blue-50 dark:bg-blue-950/20/30 border-blue-100">
                                     <CardContent className="p-4 flex items-center justify-between">
                                         <div>
                                             <h3 className="font-bold text-blue-900">1 QUOTA TESSERA</h3>
@@ -828,7 +828,7 @@ export function NuovoPagamentoModal({
                                     </CardContent>
                                 </Card>
 
-                                <Card className="shadow-sm bg-red-50/30 border-red-100">
+                                <Card className="shadow-sm bg-red-50 dark:bg-red-950/20/30 border-red-100">
                                     <CardContent className="p-4 flex items-center justify-between">
                                         <div>
                                             <h3 className="font-bold text-red-900">1 LEZIONE DI PROVA</h3>
@@ -1033,12 +1033,12 @@ function CartTableRow({
     if (row.isDebt) {
         return (
             <div className="bg-muted p-4 rounded-lg border shadow-sm relative flex gap-4 pr-14">
-                <Button variant="ghost" size="icon" className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-destructive hover:bg-red-50" onClick={() => { if (confirm("Rimuovere questa riga dal carrello?")) removeCartRow(row.id); }}>
+                <Button variant="ghost" size="icon" className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-destructive hover:bg-red-50 dark:bg-red-950/20" onClick={() => { if (confirm("Rimuovere questa riga dal carrello?")) removeCartRow(row.id); }}>
                     <Trash2 className="w-5 h-5" />
                 </Button>
                 <div className="flex-1 space-y-4">
                     <div className="flex items-center gap-4 border-b pb-3 mb-2">
-                        <div className="p-2 bg-blue-100/50 rounded-full text-blue-700">
+                        <div className="p-2 bg-blue-100 dark:bg-blue-900/30/50 rounded-full text-blue-700">
                             <ShoppingCart className="w-5 h-5" />
                         </div>
                         <div>
@@ -1075,7 +1075,7 @@ function CartTableRow({
             <Button
                 variant="ghost"
                 size="icon"
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-destructive hover:bg-red-50"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-destructive hover:bg-red-50 dark:bg-red-950/20"
                 onClick={() => { if (confirm("Rimuovere questa riga dal carrello?")) removeCartRow(row.id); }}
             >
                 <Trash2 className="w-5 h-5" />
@@ -1104,7 +1104,7 @@ function CartTableRow({
                         <Select disabled={!row.periodId} value={row.activityType || ""} onValueChange={(val) => {
                             updateRowBatch(row.id, { activityType: val, skus: [], basePrice: 0 });
                         }}>
-                            <SelectTrigger className={cn("h-9 border-border", !row.periodId ? "bg-slate-100 opacity-50" : "bg-muted")}>
+                            <SelectTrigger className={cn("h-9 border-border", !row.periodId ? "bg-slate-100 dark:bg-slate-800 opacity-50" : "bg-muted")}>
                                 <SelectValue placeholder="Seleziona..." />
                             </SelectTrigger>
                             <SelectContent>
@@ -1122,7 +1122,7 @@ function CartTableRow({
                         <Select disabled={!row.activityType} value={(row.skus && row.skus[0]) || ""} onValueChange={(val) => {
                             updateRow(row.id, 'skus', [val]);
                         }}>
-                            <SelectTrigger className={cn("h-9 border-border", !row.activityType ? "bg-slate-100 opacity-50" : "bg-background")}>
+                            <SelectTrigger className={cn("h-9 border-border", !row.activityType ? "bg-slate-100 dark:bg-slate-800 opacity-50" : "bg-background")}>
                                 <SelectValue placeholder="Seleziona..." />
                             </SelectTrigger>
                             <SelectContent>
@@ -1170,7 +1170,7 @@ function CartTableRow({
                 </div>
 
                 {row.activityType === 'corsi' && (
-                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 mt-4 mb-4 p-3 bg-blue-50/50 rounded-lg border border-blue-100">
+                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 mt-4 mb-4 p-3 bg-blue-50 dark:bg-blue-950/20/50 rounded-lg border border-blue-100">
                         <div className="space-y-1">
                             <Label className="text-xs text-blue-800 truncate font-bold">Modalità Partecipazione</Label>
                             <Select value={row.participationType || "STANDARD_COURSE"} onValueChange={(val) => {
@@ -1207,15 +1207,15 @@ function CartTableRow({
                 <div className="grid grid-cols-1 xl:grid-cols-6 gap-4">
                     <div className="space-y-1">
                         <Label className="text-xs text-emerald-700 truncate">Cod. Promo</Label>
-                        <Input className="h-9 bg-emerald-50/30 font-mono text-xs uppercase" placeholder="COD. PERSONALE" />
+                        <Input className="h-9 bg-emerald-50 dark:bg-emerald-950/20/30 font-mono text-xs uppercase" placeholder="COD. PERSONALE" />
                     </div>
                     <div className="space-y-1">
                         <Label className="text-xs text-emerald-700 truncate">Valore</Label>
-                        <Input type="number" className="h-9 bg-emerald-50/30 text-right" placeholder="€ 0.00" />
+                        <Input type="number" className="h-9 bg-emerald-50 dark:bg-emerald-950/20/30 text-right" placeholder="€ 0.00" />
                     </div>
                     <div className="space-y-1">
                         <Label className="text-xs text-emerald-700 truncate">% Promo</Label>
-                        <Input type="number" step="0.01" className="h-9 bg-emerald-50/30 text-right" placeholder="%" value={row.discountPercent2 || ""} onChange={(e) => updateRow(row.id, 'discountPercent2', e.target.value)} />
+                        <Input type="number" step="0.01" className="h-9 bg-emerald-50 dark:bg-emerald-950/20/30 text-right" placeholder="%" value={row.discountPercent2 || ""} onChange={(e) => updateRow(row.id, 'discountPercent2', e.target.value)} />
                     </div>
 
                     <div className="space-y-1">
@@ -1223,11 +1223,11 @@ function CartTableRow({
                            <Label className="text-xs text-blue-700 truncate">Cod. Sconto</Label>
                            {row.promoCodeStatus === 'valid' && <Badge variant="outline" className="h-4 text-[9px] px-1 bg-green-50 text-green-700 border-green-200" title={row.promoCodeMessage}>VALIDO</Badge>}
                            {row.promoCodeStatus === 'invalid' && <Badge variant="destructive" className="h-4 text-[9px] px-1" title={row.promoCodeMessage}>NON VALIDO</Badge>}
-                           {row.promoCodeStatus === 'error' && <Badge variant="outline" className="h-4 text-[9px] px-1 bg-amber-50 text-amber-700 border-amber-200" title={row.promoCodeMessage}>ERRORE</Badge>}
+                           {row.promoCodeStatus === 'error' && <Badge variant="outline" className="h-4 text-[9px] px-1 bg-amber-50 dark:bg-amber-950/20 text-amber-700 border-amber-200 dark:border-amber-900/50" title={row.promoCodeMessage}>ERRORE</Badge>}
                            {row.promoCodeStatus === 'validating' && <Loader2 className="w-3 h-3 animate-spin text-blue-500" />}
                         </div>
                         <Input 
-                           className="h-9 bg-blue-50/30 font-mono text-xs uppercase" 
+                           className="h-9 bg-blue-50 dark:bg-blue-950/20/30 font-mono text-xs uppercase" 
                            placeholder="COD. CAMPAGNA" 
                            value={row.discountCode || ""} 
                            onChange={(e) => updateRow(row.id, 'discountCode', e.target.value)} 
@@ -1242,11 +1242,11 @@ function CartTableRow({
                     </div>
                     <div className="space-y-1">
                         <Label className="text-xs text-blue-700 truncate">Valore</Label>
-                        <Input type="number" className="h-9 bg-blue-50/30 text-right text-green-700 font-bold" placeholder="€ 0.00" value={row.discountAmount || ""} readOnly />
+                        <Input type="number" className="h-9 bg-blue-50 dark:bg-blue-950/20/30 text-right text-green-700 font-bold" placeholder="€ 0.00" value={row.discountAmount || ""} readOnly />
                     </div>
                     <div className="space-y-1">
                         <Label className="text-xs text-blue-700 truncate">% Sconto</Label>
-                        <Input type="number" step="0.01" className="h-9 bg-blue-50/30 text-right" placeholder="%" value={row.discountPercent1 || ""} onChange={(e) => updateRow(row.id, 'discountPercent1', e.target.value)} />
+                        <Input type="number" step="0.01" className="h-9 bg-blue-50 dark:bg-blue-950/20/30 text-right" placeholder="%" value={row.discountPercent1 || ""} onChange={(e) => updateRow(row.id, 'discountPercent1', e.target.value)} />
                     </div>
                 </div>
 

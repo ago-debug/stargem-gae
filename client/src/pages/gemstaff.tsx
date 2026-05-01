@@ -169,7 +169,7 @@ function PresenzeTab({ isAdmin }: { isAdmin: boolean }) {
        </div>
 
        <Tabs value={subTab} onValueChange={setSubTab}>
-         <TabsList className="bg-slate-100 mb-4 p-1 rounded-md">
+         <TabsList className="bg-slate-100 dark:bg-slate-800 mb-4 p-1 rounded-md">
            <TabsTrigger value="presenze" className="w-48">Presenze Mensili</TabsTrigger>
            <TabsTrigger value="sostituzioni" className="w-48">Sostituzioni</TabsTrigger>
          </TabsList>
@@ -301,7 +301,7 @@ function DisciplinareTab({ staffList }: { staffList: any[] }) {
 
   return (
     <div className="space-y-6 mt-4">
-       <Alert variant="destructive" className="bg-red-50 border-red-200 text-red-800">
+       <Alert variant="destructive" className="bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-900/50 text-red-800">
          <ShieldAlert className="h-4 w-4 stroke-red-800" />
          <AlertTitle>⚠️ Sezione riservata — accesso solo Direzione.</AlertTitle>
          <AlertDescription>
@@ -329,7 +329,7 @@ function DisciplinareTab({ staffList }: { staffList: any[] }) {
        </div>
 
        {isNuovoOpen && memberId && (
-         <Card className="border-emerald-200">
+         <Card className="border-emerald-200 dark:border-emerald-900/50">
            <CardContent className="p-4 space-y-4">
              <h3 className="font-semibold text-lg">Registra Nuovo Evento</h3>
              <div className="grid grid-cols-2 gap-4">
@@ -1076,17 +1076,17 @@ export default function GemStaff() {
             <div className="space-y-1 pt-4 border-t">
               <p className="text-sm text-muted-foreground font-medium mb-3">Account di Sistema</p>
               {selectedStaff?.user_id ? (
-                 <div className="bg-emerald-50 border border-emerald-200 p-3 rounded-md text-sm flex items-center justify-between">
-                    <span className="font-medium text-emerald-800 flex items-center gap-2">
+                 <div className="bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/50 p-3 rounded-md text-sm flex items-center justify-between">
+                    <span className="font-medium text-emerald-800 dark:text-emerald-400 flex items-center gap-2">
                        <FileCheck className="w-4 h-4" /> Account attivo
                     </span>
-                    <Badge variant="outline" className={selectedStaff.email_verified ? 'text-emerald-700 border-emerald-300' : 'text-amber-600 border-amber-300'}>
+                    <Badge variant="outline" className={selectedStaff.email_verified ? 'text-emerald-700 border-emerald-300' : 'text-amber-600 border-amber-300 dark:border-amber-800/50'}>
                        {selectedStaff.email_verified ? 'Verificato' : 'Da verificare'}
                     </Badge>
                  </div>
               ) : (
-                 <div className="bg-amber-50 border border-amber-200 p-3 rounded-md text-sm space-y-3">
-                    <div className="flex items-center gap-2 text-amber-800">
+                 <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 p-3 rounded-md text-sm space-y-3">
+                    <div className="flex items-center gap-2 text-amber-800 dark:text-amber-400">
                        <AlertTriangle className="w-4 h-4" />
                        <span className="font-medium">Questo insegnante non ha ancora un account</span>
                     </div>
@@ -1134,12 +1134,12 @@ export default function GemStaff() {
             <div className="space-y-1 pt-4 border-t">
               <p className="text-sm text-muted-foreground font-medium mb-3">Autorizzazione lezioni private</p>
               {selectedStaff?.lezioni_private_autorizzate ? (
-                 <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 p-3 rounded-md text-sm">
+                 <div className="bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/50 text-emerald-800 dark:text-emerald-400 p-3 rounded-md text-sm">
                     Autorizzato in data {selectedStaff.data_autorizzazione ? new Date(selectedStaff.data_autorizzazione).toLocaleDateString() : 'N/A'}<br/>
                     da: {selectedStaff.autorizzato_da || 'Direzione'}
                  </div>
               ) : (
-                 <div className="bg-slate-100 border text-muted-foreground p-3 rounded-md text-sm">
+                 <div className="bg-slate-100 dark:bg-slate-800 border text-muted-foreground p-3 rounded-md text-sm">
                     Non autorizzato
                  </div>
               )}
@@ -1204,7 +1204,7 @@ export default function GemStaff() {
             <DialogDescription>
               Comunica questi dati all'insegnante:<br/><br/>
               Email: <strong>{createdAccountOtp?.email}</strong><br/>
-              Codice accesso temporaneo: <strong className="text-lg bg-slate-100 px-2 py-1 rounded">{createdAccountOtp?.otp}</strong><br/><br/>
+              Codice accesso temporaneo: <strong className="text-lg bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded">{createdAccountOtp?.otp}</strong><br/><br/>
               Valido per 24 ore.<br/>
               <span className="text-amber-600 font-bold flex items-center gap-1 mt-2">
                  <AlertTriangle className="w-4 h-4" /> Questo codice non verrà mostrato di nuovo.

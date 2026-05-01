@@ -184,7 +184,7 @@ export function WelfareTab() {
                         {rate.studioRestriction && (
                            <div className="flex justify-between">
                               <span className="text-muted-foreground">Studio/Sala:</span>
-                              <span className="font-medium text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded">{rate.studioRestriction}</span>
+                              <span className="font-medium text-amber-700 bg-amber-50 dark:bg-amber-950/20 px-1.5 py-0.5 rounded">{rate.studioRestriction}</span>
                            </div>
                         )}
                         <div className="flex justify-between">
@@ -193,7 +193,7 @@ export function WelfareTab() {
                         </div>
                      </div>
                      {rate.notes && (
-                        <div className="bg-blue-50/50 p-2 rounded border border-blue-100 text-xs italic text-muted-foreground mt-2">
+                        <div className="bg-blue-50 dark:bg-blue-950/20/50 p-2 rounded border border-blue-100 text-xs italic text-muted-foreground mt-2">
                            <span className="font-semibold not-italic block mb-0.5 text-blue-800">Note operative:</span>
                            {rate.notes}
                         </div>

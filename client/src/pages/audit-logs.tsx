@@ -113,7 +113,7 @@ export default function AuditLogsPage() {
                                                 </div>
                                             </TableCell>
                                             <TableCell className={cn(isSortedColumn("action") && "sorted-column-cell")}>
-                                                <Badge variant="destructive" className="bg-red-100 text-red-800 hover:bg-red-200 border-red-200">
+                                                <Badge variant="destructive" className="bg-red-100 dark:bg-red-900/30 text-red-800 hover:bg-red-200 border-red-200 dark:border-red-900/50">
                                                     {log.action}
                                                 </Badge>
                                             </TableCell>

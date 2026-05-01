@@ -68,7 +68,7 @@ export function GemChatBadge() {
               <TabsTrigger value="member" className="flex items-center gap-2">
                 💬 Tesserati
                 {counts.member > 0 && (
-                  <Badge variant="secondary" className="bg-amber-100 text-amber-800 ml-1">
+                  <Badge variant="secondary" className="bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-400 ml-1">
                     {counts.member > 99 ? '99+' : counts.member}
                   </Badge>
                 )}

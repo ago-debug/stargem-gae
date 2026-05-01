@@ -28,7 +28,7 @@ export function ConflictBadge({ result, type }: ConflictBadgeProps) {
       warningText = "⚠ Telefono già usato da un'altra scheda — permesso per minori";
     }
     return (
-      <div className="mt-1.5 text-xs font-medium bg-amber-50 text-amber-600 border border-amber-200 px-2 py-1.5 rounded-md inline-flex items-center max-w-full">
+      <div className="mt-1.5 text-xs font-medium bg-amber-50 dark:bg-amber-950/20 text-amber-600 border border-amber-200 dark:border-amber-900/50 px-2 py-1.5 rounded-md inline-flex items-center max-w-full">
         <span className="truncate">{warningText}</span>
       </div>
     );
@@ -37,7 +37,7 @@ export function ConflictBadge({ result, type }: ConflictBadgeProps) {
   if (result.available === false && result.conflict) {
     const typeLabel = type === 'cf' ? 'CF' : type === 'email' ? 'Email' : 'Telefono';
     return (
-      <div className="mt-1.5 bg-red-50 text-red-700 border border-red-200 rounded-md p-2 text-xs flex flex-col gap-1 w-full max-w-sm">
+      <div className="mt-1.5 bg-red-50 dark:bg-red-950/20 text-red-700 border border-red-200 dark:border-red-900/50 rounded-md p-2 text-xs flex flex-col gap-1 w-full max-w-sm">
         <div className="flex items-start gap-1.5 font-bold">
           <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
           <span>✗ {typeLabel} già presente nel sistema</span>

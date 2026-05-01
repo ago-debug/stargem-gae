@@ -110,7 +110,7 @@ export function UserProfileDialog({ children, targetUser }: UserProfileDialogPro
             {previewImage || user?.profileImageUrl ? (
               <img src={previewImage || user?.profileImageUrl!} alt="Avatar" className="w-full h-full object-cover" />
             ) : (
-              <div className="w-full h-full bg-slate-100 flex items-center justify-center text-slate-400">
+              <div className="w-full h-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400">
                 <Camera className="w-8 h-8" />
               </div>
             )}

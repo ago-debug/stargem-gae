@@ -29,13 +29,13 @@ export function ConvenzioniTab({ seasonId }: ConvenzioniTabProps) {
 
   const getTypeStyle = (type: string | null) => {
     switch (type) {
-      case "universita": return { color: "bg-blue-100 text-blue-800 border-blue-200", icon: <Landmark className="w-4 h-4 mr-1" />, label: "Università" };
-      case "forze_ordine": return { color: "bg-emerald-100 text-emerald-800 border-emerald-200", icon: <Shield className="w-4 h-4 mr-1" />, label: "Forze dell'Ordine" };
+      case "universita": return { color: "bg-blue-100 dark:bg-blue-900/30 text-blue-800 border-blue-200", icon: <Landmark className="w-4 h-4 mr-1" />, label: "Università" };
+      case "forze_ordine": return { color: "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/50", icon: <Shield className="w-4 h-4 mr-1" />, label: "Forze dell'Ordine" };
       case "azienda": return { color: "bg-violet-100 text-violet-800 border-violet-200", icon: <Building className="w-4 h-4 mr-1" />, label: "Azienda" };
       case "scuola": return { color: "bg-orange-100 text-orange-800 border-orange-200", icon: <GraduationCap className="w-4 h-4 mr-1" />, label: "Scuola" };
       case "accademia": return { color: "bg-teal-100 text-teal-800 border-teal-200", icon: <Building2 className="w-4 h-4 mr-1" />, label: "Accademia" };
-      case "studio_professionale": return { color: "bg-slate-100 text-foreground border-border", icon: <Briefcase className="w-4 h-4 mr-1" />, label: "Studio Professionale" };
-      default: return { color: "bg-slate-100 text-foreground border-border", icon: <Building2 className="w-4 h-4 mr-1" />, label: "Altro" };
+      case "studio_professionale": return { color: "bg-slate-100 dark:bg-slate-800 text-foreground border-border", icon: <Briefcase className="w-4 h-4 mr-1" />, label: "Studio Professionale" };
+      default: return { color: "bg-slate-100 dark:bg-slate-800 text-foreground border-border", icon: <Building2 className="w-4 h-4 mr-1" />, label: "Altro" };
     }
   };
 
@@ -106,7 +106,7 @@ export function ConvenzioniTab({ seasonId }: ConvenzioniTabProps) {
                     <span className="font-medium truncate" title={conv.verificationNotes || 'Altro'}>{conv.verificationNotes || 'Non specificato'}</span>
                   </div>
 
-                  <div className="bg-slate-100 p-3 rounded-md">
+                  <div className="bg-slate-100 dark:bg-slate-800 p-3 rounded-md">
                      <span className="flex items-center text-xs font-semibold text-foreground/80 mb-1">
                         <Users className="w-3.5 h-3.5 mr-1" /> Chi può usarla:
                      </span>
@@ -121,7 +121,7 @@ export function ConvenzioniTab({ seasonId }: ConvenzioniTabProps) {
                           <ChevronDown className="w-4 h-4 ml-2" />
                         </Button>
                       </CollapsibleTrigger>
-                      <CollapsibleContent className="pt-2 text-xs text-muted-foreground italic bg-amber-50 p-3 rounded border border-amber-100">
+                      <CollapsibleContent className="pt-2 text-xs text-muted-foreground italic bg-amber-50 dark:bg-amber-950/20 p-3 rounded border border-amber-100 dark:border-amber-900/50">
                         {conv.specialRules}
                       </CollapsibleContent>
                     </Collapsible>

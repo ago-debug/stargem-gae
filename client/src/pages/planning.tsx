@@ -54,7 +54,7 @@ const getStrategicColor = (type: string, title?: string) => {
     if (type === 'campus' || t.includes('CAM')) return 'bg-sky-100 text-sky-800 border-l border-sky-400';
     if (type === 'saggio' || t.includes('SAG')) return 'bg-pink-100 text-pink-800 border-l border-pink-400';
     if (t.includes('WS')) return 'bg-orange-100 text-orange-800 border-l border-orange-400';
-    if (t.includes('VAC')) return 'bg-emerald-100 text-emerald-800 border-l border-emerald-400';
+    if (t.includes('VAC')) return 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-400 border-l border-emerald-400';
     if (type === 'nota' || t.includes('PROMO')) return 'bg-yellow-100 text-yellow-800 border-l border-yellow-400';
     if (type === 'evento') return 'bg-indigo-50 text-indigo-800 border-l border-indigo-400';
     if (t.includes('AFT')) return 'bg-slate-200 text-foreground border-l border-slate-400';
@@ -329,7 +329,7 @@ export default function Planning() {
 
         if (resolvedHolidayName) {
             cellEvents.push(
-                <div key={`hol_${day}_${realMonthIndex}`} className="mb-1 mt-0.5 w-full bg-red-50 text-red-700 border border-red-300 px-1 py-0.5 text-[11px] font-medium rounded text-center uppercase shadow-sm truncate">
+                <div key={`hol_${day}_${realMonthIndex}`} className="mb-1 mt-0.5 w-full bg-red-50 dark:bg-red-950/20 text-red-700 border border-red-300 px-1 py-0.5 text-[11px] font-medium rounded text-center uppercase shadow-sm truncate">
                     {resolvedHolidayName}
                 </div>
             );
@@ -344,11 +344,11 @@ export default function Planning() {
         
         Object.entries(breakdown).forEach(([key, count]) => {
             if (count > 0) {
-                let colorClass = "bg-muted border-border text-muted-foreground hover:bg-slate-100 hover:border-border";
+                let colorClass = "bg-muted border-border text-muted-foreground hover:bg-slate-100 dark:bg-slate-800 hover:border-border";
                 if (key === 'Corsi') {
                     colorClass = isPastMonthCell 
                         ? "bg-slate-200 border-border text-foreground/80 hover:bg-slate-300" 
-                        : "bg-muted border-border text-foreground/80 hover:bg-slate-100";
+                        : "bg-muted border-border text-foreground/80 hover:bg-slate-100 dark:bg-slate-800";
                 }
                 else if (key === 'Allenamenti') colorClass = "bg-purple-50 border-purple-200 text-purple-600 hover:bg-purple-100";
                 else if (key === 'Lez. Individuali') colorClass = "bg-green-50 border-green-200 text-green-600 hover:bg-green-100";
@@ -460,7 +460,7 @@ export default function Planning() {
         return (
              <div className="grid grid-cols-7 gap-px bg-slate-200 border border-border">
                 {['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'].map(d => (
-                    <div key={d} className="bg-slate-100 p-2 text-center text-xs font-bold uppercase text-muted-foreground">{d}</div>
+                    <div key={d} className="bg-slate-100 dark:bg-slate-800 p-2 text-center text-xs font-bold uppercase text-muted-foreground">{d}</div>
                 ))}
                 {blanks.map(b => <div key={`blank-${b}`} className="bg-background min-h-[120px]"></div>)}
                 {days.map(d => {
@@ -563,7 +563,7 @@ export default function Planning() {
                         <Button variant="ghost" size="sm" onClick={nextTimeSpan} disabled={isNextDisabled} className="text-muted-foreground hover:text-foreground h-7 disabled:opacity-30 disabled:hover:text-muted-foreground">Succ. &rarr;</Button>
                     </div>
 
-                    <div className="text-xs font-semibold text-amber-700 bg-amber-50 px-3 py-1.5 rounded-md border border-amber-200 cursor-pointer hover:bg-amber-100 transition-colors h-9 flex items-center shrink-0"
+                    <div className="text-xs font-semibold text-amber-700 bg-amber-50 dark:bg-amber-950/20 px-3 py-1.5 rounded-md border border-amber-200 dark:border-amber-900/50 cursor-pointer hover:bg-amber-100 dark:bg-amber-900/30 transition-colors h-9 flex items-center shrink-0"
                          onClick={() => {
                              setViewMode('annuale');
                              setStartYear(today.getMonth() < 8 ? today.getFullYear() - 1 : today.getFullYear());
@@ -574,7 +574,7 @@ export default function Planning() {
                     </div>
 
                     {/* View Mode Toggle */}
-                    <div className="flex items-center bg-slate-100 p-1 rounded-lg border border-border h-9 shrink-0">
+                    <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-lg border border-border h-9 shrink-0">
                         <Button variant={viewMode === 'annuale' ? 'default' : 'ghost'} size="sm" onClick={() => setViewMode('annuale')} className="rounded-md h-7">Annuale</Button>
                         <Button variant={viewMode === 'mensile' ? 'default' : 'ghost'} size="sm" onClick={() => setViewMode('mensile')} className="rounded-md h-7">Mensile</Button>
                         <Button variant={viewMode === 'settimanale' ? 'default' : 'ghost'} size="sm" onClick={() => setViewMode('settimanale')} className="rounded-md h-7">Settimanale</Button>
@@ -661,12 +661,12 @@ export default function Planning() {
                                                     }
                                                 }}
                                                 className={`relative min-h-[50px] p-1 text-xs transition-opacity duration-300 ${isValidDay ? 'border-r cursor-pointer hover:ring-2 hover:ring-blue-400 hover:z-20' : ''} ${
-                                                    !isValidDay ? (isPastBodyMonth ? 'bg-slate-100/80 border-transparent' : 'bg-background border-transparent') : 
+                                                    !isValidDay ? (isPastBodyMonth ? 'bg-slate-100 dark:bg-slate-800/80 border-transparent' : 'bg-background border-transparent') : 
                                                     (isToday ? 'bg-yellow-200 border-2 border-yellow-500 z-10 shadow-md scale-[1.02] transition-transform' : 
-                                                    (holidayName || isSunday ? (isPastBodyMonth ? 'bg-red-100/80' : 'bg-red-50/50') : 
+                                                    (holidayName || isSunday ? (isPastBodyMonth ? 'bg-red-100 dark:bg-red-900/30/80' : 'bg-red-50 dark:bg-red-950/20/50') : 
                                                     (isCurrentMonthCol ? 'bg-yellow-50/20' : 
-                                                    (isSaturday ? (isPastBodyMonth ? 'bg-slate-200/50' : 'bg-slate-100/50') : 
-                                                    (isPastBodyMonth ? 'bg-slate-100/80 border-border/50' : 'bg-background')))))
+                                                    (isSaturday ? (isPastBodyMonth ? 'bg-slate-200/50' : 'bg-slate-100 dark:bg-slate-800/50') : 
+                                                    (isPastBodyMonth ? 'bg-slate-100 dark:bg-slate-800/80 border-border/50' : 'bg-background')))))
                                                 } ${isPastBodyMonth && !isToday ? 'opacity-40 grayscale hover:opacity-100 hover:grayscale-0' : ''}`}
                                             >
                                                 {isValidDay && cellDate && (
@@ -760,7 +760,7 @@ export default function Planning() {
                     </div>
                     <DialogFooter className="flex justify-between sm:justify-between w-full">
                         {strategicEventId ? (
-                            <Button variant="outline" className="text-red-500 border-red-200 hover:bg-red-50 hover:text-red-600" onClick={() => deleteStrategicMutation.mutate(strategicEventId)} disabled={deleteStrategicMutation.isPending}>
+                            <Button variant="outline" className="text-red-500 border-red-200 dark:border-red-900/50 hover:bg-red-50 dark:bg-red-950/20 hover:text-red-600" onClick={() => deleteStrategicMutation.mutate(strategicEventId)} disabled={deleteStrategicMutation.isPending}>
                                 Elimina
                             </Button>
                         ) : (

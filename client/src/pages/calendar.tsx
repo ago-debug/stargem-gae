@@ -243,7 +243,7 @@ function ScrollableFilterBar({ children, className }: { children: ReactNode, cla
         <div className={`relative flex items-center min-w-0 group ${className || ''}`}>
             {showLeft && (
                 <div className="absolute left-0 z-10 bg-gradient-to-r from-white via-white/90 to-transparent pr-4 py-1 h-full flex items-center pointer-events-none">
-                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full shadow-sm bg-background border border-border pointer-events-auto hover:bg-slate-100" onClick={() => scroll('left')}>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full shadow-sm bg-background border border-border pointer-events-auto hover:bg-slate-100 dark:bg-slate-800" onClick={() => scroll('left')}>
                         <ChevronLeft className="h-4 w-4" />
                     </Button>
                 </div>
@@ -253,7 +253,7 @@ function ScrollableFilterBar({ children, className }: { children: ReactNode, cla
             </div>
             {showRight && (
                 <div className="absolute right-0 z-10 bg-gradient-to-l from-white via-white/90 to-transparent pl-4 py-1 h-full flex items-center pointer-events-none">
-                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full shadow-sm bg-background border border-border pointer-events-auto hover:bg-slate-100" onClick={() => scroll('right')}>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full shadow-sm bg-background border border-border pointer-events-auto hover:bg-slate-100 dark:bg-slate-800" onClick={() => scroll('right')}>
                         <ChevronRight className="h-4 w-4" />
                     </Button>
                 </div>
@@ -1943,7 +1943,7 @@ export default function CalendarPage() {
 
                         <div className="shrink-0 flex items-center gap-1">
                             <Select value={selectedEventType} onValueChange={setSelectedEventType}>
-                                <SelectTrigger className={`w-[180px] h-10 transition-colors ${selectedEventType !== 'all' ? 'bg-amber-100 border-amber-400 text-amber-800 font-semibold' : 'border-border'}`}>
+                                <SelectTrigger className={`w-[180px] h-10 transition-colors ${selectedEventType !== 'all' ? 'bg-amber-100 dark:bg-amber-900/30 border-amber-400 text-amber-800 dark:text-amber-400 font-semibold' : 'border-border'}`}>
                                     <div className="flex items-center">
                                         <Filter className={`w-4 h-4 mr-2 ${selectedEventType !== 'all' ? 'text-amber-600' : 'text-muted-foreground'}`} />
                                         <SelectValue placeholder="Tutte le Attività" />
@@ -1957,7 +1957,7 @@ export default function CalendarPage() {
                                 </SelectContent>
                             </Select>
                             {selectedEventType !== 'all' && (
-                                <Button variant="ghost" size="icon" className="h-10 w-10 text-muted-foreground hover:text-red-600 hover:bg-red-50" onClick={() => setSelectedEventType('all')} title="Resetta filtro">
+                                <Button variant="ghost" size="icon" className="h-10 w-10 text-muted-foreground hover:text-red-600 hover:bg-red-50 dark:bg-red-950/20" onClick={() => setSelectedEventType('all')} title="Resetta filtro">
                                     <X className="h-4 w-4" />
                                 </Button>
                             )}
@@ -1986,8 +1986,8 @@ export default function CalendarPage() {
                             const isFutureDay = isAfter(startOfDay(refDate), startOfDay(today));
                             let boxClass = "hidden md:inline-flex items-center px-3 h-10 text-sm font-bold rounded-md shadow-sm border shrink-0 whitespace-nowrap";
                             if (isCurrentDay) boxClass += " bg-yellow-100/80 border-yellow-300 text-yellow-800";
-                            else if (isFutureDay) boxClass += " bg-blue-100/80 border-blue-300 text-blue-800";
-                            else boxClass += " bg-slate-100/80 border-border text-muted-foreground";
+                            else if (isFutureDay) boxClass += " bg-blue-100 dark:bg-blue-900/30/80 border-blue-300 text-blue-800";
+                            else boxClass += " bg-slate-100 dark:bg-slate-800/80 border-border text-muted-foreground";
                             return (
                                 <div className={boxClass}>
                                     {isCurrentDay ? "Oggi: " : ""}{format(refDate, "EEEE d MMMM", { locale: it })}
@@ -2033,13 +2033,13 @@ export default function CalendarPage() {
                             </Button>
                         </div>
 
-                        <Button variant="outline" size="sm" className="h-10 px-4 font-semibold shrink-0 bg-slate-100 hover:bg-slate-200 border-border text-foreground/80 shadow-sm" onClick={resetToToday}>
+                        <Button variant="outline" size="sm" className="h-10 px-4 font-semibold shrink-0 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 border-border text-foreground/80 shadow-sm" onClick={resetToToday}>
                             Oggi
                         </Button>
                         {totalRenderedCards.total > 0 ? (
                             <Popover>
                                 <PopoverTrigger asChild>
-                                    <div className="flex items-center justify-center h-10 px-3 shrink-0 bg-slate-100 hover:bg-slate-200 cursor-pointer text-foreground/80 border border-border shadow-sm rounded-md md:rounded-lg transition-colors">
+                                    <div className="flex items-center justify-center h-10 px-3 shrink-0 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 cursor-pointer text-foreground/80 border border-border shadow-sm rounded-md md:rounded-lg transition-colors">
                                         <span className="font-extrabold text-sm tracking-tight">{totalRenderedCards.total}</span>
                                         <span className="text-xs font-semibold ml-1 opacity-90 uppercase tracking-wider">{selectedDay === "all" ? "Sessioni della settimana" : "Sessioni di oggi"}</span>
                                     </div>
@@ -2058,9 +2058,9 @@ export default function CalendarPage() {
                                                 'Altro': 'all'
                                             };
                                             return (
-                                            <div key={key} className="flex justify-between items-center text-sm cursor-pointer hover:bg-slate-100 p-1 -mx-1 px-1 rounded transition-colors" onClick={() => setSelectedEventType(typeMapping[key] || 'all')}>
+                                            <div key={key} className="flex justify-between items-center text-sm cursor-pointer hover:bg-slate-100 dark:bg-slate-800 p-1 -mx-1 px-1 rounded transition-colors" onClick={() => setSelectedEventType(typeMapping[key] || 'all')}>
                                                 <span className="text-muted-foreground font-medium">{key}</span>
-                                                <span className="font-bold text-foreground bg-slate-100 px-2 py-0.5 rounded-full text-xs">{count}</span>
+                                                <span className="font-bold text-foreground bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full text-xs">{count}</span>
                                             </div>
                                         )})}
                                     </div>
@@ -2127,7 +2127,7 @@ export default function CalendarPage() {
                                         </div>
                                         <div className="p-2 flex flex-col gap-1 max-h-[300px] overflow-auto">
                                             {isPublicHoliday && (
-                                                <div className="px-2 py-1.5 rounded-sm text-xs font-bold bg-red-50 text-red-700 border-l-[3px] border-red-500">
+                                                <div className="px-2 py-1.5 rounded-sm text-xs font-bold bg-red-50 dark:bg-red-950/20 text-red-700 border-l-[3px] border-red-500">
                                                     ☀️ {holidayName || "Festività Nazionale"}
                                                 </div>
                                             )}
@@ -2141,7 +2141,7 @@ export default function CalendarPage() {
                                                  else if (type === 'campus' || t.includes('CAM')) badgeColor = 'bg-sky-100 text-sky-800 border-l-[3px] border-sky-400';
                                                  else if (type === 'saggio' || t.includes('SAG')) badgeColor = 'bg-pink-100 text-pink-800 border-l-[3px] border-pink-400';
                                                  else if (t.includes('WS')) badgeColor = 'bg-orange-100 text-orange-800 border-l-[3px] border-orange-400';
-                                                 else if (t.includes('VAC')) badgeColor = 'bg-emerald-100 text-emerald-800 border-l-[3px] border-emerald-400';
+                                                 else if (t.includes('VAC')) badgeColor = 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-400 border-l-[3px] border-emerald-400';
                                                  else if (type === 'nota' || t.includes('PROMO')) badgeColor = 'bg-yellow-100 text-yellow-800 border-l-[3px] border-yellow-400';
                                                  else if (type === 'evento') badgeColor = 'bg-indigo-50 text-indigo-800 border-l-[3px] border-indigo-400';
 
@@ -2213,7 +2213,7 @@ export default function CalendarPage() {
                         </div>
 
                         {(selectedStudio !== "all" || selectedInstructor !== "all" || selectedCategory !== "all" || selectedDay !== "all" || searchQuery !== "") && (
-                            <Button variant="ghost" size="icon" onClick={resetFilters} title="Resetta filtri" className="shrink-0 h-10 w-10 bg-slate-100 hover:bg-slate-200">
+                            <Button variant="ghost" size="icon" onClick={resetFilters} title="Resetta filtri" className="shrink-0 h-10 w-10 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200">
                                 <RefreshCw className="w-4 h-4 text-muted-foreground" />
                             </Button>
                         )}
@@ -2252,7 +2252,7 @@ export default function CalendarPage() {
 
                                         const isToday = isSameDay(dayDate, new Date());
                                         let rowBg = isToday ? "bg-yellow-50/50" : "bg-background";
-                                        if (isPublicHoliday) rowBg = "bg-red-50";
+                                        if (isPublicHoliday) rowBg = "bg-red-50 dark:bg-red-950/20";
                                         else if (isStudioClosed) rowBg = "bg-pink-50";
 
                                         let headerBorderClass = isToday ? "border-b-[3px] border-yellow-400 text-yellow-900" : "text-[#333]";
@@ -2270,7 +2270,7 @@ export default function CalendarPage() {
                                                 
                                                 {/* Banner Festività */}
                                                 {(isPublicHoliday || isStudioClosed) && (
-                                                    <div className={`w-full text-xs font-bold px-1 pb-1 pt-1 flex justify-center items-center ${isPublicHoliday ? 'text-red-600 bg-red-100/50 border-b border-red-100' : 'text-pink-600 bg-pink-100/50 border-b border-pink-100'}`}>
+                                                    <div className={`w-full text-xs font-bold px-1 pb-1 pt-1 flex justify-center items-center ${isPublicHoliday ? 'text-red-600 bg-red-100 dark:bg-red-900/30/50 border-b border-red-100' : 'text-pink-600 bg-pink-100/50 border-b border-pink-100'}`}>
                                                         {isPublicHoliday ? `☀️ ${holidayName || "Festività"}` : `🔒 Studio Chiuso`}
                                                     </div>
                                                 )}
@@ -2435,7 +2435,7 @@ export default function CalendarPage() {
                                                     key={evt.eventId}
                                                     id={`event-card-${evt.sourceType}-${evt.sourceId}`}
                                                     onClick={handleCardClick}
-                                                    className={`absolute p-[4px] pointer-events-auto cursor-pointer transition-all duration-300 hover:scale-[1.03] hover:-translate-y-0.5 hover:shadow-xl z-20 hover:z-50 ${conflictEventId === evt.id ? 'ring-4 ring-red-500 animate-pulse z-[100]' : ''} ${evt.hasTimeOverlap ? '!border-red-600 !bg-red-50 ring-2 ring-red-500 animate-pulse z-[90]' : ''} ${highlightCourseId && Number(highlightCourseId) === evt.sourceId && (evt.sourceType === "course" || evt.sourceType === "courses") ? 'outline outline-[4px] outline-dashed outline-black ring-4 ring-amber-400 z-[100] scale-[1.05] shadow-2xl' : ''}`}
+                                                    className={`absolute p-[4px] pointer-events-auto cursor-pointer transition-all duration-300 hover:scale-[1.03] hover:-translate-y-0.5 hover:shadow-xl z-20 hover:z-50 ${conflictEventId === evt.id ? 'ring-4 ring-red-500 animate-pulse z-[100]' : ''} ${evt.hasTimeOverlap ? '!border-red-600 !bg-red-50 dark:bg-red-950/20 ring-2 ring-red-500 animate-pulse z-[90]' : ''} ${highlightCourseId && Number(highlightCourseId) === evt.sourceId && (evt.sourceType === "course" || evt.sourceType === "courses") ? 'outline outline-[4px] outline-dashed outline-black ring-4 ring-amber-400 z-[100] scale-[1.05] shadow-2xl' : ''}`}
                                                     style={{
                                                         top: `${realTop + 2}px`,
                                                         minHeight: `${Math.max(realHeight - 4, 55)}px`,  // Elastic minimum height for short events
@@ -2542,7 +2542,7 @@ export default function CalendarPage() {
                                                                         }
                                                                         
                                                                         return remainingOccurrences && remainingOccurrences > 0 ? (
-                                                                            <span className="text-[10px] font-semibold text-muted-foreground bg-slate-100 px-1.5 py-0.5 rounded shrink-0">
+                                                                            <span className="text-[10px] font-semibold text-muted-foreground bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded shrink-0">
                                                                                 {remainingOccurrences} Lez
                                                                             </span>
                                                                         ) : <span className="w-4"></span>;
@@ -2579,7 +2579,7 @@ export default function CalendarPage() {
                                                             </div>
                                                             
                                                             {codeLabel && (
-                                                                <div className="bg-slate-100 text-[8px] font-bold px-1.5 py-0.5 rounded text-muted-foreground break-all leading-tight w-full">
+                                                                <div className="bg-slate-100 dark:bg-slate-800 text-[8px] font-bold px-1.5 py-0.5 rounded text-muted-foreground break-all leading-tight w-full">
                                                                     {codeLabel}
                                                                 </div>
                                                             )}

@@ -302,14 +302,14 @@ export default function GestioneNote() {
                                 </TableHeader>
                                 <TableBody>
                                     {sortedAndFilteredNotes.map((note) => (
-                                        <TableRow key={`${note.id}-${note.status}`} className="group hover:bg-amber-50/30 transition-colors">
+                                        <TableRow key={`${note.id}-${note.status}`} className="group hover:bg-amber-50 dark:bg-amber-950/20/30 transition-colors">
                                             <TableCell className={cn(isSortedColumn("status") && "sorted-column-cell")}>
                                                 {note.status === "active" ? (
                                                     <Badge className="bg-green-100 text-green-700 hover:bg-green-100 border-green-200">
                                                         <CheckCircle className="w-3 h-3 mr-1" /> Attiva
                                                     </Badge>
                                                 ) : (
-                                                    <Badge variant="outline" className="bg-slate-100 text-muted-foreground border-border">
+                                                    <Badge variant="outline" className="bg-slate-100 dark:bg-slate-800 text-muted-foreground border-border">
                                                         <Archive className="w-3 h-3 mr-1" /> Chiusa
                                                     </Badge>
                                                 )}
@@ -336,7 +336,7 @@ export default function GestioneNote() {
                                                 <div className="flex flex-col gap-1 pr-4">
                                                     {(note.title || note.category !== "generale") && (
                                                         <div className="flex items-center">
-                                                            <span className="text-[10px] bg-amber-100/50 text-amber-800 px-1.5 py-0.5 rounded uppercase font-semibold">
+                                                            <span className="text-[10px] bg-amber-100 dark:bg-amber-900/30/50 text-amber-800 dark:text-amber-400 px-1.5 py-0.5 rounded uppercase font-semibold">
                                                                 {note.title || note.category}
                                                             </span>
                                                         </div>
@@ -348,7 +348,7 @@ export default function GestioneNote() {
                                             </TableCell>
                                             <TableCell className={cn(isSortedColumn("section") && "sorted-column-cell")}>
                                                 <Link href={note.targetUrl || "/"} className="hover:opacity-80 transition-opacity">
-                                                    <Badge variant="secondary" className="bg-slate-100/80 text-muted-foreground text-[10px] font-mono border-border cursor-pointer hover:bg-amber-100 hover:text-amber-800" title={`Vai a: ${note.targetUrl || "/"}`}>
+                                                    <Badge variant="secondary" className="bg-slate-100 dark:bg-slate-800/80 text-muted-foreground text-[10px] font-mono border-border cursor-pointer hover:bg-amber-100 dark:bg-amber-900/30 hover:text-amber-800 dark:text-amber-400" title={`Vai a: ${note.targetUrl || "/"}`}>
                                                         {TARGET_PAGES.find(p => p.value === note.targetUrl)?.label || note.targetUrl || "Generale"}
                                                     </Badge>
                                                 </Link>
@@ -366,7 +366,7 @@ export default function GestioneNote() {
                                                     <Button 
                                                         variant="ghost" 
                                                         size="sm" 
-                                                        className="text-slate-400 hover:text-amber-600 hover:bg-amber-50 h-8"
+                                                        className="text-slate-400 hover:text-amber-600 hover:bg-amber-50 dark:bg-amber-950/20 h-8"
                                                         onClick={() => deleteMutation.mutate(note.id)}
                                                         title="Archivia/Chiudi Nota"
                                                     >

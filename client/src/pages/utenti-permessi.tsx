@@ -489,7 +489,7 @@ export default function UtentiPermessi() {
                             <TableCell className={cn(iscUser("phone") && "sorted-column-cell")}>{u.phone || "-"}</TableCell>
                             <TableCell className={cn(iscUser("email") && "sorted-column-cell")}>{u.email || "-"}</TableCell>
                             <TableCell className={cn(iscUser("role") && "sorted-column-cell")}>
-                              <span className={`px-2 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider ${u.role === 'admin' ? 'bg-amber-100 text-amber-700 border border-amber-300' : 'bg-blue-100 text-blue-700'}`}>
+                              <span className={`px-2 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider ${u.role === 'admin' ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 border border-amber-300 dark:border-amber-800/50' : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700'}`}>
                                 {u.role === 'admin' ? 'MASTER' : (u.role || 'Nessuno')}
                               </span>
                             </TableCell>
@@ -608,7 +608,7 @@ export default function UtentiPermessi() {
                         </TableCell>
                         <TableCell className={cn("text-sm", iscRole("description") && "sorted-column-cell")}>{r.description || "-"}</TableCell>
                         <TableCell className={cn(iscRole("permissions") && "sorted-column-cell")}>
-                          <span className="text-xs font-medium text-foreground/80 bg-slate-100 px-2 py-1 rounded-md">
+                          <span className="text-xs font-medium text-foreground/80 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-md">
                             {(() => {
                               const p = typeof r.permissions === 'string' ? JSON.parse(r.permissions as string) : (r.permissions || {});
                               if (p["*"] === "write" || p["*"] === "read") return "Accesso Totale (100%)";
@@ -702,7 +702,7 @@ export default function UtentiPermessi() {
                 {newUserImageBase64 ? (
                   <img src={newUserImageBase64} alt="Avatar" className="w-full h-full object-cover" />
                 ) : (
-                  <div className="w-full h-full bg-slate-100 flex items-center justify-center text-slate-400">
+                  <div className="w-full h-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400">
                     <Camera className="w-6 h-6" />
                   </div>
                 )}
@@ -788,7 +788,7 @@ export default function UtentiPermessi() {
                 {editUserImageBase64 ? (
                   <img src={editUserImageBase64} alt="Avatar" className="w-full h-full object-cover" />
                 ) : (
-                  <div className="w-full h-full bg-slate-100 flex items-center justify-center text-slate-400">
+                  <div className="w-full h-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400">
                     <UserIcon className="w-6 h-6" />
                   </div>
                 )}

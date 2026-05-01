@@ -42,7 +42,7 @@ export function CommandPalette() {
               placeholder="Chiedi a Teo o cerca funzioni (es. Iscrivi utente...)" 
               className="flex h-16 w-full rounded-md bg-transparent py-3 text-lg outline-none placeholder:text-slate-400 disabled:cursor-not-allowed disabled:opacity-50" 
             />
-            <kbd className="ml-2 hidden sm:inline-flex items-center gap-1 rounded border border-border bg-slate-100 px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
+            <kbd className="ml-2 hidden sm:inline-flex items-center gap-1 rounded border border-border bg-slate-100 dark:bg-slate-800 px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
               <span className="text-xs">ESC</span>
             </kbd>
           </div>
@@ -61,7 +61,7 @@ export function CommandPalette() {
             <Command.Group heading="Suggerimenti Rapidi (AI)">
               <Command.Item 
                 onSelect={() => runCommand(() => setLocation("/maschera-input"))}
-                className="flex items-center cursor-pointer hover:bg-slate-100 rounded-lg p-2 transition-colors data-[selected=true]:bg-primary/10 data-[selected=true]:text-primary"
+                className="flex items-center cursor-pointer hover:bg-slate-100 dark:bg-slate-800 rounded-lg p-2 transition-colors data-[selected=true]:bg-primary/10 data-[selected=true]:text-primary"
               >
                 <Users className="mr-3 h-5 w-5 text-blue-500" />
                 <div className="flex flex-col">
@@ -71,7 +71,7 @@ export function CommandPalette() {
               </Command.Item>
               <Command.Item 
                 onSelect={() => runCommand(() => setLocation("/planning"))}
-                className="flex items-center cursor-pointer hover:bg-slate-100 rounded-lg p-2 transition-colors data-[selected=true]:bg-primary/10 data-[selected=true]:text-primary"
+                className="flex items-center cursor-pointer hover:bg-slate-100 dark:bg-slate-800 rounded-lg p-2 transition-colors data-[selected=true]:bg-primary/10 data-[selected=true]:text-primary"
               >
                 <Calendar className="mr-3 h-5 w-5 text-emerald-500" />
                 <div className="flex flex-col">
@@ -81,7 +81,7 @@ export function CommandPalette() {
               </Command.Item>
               <Command.Item 
                 onSelect={() => runCommand(() => setLocation("/gemteam"))}
-                className="flex items-center cursor-pointer hover:bg-slate-100 rounded-lg p-2 transition-colors data-[selected=true]:bg-primary/10 data-[selected=true]:text-primary"
+                className="flex items-center cursor-pointer hover:bg-slate-100 dark:bg-slate-800 rounded-lg p-2 transition-colors data-[selected=true]:bg-primary/10 data-[selected=true]:text-primary"
               >
                 <Briefcase className="mr-3 h-5 w-5 text-purple-500" />
                 <div className="flex flex-col">
@@ -94,7 +94,7 @@ export function CommandPalette() {
             <Command.Group heading="Impostazioni Sistema">
                <Command.Item 
                 onSelect={() => runCommand(() => setLocation("/admin"))}
-                className="flex items-center cursor-pointer hover:bg-slate-100 rounded-lg p-2 transition-colors data-[selected=true]:bg-primary/10 data-[selected=true]:text-primary"
+                className="flex items-center cursor-pointer hover:bg-slate-100 dark:bg-slate-800 rounded-lg p-2 transition-colors data-[selected=true]:bg-primary/10 data-[selected=true]:text-primary"
               >
                 <Settings className="mr-3 h-5 w-5 text-muted-foreground" />
                 <span>Pannello Amministratore</span>

@@ -1926,7 +1926,7 @@ export default function MascheraInputGenerale(props?: any) {
   }
   const isTesseraExpired = topTesseraScad && new Date(topTesseraScad) < new Date();
   const topTesseraClass = isTesseraExpired
-    ? "bg-red-50 text-red-600 border-red-300 dark:bg-red-950/30 dark:text-red-400 dark:border-red-800" 
+    ? "bg-red-50 dark:bg-red-950/20 text-red-600 border-red-300 dark:bg-red-950/30 dark:text-red-400 dark:border-red-800" 
     : "bg-transparent opacity-80 cursor-default";
 
   return (
@@ -1934,7 +1934,7 @@ export default function MascheraInputGenerale(props?: any) {
       <datalist id="province-list">{["AG","AL","AN","AO","AP","AQ","AR","AT","AV","BA","BG","BI","BL","BN","BO","BR","BS","BT","BZ","CA","CB","CE","CH","CL","CN","CO","CR","CS","CT","CZ","EN","FC","FE","FG","FI","FM","FR","GE","GO","GR","IM","IS","KR","LC","LE","LI","LO","LT","LU","MB","MC","ME","MI","MN","MO","MS","MT","NA","NO","NU","OR","PA","PC","PD","PE","PG","PI","PN","PO","PR","PT","PU","PV","PZ","RA","RC","RE","RG","RI","RM","RN","RO","SA","SI","SO","SP","SR","SS","SU","SV","TA","TE","TN","TO","TP","TR","TS","TV","UD","VA","VB","VC","VE","VI","VR","VT","VV"].map(p => <option key={p} value={p} />)}</datalist>
       <datalist id="comuni-list">{["Roma", "Milano", "Napoli", "Torino", "Palermo", "Genova", "Bologna", "Firenze", "Bari", "Catania", "Venezia", "Verona", "Messina", "Padova", "Trieste", "Brescia", "Terni", "Taranto", "Prato", "Parma", "Modena", "Reggio Calabria", "Reggio Emilia", "Perugia", "Ravenna", "Livorno", "Cagliari", "Foggia", "Rimini", "Salerno", "Ferrara", "Sassari", "Latina", "Giugliano in Campania", "Monza", "Siracusa", "Pescara", "Bergamo", "Forlì", "Trento", "Vicenza", "Bolzano", "Novara", "Piacenza", "Ancona", "Andria", "Arezzo", "Udine", "Cesena", "Lecce"].map(c => <option key={c} value={c} />)}</datalist>
       {/* Header fisso con navigazione */}
-      <div className="border-b bg-gradient-to-r from-slate-50 via-white to-slate-50 sticky top-0 z-10 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] relative overflow-hidden">
+      <div className="border-b bg-gradient-to-r from-slate-50 dark:from-background via-white to-slate-50 dark:to-background sticky top-0 z-10 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] relative overflow-hidden">
         {/* Premium Decorators */}
         <div className="absolute top-[-20%] right-[-5%] w-[150px] h-[150px] rounded-full bg-primary/5 blur-[40px] pointer-events-none" />
         
@@ -2189,8 +2189,8 @@ export default function MascheraInputGenerale(props?: any) {
                       className={cn(
                         "px-2 py-0.5 text-[11px] font-bold rounded-md border tracking-wide uppercase transition-colors",
                         isTesseraExpired 
-                          ? "bg-red-50 text-red-600 border-red-300 shadow-sm shadow-red-100" 
-                          : "bg-emerald-50 text-emerald-600 border-emerald-300 shadow-sm shadow-emerald-100"
+                          ? "bg-red-50 dark:bg-red-950/20 text-red-600 border-red-300 shadow-sm shadow-red-100" 
+                          : "bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 border-emerald-300 shadow-sm shadow-emerald-100"
                       )}
                     >
                       {isTesseraExpired ? "Scaduta" : "Attiva"}
@@ -2227,7 +2227,7 @@ export default function MascheraInputGenerale(props?: any) {
             {/* FOTO PARTECIPANTE */}
             <Card className={photoFile.preview ? "border-green-400 dark:border-green-700" : ""}>
               <CardHeader className={`pb-2 rounded-t-lg ${photoFile.preview ? 'bg-green-100 dark:bg-green-900/40' : 'bg-amber-100 dark:bg-amber-900/30'}`}>
-                <CardTitle className={`flex items-center gap-2 text-sm font-bold ${photoFile.preview ? 'text-green-700 dark:text-green-300' : 'text-amber-800 dark:text-amber-200'}`}>
+                <CardTitle className={`flex items-center gap-2 text-sm font-bold ${photoFile.preview ? 'text-green-700 dark:text-green-300' : 'text-amber-800 dark:text-amber-400 dark:text-amber-200'}`}>
                   <Camera className="w-4 h-4" />
                   FOTO
                 </CardTitle>
@@ -2264,7 +2264,7 @@ export default function MascheraInputGenerale(props?: any) {
                 ) : (
                   <label
                     htmlFor="upload-photo"
-                    className="cursor-pointer flex flex-col items-center justify-center gap-2 border-2 border-dashed border-amber-300 dark:border-amber-700 rounded-md aspect-[3/4] transition-colors hover:bg-muted/50"
+                    className="cursor-pointer flex flex-col items-center justify-center gap-2 border-2 border-dashed border-amber-300 dark:border-amber-800/50 dark:border-amber-700 rounded-md aspect-[3/4] transition-colors hover:bg-muted/50"
                     data-testid="label-upload-photo"
                   >
                     <Camera className="w-10 h-10 text-amber-400" />
@@ -2276,15 +2276,15 @@ export default function MascheraInputGenerale(props?: any) {
 
             {/* ALLEGATI DA INSERIRE */}
             <Card>
-              <CardHeader className="p-3 bg-amber-100 dark:bg-amber-900/40 relative">
-                <CardTitle className="text-[13px] font-bold text-amber-900 dark:text-amber-100 uppercase tracking-wider text-center">
+              <CardHeader className="p-3 bg-amber-100 dark:bg-amber-900/30 dark:bg-amber-900/40 relative">
+                <CardTitle className="text-[13px] font-bold text-amber-900 dark:text-amber-300 dark:text-amber-100 uppercase tracking-wider text-center">
                   ALLEGATI DA INSERIRE
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-0 relative">
                 {!selectedMemberId && (
                   <div className="absolute inset-0 z-10 bg-background/80 backdrop-blur-[1px] flex items-center justify-center p-4">
-                    <div className="bg-amber-100 dark:bg-amber-900/90 text-amber-800 dark:text-amber-200 border border-amber-300 dark:border-amber-700 p-3 rounded-md text-xs font-medium text-center shadow-lg shadow-amber-900/10">
+                    <div className="bg-amber-100 dark:bg-amber-900/30 dark:bg-amber-900/90 text-amber-800 dark:text-amber-400 dark:text-amber-200 border border-amber-300 dark:border-amber-800/50 dark:border-amber-700 p-3 rounded-md text-xs font-medium text-center shadow-lg shadow-amber-900/10">
                       I documenti si possono compilare solo quando è selezionato o salvato un partecipante.
                     </div>
                   </div>
@@ -2318,7 +2318,7 @@ export default function MascheraInputGenerale(props?: any) {
                   </div>
                   {openAllegatoSections.domandaTesseramento && (
                     <div className="p-3 pt-0 space-y-3">
-                      <div className={`border-2 border-dashed rounded-md p-3 text-center ${allegati.domandaTesseramento.hasFile ? 'border-green-400 dark:border-green-700 bg-green-50 dark:bg-green-900/20' : 'border-amber-300 dark:border-amber-700'}`}>
+                      <div className={`border-2 border-dashed rounded-md p-3 text-center ${allegati.domandaTesseramento.hasFile ? 'border-green-400 dark:border-green-700 bg-green-50 dark:bg-green-900/20' : 'border-amber-300 dark:border-amber-800/50 dark:border-amber-700'}`}>
                         <input
                           type="file"
                           accept=".pdf,.jpg,.jpeg,.png"
@@ -2418,7 +2418,7 @@ export default function MascheraInputGenerale(props?: any) {
                   </div>
                   {openAllegatoSections.regolamento && (
                     <div className="p-3 pt-0 space-y-3">
-                      <div className={`border-2 border-dashed rounded-md p-3 text-center ${allegati.regolamento.hasFile ? 'border-green-400 dark:border-green-700 bg-green-50 dark:bg-green-900/20' : 'border-amber-300 dark:border-amber-700'}`}>
+                      <div className={`border-2 border-dashed rounded-md p-3 text-center ${allegati.regolamento.hasFile ? 'border-green-400 dark:border-green-700 bg-green-50 dark:bg-green-900/20' : 'border-amber-300 dark:border-amber-800/50 dark:border-amber-700'}`}>
                         <input
                           type="file"
                           accept=".pdf,.jpg,.jpeg,.png"
@@ -2518,7 +2518,7 @@ export default function MascheraInputGenerale(props?: any) {
                   </div>
                   {openAllegatoSections.privacy && (
                     <div className="p-3 pt-0 space-y-3">
-                      <div className={`border-2 border-dashed rounded-md p-3 text-center ${allegati.privacy.hasFile ? 'border-green-400 dark:border-green-700 bg-green-50 dark:bg-green-900/20' : 'border-amber-300 dark:border-amber-700'}`}>
+                      <div className={`border-2 border-dashed rounded-md p-3 text-center ${allegati.privacy.hasFile ? 'border-green-400 dark:border-green-700 bg-green-50 dark:bg-green-900/20' : 'border-amber-300 dark:border-amber-800/50 dark:border-amber-700'}`}>
                         <input
                           type="file"
                           accept=".pdf,.jpg,.jpeg,.png"
@@ -2618,7 +2618,7 @@ export default function MascheraInputGenerale(props?: any) {
                   </div>
                   {openAllegatoSections.certificatoMedico && (
                     <div className="p-3 pt-0 space-y-3">
-                      <div className={`border-2 border-dashed rounded-md p-3 text-center ${allegati.certificatoMedico.hasFile ? 'border-green-400 dark:border-green-700 bg-green-50 dark:bg-green-900/20' : 'border-amber-300 dark:border-amber-700'}`}>
+                      <div className={`border-2 border-dashed rounded-md p-3 text-center ${allegati.certificatoMedico.hasFile ? 'border-green-400 dark:border-green-700 bg-green-50 dark:bg-green-900/20' : 'border-amber-300 dark:border-amber-800/50 dark:border-amber-700'}`}>
                         <input
                           type="file"
                           accept=".pdf,.jpg,.jpeg,.png"
@@ -2930,7 +2930,7 @@ export default function MascheraInputGenerale(props?: any) {
                   <User className="w-5 h-5 sidebar-icon-gold" />
                   Anagrafica
                 </div>
-                <span className="text-sm font-medium px-3 py-1 bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200 rounded-full border border-amber-200 dark:border-amber-800/60">Dati Personali</span>
+                <span className="text-sm font-medium px-3 py-1 bg-amber-100 dark:bg-amber-900/30 dark:bg-amber-900/40 text-amber-800 dark:text-amber-400 dark:text-amber-200 rounded-full border border-amber-200 dark:border-amber-900/50 dark:border-amber-800/60">Dati Personali</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -3136,7 +3136,7 @@ export default function MascheraInputGenerale(props?: any) {
 
               {/* Genitore 1 */}
               <div className="pt-6 mt-6 border-t border-border">
-                <h3 className="inline-block text-sm font-medium px-3 py-1 bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200 rounded-full border border-amber-200 dark:border-amber-800/60 mb-4">Genitore 1</h3>
+                <h3 className="inline-block text-sm font-medium px-3 py-1 bg-amber-100 dark:bg-amber-900/30 dark:bg-amber-900/40 text-amber-800 dark:text-amber-400 dark:text-amber-200 rounded-full border border-amber-200 dark:border-amber-900/50 dark:border-amber-800/60 mb-4">Genitore 1</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                   <div className="space-y-2">
                     <Label>Cognome</Label>
@@ -3295,7 +3295,7 @@ export default function MascheraInputGenerale(props?: any) {
 
               {/* Genitore 2 */}
               <div className="pt-6 mt-6 border-t border-border">
-                <h3 className="inline-block text-sm font-medium px-3 py-1 bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200 rounded-full border border-amber-200 dark:border-amber-800/60 mb-4">Genitore 2</h3>
+                <h3 className="inline-block text-sm font-medium px-3 py-1 bg-amber-100 dark:bg-amber-900/30 dark:bg-amber-900/40 text-amber-800 dark:text-amber-400 dark:text-amber-200 rounded-full border border-amber-200 dark:border-amber-900/50 dark:border-amber-800/60 mb-4">Genitore 2</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                   <div className="space-y-2">
                     <Label>Cognome</Label>
@@ -3457,9 +3457,9 @@ export default function MascheraInputGenerale(props?: any) {
 
         
         {/* ATTIVITÀ DI MARKETING (FULL WIDTH ROW) */}
-        <Card id="attivita-marketing" className="bg-amber-50 dark:bg-amber-900/10 border-amber-200 scroll-mt-32">
-          <CardHeader className="pb-3 bg-amber-100 dark:bg-amber-900/30 rounded-t-lg border-b border-amber-200/50">
-            <CardTitle className="flex items-center justify-between text-lg font-bold text-amber-800 dark:text-amber-200">
+        <Card id="attivita-marketing" className="bg-amber-50 dark:bg-amber-950/20 dark:bg-amber-900/10 border-amber-200 dark:border-amber-900/50 scroll-mt-32">
+          <CardHeader className="pb-3 bg-amber-100 dark:bg-amber-900/30 rounded-t-lg border-b border-amber-200 dark:border-amber-900/50/50">
+            <CardTitle className="flex items-center justify-between text-lg font-bold text-amber-800 dark:text-amber-400 dark:text-amber-200">
               <div className="flex items-center gap-2">
                 <span className="w-5 h-5 flex items-center justify-center">🎯</span>
                 Attività di marketing
@@ -3480,7 +3480,7 @@ export default function MascheraInputGenerale(props?: any) {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="h-8 bg-background dark:bg-transparent border-amber-300 hover:bg-amber-100"
+                    className="h-8 bg-background dark:bg-transparent border-amber-300 dark:border-amber-800/50 hover:bg-amber-100 dark:bg-amber-900/30"
                     onClick={(e) => { e.preventDefault(); handleOpenCrmOverride(); }}
                     title="Impostazioni Manuali"
                   >
@@ -3535,7 +3535,7 @@ export default function MascheraInputGenerale(props?: any) {
                               <Info className="w-3.5 h-3.5 text-muted-foreground" />
                             </div>
                           </TooltipTrigger>
-                          <TooltipContent className="max-w-[280px] bg-background dark:bg-slate-900 border-amber-200">
+                          <TooltipContent className="max-w-[280px] bg-background dark:bg-slate-900 border-amber-200 dark:border-amber-900/50">
                             <p className="text-xs text-muted-foreground dark:text-slate-300">
                               Il livello marketing viene assegnato automaticamente in base a spesa, continuità, numero di attività e recente partecipazione. Il modello può essere aggiornato nel tempo per migliorare la classificazione.
                               <br/><br/>
@@ -3581,19 +3581,19 @@ export default function MascheraInputGenerale(props?: any) {
                     <Label className="uppercase text-xs font-semibold text-muted-foreground flex items-center gap-2">
                       Dettagli Algoritmo
                       {currentMember?.crmProfileOverride && (
-                        <Badge variant="outline" className="border-amber-500 text-amber-600 bg-amber-50 h-5 text-[10px] px-1.5 flex items-center gap-1 cursor-help leading-none" title="Forzatura manuale attiva">
+                        <Badge variant="outline" className="border-amber-500 text-amber-600 bg-amber-50 dark:bg-amber-950/20 h-5 text-[10px] px-1.5 flex items-center gap-1 cursor-help leading-none" title="Forzatura manuale attiva">
                           <ShieldAlert className="w-3 h-3" />
                           Forzato
                         </Badge>
                       )}
                     </Label>
-                    <div className="bg-background/50 dark:bg-black/20 p-2.5 rounded-md border border-amber-200/50 min-h-[40px] flex items-center text-sm text-muted-foreground break-words italic">
+                    <div className="bg-background/50 dark:bg-black/20 p-2.5 rounded-md border border-amber-200 dark:border-amber-900/50/50 min-h-[40px] flex items-center text-sm text-muted-foreground break-words italic">
                       {currentMember?.crmProfileReason || "Nessun ricalcolo effettuato di recente."}
                     </div>
                   </div>
                 </>
               ) : (
-                <div className="col-span-3 flex items-center justify-center p-4 border border-dashed border-amber-300 rounded-md bg-background/30 text-amber-800/60 text-sm">
+                <div className="col-span-3 flex items-center justify-center p-4 border border-dashed border-amber-300 dark:border-amber-800/50 rounded-md bg-background/30 text-amber-800 dark:text-amber-400/60 text-sm">
                   Salva o seleziona un partecipante per attivare il calcolo CRM.
                 </div>
               )}
@@ -3960,7 +3960,7 @@ export default function MascheraInputGenerale(props?: any) {
                              <Label>Stato</Label>
                              <div className="h-10 flex items-center">
                                {topTesseraMembership ? (
-                                 <Badge variant={!isTesseraExpired ? 'default' : 'secondary'} className={isTesseraExpired ? "bg-red-50 text-red-600 border-red-300" : "shadow-sm"}>
+                                 <Badge variant={!isTesseraExpired ? 'default' : 'secondary'} className={isTesseraExpired ? "bg-red-50 dark:bg-red-950/20 text-red-600 border-red-300" : "shadow-sm"}>
                                    {!isTesseraExpired ? 'Attiva' : 'Scaduta'}
                                  </Badge>
                                ) : (
@@ -4137,9 +4137,9 @@ export default function MascheraInputGenerale(props?: any) {
                             {/* Dettagli Partecipazione (Modalità) */}
                             <div className="flex flex-col items-start gap-1 overflow-hidden">
                               {e.participationType === 'FREE_TRIAL' && <Badge variant="outline" className="text-[10px] bg-green-50 text-green-700 border-green-200 font-medium">Prova Gratuita</Badge>}
-                              {e.participationType === 'PAID_TRIAL' && <Badge variant="outline" className="text-[10px] bg-amber-50 text-amber-700 border-amber-200 font-medium">Prova a Pagamento</Badge>}
+                              {e.participationType === 'PAID_TRIAL' && <Badge variant="outline" className="text-[10px] bg-amber-50 dark:bg-amber-950/20 text-amber-700 border-amber-200 dark:border-amber-900/50 font-medium">Prova a Pagamento</Badge>}
                               {e.participationType === 'SINGLE_LESSON' && <Badge variant="outline" className="text-[10px] bg-purple-50 text-purple-700 border-purple-200 font-medium">Lezione Singola</Badge>}
-                              {(!e.participationType || e.participationType === 'STANDARD_COURSE') && <Badge variant="outline" className="text-[10px] bg-blue-50 text-blue-700 border-blue-200 font-medium">Iscrizione Standard</Badge>}
+                              {(!e.participationType || e.participationType === 'STANDARD_COURSE') && <Badge variant="outline" className="text-[10px] bg-blue-50 dark:bg-blue-950/20 text-blue-700 border-blue-200 font-medium">Iscrizione Standard</Badge>}
                               
                               {e.targetDate && (
                                 <span className="text-[10px] text-muted-foreground flex items-center gap-1 font-medium mt-0.5">
@@ -4203,7 +4203,7 @@ export default function MascheraInputGenerale(props?: any) {
                   <CreditCard className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                   <span className="text-muted-foreground line-through decoration-muted-foreground/50">Prove a Pagamento</span>
                 </div>
-                <Badge variant="outline" className="text-[10px] bg-amber-50 text-amber-700 border-amber-200 font-normal">Sola Lettura (Usa modulo Corsi)</Badge>
+                <Badge variant="outline" className="text-[10px] bg-amber-50 dark:bg-amber-950/20 text-amber-700 border-amber-200 dark:border-amber-900/50 font-normal">Sola Lettura (Usa modulo Corsi)</Badge>
               </h3>
               {renderGenericEnrollmentList(memberPtEnrollments, paidTrials, removePtEnrollmentMutation, "Nessuna prova a pagamento registrata.", "Storico Prove a Pagamento", "le prove a pagamento", "paidTrialId")}
             </div>
@@ -4215,7 +4215,7 @@ export default function MascheraInputGenerale(props?: any) {
                   <Gift className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                   <span className="text-muted-foreground line-through decoration-muted-foreground/50">Prove Gratuite</span>
                 </div>
-                <Badge variant="outline" className="text-[10px] bg-amber-50 text-amber-700 border-amber-200 font-normal">Sola Lettura (Usa modulo Corsi)</Badge>
+                <Badge variant="outline" className="text-[10px] bg-amber-50 dark:bg-amber-950/20 text-amber-700 border-amber-200 dark:border-amber-900/50 font-normal">Sola Lettura (Usa modulo Corsi)</Badge>
               </h3>
               {renderGenericEnrollmentList(memberFtEnrollments, freeTrials, removeFtEnrollmentMutation, "Nessuna prova gratuita registrata.", "Storico Prove Gratuite", "le prove gratuite", "freeTrialId")}
             </div>
@@ -4227,7 +4227,7 @@ export default function MascheraInputGenerale(props?: any) {
                   <BookOpen className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                   <span className="text-muted-foreground line-through decoration-muted-foreground/50">Lezioni Singole</span>
                 </div>
-                <Badge variant="outline" className="text-[10px] bg-amber-50 text-amber-700 border-amber-200 font-normal">Sola Lettura (Usa modulo Corsi)</Badge>
+                <Badge variant="outline" className="text-[10px] bg-amber-50 dark:bg-amber-950/20 text-amber-700 border-amber-200 dark:border-amber-900/50 font-normal">Sola Lettura (Usa modulo Corsi)</Badge>
               </h3>
               {renderGenericEnrollmentList(memberSlEnrollments, singleLessons, removeSlEnrollmentMutation, "Nessuna lezione singola registrata.", "Storico Lezioni Singole", "le lezioni singole", "singleLessonId")}
             </div>
@@ -4396,8 +4396,8 @@ export default function MascheraInputGenerale(props?: any) {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="bg-amber-50 dark:bg-amber-900/10 p-3 rounded-md border border-amber-200/50 flex flex-col sm:flex-row justify-between sm:items-center gap-2 mt-4 text-sm">
-            <span className="text-amber-800 dark:text-amber-200 font-medium whitespace-nowrap">Stato attuale a sistema:</span>
+          <div className="bg-amber-50 dark:bg-amber-950/20 dark:bg-amber-900/10 p-3 rounded-md border border-amber-200 dark:border-amber-900/50/50 flex flex-col sm:flex-row justify-between sm:items-center gap-2 mt-4 text-sm">
+            <span className="text-amber-800 dark:text-amber-400 dark:text-amber-200 font-medium whitespace-nowrap">Stato attuale a sistema:</span>
             <div className="flex gap-4">
               <span className="text-foreground/80 dark:text-slate-300"><span className="font-semibold">{currentMember?.crmProfileLevel && currentMember.crmProfileLevel !== "NONE" ? currentMember.crmProfileLevel : "Nessuno"}</span></span>
               <span className="text-amber-700 dark:text-amber-400 font-bold">{currentMember?.crmProfileScore || 0} pts</span>

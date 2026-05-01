@@ -891,13 +891,13 @@ export default function Courses() {
         {/* Selected Toolbar */}
         {selectedIds.size > 0 && (
           <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-background border border-border shadow-xl rounded-full px-6 py-3 flex items-center gap-6 animate-in slide-in-from-bottom-10">
-            <span className="text-sm font-semibold text-foreground/80 bg-slate-100 px-3 py-1 rounded-full">
+            <span className="text-sm font-semibold text-foreground/80 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full">
               {selectedIds.size} {selectedIds.size === 1 ? 'corso selezionato' : 'corsi selezionati'}
             </span>
             <div className="flex gap-2">
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button size="sm" variant="outline" className="border-red-200 text-red-600 hover:bg-red-50" onClick={(e) => {
+                  <Button size="sm" variant="outline" className="border-red-200 dark:border-red-900/50 text-red-600 hover:bg-red-50 dark:bg-red-950/20" onClick={(e) => {
                     // Controlla se qualcuno dei corsi selezionati ha iscritti
                     let hasProtectedCourses = false;
                     for (const id of Array.from(selectedIds)) {
@@ -934,7 +934,7 @@ export default function Courses() {
                 }
               />
             </div>
-            <Button size="icon" variant="ghost" className="h-6 w-6 rounded-full -ml-2 text-slate-400 hover:text-muted-foreground hover:bg-slate-100" onClick={() => setSelectedIds(new Set())}>
+            <Button size="icon" variant="ghost" className="h-6 w-6 rounded-full -ml-2 text-slate-400 hover:text-muted-foreground hover:bg-slate-100 dark:bg-slate-800" onClick={() => setSelectedIds(new Set())}>
               <X className="w-4 h-4" />
             </Button>
           </div>

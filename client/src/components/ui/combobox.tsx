@@ -108,7 +108,7 @@ export function Combobox({
                       onQuickAdd(searchValue.trim()); 
                       setSearchValue(""); 
                     }}
-                    className="text-amber-700 bg-amber-50 cursor-pointer border-t font-semibold mt-1"
+                    className="text-amber-700 bg-amber-50 dark:bg-amber-950/20 cursor-pointer border-t font-semibold mt-1"
                     disabled={isQuickAddPending}
                   >
                     <Plus className="mr-2 h-4 w-4" /> 

@@ -45,7 +45,7 @@ export function ActiveUserAvatars() {
           <TooltipProvider key={u.id}>
             <Tooltip>
               <TooltipTrigger asChild>
-                <div className={`relative w-7 h-7 rounded-full border-2 ${isMe ? 'border-primary' : 'border-white'} flex items-center justify-center bg-emerald-100 text-[10px] font-bold text-emerald-800 shadow-sm overflow-hidden`}>
+                <div className={`relative w-7 h-7 rounded-full border-2 ${isMe ? 'border-primary' : 'border-white'} flex items-center justify-center bg-emerald-100 dark:bg-emerald-900/30 text-[10px] font-bold text-emerald-800 dark:text-emerald-400 shadow-sm overflow-hidden`}>
                   {u.profileImageUrl ? (
                     <img src={u.profileImageUrl} alt="avatar" className={`w-full h-full object-cover ${isAway ? 'opacity-60 grayscale-[50%]' : ''}`} />
                   ) : (
@@ -65,7 +65,7 @@ export function ActiveUserAvatars() {
       {hiddenCount > 0 && (
         <Popover>
           <PopoverTrigger asChild>
-            <button className="w-7 h-7 rounded-full border-2 border-white flex items-center justify-center bg-slate-100 text-[10px] font-bold text-muted-foreground shadow-sm hover:bg-slate-200 transition-colors cursor-pointer">
+            <button className="w-7 h-7 rounded-full border-2 border-white flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-[10px] font-bold text-muted-foreground shadow-sm hover:bg-slate-200 transition-colors cursor-pointer">
               +{hiddenCount}
             </button>
           </PopoverTrigger>
@@ -94,7 +94,7 @@ export function ActiveUserAvatars() {
 
                 return (
                   <div key={u.id} className="flex items-center gap-2 p-1.5 hover:bg-muted rounded-md">
-                    <div className="relative w-6 h-6 rounded-full flex items-center justify-center bg-emerald-100 text-[9px] font-bold text-emerald-800 shrink-0 overflow-hidden">
+                    <div className="relative w-6 h-6 rounded-full flex items-center justify-center bg-emerald-100 dark:bg-emerald-900/30 text-[9px] font-bold text-emerald-800 dark:text-emerald-400 shrink-0 overflow-hidden">
                       {u.profileImageUrl ? (
                         <img src={u.profileImageUrl} alt="avatar" className={`w-full h-full object-cover ${isAway ? 'opacity-60 grayscale-[50%]' : ''}`} />
                       ) : (

@@ -689,7 +689,7 @@ export default function ActivityManagementPage({
       {/* BLOCCCHI CONDIZIONALI MODALE OPERATIVO CONDIVISO (FASE 21/23) */}
       {activityType === "individual_lesson" && (
         <div className="p-4 mt-6 border border-amber-500/30 bg-amber-500/5 rounded-md space-y-4">
-          <h4 className="text-sm font-semibold text-amber-900 border-b border-amber-500/20 pb-2">Dettagli Specifici Lezione Privata</h4>
+          <h4 className="text-sm font-semibold text-amber-900 dark:text-amber-300 border-b border-amber-500/20 pb-2">Dettagli Specifici Lezione Privata</h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Allievo / Partecipante Principale</Label>

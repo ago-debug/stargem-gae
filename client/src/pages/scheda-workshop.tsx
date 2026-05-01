@@ -215,7 +215,7 @@ export default function SchedaWorkshop() {
                                     }
 
                                     // Check med cert expiry using pre-calculated status
-                                    let certExpiryText = <Badge variant="outline" className="bg-slate-100 text-muted-foreground hover:bg-slate-200 shadow-none border-0 gap-1"><XCircle className="w-3.5 h-3.5"/> Assente</Badge>;
+                                    let certExpiryText = <Badge variant="outline" className="bg-slate-100 dark:bg-slate-800 text-muted-foreground hover:bg-slate-200 shadow-none border-0 gap-1"><XCircle className="w-3.5 h-3.5"/> Assente</Badge>;
                                     if (medicalCertStatus === 'valid') {
                                         certExpiryText = <Badge className="bg-green-500/10 text-green-700 hover:bg-green-500/20 shadow-none border-0 gap-1"><CheckCircle2 className="w-3.5 h-3.5"/> Valido ({medicalCertFormattedDate})</Badge>;
                                     } else if (medicalCertStatus === 'warning') {
@@ -240,7 +240,7 @@ export default function SchedaWorkshop() {
                                             <TableCell>{cardExpiryText}</TableCell>
                                             <TableCell>{certExpiryText}</TableCell>
                                             <TableCell className={cn("text-center", isSortedColumn("attendances") && "sorted-column-cell")}>
-                                                <Badge variant="secondary" className="bg-slate-100 text-foreground/80 hover:bg-slate-200 shadow-none border-0 font-semibold px-2.5">
+                                                <Badge variant="secondary" className="bg-slate-100 dark:bg-slate-800 text-foreground/80 hover:bg-slate-200 shadow-none border-0 font-semibold px-2.5">
                                                     {attendances.length}
                                                 </Badge>
                                             </TableCell>

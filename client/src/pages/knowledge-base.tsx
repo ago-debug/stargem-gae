@@ -48,7 +48,7 @@ export default function KnowledgeBase() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="bg-blue-50/50 p-4 flex items-start gap-3 rounded-lg border border-blue-100">
+                <div className="bg-blue-50 dark:bg-blue-950/20/50 p-4 flex items-start gap-3 rounded-lg border border-blue-100">
                   <Info className="w-5 h-5 text-blue-600 mt-0.5 shrink-0" />
                   <div className="text-sm text-blue-900 leading-relaxed">
                     <p className="font-semibold mb-1">Come funzionano i Permessi (Security by Design)</p>
@@ -78,7 +78,7 @@ export default function KnowledgeBase() {
                             <p className="text-sm font-semibold text-green-800 mb-2 flex items-center gap-2"><CheckCircle2 className="w-4 h-4" /> POTERI ATTIVI</p>
                             <p className="text-sm text-foreground/80"><strong>TOTALE (100%).</strong> Nessuna preclusione.<br/>Gestisce importazioni, elimazioni, log di controllo e creazione di account lavorativi.</p>
                           </div>
-                          <div className="border rounded-md p-3 bg-red-50/50 border-red-100">
+                          <div className="border rounded-md p-3 bg-red-50 dark:bg-red-950/20/50 border-red-100">
                             <p className="text-sm font-semibold text-red-800 mb-2 flex items-center gap-2">🚫 COSA GLI VIENE NASCOSTO</p>
                             <p className="text-sm text-foreground/80">Nulla.</p>
                           </div>
@@ -107,7 +107,7 @@ export default function KnowledgeBase() {
                               <li>Risorse Umane e Staff</li>
                             </ul>
                           </div>
-                          <div className="border rounded-md p-3 bg-red-50/50 border-red-100">
+                          <div className="border rounded-md p-3 bg-red-50 dark:bg-red-950/20/50 border-red-100">
                             <p className="text-sm font-semibold text-red-800 mb-2 flex items-center gap-2">🚫 COSA GLI VIENE NASCOSTO</p>
                             <ul className="text-sm text-foreground/80 space-y-1 ml-4 list-disc marker:text-slate-400">
                               <li>Log e Audit di Sicurezza Sistema</li>
@@ -141,7 +141,7 @@ export default function KnowledgeBase() {
                               <li>Affitti / Prenotazioni Aule</li>
                             </ul>
                           </div>
-                          <div className="border rounded-md p-3 bg-red-50/50 border-red-100">
+                          <div className="border rounded-md p-3 bg-red-50 dark:bg-red-950/20/50 border-red-100">
                             <p className="text-sm font-semibold text-red-800 mb-2 flex items-center gap-2">🚫 COSA GLI VIENE NASCOSTO</p>
                             <ul className="text-sm text-foreground/80 space-y-1 ml-4 list-disc marker:text-slate-400">
                               <li>**Scheda Contabile e Resoconti Globali**</li>
@@ -174,7 +174,7 @@ export default function KnowledgeBase() {
                               <li>Inserimento "Note" e "ToDo List" per colleghi</li>
                             </ul>
                           </div>
-                          <div className="border rounded-md p-3 bg-red-50/50 border-red-100">
+                          <div className="border rounded-md p-3 bg-red-50 dark:bg-red-950/20/50 border-red-100">
                             <p className="text-sm font-semibold text-red-800 mb-2 flex items-center gap-2">🚫 COSA GLI VIENE NASCOSTO</p>
                             <ul className="text-sm text-foreground/80 space-y-1 ml-4 list-disc marker:text-slate-400">
                               <li>**Tutto il denaro.** Nessun accesso ai Pagamenti.</li>
@@ -206,7 +206,7 @@ export default function KnowledgeBase() {
                               <li>Inserisci Nota</li>
                             </ul>
                           </div>
-                          <div className="border rounded-md p-3 bg-red-50/50 border-red-100">
+                          <div className="border rounded-md p-3 bg-red-50 dark:bg-red-950/20/50 border-red-100">
                             <p className="text-sm font-semibold text-red-800 mb-2 flex items-center gap-2">🚫 COSA GLI VIENE NASCOSTO</p>
                             <ul className="text-sm text-foreground/80 space-y-1 ml-4 list-disc marker:text-slate-400">
                               <li>**Il 90% dell'Azienda**. Dalla contabilità all'anagrafica globale, ai listini, fino alle comunicazioni private del team.</li>

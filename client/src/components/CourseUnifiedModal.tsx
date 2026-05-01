@@ -894,7 +894,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
 
           <TabsContent value="details" className="pt-2">
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div className={cn("flex flex-col gap-4 p-4 rounded-md border-2", (isCopy && opStates.length > 0) ? "bg-red-50/50 border-red-400" : "border-yellow-400 bg-background")}>
+              <div className={cn("flex flex-col gap-4 p-4 rounded-md border-2", (isCopy && opStates.length > 0) ? "bg-red-50 dark:bg-red-950/20/50 border-red-400" : "border-yellow-400 bg-background")}>
                 <div className="flex gap-4 w-full">
                   <MultiSelectStatus selectedStatuses={opStates} onChange={setOpStates} testIdPrefix="course" />
                   <MultiSelectInternal selectedTags={internalTags} onChange={setInternalTags} />
@@ -925,7 +925,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                     </Label>
                   <InlineListEditorDialog listCode={nameListType} listName="Genere Corso" showColors={false} penninoType="tipo A" />
                 </div>
-                  <div className={(isCopy && !!formData.name) ? "rounded-md border border-red-400 bg-red-50" : ""}>
+                  <div className={(isCopy && !!formData.name) ? "rounded-md border border-red-400 bg-red-50 dark:bg-red-950/20" : ""}>
                   <Combobox
                     name="name"
                     value={formData.name || ""}
@@ -938,7 +938,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                 </div>
                 <div className="space-y-2">
                   <Label className="font-semibold text-foreground">Stagione <span className="text-red-500 ml-1">*</span></Label>
-                  <div className={(isCopy && !!formData.seasonId) ? "rounded-md border border-red-400 bg-red-50" : ""}>
+                  <div className={(isCopy && !!formData.seasonId) ? "rounded-md border border-red-400 bg-red-50 dark:bg-red-950/20" : ""}>
                   <Select 
                      value={formData.seasonId?.toString() || "none"}
                      onValueChange={val => updateForm("seasonId", val === "none" ? null : parseInt(val))}
@@ -959,14 +959,14 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="sku">SKU / Codice</Label>
-                  <Input id="sku" value={formData.sku || ""} onChange={(e) => updateForm("sku", e.target.value)} placeholder={activityType === "campus" ? "es: 2526CAMPUS-1SETTIMANA-" : "es: 2526-CORSO-1"} className={(isCopy && !!formData.sku) ? "border-red-400 bg-red-50" : ""} />
+                  <Input id="sku" value={formData.sku || ""} onChange={(e) => updateForm("sku", e.target.value)} placeholder={activityType === "campus" ? "es: 2526CAMPUS-1SETTIMANA-" : "es: 2526-CORSO-1"} className={(isCopy && !!formData.sku) ? "border-red-400 bg-red-50 dark:bg-red-950/20" : ""} />
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <Label className="font-semibold text-foreground shrink-0">Categoria <span className="text-red-500 ml-1">*</span></Label>
                     <InlineListEditorDialog listCode="categorie" listName="Categorie Corsi" showColors={true} penninoType="tipo C" />
                   </div>
-                  <div className={(isCopy && !!formData.categoryId) ? "rounded-md border border-red-400 bg-red-50" : ""}>
+                  <div className={(isCopy && !!formData.categoryId) ? "rounded-md border border-red-400 bg-red-50 dark:bg-red-950/20" : ""}>
                   <Combobox
                     name="categoryId"
                     value={formData.categoryId?.toString() || "none"}
@@ -991,7 +991,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                       <Label className="font-semibold text-foreground shrink-0">NUMERO PERSONE</Label>
                       <InlineListEditorDialog listCode="numero_persone" listName="Numero Persone" showColors={false} />
                     </div>
-                    <div className={(isCopy && !!formData.numberOfPeople && formData.numberOfPeople !== "none") ? "rounded-md border border-red-400 bg-red-50" : ""}>
+                    <div className={(isCopy && !!formData.numberOfPeople && formData.numberOfPeople !== "none") ? "rounded-md border border-red-400 bg-red-50 dark:bg-red-950/20" : ""}>
                     <Combobox
                       name="numberOfPeople"
                       value={formData.numberOfPeople || "none"}
@@ -1007,7 +1007,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Studio / Sala <span className="text-red-500 ml-1">*</span></Label>
-                  <div className={(isCopy && !!formData.studioId) ? "rounded-md border border-red-400 bg-red-50" : ""}>
+                  <div className={(isCopy && !!formData.studioId) ? "rounded-md border border-red-400 bg-red-50 dark:bg-red-950/20" : ""}>
                   <Combobox
                     name="studioId"
                     value={formData.studioId?.toString() || "none"}
@@ -1121,7 +1121,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                     <Label className="font-semibold text-foreground">Insegnante Principale <span className="text-red-500 ml-1">*</span></Label>
                     <Button variant="outline" size="sm" type="button" onClick={() => { setQuickMemberTarget("instructor"); setIsQuickMemberAddOpen(true); }}>➕ Nuovo</Button>
                   </div>
-                  <div className={(isCopy && !!formData.instructorId) ? "rounded-md border border-red-400 bg-red-50" : ""}>
+                  <div className={(isCopy && !!formData.instructorId) ? "rounded-md border border-red-400 bg-red-50 dark:bg-red-950/20" : ""}>
                   <Combobox
                     name="instructorId"
                     value={formData.instructorId?.toString() || "none"}
@@ -1156,7 +1156,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="price">Prezzo (€) <span className="text-red-500 ml-1">*</span></Label>
-                  <Input id="price" type="number" step="0.01" min="0" value={formData.price || ""} onChange={e => updateForm("price", e.target.value)} className={(isCopy && !!formData.price) ? "border-red-400 bg-red-50" : ""} />
+                  <Input id="price" type="number" step="0.01" min="0" value={formData.price || ""} onChange={e => updateForm("price", e.target.value)} className={(isCopy && !!formData.price) ? "border-red-400 bg-red-50 dark:bg-red-950/20" : ""} />
                 </div>
                 <div className="space-y-2">
                   <Label>Quota da usare come base (opzionale)</Label>
@@ -1195,7 +1195,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                 </div>
                 <div className="space-y-2">
                   <Label>Giorno <span className="text-red-500 ml-1">*</span></Label>
-                  <div className={(isCopy && !!formData.dayOfWeek) ? "rounded-md border border-red-400 bg-red-50" : ""}>
+                  <div className={(isCopy && !!formData.dayOfWeek) ? "rounded-md border border-red-400 bg-red-50 dark:bg-red-950/20" : ""}>
                   <Select value={selectedDayOfWeek || "none"} onValueChange={val => updateForm("dayOfWeek", val === "none" ? null : val)}>
                     <SelectTrigger><SelectValue placeholder="Giorno" /></SelectTrigger>
                     <SelectContent>
@@ -1207,15 +1207,15 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                 </div>
                 <div className="space-y-2">
                   <Label>Inizio <span className="text-red-500 ml-1">*</span></Label>
-                  <Input type="time" value={selectedStartTime} onChange={(e) => updateForm("startTime", e.target.value || null)} className={cn("min-w-[100px]", (isCopy && !!formData.startTime) && "border-red-400 bg-red-50")} />
+                  <Input type="time" value={selectedStartTime} onChange={(e) => updateForm("startTime", e.target.value || null)} className={cn("min-w-[100px]", (isCopy && !!formData.startTime) && "border-red-400 bg-red-50 dark:bg-red-950/20")} />
                 </div>
                 <div className="space-y-2">
                   <Label>Fine <span className="text-red-500 ml-1">*</span></Label>
-                  <Input type="time" value={selectedEndTime} onChange={(e) => updateForm("endTime", e.target.value || null)} className={cn("min-w-[100px]", (isCopy && !!formData.endTime) && "border-red-400 bg-red-50")} />
+                  <Input type="time" value={selectedEndTime} onChange={(e) => updateForm("endTime", e.target.value || null)} className={cn("min-w-[100px]", (isCopy && !!formData.endTime) && "border-red-400 bg-red-50 dark:bg-red-950/20")} />
                 </div>
                 <div className="space-y-2">
                   <Label>Ricorrenza <span className="text-red-500 ml-1">*</span></Label>
-                  <div className={(isCopy && !!formData.recurrenceType) ? "rounded-md border border-red-400 bg-red-50" : ""}>
+                  <div className={(isCopy && !!formData.recurrenceType) ? "rounded-md border border-red-400 bg-red-50 dark:bg-red-950/20" : ""}>
                   <Select value={formData.recurrenceType || "none"} onValueChange={val => updateForm("recurrenceType", val === "none" ? null : val)}>
                     <SelectTrigger><SelectValue placeholder="Periodo" /></SelectTrigger>
                     <SelectContent>
@@ -1224,7 +1224,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                     </SelectContent>
                   </Select>
                   </div>
-                  <div className="flex items-center gap-3 mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                  <div className="flex items-center gap-3 mt-3 p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 rounded-lg">
                     <input
                       type="checkbox"
                       id="activeOnHolidays"
@@ -1232,7 +1232,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                       onChange={e => updateForm("activeOnHolidays", e.target.checked ? 1 : 0)}
                       className="h-4 w-4 rounded"
                     />
-                    <label htmlFor="activeOnHolidays" className="text-sm font-medium text-amber-800 cursor-pointer">
+                    <label htmlFor="activeOnHolidays" className="text-sm font-medium text-amber-800 dark:text-amber-400 cursor-pointer">
                       🎄 Corso attivo anche durante festività e chiusure studio
                     </label>
                   </div>
@@ -1241,11 +1241,11 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                 <div className="col-span-full grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
                   <div className="space-y-2">
                     <Label>Validità Dal <span className="text-red-500 ml-1">*</span></Label>
-                    <Input type="date" value={getSafeDateStr(formData.startDate)} onChange={e => updateForm("startDate", e.target.value || null)} className={(isCopy && !!formData.startDate) ? "border-red-400 bg-red-50" : ""} />
+                    <Input type="date" value={getSafeDateStr(formData.startDate)} onChange={e => updateForm("startDate", e.target.value || null)} className={(isCopy && !!formData.startDate) ? "border-red-400 bg-red-50 dark:bg-red-950/20" : ""} />
                   </div>
                   <div className="space-y-2">
                     <Label>Validità Al <span className="text-red-500 ml-1">*</span></Label>
-                    <Input type="date" value={getSafeDateStr(formData.endDate)} onChange={e => updateForm("endDate", e.target.value || null)} className={(isCopy && !!formData.endDate) ? "border-red-400 bg-red-50" : ""} />
+                    <Input type="date" value={getSafeDateStr(formData.endDate)} onChange={e => updateForm("endDate", e.target.value || null)} className={(isCopy && !!formData.endDate) ? "border-red-400 bg-red-50 dark:bg-red-950/20" : ""} />
                   </div>
                 </div>
               </div>
@@ -1268,12 +1268,12 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                        {!confirmDelete ? (
                           <Button type="button" variant="destructive" size="sm" onClick={() => setConfirmDelete(true)}>Elimina</Button>
                        ) : (
-                          <div className="flex items-center gap-2 bg-red-50 p-1.5 rounded-md border border-red-200 animate-in slide-in-from-left-2">
+                          <div className="flex items-center gap-2 bg-red-50 dark:bg-red-950/20 p-1.5 rounded-md border border-red-200 dark:border-red-900/50 animate-in slide-in-from-left-2">
                              <div className="flex flex-col">
                                 <span className="text-xs font-bold text-red-700 px-2 leading-none uppercase">Confermi?</span>
                                 <span className="text-[10px] text-red-600 px-2 leading-none mt-1">Azione irreversibile</span>
                              </div>
-                             <Button type="button" variant="ghost" size="sm" className="h-7 text-xs hover:bg-red-100" onClick={() => setConfirmDelete(false)}>Annulla</Button>
+                             <Button type="button" variant="ghost" size="sm" className="h-7 text-xs hover:bg-red-100 dark:bg-red-900/30" onClick={() => setConfirmDelete(false)}>Annulla</Button>
                              <Button type="button" variant="destructive" size="sm" className="h-7 text-xs" onClick={() => { setConfirmDelete(false); onDelete(course.id); onOpenChange(false); }}>Sì, elimina</Button>
                           </div>
                        )}

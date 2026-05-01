@@ -453,7 +453,7 @@ export default function IscrittiPerAttivita() {
               <Button
                 variant={showOnlyWithEnrollments ? "default" : "outline"}
                 onClick={() => setShowOnlyWithEnrollments(!showOnlyWithEnrollments)}
-                className={`text-lg px-4 py-2 h-auto flex items-center gap-2 transition-all ${showOnlyWithEnrollments ? "bg-amber-600 hover:bg-amber-700 text-white border-amber-700 shadow-md scale-105" : "hover:bg-amber-100"}`}
+                className={`text-lg px-4 py-2 h-auto flex items-center gap-2 transition-all ${showOnlyWithEnrollments ? "bg-amber-600 hover:bg-amber-700 text-white border-amber-700 shadow-md scale-105" : "hover:bg-amber-100 dark:bg-amber-900/30"}`}
                 data-testid="button-toggle-active-enrollments"
               >
                 <Users className={`w-4 h-4 ${showOnlyWithEnrollments ? "text-white" : "sidebar-icon-gold"}`} />
@@ -469,7 +469,7 @@ export default function IscrittiPerAttivita() {
                 variant="outline"
                 size="sm"
                 onClick={() => setActiveTab(item.id)}
-                className={`text-xs h-8 whitespace-nowrap flex-shrink-0 ${activeTab === item.id ? "border-amber-500 bg-amber-50 dark:bg-amber-950/30" : ""}`}
+                className={`text-xs h-8 whitespace-nowrap flex-shrink-0 ${activeTab === item.id ? "border-amber-500 bg-amber-50 dark:bg-amber-950/20 dark:bg-amber-950/30" : ""}`}
               >
                 <item.icon className="w-3 h-3 mr-1 sidebar-icon-gold" />
                 {item.label}

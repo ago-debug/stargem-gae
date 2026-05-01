@@ -87,7 +87,7 @@ export function IndividualPricing({ formData, updateForm, membersList }: { formD
                 updateForm("price", e.target.value);
             }} 
             disabled={!isManualOverride}
-            className={`text-lg font-bold ${!isManualOverride ? "bg-slate-100" : "bg-background border-blue-400"}`}
+            className={`text-lg font-bold ${!isManualOverride ? "bg-slate-100 dark:bg-slate-800" : "bg-background border-blue-400"}`}
           />
         </div>
 

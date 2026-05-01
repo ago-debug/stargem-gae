@@ -373,7 +373,7 @@ export function AppSidebar() {
         {isInsegnante && user && (
           <div className="flex flex-col items-center mt-4">
             <span className="font-bold text-foreground">Ciao {((user as any).lastName || user.firstName) ? `${(user as any).lastName || ""} ${user.firstName || ""}`.trim() : user.username} 👋</span>
-            <span className="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded mt-1 shadow-sm border border-amber-200">STAFF</span>
+            <span className="bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-400 text-[10px] font-bold px-2 py-0.5 rounded mt-1 shadow-sm border border-amber-200 dark:border-amber-900/50">STAFF</span>
           </div>
         )}
       </SidebarHeader>
@@ -831,7 +831,7 @@ export function AppSidebar() {
                 onClick={() => logoutMutation.mutate()}
                 disabled={logoutMutation.isPending}
                 data-testid="button-logout"
-                className="flex-shrink-0 h-7 w-7 rounded-md hover:bg-red-100 hover:text-red-700 bg-background border border-border shadow-sm"
+                className="flex-shrink-0 h-7 w-7 rounded-md hover:bg-red-100 dark:bg-red-900/30 hover:text-red-700 bg-background border border-border shadow-sm"
                 title="Scollegati"
               >
                 <LogOut className="w-3.5 h-3.5" />

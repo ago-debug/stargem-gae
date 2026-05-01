@@ -75,7 +75,7 @@ export default function GemStaffMe() {
             I tuoi dati saranno disponibili a breve. La segreteria sta completando il tuo profilo.<br/><br/>
             Per assistenza: <a href="mailto:info@studio-gem.it" className="text-primary hover:underline font-semibold">info@studio-gem.it</a>
           </p>
-          <Button onClick={() => logoutMutation.mutate()} variant="outline" className="bg-background hover:bg-slate-100 flex items-center gap-2 mx-auto">
+          <Button onClick={() => logoutMutation.mutate()} variant="outline" className="bg-background hover:bg-slate-100 dark:bg-slate-800 flex items-center gap-2 mx-auto">
             <LogOut className="w-4 h-4" /> Torna al login
           </Button>
         </Card>
@@ -218,7 +218,7 @@ export default function GemStaffMe() {
                 </div>
 
                 {(!payslip.status || payslip.status === 'BOZZA') && (
-                  <Alert className="bg-amber-50 border-amber-200 text-amber-800">
+                  <Alert className="bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/50 text-amber-800 dark:text-amber-400">
                     <Info className="h-4 w-4 text-amber-600" />
                     <AlertDescription>
                       Il cedolino è in elaborazione. Verrà confermato dalla segreteria nei prossimi giorni.
@@ -305,7 +305,7 @@ export default function GemStaffMe() {
                   const val = complianceData?.[item.key];
                   const hasDoc = !!val;
                   return (
-                    <div key={item.key} className={`border rounded-lg p-4 flex flex-col justify-between h-full bg-card transition-colors ${hasDoc ? 'border-green-200 bg-green-50/30' : 'border-red-100 bg-red-50/30'}`}>
+                    <div key={item.key} className={`border rounded-lg p-4 flex flex-col justify-between h-full bg-card transition-colors ${hasDoc ? 'border-green-200 bg-green-50/30' : 'border-red-100 bg-red-50 dark:bg-red-950/20/30'}`}>
                       <div className="flex items-start justify-between">
                          <div className="text-sm font-medium pr-2">{item.label}</div>
                          <div className="mt-0.5">

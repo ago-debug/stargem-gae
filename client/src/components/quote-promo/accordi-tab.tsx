@@ -80,7 +80,7 @@ function AgreementDetails({ agreement, onRegisterPayment }: { agreement: Expande
                    <span className="text-sm font-semibold">Ore Consumate</span>
                    <span className="text-lg font-black text-foreground/80">{agreement.usedHours || 0} / {agreement.totalHours || 0}h</span>
                  </div>
-                 <div className="h-3 w-full bg-slate-100 rounded-full overflow-hidden border">
+                 <div className="h-3 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden border">
                    <div className="h-full bg-indigo-500" style={{ width: `${Math.min(100, Math.round(((agreement.usedHours || 0) / (agreement.totalHours || 1)) * 100))}%` }}></div>
                  </div>
               </div>

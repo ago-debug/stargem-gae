@@ -105,7 +105,7 @@ export function CarnetTab({ seasonId }: CarnetTabProps) {
         toast({ 
           title: "🎁 Sessione registrata — Pacchetto completato!", 
           description: "11a ora omaggio aggiunta al carnet.",
-          className: "bg-amber-100 border-amber-300"
+          className: "bg-amber-100 dark:bg-amber-900/30 border-amber-300 dark:border-amber-800/50"
         });
       } else {
         toast({ title: "Sessione registrata", description: "Ingresso scalato dal carnet con successo." });
@@ -123,7 +123,7 @@ export function CarnetTab({ seasonId }: CarnetTabProps) {
     <div className="space-y-6">
       <div className="flex justify-between items-center bg-background p-4 rounded-lg border shadow-sm">
         <div>
-          <h2 className="text-lg font-bold text-amber-900 flex items-center gap-2">
+          <h2 className="text-lg font-bold text-amber-900 dark:text-amber-300 flex items-center gap-2">
             <Layers className="w-5 h-5" /> Carnet Attivi
           </h2>
           <p className="text-sm text-muted-foreground">Monitoraggio pacchetti ingressi prepagati (Lezioni e Sale)</p>
@@ -192,13 +192,13 @@ export function CarnetTab({ seasonId }: CarnetTabProps) {
 
                 const daysLeft = carnet.expiresAt ? differenceInDays(new Date(carnet.expiresAt), new Date()) : null;
                 let badgeColor = "bg-green-100 text-green-800";
-                if (daysLeft !== null && daysLeft < 10) badgeColor = "bg-red-100 text-red-800 border-red-300";
-                else if (daysLeft !== null && daysLeft <= 30) badgeColor = "bg-amber-100 text-amber-800 border-amber-300";
+                if (daysLeft !== null && daysLeft < 10) badgeColor = "bg-red-100 dark:bg-red-900/30 text-red-800 border-red-300";
+                else if (daysLeft !== null && daysLeft <= 30) badgeColor = "bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-400 border-amber-300 dark:border-amber-800/50";
 
                 const grpSizeNum = carnet.groupSize || 1;
                 const groupLabel = grpSizeNum === 1 ? "Singola" : (grpSizeNum === 2 ? "Coppia" : `Gruppo ${grpSizeNum}`);
                 
-                let locationBadge = "bg-slate-100 text-foreground";
+                let locationBadge = "bg-slate-100 dark:bg-slate-800 text-foreground";
                 let locationLabel = "In sede";
                 if (carnet.locationType === 'domicilio') {
                   locationBadge = "bg-orange-100 text-orange-800 border-orange-200";
@@ -222,7 +222,7 @@ export function CarnetTab({ seasonId }: CarnetTabProps) {
                     <TableCell>
                       <div className="flex flex-col gap-1 w-full">
                         <span className="text-xs font-medium">{carnet.usedCount} / {carnet.maxUses} Ingressi</span>
-                        <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden border">
+                        <div className="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden border">
                           <div className={`h-full ${barColor}`} style={{ width: `${percent}%` }}></div>
                         </div>
                       </div>
@@ -236,7 +236,7 @@ export function CarnetTab({ seasonId }: CarnetTabProps) {
                       € {Number(carnet.totalPaid || 0).toFixed(2)}
                     </TableCell>
                     <TableCell className="text-right flex items-center justify-end gap-2">
-                       <Button variant="outline" size="sm" className="h-8 gap-1 border-blue-200 text-blue-700 bg-blue-50 hover:bg-blue-100" onClick={() => {
+                       <Button variant="outline" size="sm" className="h-8 gap-1 border-blue-200 text-blue-700 bg-blue-50 dark:bg-blue-950/20 hover:bg-blue-100 dark:bg-blue-900/30" onClick={() => {
                           setSelectedCarnet(carnet);
                           setSessionDate(new Date().toISOString().split("T")[0]);
                           setSessionTimeStart("");

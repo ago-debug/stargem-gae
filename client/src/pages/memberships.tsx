@@ -382,7 +382,7 @@ export default function Memberships() {
                           }
                           const isZeroFee = !membership.fee || parseFloat(membership.fee.toString()) === 0;
                           if (isZeroFee && expiryInfo.variant === 'default') {
-                            return { className: 'bg-slate-100 text-foreground border-border', label: 'IMPORTA DATI DATABASE' };
+                            return { className: 'bg-slate-100 dark:bg-slate-800 text-foreground border-border', label: 'IMPORTA DATI DATABASE' };
                           }
                           return { className: 'bg-yellow-100 text-yellow-800 border-yellow-200', label: 'Da Saldare' };
                         };
@@ -392,7 +392,7 @@ export default function Memberships() {
                           <TableRow 
                             key={membership.id} 
                             data-testid={`membership-row-${membership.id}`}
-                            className="cursor-pointer hover:bg-amber-50/50 transition-colors"
+                            className="cursor-pointer hover:bg-amber-50 dark:bg-amber-950/20/50 transition-colors"
                             onClick={() => {
                                 const mem = membersData?.members?.find(m => m.id === membership.memberId);
                                 if (mem) {
@@ -761,7 +761,7 @@ export default function Memberships() {
                         {selectedMembershipMember && (
                           <Badge 
                             variant={(defExpiryDate && new Date(defExpiryDate).setHours(0,0,0,0) >= new Date().setHours(0,0,0,0)) ? 'default' : 'secondary'} 
-                            className={(defExpiryDate && new Date(defExpiryDate).setHours(0,0,0,0) >= new Date().setHours(0,0,0,0)) ? "bg-green-50 text-green-700 hover:bg-green-50 border-green-300 pointer-events-none shadow-sm" : "bg-red-50 text-red-600 hover:bg-red-50 border-red-300 pointer-events-none shadow-sm"}
+                            className={(defExpiryDate && new Date(defExpiryDate).setHours(0,0,0,0) >= new Date().setHours(0,0,0,0)) ? "bg-green-50 text-green-700 hover:bg-green-50 border-green-300 pointer-events-none shadow-sm" : "bg-red-50 dark:bg-red-950/20 text-red-600 hover:bg-red-50 dark:bg-red-950/20 border-red-300 pointer-events-none shadow-sm"}
                           >
                             {defExpiryDate ? ((new Date(defExpiryDate).setHours(0,0,0,0) >= new Date().setHours(0,0,0,0)) ? 'Attiva' : 'Scaduta') : 'Nessuna'}
                           </Badge>
