@@ -242,7 +242,7 @@ function ScrollableFilterBar({ children, className }: { children: ReactNode, cla
     return (
         <div className={`relative flex items-center min-w-0 group ${className || ''}`}>
             {showLeft && (
-                <div className="absolute left-0 z-10 bg-gradient-to-r from-white via-white/90 to-transparent pr-4 py-1 h-full flex items-center pointer-events-none">
+                <div className="absolute left-0 z-10 bg-gradient-to-r from-white dark:from-background via-white/90 dark:via-background/90 to-transparent pr-4 py-1 h-full flex items-center pointer-events-none">
                     <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full shadow-sm bg-background border border-border pointer-events-auto hover:bg-slate-100 dark:bg-slate-800" onClick={() => scroll('left')}>
                         <ChevronLeft className="h-4 w-4" />
                     </Button>
@@ -252,7 +252,7 @@ function ScrollableFilterBar({ children, className }: { children: ReactNode, cla
                 {children}
             </div>
             {showRight && (
-                <div className="absolute right-0 z-10 bg-gradient-to-l from-white via-white/90 to-transparent pl-4 py-1 h-full flex items-center pointer-events-none">
+                <div className="absolute right-0 z-10 bg-gradient-to-l from-white dark:from-background via-white/90 dark:via-background/90 to-transparent pl-4 py-1 h-full flex items-center pointer-events-none">
                     <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full shadow-sm bg-background border border-border pointer-events-auto hover:bg-slate-100 dark:bg-slate-800" onClick={() => scroll('right')}>
                         <ChevronRight className="h-4 w-4" />
                     </Button>
@@ -1974,7 +1974,7 @@ export default function CalendarPage() {
                     <ScrollableFilterBar className="shrink-0 max-w-full">
                         {selectedDay === "all" ? (
                             isTodayInView && (
-                                <div className="hidden md:inline-flex items-center px-3 h-10 bg-yellow-100/80 border border-yellow-300 text-yellow-800 text-sm font-bold rounded-md shadow-sm shrink-0 whitespace-nowrap">
+                                <div className="hidden md:inline-flex items-center px-3 h-10 bg-yellow-100/80 dark:bg-yellow-900/30 border border-yellow-300 dark:border-yellow-700 text-yellow-800 dark:text-yellow-400 text-sm font-bold rounded-md shadow-sm shrink-0 whitespace-nowrap">
                                     Oggi: {format(new Date(), "EEEE d MMMM", { locale: it })}
                                 </div>
                             )
