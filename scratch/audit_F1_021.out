@@ -1,0 +1,386 @@
+
+--- Q1: DESCRIBE courses ---
+┌─────────┬────────────────────────────┬─────────────────┬───────┬───────┬───────────────────────┬──────────────────┐
+│ (index) │ Field                      │ Type            │ Null  │ Key   │ Default               │ Extra            │
+├─────────┼────────────────────────────┼─────────────────┼───────┼───────┼───────────────────────┼──────────────────┤
+│ 0       │ 'id'                       │ 'int(11)'       │ 'NO'  │ 'PRI' │ null                  │ 'auto_increment' │
+│ 1       │ 'sku'                      │ 'varchar(100)'  │ 'YES' │ ''    │ null                  │ ''               │
+│ 2       │ 'name'                     │ 'varchar(255)'  │ 'NO'  │ ''    │ null                  │ ''               │
+│ 3       │ 'description'              │ 'text'          │ 'YES' │ ''    │ null                  │ ''               │
+│ 4       │ 'category_id'              │ 'int(11)'       │ 'YES' │ 'MUL' │ null                  │ ''               │
+│ 5       │ 'studio_id'                │ 'int(11)'       │ 'YES' │ 'MUL' │ null                  │ ''               │
+│ 6       │ 'instructor_id'            │ 'int(11)'       │ 'YES' │ 'MUL' │ null                  │ ''               │
+│ 7       │ 'secondary_instructor1_id' │ 'int(11)'       │ 'YES' │ 'MUL' │ null                  │ ''               │
+│ 8       │ 'secondary_instructor2_id' │ 'int(11)'       │ 'YES' │ 'MUL' │ null                  │ ''               │
+│ 9       │ 'price'                    │ 'decimal(10,2)' │ 'YES' │ ''    │ null                  │ ''               │
+│ 10      │ 'max_capacity'             │ 'int(11)'       │ 'YES' │ ''    │ null                  │ ''               │
+│ 11      │ 'current_enrollment'       │ 'int(11)'       │ 'YES' │ ''    │ '0'                   │ ''               │
+│ 12      │ 'day_of_week'              │ 'varchar(20)'   │ 'YES' │ ''    │ null                  │ ''               │
+│ 13      │ 'start_time'               │ 'varchar(10)'   │ 'YES' │ ''    │ null                  │ ''               │
+│ 14      │ 'end_time'                 │ 'varchar(10)'   │ 'YES' │ ''    │ null                  │ ''               │
+│ 15      │ 'recurrence_type'          │ 'varchar(20)'   │ 'YES' │ ''    │ null                  │ ''               │
+│ 16      │ 'schedule'                 │ 'text'          │ 'YES' │ ''    │ null                  │ ''               │
+│ 17      │ 'start_date'               │ 'date'          │ 'YES' │ ''    │ null                  │ ''               │
+│ 18      │ 'end_date'                 │ 'date'          │ 'YES' │ ''    │ null                  │ ''               │
+│ 19      │ 'total_occurrences'        │ 'int(11)'       │ 'YES' │ ''    │ null                  │ ''               │
+│ 20      │ 'active_on_holidays'       │ 'tinyint(1)'    │ 'NO'  │ ''    │ '0'                   │ ''               │
+│ 21      │ 'status_tags'              │ 'longtext'      │ 'YES' │ ''    │ "'[]'"                │ ''               │
+│ 22      │ 'internal_tags'            │ 'longtext'      │ 'YES' │ ''    │ null                  │ ''               │
+│ 23      │ 'active'                   │ 'tinyint(1)'    │ 'YES' │ ''    │ '1'                   │ ''               │
+│ 24      │ 'created_at'               │ 'timestamp'     │ 'YES' │ ''    │ 'current_timestamp()' │ ''               │
+│ 25      │ 'updated_at'               │ 'timestamp'     │ 'YES' │ ''    │ 'current_timestamp()' │ ''               │
+│ 26      │ 'season_id'                │ 'int(11)'       │ 'YES' │ ''    │ null                  │ ''               │
+│ 27      │ 'google_event_id'          │ 'varchar(255)'  │ 'YES' │ ''    │ null                  │ ''               │
+│ 28      │ 'quote_id'                 │ 'int(11)'       │ 'YES' │ 'MUL' │ null                  │ ''               │
+│ 29      │ 'level'                    │ 'varchar(100)'  │ 'YES' │ ''    │ null                  │ ''               │
+│ 30      │ 'age_group'                │ 'varchar(100)'  │ 'YES' │ ''    │ null                  │ ''               │
+│ 31      │ 'lesson_type'              │ 'longtext'      │ 'YES' │ ''    │ "'[]'"                │ ''               │
+│ 32      │ 'number_of_people'         │ 'varchar(50)'   │ 'YES' │ ''    │ null                  │ ''               │
+│ 33      │ 'activity_type'            │ 'varchar(50)'   │ 'YES' │ ''    │ null                  │ ''               │
+└─────────┴────────────────────────────┴─────────────────┴───────┴───────┴───────────────────────┴──────────────────┘
+
+--- Q1: DESCRIBE enrollments ---
+┌─────────┬────────────────────────┬───────────────┬───────┬───────┬───────────────────────┬─────────────────────────────────┐
+│ (index) │ Field                  │ Type          │ Null  │ Key   │ Default               │ Extra                           │
+├─────────┼────────────────────────┼───────────────┼───────┼───────┼───────────────────────┼─────────────────────────────────┤
+│ 0       │ 'id'                   │ 'int(11)'     │ 'NO'  │ 'PRI' │ null                  │ 'auto_increment'                │
+│ 1       │ 'member_id'            │ 'int(11)'     │ 'NO'  │ 'MUL' │ null                  │ ''                              │
+│ 2       │ 'course_id'            │ 'int(11)'     │ 'NO'  │ 'MUL' │ null                  │ ''                              │
+│ 3       │ 'status'               │ 'varchar(50)' │ 'NO'  │ ''    │ 'active'              │ ''                              │
+│ 4       │ 'enrollment_date'      │ 'timestamp'   │ 'YES' │ ''    │ 'current_timestamp()' │ ''                              │
+│ 5       │ 'notes'                │ 'text'        │ 'YES' │ ''    │ null                  │ ''                              │
+│ 6       │ 'created_at'           │ 'timestamp'   │ 'YES' │ ''    │ 'current_timestamp()' │ ''                              │
+│ 7       │ 'season_id'            │ 'int(11)'     │ 'YES' │ ''    │ null                  │ ''                              │
+│ 8       │ 'online_source'        │ 'tinyint(1)'  │ 'YES' │ ''    │ '0'                   │ ''                              │
+│ 9       │ 'pending_medical_cert' │ 'tinyint(1)'  │ 'YES' │ ''    │ '0'                   │ ''                              │
+│ 10      │ 'pending_membership'   │ 'tinyint(1)'  │ 'YES' │ ''    │ '0'                   │ ''                              │
+│ 11      │ 'completion_notes'     │ 'text'        │ 'YES' │ ''    │ null                  │ ''                              │
+│ 12      │ 'details'              │ 'longtext'    │ 'YES' │ ''    │ null                  │ ''                              │
+│ 13      │ 'participation_type'   │ 'varchar(50)' │ 'YES' │ ''    │ 'STANDARD_COURSE'     │ ''                              │
+│ 14      │ 'target_date'          │ 'date'        │ 'YES' │ ''    │ null                  │ ''                              │
+│ 15      │ 'source_file'          │ 'varchar(50)' │ 'YES' │ ''    │ null                  │ ''                              │
+│ 16      │ 'updated_at'           │ 'timestamp'   │ 'YES' │ ''    │ null                  │ 'on update current_timestamp()' │
+└─────────┴────────────────────────┴───────────────┴───────┴───────┴───────────────────────┴─────────────────────────────────┘
+
+--- Q1: DESCRIBE members ---
+┌─────────┬──────────────────────────────────┬────────────────────────────────────────┬───────┬───────┬───────────────────────┬──────────────────┐
+│ (index) │ Field                            │ Type                                   │ Null  │ Key   │ Default               │ Extra            │
+├─────────┼──────────────────────────────────┼────────────────────────────────────────┼───────┼───────┼───────────────────────┼──────────────────┤
+│ 0       │ 'id'                             │ 'int(11)'                              │ 'NO'  │ 'PRI' │ null                  │ 'auto_increment' │
+│ 1       │ 'first_name'                     │ 'varchar(255)'                         │ 'NO'  │ ''    │ null                  │ ''               │
+│ 2       │ 'last_name'                      │ 'varchar(255)'                         │ 'NO'  │ ''    │ null                  │ ''               │
+│ 3       │ 'fiscal_code'                    │ 'varchar(16)'                          │ 'YES' │ 'UNI' │ null                  │ ''               │
+│ 4       │ 'date_of_birth'                  │ 'date'                                 │ 'YES' │ ''    │ null                  │ ''               │
+│ 5       │ 'place_of_birth'                 │ 'varchar(255)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 6       │ 'birth_province'                 │ 'varchar(2)'                           │ 'YES' │ ''    │ null                  │ ''               │
+│ 7       │ 'birth_nation'                   │ 'varchar(100)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 8       │ 'gender'                         │ 'varchar(1)'                           │ 'YES' │ ''    │ null                  │ ''               │
+│ 9       │ 'email'                          │ 'varchar(255)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 10      │ 'secondary_email'                │ 'varchar(255)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 11      │ 'phone'                          │ 'varchar(50)'                          │ 'YES' │ ''    │ null                  │ ''               │
+│ 12      │ 'mobile'                         │ 'varchar(50)'                          │ 'YES' │ ''    │ null                  │ ''               │
+│ 13      │ 'category_id'                    │ 'int(11)'                              │ 'YES' │ 'MUL' │ null                  │ ''               │
+│ 14      │ 'subscription_type_id'           │ 'int(11)'                              │ 'YES' │ 'MUL' │ null                  │ ''               │
+│ 15      │ 'card_number'                    │ 'varchar(100)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 16      │ 'card_issue_date'                │ 'date'                                 │ 'YES' │ ''    │ null                  │ ''               │
+│ 17      │ 'card_expiry_date'               │ 'date'                                 │ 'YES' │ ''    │ null                  │ ''               │
+│ 18      │ 'entity_card_type'               │ 'varchar(50)'                          │ 'YES' │ ''    │ null                  │ ''               │
+│ 19      │ 'entity_card_number'             │ 'varchar(100)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 20      │ 'entity_card_issue_date'         │ 'date'                                 │ 'YES' │ ''    │ null                  │ ''               │
+│ 21      │ 'entity_card_expiry_date'        │ 'date'                                 │ 'YES' │ ''    │ null                  │ ''               │
+│ 22      │ 'has_medical_certificate'        │ 'tinyint(1)'                           │ 'YES' │ ''    │ '0'                   │ ''               │
+│ 23      │ 'medical_certificate_expiry'     │ 'date'                                 │ 'YES' │ ''    │ null                  │ ''               │
+│ 24      │ 'is_minor'                       │ 'tinyint(1)'                           │ 'YES' │ ''    │ '0'                   │ ''               │
+│ 25      │ 'mother_first_name'              │ 'varchar(255)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 26      │ 'mother_last_name'               │ 'varchar(255)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 27      │ 'mother_fiscal_code'             │ 'varchar(16)'                          │ 'YES' │ ''    │ null                  │ ''               │
+│ 28      │ 'mother_email'                   │ 'varchar(255)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 29      │ 'mother_phone'                   │ 'varchar(50)'                          │ 'YES' │ ''    │ null                  │ ''               │
+│ 30      │ 'mother_mobile'                  │ 'varchar(50)'                          │ 'YES' │ ''    │ null                  │ ''               │
+│ 31      │ 'father_first_name'              │ 'varchar(255)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 32      │ 'father_last_name'               │ 'varchar(255)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 33      │ 'father_fiscal_code'             │ 'varchar(16)'                          │ 'YES' │ ''    │ null                  │ ''               │
+│ 34      │ 'father_email'                   │ 'varchar(255)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 35      │ 'father_phone'                   │ 'varchar(50)'                          │ 'YES' │ ''    │ null                  │ ''               │
+│ 36      │ 'father_mobile'                  │ 'varchar(50)'                          │ 'YES' │ ''    │ null                  │ ''               │
+│ 37      │ 'street_address'                 │ 'varchar(255)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 38      │ 'city'                           │ 'varchar(100)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 39      │ 'province'                       │ 'varchar(2)'                           │ 'YES' │ ''    │ null                  │ ''               │
+│ 40      │ 'postal_code'                    │ 'varchar(10)'                          │ 'YES' │ ''    │ null                  │ ''               │
+│ 41      │ 'country'                        │ 'varchar(100)'                         │ 'YES' │ ''    │ 'Italia'              │ ''               │
+│ 42      │ 'address'                        │ 'text'                                 │ 'YES' │ ''    │ null                  │ ''               │
+│ 43      │ 'notes'                          │ 'text'                                 │ 'YES' │ ''    │ null                  │ ''               │
+│ 44      │ 'admin_notes'                    │ 'text'                                 │ 'YES' │ ''    │ null                  │ ''               │
+│ 45      │ 'health_notes'                   │ 'text'                                 │ 'YES' │ ''    │ null                  │ ''               │
+│ 46      │ 'food_alerts'                    │ 'varchar(255)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 47      │ 'tags'                           │ 'varchar(500)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 48      │ 'residence_permit'               │ 'varchar(100)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 49      │ 'residence_permit_expiry'        │ 'date'                                 │ 'YES' │ ''    │ null                  │ ''               │
+│ 50      │ 'active'                         │ 'tinyint(1)'                           │ 'YES' │ ''    │ '1'                   │ ''               │
+│ 51      │ 'enrollment_status'              │ "enum('attivo','non_attivo')"          │ 'YES' │ ''    │ 'non_attivo'          │ ''               │
+│ 52      │ 'created_at'                     │ 'timestamp'                            │ 'YES' │ ''    │ 'current_timestamp()' │ ''               │
+│ 53      │ 'updated_at'                     │ 'timestamp'                            │ 'YES' │ ''    │ 'current_timestamp()' │ ''               │
+│ 54      │ 'photo_url'                      │ 'longtext'                             │ 'YES' │ ''    │ null                  │ ''               │
+│ 55      │ 'mother_birth_date'              │ 'date'                                 │ 'YES' │ ''    │ null                  │ ''               │
+│ 56      │ 'mother_birth_place'             │ 'varchar(255)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 57      │ 'mother_birth_province'          │ 'varchar(2)'                           │ 'YES' │ ''    │ null                  │ ''               │
+│ 58      │ 'mother_street_address'          │ 'varchar(255)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 59      │ 'mother_city'                    │ 'varchar(100)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 60      │ 'mother_province'                │ 'varchar(2)'                           │ 'YES' │ ''    │ null                  │ ''               │
+│ 61      │ 'mother_postal_code'             │ 'varchar(10)'                          │ 'YES' │ ''    │ null                  │ ''               │
+│ 62      │ 'father_birth_date'              │ 'date'                                 │ 'YES' │ ''    │ null                  │ ''               │
+│ 63      │ 'father_birth_place'             │ 'varchar(255)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 64      │ 'father_birth_province'          │ 'varchar(2)'                           │ 'YES' │ ''    │ null                  │ ''               │
+│ 65      │ 'father_street_address'          │ 'varchar(255)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 66      │ 'father_city'                    │ 'varchar(100)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 67      │ 'father_province'                │ 'varchar(2)'                           │ 'YES' │ ''    │ null                  │ ''               │
+│ 68      │ 'father_postal_code'             │ 'varchar(10)'                          │ 'YES' │ ''    │ null                  │ ''               │
+│ 69      │ 'season'                         │ 'varchar(50)'                          │ 'YES' │ ''    │ null                  │ ''               │
+│ 70      │ 'internal_id'                    │ 'varchar(50)'                          │ 'YES' │ ''    │ null                  │ ''               │
+│ 71      │ 'insertion_date'                 │ 'date'                                 │ 'YES' │ ''    │ null                  │ ''               │
+│ 72      │ 'participant_type'               │ 'varchar(50)'                          │ 'YES' │ ''    │ null                  │ ''               │
+│ 73      │ 'from_where'                     │ 'varchar(255)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 74      │ 'profession'                     │ 'varchar(100)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 75      │ 'document_type'                  │ 'varchar(50)'                          │ 'YES' │ ''    │ null                  │ ''               │
+│ 76      │ 'document_expiry'                │ 'date'                                 │ 'YES' │ ''    │ null                  │ ''               │
+│ 77      │ 'team_segreteria'                │ 'varchar(255)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 78      │ 'detraction_requested'           │ 'tinyint(1)'                           │ 'YES' │ ''    │ '0'                   │ ''               │
+│ 79      │ 'detraction_year'                │ 'varchar(4)'                           │ 'YES' │ ''    │ null                  │ ''               │
+│ 80      │ 'credits_requested'              │ 'tinyint(1)'                           │ 'YES' │ ''    │ '0'                   │ ''               │
+│ 81      │ 'credits_year'                   │ 'varchar(20)'                          │ 'YES' │ ''    │ null                  │ ''               │
+│ 82      │ 'tesserino_tecnico_number'       │ 'varchar(100)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 83      │ 'tesserino_tecnico_date'         │ 'date'                                 │ 'YES' │ ''    │ null                  │ ''               │
+│ 84      │ 'created_by'                     │ 'varchar(255)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 85      │ 'updated_by'                     │ 'varchar(255)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 86      │ 'privacy_accepted'               │ 'tinyint(1)'                           │ 'YES' │ ''    │ '0'                   │ ''               │
+│ 87      │ 'privacy_date'                   │ 'date'                                 │ 'YES' │ ''    │ null                  │ ''               │
+│ 88      │ 'regulations_accepted'           │ 'tinyint(1)'                           │ 'YES' │ ''    │ '0'                   │ ''               │
+│ 89      │ 'membership_application_signed'  │ 'tinyint(1)'                           │ 'YES' │ ''    │ '0'                   │ ''               │
+│ 90      │ 'specialization'                 │ 'text'                                 │ 'YES' │ ''    │ null                  │ ''               │
+│ 91      │ 'bio'                            │ 'text'                                 │ 'YES' │ ''    │ null                  │ ''               │
+│ 92      │ 'hourly_rate'                    │ 'decimal(10,2)'                        │ 'YES' │ ''    │ null                  │ ''               │
+│ 93      │ 'attachment_metadata'            │ 'longtext'                             │ 'YES' │ ''    │ null                  │ ''               │
+│ 94      │ 'gift_metadata'                  │ 'longtext'                             │ 'YES' │ ''    │ null                  │ ''               │
+│ 95      │ 'tessere_metadata'               │ 'longtext'                             │ 'YES' │ ''    │ null                  │ ''               │
+│ 96      │ 'certificato_medico_metadata'    │ 'longtext'                             │ 'YES' │ ''    │ null                  │ ''               │
+│ 97      │ 'crm_profile_level'              │ 'varchar(20)'                          │ 'YES' │ ''    │ null                  │ ''               │
+│ 98      │ 'crm_profile_score'              │ 'int(11)'                              │ 'YES' │ ''    │ '0'                   │ ''               │
+│ 99      │ 'crm_profile_override'           │ 'tinyint(1)'                           │ 'YES' │ ''    │ '0'                   │ ''               │
+│ 100     │ 'crm_profile_reason'             │ 'varchar(255)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 101     │ 'staff_status'                   │ "enum('attivo','inattivo','archivio')" │ 'NO'  │ ''    │ 'attivo'              │ ''               │
+│ 102     │ 'lezioni_private_autorizzate'    │ 'tinyint(1)'                           │ 'NO'  │ ''    │ '0'                   │ ''               │
+│ 103     │ 'lezioni_private_autorizzate_at' │ 'datetime'                             │ 'YES' │ ''    │ null                  │ ''               │
+│ 104     │ 'lezioni_private_autorizzate_by' │ 'varchar(100)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 105     │ 'lezioni_private_note'           │ 'text'                                 │ 'YES' │ ''    │ null                  │ ''               │
+│ 106     │ 'user_id'                        │ 'varchar(255)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 107     │ 'tutor1_fiscal_code'             │ 'varchar(16)'                          │ 'YES' │ ''    │ null                  │ ''               │
+│ 108     │ 'tutor1_phone'                   │ 'varchar(20)'                          │ 'YES' │ ''    │ null                  │ ''               │
+│ 109     │ 'tutor1_email'                   │ 'varchar(255)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 110     │ 'tutor2_fiscal_code'             │ 'varchar(16)'                          │ 'YES' │ ''    │ null                  │ ''               │
+│ 111     │ 'tutor2_phone'                   │ 'varchar(20)'                          │ 'YES' │ ''    │ null                  │ ''               │
+│ 112     │ 'tutor2_email'                   │ 'varchar(255)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 113     │ 'nationality'                    │ 'varchar(100)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 114     │ 'region'                         │ 'varchar(100)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 115     │ 'consent_image'                  │ 'tinyint(1)'                           │ 'YES' │ ''    │ '0'                   │ ''               │
+│ 116     │ 'consent_marketing'              │ 'tinyint(1)'                           │ 'YES' │ ''    │ '0'                   │ ''               │
+│ 117     │ 'consent_newsletter'             │ 'tinyint(1)'                           │ 'NO'  │ ''    │ '0'                   │ ''               │
+│ 118     │ 'previous_membership_number'     │ 'varchar(50)'                          │ 'YES' │ ''    │ null                  │ ''               │
+│ 119     │ 'data_quality_flag'              │ 'varchar(50)'                          │ 'YES' │ ''    │ null                  │ ''               │
+│ 120     │ 'title'                          │ 'varchar(20)'                          │ 'YES' │ ''    │ null                  │ ''               │
+│ 121     │ 'whatsapp'                       │ 'varchar(20)'                          │ 'YES' │ ''    │ null                  │ ''               │
+│ 122     │ 'consent_sms'                    │ 'tinyint(1)'                           │ 'YES' │ ''    │ '0'                   │ ''               │
+│ 123     │ 'email_pec'                      │ 'varchar(255)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 124     │ 'family_code'                    │ 'varchar(50)'                          │ 'YES' │ ''    │ null                  │ ''               │
+│ 125     │ 'athena_group'                   │ 'varchar(100)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 126     │ 'alias'                          │ 'varchar(100)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 127     │ 'cancellation_date'              │ 'date'                                 │ 'YES' │ ''    │ null                  │ ''               │
+│ 128     │ 'company_name'                   │ 'varchar(200)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 129     │ 'company_fiscal_code'            │ 'varchar(16)'                          │ 'YES' │ ''    │ null                  │ ''               │
+│ 130     │ 'company_address'                │ 'varchar(255)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 131     │ 'company_cap'                    │ 'varchar(10)'                          │ 'YES' │ ''    │ null                  │ ''               │
+│ 132     │ 'company_city'                   │ 'varchar(100)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 133     │ 'company_province'               │ 'varchar(10)'                          │ 'YES' │ ''    │ null                  │ ''               │
+│ 134     │ 'company_phone'                  │ 'varchar(20)'                          │ 'YES' │ ''    │ null                  │ ''               │
+│ 135     │ 'company_email'                  │ 'varchar(255)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 136     │ 'document_issued_by'             │ 'varchar(100)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 137     │ 'document_issue_date'            │ 'date'                                 │ 'YES' │ ''    │ null                  │ ''               │
+│ 138     │ 'bank_name'                      │ 'varchar(100)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 139     │ 'iban'                           │ 'varchar(34)'                          │ 'YES' │ ''    │ null                  │ ''               │
+│ 140     │ 'size_shirt'                     │ 'varchar(10)'                          │ 'YES' │ ''    │ null                  │ ''               │
+│ 141     │ 'size_pants'                     │ 'varchar(10)'                          │ 'YES' │ ''    │ null                  │ ''               │
+│ 142     │ 'size_shoes'                     │ 'varchar(10)'                          │ 'YES' │ ''    │ null                  │ ''               │
+│ 143     │ 'height'                         │ 'varchar(10)'                          │ 'YES' │ ''    │ null                  │ ''               │
+│ 144     │ 'weight'                         │ 'varchar(10)'                          │ 'YES' │ ''    │ null                  │ ''               │
+│ 145     │ 'social_facebook'                │ 'varchar(255)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 146     │ 'social_instagram'               │ 'varchar(255)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 147     │ 'social_tiktok'                  │ 'varchar(255)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 148     │ 'social_youtube'                 │ 'varchar(255)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 149     │ 'website'                        │ 'varchar(255)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 150     │ 'drive_folder_url'               │ 'varchar(500)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 151     │ 'education_title'                │ 'varchar(200)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 152     │ 'education_institute'            │ 'varchar(200)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 153     │ 'education_date'                 │ 'date'                                 │ 'YES' │ ''    │ null                  │ ''               │
+│ 154     │ 'emergency_contact1_name'        │ 'varchar(100)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 155     │ 'emergency_contact1_phone'       │ 'varchar(20)'                          │ 'YES' │ ''    │ null                  │ ''               │
+│ 156     │ 'emergency_contact1_email'       │ 'varchar(255)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 157     │ 'emergency_contact2_name'        │ 'varchar(100)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 158     │ 'emergency_contact2_phone'       │ 'varchar(20)'                          │ 'YES' │ ''    │ null                  │ ''               │
+│ 159     │ 'emergency_contact2_email'       │ 'varchar(255)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 160     │ 'emergency_contact3_name'        │ 'varchar(100)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 161     │ 'emergency_contact3_phone'       │ 'varchar(20)'                          │ 'YES' │ ''    │ null                  │ ''               │
+│ 162     │ 'emergency_contact3_email'       │ 'varchar(255)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 163     │ 'sede_riferimento'               │ 'varchar(100)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 164     │ 'athena_member_type'             │ 'varchar(50)'                          │ 'YES' │ ''    │ null                  │ ''               │
+│ 165     │ 'first_enrollment_date'          │ 'date'                                 │ 'YES' │ ''    │ null                  │ ''               │
+│ 166     │ 'consent_certificate'            │ 'tinyint(1)'                           │ 'YES' │ ''    │ '0'                   │ ''               │
+│ 167     │ 'consent_module'                 │ 'tinyint(1)'                           │ 'YES' │ ''    │ '0'                   │ ''               │
+│ 168     │ 'codice_catastale'               │ 'varchar(10)'                          │ 'YES' │ ''    │ null                  │ ''               │
+│ 169     │ 'mastro_c'                       │ 'varchar(30)'                          │ 'YES' │ ''    │ null                  │ ''               │
+│ 170     │ 'mastro_col'                     │ 'varchar(30)'                          │ 'YES' │ ''    │ null                  │ ''               │
+│ 171     │ 'codice_fe'                      │ 'varchar(50)'                          │ 'YES' │ ''    │ null                  │ ''               │
+│ 172     │ 'tutor1_birth_date'              │ 'date'                                 │ 'YES' │ ''    │ null                  │ ''               │
+│ 173     │ 'tutor1_birth_place'             │ 'varchar(100)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 174     │ 'fattura_fatta'                  │ 'tinyint(1)'                           │ 'YES' │ ''    │ '0'                   │ ''               │
+│ 175     │ 'athena_id'                      │ 'varchar(50)'                          │ 'YES' │ ''    │ null                  │ ''               │
+│ 176     │ 'p_iva'                          │ 'varchar(20)'                          │ 'YES' │ ''    │ null                  │ ''               │
+│ 177     │ 'albo_tipo'                      │ 'varchar(50)'                          │ 'YES' │ ''    │ null                  │ ''               │
+│ 178     │ 'albo_sezione'                   │ 'varchar(50)'                          │ 'YES' │ ''    │ null                  │ ''               │
+│ 179     │ 'albo_numero'                    │ 'varchar(50)'                          │ 'YES' │ ''    │ null                  │ ''               │
+│ 180     │ 'albo_data_iscrizione'           │ 'date'                                 │ 'YES' │ ''    │ null                  │ ''               │
+│ 181     │ 'patente_tipo'                   │ 'varchar(20)'                          │ 'YES' │ ''    │ null                  │ ''               │
+│ 182     │ 'patente_rilasciata_da'          │ 'varchar(100)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 183     │ 'patente_scadenza'               │ 'date'                                 │ 'YES' │ ''    │ null                  │ ''               │
+│ 184     │ 'car_plate'                      │ 'varchar(20)'                          │ 'YES' │ ''    │ null                  │ ''               │
+│ 185     │ 'tutor2_first_name'              │ 'varchar(100)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 186     │ 'tutor2_last_name'               │ 'varchar(100)'                         │ 'YES' │ ''    │ null                  │ ''               │
+│ 187     │ 'tutor2_birth_date'              │ 'date'                                 │ 'YES' │ ''    │ null                  │ ''               │
+│ 188     │ 'tutor2_birth_place'             │ 'varchar(100)'                         │ 'YES' │ ''    │ null                  │ ''               │
+└─────────┴──────────────────────────────────┴────────────────────────────────────────┴───────┴───────┴───────────────────────┴──────────────────┘
+
+--- Q1: DESCRIBE memberships ---
+┌─────────┬──────────────────────────────┬─────────────────┬───────┬───────┬───────────────────────┬──────────────────┐
+│ (index) │ Field                        │ Type            │ Null  │ Key   │ Default               │ Extra            │
+├─────────┼──────────────────────────────┼─────────────────┼───────┼───────┼───────────────────────┼──────────────────┤
+│ 0       │ 'id'                         │ 'int(11)'       │ 'NO'  │ 'PRI' │ null                  │ 'auto_increment' │
+│ 1       │ 'member_id'                  │ 'int(11)'       │ 'NO'  │ 'MUL' │ null                  │ ''               │
+│ 2       │ 'membership_number'          │ 'varchar(100)'  │ 'NO'  │ 'UNI' │ null                  │ ''               │
+│ 3       │ 'previous_membership_number' │ 'varchar(100)'  │ 'YES' │ ''    │ null                  │ ''               │
+│ 4       │ 'barcode'                    │ 'varchar(100)'  │ 'NO'  │ 'UNI' │ null                  │ ''               │
+│ 5       │ 'issue_date'                 │ 'date'          │ 'NO'  │ ''    │ null                  │ ''               │
+│ 6       │ 'expiry_date'                │ 'date'          │ 'NO'  │ ''    │ null                  │ ''               │
+│ 7       │ 'status'                     │ 'varchar(50)'   │ 'NO'  │ ''    │ 'active'              │ ''               │
+│ 8       │ 'type'                       │ 'varchar(100)'  │ 'YES' │ ''    │ null                  │ ''               │
+│ 9       │ 'fee'                        │ 'decimal(10,2)' │ 'YES' │ ''    │ null                  │ ''               │
+│ 10      │ 'created_at'                 │ 'timestamp'     │ 'YES' │ ''    │ 'current_timestamp()' │ ''               │
+│ 11      │ 'updated_at'                 │ 'timestamp'     │ 'YES' │ ''    │ 'current_timestamp()' │ ''               │
+│ 12      │ 'renewal_type'               │ 'varchar(50)'   │ 'YES' │ ''    │ null                  │ ''               │
+│ 13      │ 'is_renewal'                 │ 'tinyint(1)'    │ 'NO'  │ ''    │ '0'                   │ ''               │
+│ 14      │ 'renewed_from_id'            │ 'int(11)'       │ 'YES' │ ''    │ null                  │ ''               │
+│ 15      │ 'entity_card_number'         │ 'varchar(100)'  │ 'YES' │ ''    │ null                  │ ''               │
+│ 16      │ 'entity_card_expiry_date'    │ 'date'          │ 'YES' │ ''    │ null                  │ ''               │
+│ 17      │ 'membership_type'            │ 'varchar(50)'   │ 'YES' │ ''    │ null                  │ ''               │
+│ 18      │ 'season_competence'          │ 'varchar(50)'   │ 'YES' │ ''    │ null                  │ ''               │
+│ 19      │ 'season_start_year'          │ 'int(11)'       │ 'YES' │ ''    │ null                  │ ''               │
+│ 20      │ 'season_end_year'            │ 'int(11)'       │ 'YES' │ ''    │ null                  │ ''               │
+│ 21      │ 'notes'                      │ 'text'          │ 'YES' │ ''    │ null                  │ ''               │
+│ 22      │ 'season_id'                  │ 'int(11)'       │ 'YES' │ ''    │ null                  │ ''               │
+│ 23      │ 'data_quality_flag'          │ 'varchar(50)'   │ 'YES' │ ''    │ null                  │ ''               │
+└─────────┴──────────────────────────────┴─────────────────┴───────┴───────┴───────────────────────┴──────────────────┘
+
+--- Q1: DESCRIBE medical_certificates ---
+┌─────────┬───────────────┬────────────────┬───────┬───────┬───────────────────────┬──────────────────┐
+│ (index) │ Field         │ Type           │ Null  │ Key   │ Default               │ Extra            │
+├─────────┼───────────────┼────────────────┼───────┼───────┼───────────────────────┼──────────────────┤
+│ 0       │ 'id'          │ 'int(11)'      │ 'NO'  │ 'PRI' │ null                  │ 'auto_increment' │
+│ 1       │ 'member_id'   │ 'int(11)'      │ 'NO'  │ 'MUL' │ null                  │ ''               │
+│ 2       │ 'issue_date'  │ 'date'         │ 'NO'  │ ''    │ null                  │ ''               │
+│ 3       │ 'expiry_date' │ 'date'         │ 'NO'  │ ''    │ null                  │ ''               │
+│ 4       │ 'doctor_name' │ 'varchar(255)' │ 'YES' │ ''    │ null                  │ ''               │
+│ 5       │ 'notes'       │ 'text'         │ 'YES' │ ''    │ null                  │ ''               │
+│ 6       │ 'status'      │ 'varchar(50)'  │ 'NO'  │ ''    │ 'valid'               │ ''               │
+│ 7       │ 'created_at'  │ 'timestamp'    │ 'YES' │ ''    │ 'current_timestamp()' │ ''               │
+│ 8       │ 'updated_at'  │ 'timestamp'    │ 'YES' │ ''    │ 'current_timestamp()' │ ''               │
+└─────────┴───────────────┴────────────────┴───────┴───────┴───────────────────────┴──────────────────┘
+
+--- Q1: DESCRIBE payments ---
+┌─────────┬──────────────────────────────┬─────────────────┬───────┬───────┬───────────────────────┬──────────────────┐
+│ (index) │ Field                        │ Type            │ Null  │ Key   │ Default               │ Extra            │
+├─────────┼──────────────────────────────┼─────────────────┼───────┼───────┼───────────────────────┼──────────────────┤
+│ 0       │ 'id'                         │ 'int(11)'       │ 'NO'  │ 'PRI' │ null                  │ 'auto_increment' │
+│ 1       │ 'member_id'                  │ 'int(11)'       │ 'YES' │ 'MUL' │ null                  │ ''               │
+│ 2       │ 'enrollment_id'              │ 'int(11)'       │ 'YES' │ 'MUL' │ null                  │ ''               │
+│ 3       │ 'amount'                     │ 'decimal(10,2)' │ 'NO'  │ ''    │ null                  │ ''               │
+│ 4       │ 'type'                       │ 'varchar(100)'  │ 'NO'  │ ''    │ null                  │ ''               │
+│ 5       │ 'description'                │ 'text'          │ 'YES' │ ''    │ null                  │ ''               │
+│ 6       │ 'status'                     │ 'varchar(50)'   │ 'NO'  │ ''    │ 'pending'             │ ''               │
+│ 7       │ 'due_date'                   │ 'date'          │ 'YES' │ ''    │ null                  │ ''               │
+│ 8       │ 'paid_date'                  │ 'date'          │ 'YES' │ ''    │ null                  │ ''               │
+│ 9       │ 'payment_method_id'          │ 'int(11)'       │ 'YES' │ 'MUL' │ null                  │ ''               │
+│ 10      │ 'payment_method'             │ 'varchar(100)'  │ 'YES' │ ''    │ null                  │ ''               │
+│ 11      │ 'notes'                      │ 'text'          │ 'YES' │ ''    │ null                  │ ''               │
+│ 12      │ 'created_at'                 │ 'timestamp'     │ 'YES' │ ''    │ 'current_timestamp()' │ ''               │
+│ 13      │ 'updated_at'                 │ 'timestamp'     │ 'YES' │ ''    │ 'current_timestamp()' │ ''               │
+│ 14      │ 'season_id'                  │ 'int(11)'       │ 'YES' │ ''    │ null                  │ ''               │
+│ 15      │ 'created_by_id'              │ 'varchar(255)'  │ 'YES' │ ''    │ null                  │ ''               │
+│ 16      │ 'updated_by_id'              │ 'varchar(255)'  │ 'YES' │ ''    │ null                  │ ''               │
+│ 17      │ 'booking_id'                 │ 'int(11)'       │ 'YES' │ ''    │ null                  │ ''               │
+│ 18      │ 'membership_id'              │ 'int(11)'       │ 'YES' │ ''    │ null                  │ ''               │
+│ 19      │ 'quantity'                   │ 'int(11)'       │ 'YES' │ ''    │ '1'                   │ ''               │
+│ 20      │ 'quota_description'          │ 'varchar(255)'  │ 'YES' │ ''    │ null                  │ ''               │
+│ 21      │ 'period'                     │ 'varchar(255)'  │ 'YES' │ ''    │ null                  │ ''               │
+│ 22      │ 'total_quota'                │ 'decimal(10,2)' │ 'YES' │ ''    │ null                  │ ''               │
+│ 23      │ 'discount_code'              │ 'varchar(100)'  │ 'YES' │ ''    │ null                  │ ''               │
+│ 24      │ 'discount_value'             │ 'decimal(10,2)' │ 'YES' │ ''    │ null                  │ ''               │
+│ 25      │ 'discount_percentage'        │ 'decimal(5,2)'  │ 'YES' │ ''    │ null                  │ ''               │
+│ 26      │ 'promo_code'                 │ 'varchar(100)'  │ 'YES' │ ''    │ null                  │ ''               │
+│ 27      │ 'promo_value'                │ 'decimal(10,2)' │ 'YES' │ ''    │ null                  │ ''               │
+│ 28      │ 'promo_percentage'           │ 'decimal(5,2)'  │ 'YES' │ ''    │ null                  │ ''               │
+│ 29      │ 'deposit'                    │ 'decimal(10,2)' │ 'YES' │ ''    │ null                  │ ''               │
+│ 30      │ 'annual_balance'             │ 'decimal(10,2)' │ 'YES' │ ''    │ null                  │ ''               │
+│ 31      │ 'receipts_count'             │ 'int(11)'       │ 'YES' │ ''    │ null                  │ ''               │
+│ 32      │ 'transfer_confirmation_date' │ 'date'          │ 'YES' │ ''    │ null                  │ ''               │
+│ 33      │ 'payment_note_labels'        │ 'text'          │ 'YES' │ ''    │ null                  │ ''               │
+│ 34      │ 'enrollment_detail_labels'   │ 'text'          │ 'YES' │ ''    │ null                  │ ''               │
+│ 35      │ 'global_enrollment_id'       │ 'int(11)'       │ 'YES' │ ''    │ null                  │ ''               │
+│ 36      │ 'accounting_code'            │ 'varchar(20)'   │ 'YES' │ ''    │ null                  │ ''               │
+│ 37      │ 'vat_code'                   │ 'varchar(10)'   │ 'YES' │ ''    │ 'ESENTE'              │ ''               │
+│ 38      │ 'cost_center_code'           │ 'varchar(50)'   │ 'YES' │ ''    │ null                  │ ''               │
+│ 39      │ 'source'                     │ 'varchar(20)'   │ 'YES' │ ''    │ 'sede'                │ ''               │
+│ 40      │ 'operator_name'              │ 'varchar(100)'  │ 'YES' │ ''    │ null                  │ ''               │
+│ 41      │ 'gbrh_numero'                │ 'varchar(50)'   │ 'YES' │ ''    │ null                  │ ''               │
+│ 42      │ 'gbrh_data_emissione'        │ 'date'          │ 'YES' │ ''    │ null                  │ ''               │
+│ 43      │ 'gbrh_data_scadenza'         │ 'date'          │ 'YES' │ ''    │ null                  │ ''               │
+│ 44      │ 'gbrh_data_utilizzo'         │ 'date'          │ 'YES' │ ''    │ null                  │ ''               │
+│ 45      │ 'gbrh_iban'                  │ 'varchar(34)'   │ 'YES' │ ''    │ null                  │ ''               │
+└─────────┴──────────────────────────────┴─────────────────┴───────┴───────┴───────────────────────┴──────────────────┘
+
+--- Q1: SHOW TABLES LIKE '%attend%' ---
+┌─────────┬─────────────────────────────────┐
+│ (index) │ Tables_in_stargem_v2 (%attend%) │
+├─────────┼─────────────────────────────────┤
+│ 0       │ 'attendances'                   │
+│ 1       │ 'team_attendance_logs'          │
+└─────────┴─────────────────────────────────┘
+
+--- Q2: Esempio reale Domenica ---
+┌─────────┬─────┬───────────────────────┬───────────────────────────────────────┬─────────────┬─────────────┬───────────┬───────────────┬──────────────────────────┬──────────────────────────┬───────┬──────────────┬────────────────────┬─────────────┬────────────┬──────────┬─────────────────┬──────────┬────────────┬──────────┬───────────────────┬────────────────────┬─────────────┬───────────────┬────────┬──────────────────────────┬──────────────────────────┬───────────┬─────────────────┬──────────┬───────┬───────────┬─────────────┬──────────────────┬──────────────────────┬──────────────────────┐
+│ (index) │ id  │ sku                   │ name                                  │ description │ category_id │ studio_id │ instructor_id │ secondary_instructor1_id │ secondary_instructor2_id │ price │ max_capacity │ current_enrollment │ day_of_week │ start_time │ end_time │ recurrence_type │ schedule │ start_date │ end_date │ total_occurrences │ active_on_holidays │ status_tags │ internal_tags │ active │ created_at               │ updated_at               │ season_id │ google_event_id │ quote_id │ level │ age_group │ lesson_type │ number_of_people │ activity_type        │ season               │
+├─────────┼─────┼───────────────────────┼───────────────────────────────────────┼─────────────┼─────────────┼───────────┼───────────────┼──────────────────────────┼──────────────────────────┼───────┼──────────────┼────────────────────┼─────────────┼────────────┼──────────┼─────────────────┼──────────┼────────────┼──────────┼───────────────────┼────────────────────┼─────────────┼───────────────┼────────┼──────────────────────────┼──────────────────────────┼───────────┼─────────────────┼──────────┼───────┼───────────┼─────────────┼──────────────────┼──────────────────────┼──────────────────────┤
+│ 0       │ 741 │ '2526DOSSANTO09NOV-B' │ 'Domeniche in Movimento - Gestualità' │ null        │ null        │ null      │ null          │ null                     │ null                     │ null  │ null         │ 0                  │ null        │ null       │ null     │ null            │ null     │ null       │ null     │ null              │ 0                  │ '[]'        │ null          │ 0      │ 2026-04-23T14:38:00.000Z │ 2026-04-23T14:38:00.000Z │ 1         │ null            │ null     │ null  │ null      │ '[]'        │ null             │ 'domenica_movimento' │ 'Stagione 2025/2026' │
+└─────────┴─────┴───────────────────────┴───────────────────────────────────────┴─────────────┴─────────────┴───────────┴───────────────┴──────────────────────────┴──────────────────────────┴───────┴──────────────┴────────────────────┴─────────────┴────────────┴──────────┴─────────────────┴──────────┴────────────┴──────────┴───────────────────┴────────────────────┴─────────────┴───────────────┴────────┴──────────────────────────┴──────────────────────────┴───────────┴─────────────────┴──────────┴───────┴───────────┴─────────────┴──────────────────┴──────────────────────┴──────────────────────┘
+
+--- Q3: Esempio reale LI ---
+┌─────────┬─────┬──────────────────────┬───────────────────────┬─────────────┬─────────────┬───────────┬───────────────┬──────────────────────────┬──────────────────────────┬───────┬──────────────┬────────────────────┬─────────────┬────────────┬──────────┬─────────────────┬──────────┬────────────┬──────────┬───────────────────┬────────────────────┬─────────────┬───────────────┬────────┬──────────────────────────┬──────────────────────────┬───────────┬─────────────────┬──────────┬───────┬───────────┬─────────────┬──────────────────┬───────────────────────┐
+│ (index) │ id  │ sku                  │ name                  │ description │ category_id │ studio_id │ instructor_id │ secondary_instructor1_id │ secondary_instructor2_id │ price │ max_capacity │ current_enrollment │ day_of_week │ start_time │ end_time │ recurrence_type │ schedule │ start_date │ end_date │ total_occurrences │ active_on_holidays │ status_tags │ internal_tags │ active │ created_at               │ updated_at               │ season_id │ google_event_id │ quote_id │ level │ age_group │ lesson_type │ number_of_people │ activity_type         │
+├─────────┼─────┼──────────────────────┼───────────────────────┼─────────────┼─────────────┼───────────┼───────────────┼──────────────────────────┼──────────────────────────┼───────┼──────────────┼────────────────────┼─────────────┼────────────┼──────────┼─────────────────┼──────────┼────────────┼──────────┼───────────────────┼────────────────────┼─────────────┼───────────────┼────────┼──────────────────────────┼──────────────────────────┼───────────┼─────────────────┼──────────┼───────┼───────────┼─────────────┼──────────────────┼───────────────────────┤
+│ 0       │ 560 │ '2526LEZINDIVIDUALE' │ 'Lezione Individuale' │ null        │ null        │ null      │ null          │ null                     │ null                     │ null  │ null         │ 0                  │ null        │ null       │ null     │ null            │ null     │ null       │ null     │ null              │ 0                  │ '[]'        │ null          │ 0      │ 2026-04-23T14:37:36.000Z │ 2026-04-23T14:37:36.000Z │ 1         │ null            │ null     │ null  │ null      │ '[]'        │ null             │ 'lezione_individuale' │
+└─────────┴─────┴──────────────────────┴───────────────────────┴─────────────┴─────────────┴───────────┴───────────────┴──────────────────────────┴──────────────────────────┴───────┴──────────────┴────────────────────┴─────────────┴────────────┴──────────┴─────────────────┴──────────┴────────────┴──────────┴───────────────────┴────────────────────┴─────────────┴───────────────┴────────┴──────────────────────────┴──────────────────────────┴───────────┴─────────────────┴──────────┴───────┴───────────┴─────────────┴──────────────────┴───────────────────────┘
+
+--- Q4: Esempio reale Campus ---
+┌─────────┬─────┬────────────────┬───────────────────────┬─────────────┬─────────────┬───────────┬───────────────┬──────────────────────────┬──────────────────────────┬───────┬──────────────┬────────────────────┬─────────────┬────────────┬──────────┬─────────────────┬──────────┬────────────┬──────────┬───────────────────┬────────────────────┬─────────────┬───────────────┬────────┬──────────────────────────┬──────────────────────────┬───────────┬─────────────────┬──────────┬───────┬───────────┬─────────────┬──────────────────┬───────────────┐
+│ (index) │ id  │ sku            │ name                  │ description │ category_id │ studio_id │ instructor_id │ secondary_instructor1_id │ secondary_instructor2_id │ price │ max_capacity │ current_enrollment │ day_of_week │ start_time │ end_time │ recurrence_type │ schedule │ start_date │ end_date │ total_occurrences │ active_on_holidays │ status_tags │ internal_tags │ active │ created_at               │ updated_at               │ season_id │ google_event_id │ quote_id │ level │ age_group │ lesson_type │ number_of_people │ activity_type │
+├─────────┼─────┼────────────────┼───────────────────────┼─────────────┼─────────────┼───────────┼───────────────┼──────────────────────────┼──────────────────────────┼───────┼──────────────┼────────────────────┼─────────────┼────────────┼──────────┼─────────────────┼──────────┼────────────┼──────────┼───────────────────┼────────────────────┼─────────────┼───────────────┼────────┼──────────────────────────┼──────────────────────────┼───────────┼─────────────────┼──────────┼───────┼───────────┼─────────────┼──────────────────┼───────────────┤
+│ 0       │ 786 │ '2526CAMPUSS2' │ 'Campus 2° settimana' │ null        │ null        │ null      │ null          │ null                     │ null                     │ null  │ null         │ 0                  │ null        │ null       │ null     │ null            │ null     │ null       │ null     │ null              │ 0                  │ '[]'        │ null          │ 0      │ 2026-04-23T14:38:15.000Z │ 2026-04-23T14:38:15.000Z │ 1         │ null            │ null     │ null  │ null      │ '[]'        │ null             │ 'campus'      │
+└─────────┴─────┴────────────────┴───────────────────────┴─────────────┴─────────────┴───────────┴───────────────┴──────────────────────────┴──────────────────────────┴───────┴──────────────┴────────────────────┴─────────────┴────────────┴──────────┴─────────────────┴──────────┴────────────┴──────────┴───────────────────┴────────────────────┴─────────────┴───────────────┴────────┴──────────────────────────┴──────────────────────────┴───────────┴─────────────────┴──────────┴───────┴───────────┴─────────────┴──────────────────┴───────────────┘
+
+--- Q5: Minorenni campi (test basato su parent_name) ---

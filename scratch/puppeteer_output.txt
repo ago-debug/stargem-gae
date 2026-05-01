@@ -1,0 +1,110 @@
+Navigating...
+BROWSER CONSOLE: debug [vite] connecting...
+BROWSER CONSOLE: debug [vite] connected.
+BROWSER CONSOLE: info %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold
+BROWSER CONSOLE: error Warning: validateDOMNesting(...): %s cannot appear as a descendant of <%s>.%s <button> button 
+    at button
+    at _c (http://localhost:5001/src/components/ui/button.tsx:55:11)
+    at http://localhost:5001/@fs/Users/gaetano1/SVILUPPO/StarGem_manager/node_modules/.vite/deps/chunk-2NOUPWRX.js?v=ea11c9ae:61:13
+    at http://localhost:5001/@fs/Users/gaetano1/SVILUPPO/StarGem_manager/node_modules/.vite/deps/chunk-2NOUPWRX.js?v=ea11c9ae:38:13
+    at http://localhost:5001/@fs/Users/gaetano1/SVILUPPO/StarGem_manager/node_modules/.vite/deps/chunk-2NOUPWRX.js?v=ea11c9ae:151:13
+    at http://localhost:5001/@fs/Users/gaetano1/SVILUPPO/StarGem_manager/node_modules/.vite/deps/chunk-2NOUPWRX.js?v=ea11c9ae:61:13
+    at http://localhost:5001/@fs/Users/gaetano1/SVILUPPO/StarGem_manager/node_modules/.vite/deps/chunk-2NOUPWRX.js?v=ea11c9ae:38:13
+    at http://localhost:5001/@fs/Users/gaetano1/SVILUPPO/StarGem_manager/node_modules/.vite/deps/chunk-2NOUPWRX.js?v=ea11c9ae:151:13
+    at http://localhost:5001/@fs/Users/gaetano1/SVILUPPO/StarGem_manager/node_modules/.vite/deps/chunk-EN4WPDEP.js?v=ea11c9ae:1969:13
+    at http://localhost:5001/@fs/Users/gaetano1/SVILUPPO/StarGem_manager/node_modules/.vite/deps/chunk-RY2LG5GD.js?v=ea11c9ae:230:13
+    at http://localhost:5001/@fs/Users/gaetano1/SVILUPPO/StarGem_manager/node_modules/.vite/deps/@radix-ui_react-dropdown-menu.js?v=ea11c9ae:105:13
+    at Provider (http://localhost:5001/@fs/Users/gaetano1/SVILUPPO/StarGem_manager/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=ea11c9ae:38:15)
+    at Provider (http://localhost:5001/@fs/Users/gaetano1/SVILUPPO/StarGem_manager/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=ea11c9ae:38:15)
+    at Provider (http://localhost:5001/@fs/Users/gaetano1/SVILUPPO/StarGem_manager/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=ea11c9ae:38:15)
+    at Popper (http://localhost:5001/@fs/Users/gaetano1/SVILUPPO/StarGem_manager/node_modules/.vite/deps/chunk-EN4WPDEP.js?v=ea11c9ae:1961:11)
+    at Menu (http://localhost:5001/@fs/Users/gaetano1/SVILUPPO/StarGem_manager/node_modules/.vite/deps/chunk-RY2LG5GD.js?v=ea11c9ae:184:11)
+    at Provider (http://localhost:5001/@fs/Users/gaetano1/SVILUPPO/StarGem_manager/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=ea11c9ae:38:15)
+    at DropdownMenu (http://localhost:5001/@fs/Users/gaetano1/SVILUPPO/StarGem_manager/node_modules/.vite/deps/@radix-ui_react-dropdown-menu.js?v=ea11c9ae:70:5)
+    at StarGemCopilot (http://localhost:5001/src/components/star-gem-copilot.tsx:25:34)
+    at button
+    at http://localhost:5001/@fs/Users/gaetano1/SVILUPPO/StarGem_manager/node_modules/.vite/deps/chunk-GTF7DNNX.js?v=ea11c9ae:54:11
+    at http://localhost:5001/@fs/Users/gaetano1/SVILUPPO/StarGem_manager/node_modules/.vite/deps/chunk-GTF7DNNX.js?v=ea11c9ae:28:11
+    at SidebarMenuButton (http://localhost:5001/src/components/ui/sidebar.tsx:695:3)
+    at li
+    at SidebarMenuItem (http://localhost:5001/src/components/ui/sidebar.tsx:654:28)
+    at ul
+    at SidebarMenu (http://localhost:5001/src/components/ui/sidebar.tsx:634:24)
+    at div
+    at SidebarGroupContent (http://localhost:5001/src/components/ui/sidebar.tsx:612:3)
+    at div
+    at SidebarGroup (http://localhost:5001/src/components/ui/sidebar.tsx:531:25)
+    at div
+    at SidebarContent (http://localhost:5001/src/components/ui/sidebar.tsx:508:27)
+    at div
+    at div
+    at div
+    at Sidebar (http://localhost:5001/src/components/ui/sidebar.tsx:149:3)
+    at AppSidebar (http://localhost:5001/src/components/app-sidebar.tsx?t=1777484970133:266:22)
+    at div
+    at div
+    at Provider (http://localhost:5001/@fs/Users/gaetano1/SVILUPPO/StarGem_manager/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=ea11c9ae:38:15)
+    at TooltipProvider (http://localhost:5001/@fs/Users/gaetano1/SVILUPPO/StarGem_manager/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=ea11c9ae:160:5)
+    at SidebarProvider (http://localhost:5001/src/components/ui/sidebar.tsx:59:3)
+    at AppContent (http://localhost:5001/src/App.tsx?t=1777484970133&v=NGI_ngHts0_1147P-VxM4:606:47)
+    at Provider (http://localhost:5001/@fs/Users/gaetano1/SVILUPPO/StarGem_manager/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=ea11c9ae:38:15)
+    at TooltipProvider (http://localhost:5001/@fs/Users/gaetano1/SVILUPPO/StarGem_manager/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=ea11c9ae:160:5)
+    at AuthProvider (http://localhost:5001/src/hooks/use-auth.tsx:23:32)
+    at QueryClientProvider (http://localhost:5001/@fs/Users/gaetano1/SVILUPPO/StarGem_manager/node_modules/.vite/deps/@tanstack_react-query.js?v=ea11c9ae:3168:3)
+    at App
+BROWSER ERROR: CardDescription is not defined ReferenceError: CardDescription is not defined
+    at IscrittiPerAttivita (http://localhost:5001/src/pages/iscritti_per_attivita.tsx?t=1777484970133:1276:38)
+    at renderWithHooks (http://localhost:5001/@fs/Users/gaetano1/SVILUPPO/StarGem_manager/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=ea11c9ae:11548:26)
+    at mountIndeterminateComponent (http://localhost:5001/@fs/Users/gaetano1/SVILUPPO/StarGem_manager/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=ea11c9ae:14926:21)
+    at beginWork (http://localhost:5001/@fs/Users/gaetano1/SVILUPPO/StarGem_manager/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=ea11c9ae:15914:22)
+    at callCallback2 (http://localhost:5001/@fs/Users/gaetano1/SVILUPPO/StarGem_manager/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=ea11c9ae:3674:22)
+    at invokeGuardedCallbackDev (http://localhost:5001/@fs/Users/gaetano1/SVILUPPO/StarGem_manager/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=ea11c9ae:3699:24)
+    at invokeGuardedCallback (http://localhost:5001/@fs/Users/gaetano1/SVILUPPO/StarGem_manager/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=ea11c9ae:3733:39)
+    at beginWork$1 (http://localhost:5001/@fs/Users/gaetano1/SVILUPPO/StarGem_manager/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=ea11c9ae:19765:15)
+    at performUnitOfWork (http://localhost:5001/@fs/Users/gaetano1/SVILUPPO/StarGem_manager/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=ea11c9ae:19198:20)
+    at workLoopSync (http://localhost:5001/@fs/Users/gaetano1/SVILUPPO/StarGem_manager/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=ea11c9ae:19137:13)
+BROWSER ERROR: CardDescription is not defined ReferenceError: CardDescription is not defined
+    at IscrittiPerAttivita (http://localhost:5001/src/pages/iscritti_per_attivita.tsx?t=1777484970133:1276:38)
+    at renderWithHooks (http://localhost:5001/@fs/Users/gaetano1/SVILUPPO/StarGem_manager/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=ea11c9ae:11548:26)
+    at mountIndeterminateComponent (http://localhost:5001/@fs/Users/gaetano1/SVILUPPO/StarGem_manager/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=ea11c9ae:14926:21)
+    at beginWork (http://localhost:5001/@fs/Users/gaetano1/SVILUPPO/StarGem_manager/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=ea11c9ae:15914:22)
+    at callCallback2 (http://localhost:5001/@fs/Users/gaetano1/SVILUPPO/StarGem_manager/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=ea11c9ae:3674:22)
+    at invokeGuardedCallbackDev (http://localhost:5001/@fs/Users/gaetano1/SVILUPPO/StarGem_manager/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=ea11c9ae:3699:24)
+    at invokeGuardedCallback (http://localhost:5001/@fs/Users/gaetano1/SVILUPPO/StarGem_manager/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=ea11c9ae:3733:39)
+    at beginWork$1 (http://localhost:5001/@fs/Users/gaetano1/SVILUPPO/StarGem_manager/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=ea11c9ae:19765:15)
+    at performUnitOfWork (http://localhost:5001/@fs/Users/gaetano1/SVILUPPO/StarGem_manager/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=ea11c9ae:19198:20)
+    at workLoopSync (http://localhost:5001/@fs/Users/gaetano1/SVILUPPO/StarGem_manager/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=ea11c9ae:19137:13)
+BROWSER CONSOLE: error The above error occurred in the <IscrittiPerAttivita> component:
+
+    at IscrittiPerAttivita (http://localhost:5001/src/pages/iscritti_per_attivita.tsx?t=1777484970133:56:37)
+    at Route (http://localhost:5001/@fs/Users/gaetano1/SVILUPPO/StarGem_manager/node_modules/.vite/deps/wouter.js?v=ea11c9ae:226:16)
+    at ProtectedRoute (http://localhost:5001/src/App.tsx?t=1777484970133&v=NGI_ngHts0_1147P-VxM4:137:27)
+    at Switch (http://localhost:5001/@fs/Users/gaetano1/SVILUPPO/StarGem_manager/node_modules/.vite/deps/wouter.js?v=ea11c9ae:283:17)
+    at Router
+    at main
+    at div
+    at div
+    at div
+    at Provider (http://localhost:5001/@fs/Users/gaetano1/SVILUPPO/StarGem_manager/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=ea11c9ae:38:15)
+    at TooltipProvider (http://localhost:5001/@fs/Users/gaetano1/SVILUPPO/StarGem_manager/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=ea11c9ae:160:5)
+    at SidebarProvider (http://localhost:5001/src/components/ui/sidebar.tsx:59:3)
+    at AppContent (http://localhost:5001/src/App.tsx?t=1777484970133&v=NGI_ngHts0_1147P-VxM4:606:47)
+    at Provider (http://localhost:5001/@fs/Users/gaetano1/SVILUPPO/StarGem_manager/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=ea11c9ae:38:15)
+    at TooltipProvider (http://localhost:5001/@fs/Users/gaetano1/SVILUPPO/StarGem_manager/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=ea11c9ae:160:5)
+    at AuthProvider (http://localhost:5001/src/hooks/use-auth.tsx:23:32)
+    at QueryClientProvider (http://localhost:5001/@fs/Users/gaetano1/SVILUPPO/StarGem_manager/node_modules/.vite/deps/@tanstack_react-query.js?v=ea11c9ae:3168:3)
+    at App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+BROWSER ERROR: CardDescription is not defined ReferenceError: CardDescription is not defined
+    at IscrittiPerAttivita (http://localhost:5001/src/pages/iscritti_per_attivita.tsx?t=1777484970133:1276:38)
+    at renderWithHooks (http://localhost:5001/@fs/Users/gaetano1/SVILUPPO/StarGem_manager/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=ea11c9ae:11548:26)
+    at mountIndeterminateComponent (http://localhost:5001/@fs/Users/gaetano1/SVILUPPO/StarGem_manager/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=ea11c9ae:14926:21)
+    at beginWork (http://localhost:5001/@fs/Users/gaetano1/SVILUPPO/StarGem_manager/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=ea11c9ae:15914:22)
+    at beginWork$1 (http://localhost:5001/@fs/Users/gaetano1/SVILUPPO/StarGem_manager/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=ea11c9ae:19753:22)
+    at performUnitOfWork (http://localhost:5001/@fs/Users/gaetano1/SVILUPPO/StarGem_manager/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=ea11c9ae:19198:20)
+    at workLoopSync (http://localhost:5001/@fs/Users/gaetano1/SVILUPPO/StarGem_manager/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=ea11c9ae:19137:13)
+    at renderRootSync (http://localhost:5001/@fs/Users/gaetano1/SVILUPPO/StarGem_manager/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=ea11c9ae:19116:15)
+    at recoverFromConcurrentError (http://localhost:5001/@fs/Users/gaetano1/SVILUPPO/StarGem_manager/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=ea11c9ae:18736:28)
+    at performSyncWorkOnRoot (http://localhost:5001/@fs/Users/gaetano1/SVILUPPO/StarGem_manager/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=ea11c9ae:18879:28)

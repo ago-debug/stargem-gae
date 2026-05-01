@@ -11,6 +11,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { LiveClock } from "@/components/live-clock";
 import { AppSidebar } from "@/components/app-sidebar";
+import { CommandPalette } from "@/components/command-palette";
 import { useAuth, AuthProvider } from "@/hooks/use-auth";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { User as SelectUser } from "@shared/schema";
@@ -369,6 +370,7 @@ function AppContent() {
           </main>
         </div>
         <TeoCopilot />
+        <CommandPalette />
       </div>
     </SidebarProvider>
   );

@@ -1,86 +1,35 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useRef, useEffect } from "react";
+import { useChat } from "ai/react";
 import { useCopilot } from "@/hooks/use-copilot";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Paperclip, Send, Bot, User as UserIcon, Loader2, Sparkles, Receipt, FileText, X } from "lucide-react";
-
-interface Message {
-  id: string;
-  sender: 'user' | 'system';
-  text: string;
-  isPdf?: boolean;
-}
+import { Paperclip, Send, Bot, Loader2, FileText, X } from "lucide-react";
 
 export function TeoCopilot() {
   const { isOpen, closeCopilot } = useCopilot();
   const { user } = useAuth();
-  const [messages, setMessages] = useState<Message[]>([
-    { id: '1', sender: 'system', text: `Ciao ${user?.username || 'Utente'}, sono TeoCopilot! Come posso aiutarti oggi? ` }
-  ]);
-  const [inputVal, setInputVal] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const { messages, input, handleInputChange, handleSubmit, isLoading, append } = useChat({
+    api: '/api/chat',
+    initialMessages: [
+      { id: '1', role: 'assistant', content: `Ciao ${user?.username || 'Utente'}, sono TeoCopilot, la tua AI operativa! Come posso aiutarti oggi?` }
+    ]
+  });
 
   // Auto-scroll all'ultimo messaggio
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [messages, isTyping]);
-
-  const handleSend = async () => {
-    if (!inputVal.trim()) return;
-
-    const userMessage: Message = { id: Date.now().toString(), sender: 'user', text: inputVal };
-    setMessages(prev => [...prev, userMessage]);
-    setInputVal("");
-    setIsTyping(true);
-
-    const valLower = userMessage.text.toLowerCase();
-
-    // Mock della logica AI basata sui ruoli (RBAC) e funzioni
-    setTimeout(() => {
-      let responseText = "Ho capito. Sto elaborando la tua richiesta all'interno del gestionale...";
-
-      // Esempio logica "Manuale del gestionale"
-      if (valLower.includes('come funziona') || valLower.includes('spiega')) {
-        responseText = "Per accedere alle prenotazioni di sale o attività, apri il modulo 'Planning' a sinistra. Lì potrai vedere tutte le allocazioni. Io sono stato collegato ai manuali interni, se hai bisogno di un iter preciso, chiedi pure!";
-      } 
-      // Esempio Simulazione Lettura File (OCR)
-      else if (valLower.includes('archivia') || valLower.includes('fattur') || valLower.includes('ricevut')) {
-        if (user?.role === 'master' || user?.role === 'admin') {
-          responseText = "Ho simulato l'estrazione OCR del documento. Totale letto: €1,240.00. Ho archiviato il flusso nella sezione Contabilità. I tuoi permessi di Master ti permettono di vedere il dettaglio completo.";
-        } else {
-          responseText = "Ho protocollato il documento. Nota: in base al tuo ruolo (Segreteria), non posso mostrarti i dati finanziari macro, ma ho avvisato l'amministratore dell'avvenuto inserimento.";
-        }
-      }
-      else if (valLower.includes('permessi') || valLower.includes('ruolo') || valLower.includes('chi sono')) {
-         responseText = `Attualmente sei loggato come: ${user?.username} (Ruolo: ${user?.role}). La mia visibilità dei dati è tarata sui tuoi permessi.`;
-      }
-
-      setMessages(prev => [...prev, { id: Date.now().toString(), sender: 'system', text: responseText }]);
-      setIsTyping(false);
-    }, 1500);
-  };
+  }, [messages, isLoading]);
 
   const handleSimulateFileUpload = () => {
-     const fileMessage: Message = { id: Date.now().toString(), sender: 'user', text: "Ricevuta_Telecom_Marzo.pdf", isPdf: true };
-     setMessages(prev => [...prev, fileMessage]);
-     setIsTyping(true);
-
-     setTimeout(() => {
-         let response = "File ricevuto. Analizzo l'immagine in corso...";
-         if (user?.role === 'master' || user?.role === 'admin') {
-            response = "Ho letto la ricevuta. Importo: €120.50. Categoria: Utenze. Vuoi che lo registri in Partita Doppia nella Scheda Contabile?";
-         } else {
-            response = "Ricevuta caricata e protocollata nei file temporanei fiduciari. Aspetto il via libera dall'Amministrazione.";
-         }
-         setMessages(prev => [...prev, { id: (Date.now() + 1).toString(), sender: 'system', text: response }]);
-         setIsTyping(false);
-     }, 2000);
+    // Simula caricamento file e aggiunge messaggio di contesto
+    append({ role: 'user', content: "Ho caricato un file PDF per l'analisi (SIMULAZIONE)." });
   };
 
   if (!isOpen) return null;
@@ -110,9 +59,9 @@ export function TeoCopilot() {
         {/* Area Messaggi */}
         <ScrollArea className="flex-1 p-4 bg-slate-50/50">
           <div className="flex flex-col gap-4 pb-4">
-            {messages.map((msg) => (
-              <div key={msg.id} className={`flex gap-3 ${msg.sender === 'user' ? 'flex-row-reverse' : ''}`}>
-                {msg.sender === 'system' ? (
+            {messages.map((msg: any) => (
+              <div key={msg.id} className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
+                {msg.role !== 'user' ? (
                     <Avatar className="w-8 h-8 shrink-0 border border-slate-200 shadow-sm">
                         <AvatarImage src="/assets/teo-head-new.png" alt="Teo" className="object-cover bg-white" />
                         <AvatarFallback className="bg-primary text-white"><Bot className="w-4 h-4" /></AvatarFallback>
@@ -124,18 +73,12 @@ export function TeoCopilot() {
                         </AvatarFallback>
                     </Avatar>
                 )}
-                <div className={`filter max-w-[80%] rounded-xl p-3 text-sm shadow-sm ${msg.sender === 'system' ? 'bg-white border text-slate-800' : 'bg-primary text-white'}`}>
-                  {msg.isPdf ? (
-                     <div className="flex items-center gap-2 font-medium">
-                        <FileText className="w-4 h-4" /> {msg.text}
-                     </div>
-                  ) : (
-                     msg.text
-                  )}
+                <div className={`filter max-w-[80%] rounded-xl p-3 text-sm shadow-sm whitespace-pre-wrap ${msg.role !== 'user' ? 'bg-white border text-slate-800' : 'bg-primary text-white'}`}>
+                  {msg.content}
                 </div>
               </div>
             ))}
-            {isTyping && (
+            {isLoading && messages[messages.length - 1]?.role === 'user' && (
                 <div className="flex gap-3">
                     <Avatar className="w-8 h-8 shrink-0 border border-slate-200 shadow-sm">
                         <AvatarImage src="/assets/teo-head-new.png" alt="Teo" className="object-cover bg-white" />
@@ -159,19 +102,19 @@ export function TeoCopilot() {
                 </Button>
                 <form 
                     className="flex flex-1 gap-2 relative"
-                    onSubmit={(e) => { e.preventDefault(); handleSend(); }}
+                    onSubmit={handleSubmit}
                 >
                     <Input 
-                        value={inputVal}
-                        onChange={(e) => setInputVal(e.target.value)}
-                        placeholder="Chiedi a Teo o condividi documenti..."
+                        value={input}
+                        onChange={handleInputChange}
+                        placeholder="Chiedi a Teo..."
                         className="rounded-full pr-10 focus-visible:ring-primary/50 border-slate-300"
-                        disabled={isTyping}
+                        disabled={isLoading}
                     />
                     <Button 
                         type="submit" 
                         size="icon" 
-                        disabled={!inputVal.trim() || isTyping} 
+                        disabled={!input.trim() || isLoading} 
                         className="absolute right-1 top-1 bottom-1 h-8 w-8 rounded-full bg-primary"
                     >
                         <Send className="w-4 h-4" />

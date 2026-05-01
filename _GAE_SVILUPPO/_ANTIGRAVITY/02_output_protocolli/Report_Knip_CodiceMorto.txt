@@ -1,0 +1,816 @@
+Unused files (678)
+add_gbrh_payments.js                                                    
+add_workshop_payments.js                                                
+analisi-excel.ts                                                        
+analyze_trash.mjs                                                       
+append_gemteam_schema.ts                                                
+audit_script.ts                                                         
+auditQuery.ts                                                           
+auditQuery2.ts                                                          
+auditQuery3.ts                                                          
+auditQuery4.ts                                                          
+auditQuery5.ts                                                          
+auditQuery6.ts                                                          
+auditQuery7_fixed.ts                                                    
+auditQuery7.ts                                                          
+auditQuery8.ts                                                          
+auditQuery9.ts                                                          
+change_bot.ts                                                           
+check_2425_enrollments.js                                               
+check_2425_skus.js                                                      
+check_2425.js                                                           
+check_2627.js                                                           
+check_activities.js                                                     
+check_ad_col.js                                                         
+check_all_duplicates.js                                                 
+check_api.js                                                            
+check_bitrix_2425.js                                                    
+check_bitrix_gbrh.js                                                    
+check_bitrix_multiple.js                                                
+check_bookings_temp.ts                                                  
+check_categories.js                                                     
+check_categories.mjs                                                    
+check_categories.ts                                                     
+check_categories2.js                                                    
+check_course_types.js                                                   
+check_dashboard_totals.js                                               
+check_dates.ts                                                          
+check_db_skus.js                                                        
+check_db.js                                                             
+check_dots_excel.js                                                     
+check_dots.js                                                           
+check_duplicates.js                                                     
+check_elenco_2425.js                                                    
+check_elenco_payments.js                                                
+check_elenco.js                                                         
+check_july.ts                                                           
+check_members_schema.js                                                 
+check_men.mjs                                                           
+check_orphans.js                                                        
+check_orphans.ts                                                        
+check_payments_bitrix.js                                                
+check_phones.mjs                                                        
+check_seasons.js                                                        
+check_storico_sigla.js                                                  
+check_valentina.js                                                      
+check_vite.cjs                                                          
+check_workshop_cols.js                                                  
+check_workshop_courses.js                                               
+check_workshops_bitrix.js                                               
+check_workshops.js                                                      
+checkin_bot.ts                                                          
+checkout_bot.ts                                                         
+clean_strategic.ts                                                      
+cleanup_bot.ts                                                          
+cleanup_bot2.ts                                                         
+client/src/components/category-list-manager-dialog.tsx                  
+client/src/components/member-edit-dialog.tsx                            
+client/src/components/notification-bell.tsx                             
+client/src/components/ui/aspect-ratio.tsx                               
+client/src/components/ui/breadcrumb.tsx                                 
+client/src/components/ui/carousel.tsx                                   
+client/src/components/ui/chart.tsx                                      
+client/src/components/ui/drawer.tsx                                     
+client/src/components/ui/hover-card.tsx                                 
+client/src/components/ui/input-otp.tsx                                  
+client/src/components/ui/menubar.tsx                                    
+client/src/components/ui/navigation-menu.tsx                            
+client/src/components/ui/pagination.tsx                                 
+client/src/components/ui/radio-group.tsx                                
+client/src/components/ui/resizable.tsx                                  
+client/src/components/ui/slider.tsx                                     
+client/src/lib/authUtils.ts                                             
+client/src/lib/comuni.ts                                                
+client/src/pages/client-categories.tsx                                  
+client/src/pages/knowledge.tsx                                          
+compare_counts.ts                                                       
+count_allenamenti.ts                                                    
+count_shifts.ts                                                         
+create_audit_report.js                                                  
+create_tables.ts                                                        
+cross_reference_bitrix.js                                               
+db_counts.ts                                                            
+db_mapping.js                                                           
+delete_ghosts.ts                                                        
+delete_tests.ts                                                         
+delete_tests2.ts                                                        
+desc_matrix.ts                                                          
+detailed_match_2.js                                                     
+detailed_match.js                                                       
+discovery_10.ts                                                         
+discovery_audit.ts                                                      
+discovery_bis.ts                                                        
+dry_run_import.js                                                       
+dump_db.js                                                              
+dump_users.ts                                                           
+dump.ts                                                                 
+e2e_preflight.ts                                                        
+e2e_setup.ts                                                            
+e2e_verify_diario.ts                                                    
+e2e_verify.ts                                                           
+execute_002.ts                                                          
+execute_003.ts                                                          
+execute_004.ts                                                          
+execute_008.ts                                                          
+execute_f1_002.ts                                                       
+execute_wipe_reload.js                                                  
+f4_execution.ts                                                         
+f6_wipe_activities.ts                                                   
+f7_audit_enrollments.ts                                                 
+f7_columns.ts                                                           
+f7_count_enrollments.ts                                                 
+f8_check_courses.ts                                                     
+f9_wipe_u_enrollments.ts                                                
+find_cols_2425.js                                                       
+find_unused_tables.js                                                   
+fix_bot_role.ts                                                         
+fix_courses_pr.js                                                       
+fix_courses_types.js                                                    
+fix_data_mapping.cjs                                                    
+fix_iscritti.js                                                         
+fix_remaining_storico.js                                                
+fix_rounded_dates.ts                                                    
+fix_routes.ts                                                           
+fix_scheda_allenamento.cjs                                              
+fix_schema.ts                                                           
+fix_season_id.js                                                        
+fix_season_id2.js                                                       
+fix_seasons_by_sku.js                                                   
+fix_workshops_db.js                                                     
+flag_discrepancies.js                                                   
+gen-presenze-sql.ts                                                     
+gen-sql.ts                                                              
+generate_d.mjs                                                          
+generate_db_map.ts                                                      
+generate_full_db_excel.js                                               
+generate_general_map.ts                                                 
+get_8_members.ts                                                        
+get_bitrix_headers.js                                                   
+get_browser_error.cjs                                                   
+get_cf_members.ts                                                       
+get_dip.ts                                                              
+import_presenze.ts                                                      
+inject_apis.ts                                                          
+inspect_4_files.js                                                      
+inspect_bitrix_math.js                                                  
+inspect_bitrix.js                                                       
+inspect_excel.js                                                        
+inspect_excel2.js                                                       
+inspect_financials.js                                                   
+list_ghosts.ts                                                          
+mappa_dipendenti.ts                                                     
+match_enrollments.js                                                    
+match_fileA.js                                                          
+match_ws.js                                                             
+members_columns.mjs                                                     
+migrate-logic.ts                                                        
+migrate-script.ts                                                       
+move_files.mjs                                                          
+new_turni_markup.tsx                                                    
+new_turni.tsx                                                           
+patch_app.cjs                                                           
+patch_calendar_colors.cjs                                               
+patch_calendar_height.cjs                                               
+patch_calendar_highlight.cjs                                            
+patch_calendar_tags.cjs                                                 
+patch_modal.cjs                                                         
+patch_remove_hash.cjs                                                   
+patch_routes.ts                                                         
+patch_scheda_corso_filters.cjs                                          
+patch_scheda_corso_modifica.cjs                                         
+patch_scheda.cjs                                                        
+patch/patch_area_tesserati.ts                                           
+patch/test_area_tesserati.ts                                            
+patch/test_client_account.ts                                            
+preview-debug.ts                                                        
+preview-names.ts                                                        
+preview-presenze.ts                                                     
+preview-summ.ts                                                         
+protocol-003.ts                                                         
+puppeteer-test.cjs                                                      
+puppeteer-test.js                                                       
+query_api.mjs                                                           
+query_audit.mjs                                                         
+query_b3.mjs                                                            
+query_bot.ts                                                            
+query_courses.ts                                                        
+query_db.mjs                                                            
+query_db2.mjs                                                           
+query_enrollments.js                                                    
+query_f1003.mjs                                                         
+query_logs.mjs                                                          
+query_orphan_enrollments.js                                             
+query_orphan_members.js                                                 
+query_routes.js                                                         
+query_screening.mjs                                                     
+query_test_bambini.ts                                                   
+query_test_types.ts                                                     
+query_ws_enrollments.js                                                 
+query.js                                                                
+query2.js                                                               
+query3.js                                                               
+queryJasir.ts                                                           
+read_excel_presenze.ts                                                  
+rename_abc.mjs                                                          
+rename_others.mjs                                                       
+research_003.ts                                                         
+research_004.ts                                                         
+reset_bot.ts                                                            
+scratch_summary.cjs                                                     
+scratch_ui.tsx                                                          
+scratch.cjs                                                             
+scratch.tsx                                                             
+scratch/analyze_api_usage.cjs                                           
+scratch/analyze_obsolete.cjs                                            
+scratch/analyze_sidebar.cjs                                             
+scratch/analyze.cjs                                                     
+scratch/analyze.js                                                      
+scratch/analyze2.cjs                                                    
+scratch/analyze3.cjs                                                    
+scratch/audit_016.mjs                                                   
+scratch/audit_016.ts                                                    
+scratch/audit_duplicates.mjs                                            
+scratch/audit_enroll.mjs                                                
+scratch/audit_F1_018.mjs                                                
+scratch/audit_F1_021.mjs                                                
+scratch/audit_lezioni_ind.mjs                                           
+scratch/audit_sku.mjs                                                   
+scratch/audit.mjs                                                       
+scratch/audit2.mjs                                                      
+scratch/audit3.mjs                                                      
+scratch/audit4.mjs                                                      
+scratch/check_act_type.mjs                                              
+scratch/check_courses_season.mjs                                        
+scratch/check_courses.mjs                                               
+scratch/check_courses2.mjs                                              
+scratch/check_db.mjs                                                    
+scratch/check_enrolls_breakdown.mjs                                     
+scratch/check_enrolls.mjs                                               
+scratch/check_prenotazioni.mjs                                          
+scratch/check_totals.mjs                                                
+scratch/clean_duplicates.mjs                                            
+scratch/debug_playwright.cjs                                            
+scratch/debug_puppeteer.js                                              
+scratch/execute_delete.mjs                                              
+scratch/execute_update.mjs                                              
+scratch/f1_013_light_pre.mjs                                            
+scratch/f1_013_light_update.mjs                                         
+scratch/iscritti_per_attivita_backup.tsx                                
+scratch/patch_f2_015_part2.mjs                                          
+scratch/patch_f2_015.mjs                                                
+scratch/patch_f2_017_part2.mjs                                          
+scratch/patch_f2_017.mjs                                                
+scratch/patch_f2_018b_dm.mjs                                            
+scratch/patch_f2_018b_li.mjs                                            
+scratch/patch_f2_022.mjs                                                
+scratch/pre_delete.mjs                                                  
+scratch/pre_update_audit.mjs                                            
+scratch/refactor.mjs                                                    
+scratch/refactor2.mjs                                                   
+scratch/rename_status_files.cjs                                         
+scratch/test_api_enr.mjs                                                
+scratch/test_api.mjs                                                    
+scratch/test_icon.js                                                    
+scratch/test_lucide.cjs                                                 
+scratch/test_lucide.js                                                  
+scratch/test.js                                                         
+scratch/update_dates.cjs                                                
+scratch2.cjs                                                            
+scratch3.cjs                                                            
+scratch4.cjs                                                            
+scratch5.cjs                                                            
+scratch6.cjs                                                            
+scratch7.cjs                                                            
+scratch8.cjs                                                            
+scripts/_archive/add-bottom-sections-db.ts                              
+scripts/_archive/add-column.ts                                          
+scripts/_archive/add-crm-columns.ts                                     
+scripts/_archive/alter_enrollments.ts                                   
+scripts/_archive/alter-db-photo.ts                                      
+scripts/_archive/alter-db.ts                                            
+scripts/_archive/apply-migration-force.ts                               
+scripts/_archive/check-db.ts                                            
+scripts/_archive/check-tables.ts                                        
+scripts/_archive/diagnose_db.ts                                         
+scripts/_archive/fix_db_schema.ts                                       
+scripts/_archive/fix_production_schema.ts                               
+scripts/_archive/migrate_b.ts                                           
+scripts/_archive/migrate-courses-quote.ts                               
+scripts/_archive/migrate-instructors.ts                                 
+scripts/_archive/migrate-permissions.cjs                                
+scripts/_archive/migrate-quotes.ts                                      
+scripts/_archive/migrate.ts                                             
+scripts/alter_f1_017.ts                                                 
+scripts/check-mariadb.js                                                
+scripts/db-apply.ts                                                     
+scripts/import_soci.ts                                                  
+scripts/patch_app_2.cjs                                                 
+scripts/patch_app.cjs                                                   
+scripts/patch_course_modals.cjs                                         
+scripts/patch_course.cjs                                                
+scripts/patch_editor_comments.cjs                                       
+scripts/patch_f2_029_1.cjs                                              
+scripts/patch_f2_029_2.cjs                                              
+scripts/patch_f2_029_4.cjs                                              
+scripts/patch_inline_editor.cjs                                         
+scripts/patch_inline_pennini.cjs                                        
+scripts/patch_maschera.cjs                                              
+scripts/patch_payment.cjs                                               
+scripts/patch_permessi.cjs                                              
+scripts/patch_sidebar.cjs                                               
+scripts/query_dates.ts                                                  
+scripts/query_f2_029_preview.ts                                         
+scripts/query_f2_029.ts                                                 
+scripts/query_f2_034.ts                                                 
+scripts/query_f2_035.ts                                                 
+scripts/query_f2_036_colors.ts                                          
+scripts/query_f2_036_names.ts                                           
+scripts/query_f2_036.ts                                                 
+scripts/query_hidden.ts                                                 
+scripts/query_lists.ts                                                  
+scripts/query_shifts.ts                                                 
+scripts/query_tables_all.ts                                             
+scripts/query_tables.ts                                                 
+scripts/query_team_scheduled_shifts_columns.ts                          
+scripts/query_team_scheduled_shifts.ts                                  
+scripts/query_team_shifts.ts                                            
+scripts/query_templates.ts                                              
+scripts/query-db.ts                                                     
+scripts/rewrite_status.cjs                                              
+scripts/run-f1-009-b.ts                                                 
+scripts/run-f1-009-c.ts                                                 
+scripts/run-f1-009.ts                                                   
+scripts/run-f1-011-b.ts                                                 
+scripts/run-f1-012-a.ts                                                 
+scripts/run-f1-012-b.ts                                                 
+scripts/run-f1-013-db.ts                                                
+scripts/run-f1-015-db.ts                                                
+scripts/run-f1-015-update.ts                                            
+scripts/run-f1-016-update.ts                                            
+scripts/scaffol_dummy_excel.ts                                          
+scripts/seed_stato_iscrizione.ts                                        
+scripts/temp-query.ts                                                   
+scripts/test-filters.ts                                                 
+scripts/test-mailer.ts                                                  
+scripts/test-query.ts                                                   
+scripts/test-session.ts                                                 
+scripts/validate_cf.ts                                                  
+scripts/verify_import.ts                                                
+seed_005_part2.ts                                                       
+seed_005.ts                                                             
+seed_006.ts                                                             
+seed_007.ts                                                             
+seed_008.ts                                                             
+seed_011.ts                                                             
+seed_gemteam.ts                                                         
+server/add_course_columns.ts                                            
+server/delete_duplicates.ts                                             
+server/describe.ts                                                      
+server/fix_db.ts                                                        
+server/import-from-sheets.ts                                            
+server/list_duplicates.ts                                               
+server/run_migration.ts                                                 
+server/scripts/add_custom_fields.ts                                     
+server/scripts/create_strategic_events.ts                               
+server/scripts/recalc-crm.ts                                            
+server/scripts/seed-turni.ts                                            
+server/scripts/wipe_dirty_shifts.ts                                     
+server/seed-all-comuni.ts                                               
+server/seed-custom-lists.ts                                             
+server/seed-elenchi.ts                                                  
+server/seed-locations.ts                                                
+server/test_courses.ts                                                  
+server/test_drizzle_bug.ts                                              
+server/update-members-email-phone.ts                                    
+server/utils/season.test.ts                                             
+super_migration.js                                                      
+sync_bitrix_v2.js                                                       
+sync_bitrix.js                                                          
+temp_import/check_member.ts                                             
+temp_import/check_users_list.ts                                         
+temp_import/check_users.ts                                              
+temp_import/clear_payments.ts                                           
+temp_import/client/src/App.tsx                                          
+temp_import/client/src/components/app-sidebar.tsx                       
+temp_import/client/src/components/course-selector.tsx                   
+temp_import/client/src/components/member-edit-dialog.tsx                
+temp_import/client/src/components/membership-card.tsx                   
+temp_import/client/src/components/ui/accordion.tsx                      
+temp_import/client/src/components/ui/alert-dialog.tsx                   
+temp_import/client/src/components/ui/alert.tsx                          
+temp_import/client/src/components/ui/aspect-ratio.tsx                   
+temp_import/client/src/components/ui/autocomplete-input.tsx             
+temp_import/client/src/components/ui/avatar.tsx                         
+temp_import/client/src/components/ui/badge.tsx                          
+temp_import/client/src/components/ui/breadcrumb.tsx                     
+temp_import/client/src/components/ui/button.tsx                         
+temp_import/client/src/components/ui/calendar.tsx                       
+temp_import/client/src/components/ui/card.tsx                           
+temp_import/client/src/components/ui/carousel.tsx                       
+temp_import/client/src/components/ui/chart.tsx                          
+temp_import/client/src/components/ui/checkbox.tsx                       
+temp_import/client/src/components/ui/collapsible.tsx                    
+temp_import/client/src/components/ui/command.tsx                        
+temp_import/client/src/components/ui/context-menu.tsx                   
+temp_import/client/src/components/ui/dialog.tsx                         
+temp_import/client/src/components/ui/drawer.tsx                         
+temp_import/client/src/components/ui/dropdown-menu.tsx                  
+temp_import/client/src/components/ui/form.tsx                           
+temp_import/client/src/components/ui/hover-card.tsx                     
+temp_import/client/src/components/ui/input-otp.tsx                      
+temp_import/client/src/components/ui/input.tsx                          
+temp_import/client/src/components/ui/label.tsx                          
+temp_import/client/src/components/ui/location-autocomplete.tsx          
+temp_import/client/src/components/ui/member-search.tsx                  
+temp_import/client/src/components/ui/menubar.tsx                        
+temp_import/client/src/components/ui/navigation-menu.tsx                
+temp_import/client/src/components/ui/pagination.tsx                     
+temp_import/client/src/components/ui/popover.tsx                        
+temp_import/client/src/components/ui/progress.tsx                       
+temp_import/client/src/components/ui/radio-group.tsx                    
+temp_import/client/src/components/ui/resizable.tsx                      
+temp_import/client/src/components/ui/scroll-area.tsx                    
+temp_import/client/src/components/ui/searchable-select.tsx              
+temp_import/client/src/components/ui/select.tsx                         
+temp_import/client/src/components/ui/separator.tsx                      
+temp_import/client/src/components/ui/sheet.tsx                          
+temp_import/client/src/components/ui/sidebar.tsx                        
+temp_import/client/src/components/ui/skeleton.tsx                       
+temp_import/client/src/components/ui/slider.tsx                         
+temp_import/client/src/components/ui/switch.tsx                         
+temp_import/client/src/components/ui/table.tsx                          
+temp_import/client/src/components/ui/tabs.tsx                           
+temp_import/client/src/components/ui/textarea.tsx                       
+temp_import/client/src/components/ui/toast.tsx                          
+temp_import/client/src/components/ui/toaster.tsx                        
+temp_import/client/src/components/ui/toggle-group.tsx                   
+temp_import/client/src/components/ui/toggle.tsx                         
+temp_import/client/src/components/ui/tooltip.tsx                        
+temp_import/client/src/hooks/use-auth.tsx                               
+temp_import/client/src/hooks/use-mobile.tsx                             
+temp_import/client/src/hooks/use-toast.ts                               
+temp_import/client/src/index.css                                        
+temp_import/client/src/lib/authUtils.ts                                 
+temp_import/client/src/lib/fiscalCodeUtils.ts                           
+temp_import/client/src/lib/queryClient.ts                               
+temp_import/client/src/lib/utils.ts                                     
+temp_import/client/src/main.tsx                                         
+temp_import/client/src/pages/access-control.tsx                         
+temp_import/client/src/pages/accounting-sheet.tsx                       
+temp_import/client/src/pages/admin-panel.tsx                            
+temp_import/client/src/pages/anagrafica-home.tsx                        
+temp_import/client/src/pages/auth-page.tsx                              
+temp_import/client/src/pages/booking-services.tsx                       
+temp_import/client/src/pages/calendar.tsx                               
+temp_import/client/src/pages/card-generator.tsx                         
+temp_import/client/src/pages/categories.tsx                             
+temp_import/client/src/pages/client-categories.tsx                      
+temp_import/client/src/pages/course-enrollments.tsx                     
+temp_import/client/src/pages/courses.tsx                                
+temp_import/client/src/pages/dashboard.tsx                              
+temp_import/client/src/pages/import-data.tsx                            
+temp_import/client/src/pages/instructors.tsx                            
+temp_import/client/src/pages/landing.tsx                                
+temp_import/client/src/pages/member-dashboard.tsx                       
+temp_import/client/src/pages/members.tsx                                
+temp_import/client/src/pages/memberships.tsx                            
+temp_import/client/src/pages/not-found.tsx                              
+temp_import/client/src/pages/payment-methods.tsx                        
+temp_import/client/src/pages/payments.tsx                               
+temp_import/client/src/pages/reports.tsx                                
+temp_import/client/src/pages/reset-stagione.tsx                         
+temp_import/client/src/pages/studio-bookings.tsx                        
+temp_import/client/src/pages/studios.tsx                                
+temp_import/client/src/pages/test-gae.tsx                               
+temp_import/client/src/pages/utenti-permessi.tsx                        
+temp_import/client/src/pages/workshops.tsx                              
+temp_import/drizzle.config.ts                                           
+temp_import/find_member.ts                                              
+temp_import/fix_calendar.cjs                                            
+temp_import/init-season.js                                              
+temp_import/init-season.ts                                              
+temp_import/migrate_studio_instructor.ts                                
+temp_import/postcss.config.js                                           
+temp_import/reset_password.ts                                           
+temp_import/scripts/generate_large_csv.ts                               
+temp_import/scripts/seed_admin.ts                                       
+temp_import/scripts/test_import.ts                                      
+temp_import/scripts/test_mysql.ts                                       
+temp_import/server/auth.ts                                              
+temp_import/server/db.ts                                                
+temp_import/server/google-auth.ts                                       
+temp_import/server/google-calendar.ts                                   
+temp_import/server/google-sheets.ts                                     
+temp_import/server/import-from-sheets.ts                                
+temp_import/server/index.ts                                             
+temp_import/server/migrate-photo.ts                                     
+temp_import/server/routes.ts                                            
+temp_import/server/seed-all-comuni.ts                                   
+temp_import/server/seed-locations.ts                                    
+temp_import/server/storage.ts                                           
+temp_import/server/update-members-email-phone.ts                        
+temp_import/server/vite.ts                                              
+temp_import/shared/schema.ts                                            
+temp_import/tailwind.config.ts                                          
+temp_import/test_bookings.ts                                            
+temp_import/test_db.js                                                  
+temp_import/vite.config.ts                                              
+temp_project_complete/check_member.ts                                   
+temp_project_complete/check_users_list.ts                               
+temp_project_complete/check_users.ts                                    
+temp_project_complete/clear_payments.ts                                 
+temp_project_complete/client/src/App.tsx                                
+temp_project_complete/client/src/components/app-sidebar.tsx             
+temp_project_complete/client/src/components/course-selector.tsx         
+temp_project_complete/client/src/components/member-edit-dialog.tsx      
+temp_project_complete/client/src/components/membership-card.tsx         
+temp_project_complete/client/src/components/ui/accordion.tsx            
+temp_project_complete/client/src/components/ui/alert-dialog.tsx         
+temp_project_complete/client/src/components/ui/alert.tsx                
+temp_project_complete/client/src/components/ui/aspect-ratio.tsx         
+temp_project_complete/client/src/components/ui/autocomplete-input.tsx   
+temp_project_complete/client/src/components/ui/avatar.tsx               
+temp_project_complete/client/src/components/ui/badge.tsx                
+temp_project_complete/client/src/components/ui/breadcrumb.tsx           
+temp_project_complete/client/src/components/ui/button.tsx               
+temp_project_complete/client/src/components/ui/calendar.tsx             
+temp_project_complete/client/src/components/ui/card.tsx                 
+temp_project_complete/client/src/components/ui/carousel.tsx             
+temp_project_complete/client/src/components/ui/chart.tsx                
+temp_project_complete/client/src/components/ui/checkbox.tsx             
+temp_project_complete/client/src/components/ui/collapsible.tsx          
+temp_project_complete/client/src/components/ui/command.tsx              
+temp_project_complete/client/src/components/ui/context-menu.tsx         
+temp_project_complete/client/src/components/ui/dialog.tsx               
+temp_project_complete/client/src/components/ui/drawer.tsx               
+temp_project_complete/client/src/components/ui/dropdown-menu.tsx        
+temp_project_complete/client/src/components/ui/form.tsx                 
+temp_project_complete/client/src/components/ui/hover-card.tsx           
+temp_project_complete/client/src/components/ui/input-otp.tsx            
+temp_project_complete/client/src/components/ui/input.tsx                
+temp_project_complete/client/src/components/ui/label.tsx                
+temp_project_complete/client/src/components/ui/location-autocomplete.tsx
+temp_project_complete/client/src/components/ui/member-search.tsx        
+temp_project_complete/client/src/components/ui/menubar.tsx              
+temp_project_complete/client/src/components/ui/navigation-menu.tsx      
+temp_project_complete/client/src/components/ui/pagination.tsx           
+temp_project_complete/client/src/components/ui/popover.tsx              
+temp_project_complete/client/src/components/ui/progress.tsx             
+temp_project_complete/client/src/components/ui/radio-group.tsx          
+temp_project_complete/client/src/components/ui/resizable.tsx            
+temp_project_complete/client/src/components/ui/scroll-area.tsx          
+temp_project_complete/client/src/components/ui/searchable-select.tsx    
+temp_project_complete/client/src/components/ui/select.tsx               
+temp_project_complete/client/src/components/ui/separator.tsx            
+temp_project_complete/client/src/components/ui/sheet.tsx                
+temp_project_complete/client/src/components/ui/sidebar.tsx              
+temp_project_complete/client/src/components/ui/skeleton.tsx             
+temp_project_complete/client/src/components/ui/slider.tsx               
+temp_project_complete/client/src/components/ui/switch.tsx               
+temp_project_complete/client/src/components/ui/table.tsx                
+temp_project_complete/client/src/components/ui/tabs.tsx                 
+temp_project_complete/client/src/components/ui/textarea.tsx             
+temp_project_complete/client/src/components/ui/toast.tsx                
+temp_project_complete/client/src/components/ui/toaster.tsx              
+temp_project_complete/client/src/components/ui/toggle-group.tsx         
+temp_project_complete/client/src/components/ui/toggle.tsx               
+temp_project_complete/client/src/components/ui/tooltip.tsx              
+temp_project_complete/client/src/hooks/use-auth.tsx                     
+temp_project_complete/client/src/hooks/use-mobile.tsx                   
+temp_project_complete/client/src/hooks/use-toast.ts                     
+temp_project_complete/client/src/index.css                              
+temp_project_complete/client/src/lib/authUtils.ts                       
+temp_project_complete/client/src/lib/fiscalCodeUtils.ts                 
+temp_project_complete/client/src/lib/queryClient.ts                     
+temp_project_complete/client/src/lib/utils.ts                           
+temp_project_complete/client/src/main.tsx                               
+temp_project_complete/client/src/pages/access-control.tsx               
+temp_project_complete/client/src/pages/accounting-sheet.tsx             
+temp_project_complete/client/src/pages/admin-panel.tsx                  
+temp_project_complete/client/src/pages/anagrafica-home.tsx              
+temp_project_complete/client/src/pages/auth-page.tsx                    
+temp_project_complete/client/src/pages/booking-services.tsx             
+temp_project_complete/client/src/pages/calendar.tsx                     
+temp_project_complete/client/src/pages/card-generator.tsx               
+temp_project_complete/client/src/pages/categories.tsx                   
+temp_project_complete/client/src/pages/client-categories.tsx            
+temp_project_complete/client/src/pages/course-enrollments.tsx           
+temp_project_complete/client/src/pages/courses.tsx                      
+temp_project_complete/client/src/pages/dashboard.tsx                    
+temp_project_complete/client/src/pages/import-data.tsx                  
+temp_project_complete/client/src/pages/instructors.tsx                  
+temp_project_complete/client/src/pages/landing.tsx                      
+temp_project_complete/client/src/pages/member-dashboard.tsx             
+temp_project_complete/client/src/pages/members.tsx                      
+temp_project_complete/client/src/pages/memberships.tsx                  
+temp_project_complete/client/src/pages/not-found.tsx                    
+temp_project_complete/client/src/pages/payment-methods.tsx              
+temp_project_complete/client/src/pages/payments.tsx                     
+temp_project_complete/client/src/pages/reports.tsx                      
+temp_project_complete/client/src/pages/reset-stagione.tsx               
+temp_project_complete/client/src/pages/studio-bookings.tsx              
+temp_project_complete/client/src/pages/studios.tsx                      
+temp_project_complete/client/src/pages/test-gae.tsx                     
+temp_project_complete/client/src/pages/utenti-permessi.tsx              
+temp_project_complete/client/src/pages/workshops.tsx                    
+temp_project_complete/drizzle.config.ts                                 
+temp_project_complete/find_member.ts                                    
+temp_project_complete/fix_calendar.cjs                                  
+temp_project_complete/init-season.js                                    
+temp_project_complete/init-season.ts                                    
+temp_project_complete/migrate_studio_instructor.ts                      
+temp_project_complete/postcss.config.js                                 
+temp_project_complete/reset_password.ts                                 
+temp_project_complete/scripts/generate_large_csv.ts                     
+temp_project_complete/scripts/seed_admin.ts                             
+temp_project_complete/scripts/test_import.ts                            
+temp_project_complete/scripts/test_mysql.ts                             
+temp_project_complete/server/auth.ts                                    
+temp_project_complete/server/db.ts                                      
+temp_project_complete/server/google-auth.ts                             
+temp_project_complete/server/google-calendar.ts                         
+temp_project_complete/server/google-sheets.ts                           
+temp_project_complete/server/import-from-sheets.ts                      
+temp_project_complete/server/index.ts                                   
+temp_project_complete/server/migrate-photo.ts                           
+temp_project_complete/server/routes.ts                                  
+temp_project_complete/server/seed-all-comuni.ts                         
+temp_project_complete/server/seed-locations.ts                          
+temp_project_complete/server/storage.ts                                 
+temp_project_complete/server/update-members-email-phone.ts              
+temp_project_complete/server/vite.ts                                    
+temp_project_complete/shared/schema.ts                                  
+temp_project_complete/tailwind.config.ts                                
+temp_project_complete/test_bookings.ts                                  
+temp_project_complete/test_db.js                                        
+temp_project_complete/vite.config.ts                                    
+test_db_cols.ts                                                         
+test_db_map.mjs                                                         
+test_db.mjs                                                             
+test_db.ts                                                              
+test_db2.ts                                                             
+test_eval_dates.ts                                                      
+test_f1_036.ts                                                          
+test_queries_f1.ts                                                      
+test_queries_f2.ts                                                      
+test_queries_f3.ts                                                      
+test_queries_f4.ts                                                      
+test_queries_f5_exec.ts                                                 
+test_queries_f5.ts                                                      
+test_scroll.cjs                                                         
+test_split.ts                                                           
+test-dup-error.ts                                                       
+test-dups.ts                                                            
+test-eventi-drizzle.ts                                                  
+test-login.ts                                                           
+test-mysql2-uri.ts                                                      
+test-out-bug.ts                                                         
+test-out-bug2.ts                                                        
+test-out.ts                                                             
+test-pool.ts                                                            
+test-presence.ts                                                        
+tmp-test-firme.ts                                                       
+transaction_f1003.mjs                                                   
+update_8_members.ts                                                     
+update_fg.mjs                                                           
+update_members_data.js                                                  
+update_pwd.ts                                                           
+update-docs.js                                                          
+verify_duplicates.js                                                    
+Unused dependencies (23)
+@jridgewell/trace-mapping        package.json:27:6 
+@radix-ui/react-aspect-ratio     package.json:31:6 
+@radix-ui/react-hover-card       package.json:38:6 
+@radix-ui/react-menubar          package.json:40:6 
+@radix-ui/react-navigation-menu  package.json:41:6 
+@radix-ui/react-radio-group      package.json:44:6 
+@radix-ui/react-slider           package.json:48:6 
+@types/memoizee                  package.json:57:6 
+embla-carousel-react             package.json:68:6 
+framer-motion                    package.json:74:6 
+glob                             package.json:75:6 
+input-otp                        package.json:78:6 
+memoizee                         package.json:81:6 
+memorystore                      package.json:82:6 
+next-themes                      package.json:85:6 
+openid-client                    package.json:87:6 
+react-icons                      package.json:96:6 
+react-resizable-panels           package.json:97:6 
+recharts                         package.json:98:6 
+tw-animate-css                   package.json:101:6
+vaul                             package.json:102:6
+ws                               package.json:104:6
+zod-validation-error             package.json:107:6
+Unused devDependencies (4)
+@tailwindcss/vite          package.json:112:6
+@types/express-rate-limit  package.json:115:6
+@types/ws                  package.json:123:6
+ts-morph                   package.json:133:6
+Unlisted dependencies (1)
+nanoid  server/vite.ts:7:24
+Unused exports (79)
+INTERNAL_TAGS                         client/src/components/multi-select-internal.tsx:11:14
+STATUS_OPTIONS                        client/src/components/multi-select-status.tsx:11:14  
+AlertDialogPortal                     client/src/components/ui/alert-dialog.tsx:129:3      
+AlertDialogOverlay                    client/src/components/ui/alert-dialog.tsx:130:3      
+badgeVariants                         client/src/components/ui/badge.tsx:38:17             
+CommandDialog                         client/src/components/ui/command.tsx:143:3           
+CommandShortcut                       client/src/components/ui/command.tsx:149:3           
+CommandSeparator                      client/src/components/ui/command.tsx:150:3           
+ContextMenuCheckboxItem               client/src/components/ui/context-menu.tsx:187:3      
+ContextMenuRadioItem                  client/src/components/ui/context-menu.tsx:188:3      
+ContextMenuLabel                      client/src/components/ui/context-menu.tsx:189:3      
+ContextMenuShortcut                   client/src/components/ui/context-menu.tsx:191:3      
+ContextMenuGroup                      client/src/components/ui/context-menu.tsx:192:3      
+ContextMenuPortal                     client/src/components/ui/context-menu.tsx:193:3      
+ContextMenuRadioGroup                 client/src/components/ui/context-menu.tsx:197:3      
+DialogPortal                          client/src/components/ui/dialog.tsx:113:3            
+DialogOverlay                         client/src/components/ui/dialog.tsx:114:3            
+DialogClose                           client/src/components/ui/dialog.tsx:115:3            
+DropdownMenuCheckboxItem              client/src/components/ui/dropdown-menu.tsx:187:3     
+DropdownMenuRadioItem                 client/src/components/ui/dropdown-menu.tsx:188:3     
+DropdownMenuShortcut                  client/src/components/ui/dropdown-menu.tsx:191:3     
+DropdownMenuGroup                     client/src/components/ui/dropdown-menu.tsx:192:3     
+DropdownMenuPortal                    client/src/components/ui/dropdown-menu.tsx:193:3     
+DropdownMenuSub                       client/src/components/ui/dropdown-menu.tsx:194:3     
+DropdownMenuSubContent                client/src/components/ui/dropdown-menu.tsx:195:3     
+DropdownMenuSubTrigger                client/src/components/ui/dropdown-menu.tsx:196:3     
+DropdownMenuRadioGroup                client/src/components/ui/dropdown-menu.tsx:197:3     
+useFormField                          client/src/components/ui/form.tsx:170:3              
+ScrollBar                             client/src/components/ui/scroll-area.tsx:46:22       
+SelectGroup                           client/src/components/ui/select.tsx:151:3            
+SelectLabel                           client/src/components/ui/select.tsx:155:3            
+SelectSeparator                       client/src/components/ui/select.tsx:157:3            
+SelectScrollUpButton                  client/src/components/ui/select.tsx:158:3            
+SelectScrollDownButton                client/src/components/ui/select.tsx:159:3            
+SheetPortal                           client/src/components/ui/sheet.tsx:131:3             
+SheetOverlay                          client/src/components/ui/sheet.tsx:132:3             
+SheetClose                            client/src/components/ui/sheet.tsx:134:3             
+SheetFooter                           client/src/components/ui/sheet.tsx:137:3             
+SidebarGroupAction                    client/src/components/ui/sidebar.tsx:707:3           
+SidebarInput                          client/src/components/ui/sidebar.tsx:711:3           
+SidebarInset                          client/src/components/ui/sidebar.tsx:712:3           
+SidebarMenuAction                     client/src/components/ui/sidebar.tsx:714:3           
+SidebarMenuBadge                      client/src/components/ui/sidebar.tsx:715:3           
+SidebarMenuSkeleton                   client/src/components/ui/sidebar.tsx:718:3           
+SidebarRail                           client/src/components/ui/sidebar.tsx:723:3           
+SidebarSeparator                      client/src/components/ui/sidebar.tsx:724:3           
+useSidebar                            client/src/components/ui/sidebar.tsx:726:3           
+TableFooter                           client/src/components/ui/table.tsx:112:3             
+TableCaption                          client/src/components/ui/table.tsx:116:3             
+ToastAction                           client/src/components/ui/toast.tsx:126:3             
+Toggle                                client/src/components/ui/toggle.tsx:43:10            
+AuthContext                           client/src/hooks/use-auth.tsx:18:14                  
+ACTIVITY_TYPE_COLORS                  client/src/lib/activity-colors.ts:24:14              
+safeIsoString               function  client/src/lib/event-mappers.ts:7:17                 
+stripSeconds                function  client/src/lib/event-mappers.ts:20:17                
+getDayId                    function  client/src/lib/event-mappers.ts:28:17                
+validateFiscalCodeFormat    function  client/src/lib/fiscalCodeUtils.ts:32:17              
+getPlaceDetails             function  client/src/lib/fiscalCodeUtils.ts:172:17             
+calculateAge                function  client/src/lib/fiscalCodeUtils.ts:182:17             
+formatSeasonName            function  client/src/lib/utils.ts:23:17                        
+USE_STI_BRIDGE                        client/src/pages/calendar.tsx:157:14                 
+mapUnifiedToCalendarEvents  function  client/src/pages/calendar.tsx:159:17                 
+isEventOnDate                         client/src/pages/calendar.tsx:200:14                 
+formatStatusBadge           function  client/src/pages/courses.tsx:37:17                   
+defaultBottomSectionsState            client/src/pages/maschera-input-generale.tsx:131:14  
+MembershipManagementDialog            client/src/pages/members.tsx:3248:10                 
+MembershipCardDialog                  client/src/pages/members.tsx:3248:38                 
+formatStatusBadge           function  client/src/pages/workshops.tsx:35:17                 
+comparePasswords            function  server/auth.ts:32:23                                 
+getGoogleSheetClient        function  server/google-sheets.ts:4:23                         
+writeSpreadsheet            function  server/google-sheets.ts:18:23                        
+sendWhatsApp                function  server/notifications.ts:53:23                        
+DatabaseStorage             class     server/storage.ts:604:14                             
+TEOBOT_SYSTEM_PROMPT                  server/utils/aiProvider.ts:10:14                     
+seasonToCode                function  server/utils/membership.ts:26:17                     
+toTitleCase                 function  server/utils/sanitizer.ts:1:17                       
+resolveMembershipSeason     function  server/utils/season.ts:21:17                         
+generateMembershipNumber    function  server/utils/season.ts:71:17                         
+generateBarcode             function  server/utils/season.ts:91:17                         
+Unused exported types (24)
+ActivityItem              interface  client/src/components/activity-management-page.tsx:51:18
+CourseUnifiedModalProps   interface  client/src/components/CourseUnifiedModal.tsx:355:18     
+ExportColumn              interface  client/src/components/ExportWizard.tsx:10:18            
+QuickMemberAddModalProps  interface  client/src/components/QuickMemberAddModal.tsx:10:18     
+ExpandedAgreement         type       client/src/components/quote-promo/accordi-tab.tsx:17:13 
+ExpandedCarnet            type       client/src/components/quote-promo/carnet-tab.tsx:19:13  
+SortDirection             type       client/src/components/sortable-table-head.tsx:6:13      
+SortConfig                interface  client/src/components/sortable-table-head.tsx:8:18      
+BadgeProps                interface  client/src/components/ui/badge.tsx:28:18                
+ButtonProps               interface  client/src/components/ui/button.tsx:43:18               
+CalendarProps             type       client/src/components/ui/calendar.tsx:8:13              
+ComboboxOption            interface  client/src/components/ui/combobox.tsx:19:18             
+ActivityDefinition        interface  client/src/config/activities.ts:28:18                   
+PresenceUser              type       client/src/hooks/use-active-users.tsx:3:13              
+DefaultPlanningEvent      interface  client/src/lib/event-mappers.ts:46:18                   
+ActivitySection           interface  client/src/pages/attivita.tsx:55:18                     
+CalendarEvent             interface  client/src/pages/calendar.tsx:128:18                    
+AllegatiState             interface  client/src/pages/maschera-input-generale.tsx:88:18      
+GiftItem                  interface  client/src/pages/maschera-input-generale.tsx:113:18     
+BottomSectionsState       interface  client/src/pages/maschera-input-generale.tsx:125:18     
+GoogleCalendarEvent       interface  server/google-calendar.ts:11:18                         
+NotificationPayload       interface  server/notifications.ts:5:18                            
+IStorage                  interface  server/storage.ts:189:18                                
+SeasonResult              interface  server/utils/season.ts:11:18                            
+Configuration hints (1)

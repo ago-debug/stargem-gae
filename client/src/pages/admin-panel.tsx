@@ -4,10 +4,193 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Database, AlertTriangle, CheckCircle2, XCircle, Loader2, ShieldCheck, Terminal, Wallet, Plus, ExternalLink, Link2, Clock, Save } from "lucide-react";
+import { Database, AlertTriangle, CheckCircle2, XCircle, Loader2, ShieldCheck, Terminal, Wallet, Plus, ExternalLink, Link2, Clock, Save, Cpu, Activity, Bug } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { format } from "date-fns";
+import { it } from "date-fns/locale";
+import posthog from "posthog-js";
+import * as Sentry from "@sentry/react";
+
+function AIUsageCard() {
+    const { data: usageData, isLoading } = useQuery<{
+        totalCost: number;
+        totalTokens: number;
+        totalRequests: number;
+        latestLogs: any[];
+    }>({
+        queryKey: ["/api/admin/ai-usage"],
+        refetchInterval: 30000, // Aggiorna ogni 30s
+    });
+
+    return (
+        <Card className="border-primary/20 shadow-sm border-2">
+            <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2">
+                    <Cpu className="w-5 h-5 text-indigo-600" />
+                    Consumi Intelligenza Artificiale
+                </CardTitle>
+                <CardDescription>
+                    Monitoraggio dei costi e dell'utilizzo dell'Agente Teo (OpenAI)
+                </CardDescription>
+            </CardHeader>
+            <CardContent>
+                {isLoading ? (
+                    <div className="flex justify-center p-6"><Loader2 className="w-6 h-6 animate-spin text-muted-foreground" /></div>
+                ) : (
+                    <div className="space-y-4">
+                        <div className="grid grid-cols-3 gap-2">
+                            <div className="bg-slate-50 p-3 rounded-lg border text-center">
+                                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider mb-1">Costo Totale</p>
+                                <p className="text-xl font-bold text-slate-800">${Number(usageData?.totalCost || 0).toFixed(4)}</p>
+                            </div>
+                            <div className="bg-slate-50 p-3 rounded-lg border text-center">
+                                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider mb-1">Token Usati</p>
+                                <p className="text-xl font-bold text-slate-800">{usageData?.totalTokens || 0}</p>
+                            </div>
+                            <div className="bg-slate-50 p-3 rounded-lg border text-center">
+                                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider mb-1">Richieste</p>
+                                <p className="text-xl font-bold text-slate-800">{usageData?.totalRequests || 0}</p>
+                            </div>
+                        </div>
+
+                        {usageData?.latestLogs && usageData.latestLogs.length > 0 && (
+                            <div className="mt-4 border rounded-md overflow-hidden">
+                                <table className="w-full text-sm text-left">
+                                    <thead className="bg-muted text-xs uppercase text-muted-foreground">
+                                        <tr>
+                                            <th className="px-3 py-2">Data</th>
+                                            <th className="px-3 py-2">Azione</th>
+                                            <th className="px-3 py-2">Token</th>
+                                            <th className="px-3 py-2">Costo ($)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y">
+                                        {usageData.latestLogs.map((log: any) => (
+                                            <tr key={log.id} className="bg-white">
+                                                <td className="px-3 py-2 whitespace-nowrap text-xs">
+                                                    {format(new Date(log.createdAt), "dd MMM, HH:mm", { locale: it })}
+                                                </td>
+                                                <td className="px-3 py-2 font-medium">{log.action === 'chat' ? 'Chat Teo' : 'Promo Gen'}</td>
+                                                <td className="px-3 py-2">{log.totalTokens}</td>
+                                                <td className="px-3 py-2 text-indigo-700 font-medium">{Number(log.costUsd).toFixed(4)}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
+                        {(!usageData?.latestLogs || usageData.latestLogs.length === 0) && (
+                            <p className="text-sm text-muted-foreground text-center py-4 italic">Nessun log AI registrato finora.</p>
+                        )}
+                    </div>
+                )}
+            </CardContent>
+        </Card>
+    );
+}
+
+function TelemetryCard() {
+    const { toast } = useToast();
+    
+    // Controlliamo in modo euristico se l'host e il DSN sono configurati
+    const isSentryConfigured = !!import.meta.env.VITE_SENTRY_DSN;
+    const isPostHogConfigured = !!import.meta.env.VITE_POSTHOG_KEY;
+
+    const testSentry = () => {
+        toast({ title: "Test Sentry inviato", description: "Lancio un'eccezione non gestita. Verifica la dashboard." });
+        // Genera un crash asincrono che Sentry DEVE catturare
+        setTimeout(() => {
+            throw new Error("Test Errore Fatale Generato da Pannello Admin StarGem");
+        }, 500);
+    };
+
+    const testPostHog = () => {
+        posthog.capture("admin_test_event", {
+            source: "admin_panel",
+            timestamp: new Date().toISOString()
+        });
+        toast({ title: "Test PostHog inviato", description: "Evento 'admin_test_event' catturato. Controlla PostHog." });
+    };
+
+    return (
+        <Card className="border-primary/20 shadow-sm border-2">
+            <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2">
+                    <Activity className="w-5 h-5 text-emerald-600" />
+                    Hub Telemetria e Osservabilità
+                </CardTitle>
+                <CardDescription>
+                    Verifica l'integrazione degli strumenti di Analytics e Monitoraggio Errori.
+                </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+                
+                {/* Sezione PostHog */}
+                <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                        <div className="flex flex-col">
+                            <div className="flex items-center gap-2">
+                                <span className="font-semibold text-sm">PostHog (Analytics)</span>
+                                {isPostHogConfigured ? (
+                                    <Badge className="bg-emerald-100 text-emerald-800 border-emerald-200 hover:bg-emerald-100">Attivo</Badge>
+                                ) : (
+                                    <Badge variant="outline" className="text-muted-foreground">Inattivo</Badge>
+                                )}
+                            </div>
+                            <span className="text-xs text-muted-foreground">Analizza i click e il percorso degli utenti per capire come usano il gestionale.</span>
+                        </div>
+                        <a href="https://eu.posthog.com/project/170396/activity/explore" target="_blank" rel="noreferrer" className="text-xs flex items-center gap-1 text-blue-600 hover:underline">
+                            Dashboard <ExternalLink className="w-3 h-3" />
+                        </a>
+                    </div>
+                    <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="w-full justify-start" 
+                        onClick={testPostHog}
+                        disabled={!isPostHogConfigured}
+                    >
+                        <Activity className="w-4 h-4 mr-2" />
+                        Genera Evento di Test
+                    </Button>
+                </div>
+
+                {/* Sezione Sentry */}
+                <div className="space-y-3 pt-4 border-t">
+                    <div className="flex items-center justify-between">
+                        <div className="flex flex-col">
+                            <div className="flex items-center gap-2">
+                                <span className="font-semibold text-sm">Sentry (Error Tracking)</span>
+                                {isSentryConfigured ? (
+                                    <Badge className="bg-emerald-100 text-emerald-800 border-emerald-200 hover:bg-emerald-100">Attivo</Badge>
+                                ) : (
+                                    <Badge variant="outline" className="text-muted-foreground">Inattivo</Badge>
+                                )}
+                            </div>
+                            <span className="text-xs text-muted-foreground">Cattura silenziosamente crash e bug del codice e ti avvisa del problema esatto.</span>
+                        </div>
+                        <a href="https://studiogem-geos-ssdrl.sentry.io/issues/?project=4511315597656144" target="_blank" rel="noreferrer" className="text-xs flex items-center gap-1 text-blue-600 hover:underline">
+                            Dashboard <ExternalLink className="w-3 h-3" />
+                        </a>
+                    </div>
+                    <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="w-full justify-start border-red-200 hover:bg-red-50 text-red-700" 
+                        onClick={testSentry}
+                        disabled={!isSentryConfigured}
+                    >
+                        <Bug className="w-4 h-4 mr-2" />
+                        Genera Errore di Test
+                    </Button>
+                </div>
+
+            </CardContent>
+        </Card>
+    );
+}
 
 const WEEKDAYS = [
   { id: "LUN", label: "Lunedì" },
@@ -413,22 +596,9 @@ export default function AdminPanel() {
                     </CardContent>
                 </Card>
 
-                <Card className="opacity-60 cursor-not-allowed">
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <Terminal className="w-5 h-5" />
-                            Log di Sistema
-                        </CardTitle>
-                        <CardDescription>
-                            Visualizza gli ultimi log del server (Prossimamente)
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="h-32 bg-muted rounded-md flex items-center justify-center italic text-muted-foreground">
-                            Funzionalità in fase di sviluppo
-                        </div>
-                    </CardContent>
-                </Card>
+                <AIUsageCard />
+
+                <TelemetryCard />
             </div>
         </div>
     );

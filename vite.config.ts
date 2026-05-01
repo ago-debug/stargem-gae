@@ -2,12 +2,14 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
 import fs from "fs";
+import { visualizer } from "rollup-plugin-visualizer";
 
 const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf-8'));
 
 export default defineConfig({
   plugins: [
-    react()
+    react(),
+    visualizer({ filename: "bundle_stats.html", open: false })
   ],
   define: {
     __APP_VERSION__: JSON.stringify(packageJson.version),

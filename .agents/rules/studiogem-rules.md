@@ -10,7 +10,7 @@ Regole di progetto:
 2. Non toccare pagamenti e tessere (core sensibile).
 3. Rispetta struttura a silos esistente.
 4. Non eliminare mai UI o logiche esistenti senza richiesta esplicita.
-5. **CONVENZIONE NOMI E BACKUP**: I file di status continuo in `_GAE_SVILUPPO/_ANTIGRAVITY/01_status_continui/` hanno un **nome fisso** (senza timestamp). Prima di sovrascriverli, DEVI obbligatoriamente copiare la versione precedente in `_GAE_SVILUPPO/99_archivio/` anteponendo il timestamp (`YYYY_MM_DD_HHMM_nomefile.md`).
+5. **CONVENZIONE NOMI E DATA**: I file di status in `_GAE_SVILUPPO/_ANTIGRAVITY/01_status_continui/` devono sempre includere data e ora. È OBBLIGATORIO rinominare il file inserendo il timestamp stringato dopo la lettera iniziale (es: `A_01_05_26_1520_Nome.md`) E inserire la dicitura `> **Ultimo Aggiornamento:** DD Mese YYYY, HH:MM` all'inizio del file (subito sotto il titolo). Prima di sovrascrivere, fai sempre backup in `99_archivio/`.
 6. **TERRITORI SEVERI**: Non hai limite al numero di file, ma non puoi MAI modificare nulla in `_GAE_SVILUPPO/_CLAUDE/`. Scrivi i report e gli audit strutturati in `_GAE_SVILUPPO/_ANTIGRAVITY/02_output_protocolli/`, e gli snapshot in `03_codice_in_lettura/`.
 7. La Maschera Input è il centro del sistema.
 8. Il CRM è tecnicamente pronto ma non validato senza dati reali.

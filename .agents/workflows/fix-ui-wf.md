@@ -21,7 +21,7 @@ Prima di modificare, dammi sempre:
 Regole:
 - non eliminare nulla che non sia esplicitamente richiesto
 - se il task è solo UI, non toccare backend
-- Se il task impatta lo stato/architettura/mappa, aggiorna i file a nome fisso in _GAE_SVILUPPO/_ANTIGRAVITY/01_status_continui/ (previo backup in 99_archivio/), oppure scrivi report strutturati in _ANTIGRAVITY/02_output_protocolli/
+- Se il task impatta lo stato/architettura/mappa, aggiorna i file in _GAE_SVILUPPO/_ANTIGRAVITY/01_status_continui/. È OBBLIGATORIO aggiornare la data e l'ora sia rinominando il file (es: A_01_05_26_1520_Nome.md) sia inserendo "> **Ultimo Aggiornamento:** DD Mese YYYY, HH:MM" in cima al file. Fai backup in 99_archivio/. Oppure scrivi report strutturati in _ANTIGRAVITY/02_output_protocolli/
 - attendi approvazione prima di modificare
 - chiudi sempre con:
   - FILE VERIFICATI
