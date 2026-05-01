@@ -1,5 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { Hammer, Sparkles, ArrowLeft } from "lucide-react";
+import { AlertTriangle, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
 
@@ -16,23 +16,23 @@ export default function NotFound() {
         <CardContent className="pt-12 pb-10 px-8 text-center relative z-10">
           <div className="flex justify-center mb-6">
             <div className="relative">
-              <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl animate-pulse" />
-              <div className="bg-gradient-to-br from-primary/10 to-primary/30 p-4 rounded-full relative border border-primary/20 shadow-inner">
-                <Hammer className="h-10 w-10 text-primary" />
+              <div className="absolute inset-0 bg-red-500/20 rounded-full blur-xl animate-pulse" />
+              <div className="bg-gradient-to-br from-red-100 to-red-300 p-4 rounded-full relative border border-red-200 shadow-inner">
+                <AlertTriangle className="h-10 w-10 text-red-600" />
               </div>
             </div>
           </div>
           
           <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 mb-2">
-            Modulo in Sviluppo
+            Pagina Non Trovata
           </h1>
           <p className="text-slate-500 mb-8 max-w-[280px] mx-auto leading-relaxed">
-            Quest'area del portale è in costruzione. Sarà attivata con la <strong className="text-primary font-semibold">Fase 28</strong> del progetto StarGem Manager.
+            L'indirizzo inserito non esiste, è stato rimosso, oppure l'URL è errato. Verifica il link.
           </p>
           
           <div className="flex flex-col items-center gap-3">
-             <div className="flex items-center gap-1.5 text-xs font-semibold text-primary/70 bg-primary/5 px-3 py-1.5 rounded-full mb-2 border border-primary/10">
-                <Sparkles className="w-3.5 h-3.5" /> Funzionalità Premium
+             <div className="flex items-center gap-1.5 text-xs font-semibold text-red-700 bg-red-50 px-3 py-1.5 rounded-full mb-2 border border-red-200">
+                Errore 404
              </div>
              
              <Button 

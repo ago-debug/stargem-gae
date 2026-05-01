@@ -583,7 +583,122 @@ export async function registerRoutes(app: Express): Promise<Server> {
     };
   };
 
-  
+  // ==========================================
+  // AGENTE AI (TEO COPILOT E MAGIC BUTTONS)
+  // ==========================================
+  app.post('/api/chat', isAuthenticated, async (req, res) => {
+    try {
+      const { messages } = req.body;
+      const { streamText } = await import('ai');
+      const { defaultModel, getTeoSystemPrompt, getAiTools } = await import('./ai');
+      
+      const userRole = req.user?.role || 'SCONOSCIUTO';
+      const userName = req.user?.firstName || req.user?.username || 'Utente';
+      
+      const result = await streamText({
+        model: defaultModel,
+        system: getTeoSystemPrompt(userRole, userName),
+        messages,
+        tools: getAiTools(userRole),
+        maxSteps: 3,
+        onFinish: async ({ usage }) => {
+          try {
+            const { db } = await import('./db');
+            const { aiUsageLogs } = await import('../shared/schema');
+            const costUsd = (usage.promptTokens * 0.150 / 1000000) + (usage.completionTokens * 0.600 / 1000000);
+            await db.insert(aiUsageLogs).values({
+              action: 'chat',
+              userId: req.user?.id?.toString() || 'unknown',
+              promptTokens: usage.promptTokens,
+              completionTokens: usage.completionTokens,
+              totalTokens: usage.totalTokens,
+              model: 'gpt-4o-mini',
+              costUsd: costUsd.toFixed(6)
+            });
+          } catch (e) {
+            console.error("[AI Usage Log Error]:", e);
+          }
+        }
+      });
+      
+      result.pipeDataStreamToResponse(res);
+    } catch (error) {
+      console.error("[AI Chat Error]:", error);
+      res.status(500).json({ error: "Errore durante la comunicazione con l'AI." });
+    }
+  });
+
+  app.post('/api/ai/generate-promo', isAuthenticated, async (req, res) => {
+    try {
+      const { eventName, date, extraContext } = req.body;
+      const { generateText } = await import('ai');
+      const { defaultModel } = await import('./ai');
+
+      const prompt = `Genera un breve messaggio promozionale per WhatsApp per spingere le vendite del seguente evento della scuola:
+Evento: ${eventName}
+Data: ${date}
+Contesto extra: ${extraContext || 'Nessuno'}
+
+Regole:
+- Sii persuasivo ma elegante.
+- Usa le emoji appropriate (non troppe).
+- Non superare le 5-6 righe.
+- Includi una "Call to Action" finale per invitare a prenotare in reception o via app.`;
+
+      const result = await generateText({
+        model: defaultModel,
+        prompt: prompt,
+      });
+
+      try {
+        const { db } = await import('./db');
+        const { aiUsageLogs } = await import('../shared/schema');
+        const usage = result.usage;
+        const costUsd = (usage.promptTokens * 0.150 / 1000000) + (usage.completionTokens * 0.600 / 1000000);
+        await db.insert(aiUsageLogs).values({
+          action: 'generate_promo',
+          userId: req.user?.id?.toString() || 'unknown',
+          promptTokens: usage.promptTokens,
+          completionTokens: usage.completionTokens,
+          totalTokens: usage.totalTokens,
+          model: 'gpt-4o-mini',
+          costUsd: costUsd.toFixed(6)
+        });
+      } catch (e) {
+        console.error("[AI Usage Log Error]:", e);
+      }
+
+      res.json({ text: result.text });
+    } catch (error) {
+      console.error("[AI Promo Error]:", error);
+      res.status(500).json({ error: "Errore durante la generazione del testo promozionale." });
+    }
+  });
+
+  app.get('/api/admin/ai-usage', isAuthenticated, async (req, res) => {
+    try {
+      const { db } = await import('./db');
+      const { sql, desc } = await import('drizzle-orm');
+      const { aiUsageLogs } = await import('../shared/schema');
+      
+      const totalCostResult = await db.select({ total: sql<number>`SUM(CAST(${aiUsageLogs.costUsd} AS DECIMAL(10,6)))` }).from(aiUsageLogs);
+      const totalTokensResult = await db.select({ total: sql<number>`SUM(${aiUsageLogs.totalTokens})` }).from(aiUsageLogs);
+      const totalRequestsResult = await db.select({ total: sql<number>`COUNT(*)` }).from(aiUsageLogs);
+      
+      const latestLogs = await db.select().from(aiUsageLogs).orderBy(desc(aiUsageLogs.createdAt)).limit(10);
+      
+      res.json({
+        totalCost: totalCostResult[0]?.total || 0,
+        totalTokens: totalTokensResult[0]?.total || 0,
+        totalRequests: totalRequestsResult[0]?.total || 0,
+        latestLogs
+      });
+    } catch (error) {
+      console.error("[AI Usage Fetch Error]:", error);
+      res.status(500).json({ error: "Errore durante il recupero dei log AI." });
+    }
+  });
+
   // ==== Global Activity Interceptor ====
   app.use("/api", (req, res, next) => {
     // We only care about modifications (POST, PATCH, PUT, DELETE)
@@ -1983,28 +2098,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/member-relationships", isAuthenticated, async (req, res) => {
-    try {
-      const relationship = await storage.createMemberRelationship(req.body);
-      await logUserActivity(req, "CREATE", "member_relationships", relationship.id.toString(), { member1: relationship.memberId, member2: relationship.relatedMemberId, type: relationship.relationshipType });
-      res.status(201).json(relationship);
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(400).json({ message: error.message || "Failed to create member relationship" });
-    }
-  });
 
-  app.delete("/api/member-relationships/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      await storage.deleteMemberRelationship(id);
-      await logUserActivity(req, "DELETE", "member_relationships", id.toString());
-      res.status(204).send();
-    } catch (error) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(500).json({ message: "Failed to delete member relationship" });
-    }
-  });
 
   // ==== Google Sheets Import Route ====
   app.post("/api/members/import-google-sheets", isAuthenticated, async (req, res) => {
@@ -10318,123 +10412,7 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
   });
 
   // ============================================
-  // BLOCCO 5: PAGODIL TIERS
-  // ============================================
-  app.get("/api/pagodil-tiers", isAuthenticated, async (req, res) => {
-    try {
-      res.json(await storage.getPagodilTiers());
-    } catch(err: any) {
-      res.status(500).json({ success: false, error: err.message });
-    }
-  });
 
-  app.post("/api/pagodil-tiers/calculate", isAuthenticated, async (req, res) => {
-    try {
-      const { amount, providerName = "pagodil" } = req.body;
-      const tiers = await storage.getPagodilTiers();
-      const amountVal = parseFloat(amount);
-      const target = tiers.find(t => t.providerName === providerName && amountVal >= parseFloat(t.rangeMin) && amountVal <= parseFloat(t.rangeMax));
-      if (!target) return res.status(404).json({ success: false, error: "Nessun tier Pagodil applicabile per questo importo." });
-      
-      const fee = parseFloat(target.feeAmount);
-      const totalStr = target.feeType === "fixed" ? (amountVal + fee).toFixed(2) : (amountVal + (amountVal * fee / 100)).toFixed(2);
-      
-      res.json({ success: true, data: { feeAmount: fee, feeType: target.feeType, totalWithFee: parseFloat(totalStr) } });
-    } catch(err: any) {
-      res.status(500).json({ success: false, error: err.message });
-    }
-  });
-
-  // ============================================
-  // BLOCCO 6: CONTABILITA' BASE
-  // ============================================
-  app.get("/api/cost-centers", isAuthenticated, async (req, res) => {
-    try {
-      res.json(await storage.getCostCenters());
-    } catch(err: any) {
-      res.status(500).json({ success: false, error: err.message });
-    }
-  });
-
-  app.get("/api/accounting-periods", isAuthenticated, async (req, res) => {
-    try {
-      const q = { ...req.query, ...(await resolveSeason(req.query)) };
-      res.json(await storage.getAccountingPeriods(q));
-    } catch(err: any) {
-      res.status(500).json({ success: false, error: err.message });
-    }
-  });
-
-  app.get("/api/journal-entries", isAuthenticated, async (req, res) => {
-    try {
-      res.json(await storage.getJournalEntries(req.query));
-    } catch(err: any) {
-      res.status(500).json({ success: false, error: err.message });
-    }
-  });
-
-  app.post("/api/journal-entries", isAuthenticated, async (req, res) => {
-    try {
-      const data = insertJournalEntrySchema.parse(req.body);
-      const entry = await storage.createJournalEntry(data);
-      res.status(201).json({ success: true, data: entry });
-    } catch(err: any) {
-      res.status(400).json({ success: false, error: err.message });
-    }
-  });
-
-  // ==========================================
-  // AGEVOLAZIONI (F1-007)
-  // ==========================================
-
-  // MEMBER DISCOUNTS
-  app.get("/api/member-discounts", isAuthenticated, async (req, res) => {
-    try {
-      const { memberId, isUsed, seasonId } = req.query;
-      let query = db.select().from(memberDiscounts);
-      // Minimal implementation for now
-      const data = await query;
-      res.json(data);
-    } catch (err: any) {
-      res.status(500).json({ error: err.message });
-    }
-  });
-
-  app.get("/api/member-discounts/:memberId/active", isAuthenticated, async (req, res) => {
-    try {
-      const data = await db.select().from(memberDiscounts)
-        .where(and(
-          eq(memberDiscounts.memberId, parseInt(req.params.memberId)),
-          eq(memberDiscounts.isUsed, false)
-        ));
-      res.json(data);
-    } catch (err: any) {
-      res.status(500).json({ error: err.message });
-    }
-  });
-
-  app.post("/api/member-discounts", isAuthenticated, async (req, res) => {
-    try {
-      const [result] = await db.insert(memberDiscounts).values({
-        ...req.body,
-        tenantId: (req.user as any)?.tenantId || 1
-      });
-      res.json({ success: true, id: result.insertId });
-    } catch (err: any) {
-      res.status(500).json({ error: err.message });
-    }
-  });
-
-  app.patch("/api/member-discounts/:id/use", isAuthenticated, async (req, res) => {
-    try {
-      await db.update(memberDiscounts)
-        .set({ isUsed: true, usedAt: new Date(), paymentId: req.body.paymentId })
-        .where(eq(memberDiscounts.id, parseInt(req.params.id)));
-      res.json({ success: true });
-    } catch (err: any) {
-      res.status(500).json({ error: err.message });
-    }
-  });
 
   // COMPANY AGREEMENTS
   app.get("/api/company-agreements", isAuthenticated, async (req, res) => {

@@ -35,6 +35,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { MagicPromoButton } from "@/components/magic-promo-button";
 import type { Course, Member, Enrollment, Payment, Attendance } from "@shared/schema";
 
 export default function SchedaDomenica() {
@@ -151,6 +152,12 @@ export default function SchedaDomenica() {
                                 </h1>
                             </div>
                         </div>
+                        {item && (
+                            <MagicPromoButton 
+                                eventName={item.name} 
+                                eventDate={item.startDate ? new Date(item.startDate).toLocaleDateString('it-IT') : 'Data da definire'} 
+                            />
+                        )}
                     </div>
                     {item && (
                         

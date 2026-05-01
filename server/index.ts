@@ -1,8 +1,21 @@
 import "dotenv/config";
+import * as Sentry from "@sentry/node";
+import { nodeProfilingIntegration } from "@sentry/profiling-node";
+
+Sentry.init({
+  dsn: process.env.SENTRY_DSN || "https://examplePublicKey@o0.ingest.sentry.io/0",
+  integrations: [
+    nodeProfilingIntegration(),
+  ],
+  tracesSampleRate: 1.0,
+  profilesSampleRate: 1.0,
+});
+
 import * as nodeCrypto from "node:crypto";
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes, runStaleSegmentsCron } from "./routes";
-import { setupVite, serveStatic, log } from "./vite";
+import { setupVite, serveStatic, log as viteLog } from "./vite";
+import { logger } from "./logger";
 import fs from 'fs';
 import path from 'path';
 
@@ -35,11 +48,11 @@ app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 // GLOBAL DEBUG LOG
 app.use((req, res, next) => {
-  const msg = `[${new Date().toISOString()}] PID:${process.pid} ${req.method} ${req.url}\n`;
+  const msg = `[${new Date().toISOString()}] PID:${process.pid} ${req.method} ${req.url}`;
   try {
     // DEBUG_ALL_REQUESTS disabled
   } catch (e) {
-    console.error("Failed to write global debug log", e);
+    logger.error("Failed to write global debug log", e);
   }
   next();
 });
@@ -67,7 +80,8 @@ app.use((req, res, next) => {
         logLine = logLine.slice(0, 79) + "…";
       }
 
-      log(logLine);
+      logger.info(logLine);
+      viteLog(logLine); // Maintain original vite output in dev
     }
   });
 
@@ -83,12 +97,13 @@ app.use((req, res, next) => {
 
     // Log unexpected errors
     if (status === 500) {
-      console.error("GLOBAL ERROR HANDLER CAUGHT:", err);
+      Sentry.captureException(err);
+      logger.error(`GLOBAL ERROR HANDLER CAUGHT: ${err.message}\n${err.stack}`);
       try {
         // DEBUG_GLOBAL_ERROR disabled
       } catch (e) { }
     } else {
-       console.error(`[API Error ${status}]:`, err.message);
+       logger.warn(`[API Error ${status}]: ${err.message}`);
     }
 
     res.status(status).json({ message, details: err.message });
@@ -113,14 +128,14 @@ app.use((req, res, next) => {
     port,
     host: "::",
   }, () => {
-    log(`serving on port ${port}`);
+    logger.info(`Server started. Serving on port ${port}`);
 
     // Auto-close stale segments ogni 5 minuti
     setInterval(async () => {
       try {
         await runStaleSegmentsCron();
-      } catch (e) {
-        console.error('Cron presence:', e);
+      } catch (e: any) {
+        logger.error(`Cron presence error: ${e.message}`, e);
       }
     }, 5 * 60 * 1000);
   });
