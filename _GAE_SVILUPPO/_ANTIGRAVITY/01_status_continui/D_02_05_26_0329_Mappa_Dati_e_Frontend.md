@@ -1,5 +1,5 @@
 # STATO DB REALE E MAPPATURA FRONTEND
-> **Ultimo Aggiornamento:** $(date +"%d %B %Y, %H:%M")
+> **Ultimo Aggiornamento:** 02 Maggio 2026, 11:30
 
 ## STATO ATTUALE
 Il database e il frontend sono ora sincronizzati con un focus sulle performance estreme.
