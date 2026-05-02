@@ -3511,35 +3511,23 @@ app.get("/api/public/membership-status/:code", async (req, res) => {
 app.get("/api/gempass/tessere", isAuthenticated, async (req, res) => {
   try {
     const { status, membership_type, search } = req.query;
-    const all = await storage.getMembershipsWithMembers();
-    let result: any[] = Array.isArray(all) ? all : [];
-
-    if (status) {
-      result = result.filter((m: any) => m.status === status);
-    }
-    if (membership_type) {
-      result = result.filter((m: any) => m.membershipType === membership_type);
-    }
-    if (search) {
-      const s = String(search).toLowerCase();
-      result = result.filter((m: any) =>
-        m.membershipNumber?.toLowerCase().includes(s) ||
-        m.lastName?.toLowerCase().includes(s) ||
-        m.firstName?.toLowerCase().includes(s) ||
-        m.fiscalCode?.toLowerCase().includes(s)
-      );
-    }
-    const total = result.length;
-    let paginatedData = result;
     
-    const p = parseInt(String(req.query.page || '1'));
-    const s = parseInt(String(req.query.pageSize || '50'));
-    if (!isNaN(p) && !isNaN(s)) {
-      const start = (p - 1) * s;
-      paginatedData = result.slice(start, start + s);
-    }
+    const p = parseInt(String(req.query.page || '1')) || 1;
+    const s = parseInt(String(req.query.pageSize || '50')) || 50;
 
-    return res.json({ data: paginatedData, total });
+    const searchTerm = search && String(search).trim() !== '' ? String(search) : undefined;
+    const statusFilter = status && status !== 'all' ? String(status) : undefined;
+    const typeFilter = membership_type && membership_type !== 'all' ? String(membership_type) : undefined;
+
+    const paginatedResult = await storage.getMembershipsPaginated(
+      p,
+      s,
+      searchTerm,
+      statusFilter,
+      typeFilter
+    );
+
+    return res.json(paginatedResult);
   } catch (error) {
     console.error('[GemPass] GET /tessere error:', error);
     return res.status(500).json({ error: 'Errore nel recupero tessere' });
