@@ -272,6 +272,8 @@ export default function SchedaAttivita() {
         return data?.last_name || "";
       case "email":
         return data?.email || "";
+      case "phone":
+        return data?.phone || "";
       case "attendances":
         return data?.presenze_count || 0;
       default:
@@ -449,6 +451,14 @@ export default function SchedaAttivita() {
                     Nome
                   </SortableTableHead>
                   <SortableTableHead
+                    sortKey="phone"
+                    currentSort={sortConfig}
+                    onSort={handleSort}
+                    className="font-semibold text-foreground/80 py-4"
+                  >
+                    Cellulare
+                  </SortableTableHead>
+                  <SortableTableHead
                     sortKey="email"
                     currentSort={sortConfig}
                     onSort={handleSort}
@@ -506,6 +516,7 @@ export default function SchedaAttivita() {
                       first_name,
                       last_name,
                       email,
+                      phone,
                       enrollment_date,
                       membership_expiry_date,
                       membership_status,
@@ -629,6 +640,14 @@ export default function SchedaAttivita() {
                           >
                             {first_name}
                           </Link>
+                        </TableCell>
+                        <TableCell
+                          className={cn(
+                            "text-muted-foreground text-sm",
+                            isSortedColumn("phone") && "sorted-column-cell",
+                          )}
+                        >
+                          {phone || "-"}
                         </TableCell>
                         <TableCell
                           className={cn(
