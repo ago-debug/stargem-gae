@@ -49,7 +49,11 @@ export default function SchedaAttivita() {
   const [genderFilter, setGenderFilter] = useState<"all" | "M" | "F">("all");
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const searchParams = new URLSearchParams(window.location.search);
-  const courseIdRaw = searchParams.get("courseId");
+  const courseIdRaw = searchParams.get("courseId") 
+    || searchParams.get("workshopId") 
+    || searchParams.get("campusId") 
+    || searchParams.get("Id") 
+    || searchParams.get("id");
   const courseId = Number(courseIdRaw);
   const hasValidCourseId = Number.isFinite(courseId) && courseId > 0;
 
