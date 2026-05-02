@@ -693,7 +693,7 @@ export default function AccountingSheet() {
                                             <TableCell className="font-medium">
                                                 <div className="flex flex-col">
                                                     <span>{m.date ? new Date(m.date).toLocaleDateString('it-IT') : "-"}</span>
-                                                    <span className="text-[10px] text-muted-foreground">
+                                                    <span className="text-xxs text-muted-foreground">
                                                         {m.createdAt ? new Date(m.createdAt).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }) : ''}
                                                     </span>
                                                 </div>
@@ -703,7 +703,7 @@ export default function AccountingSheet() {
                                                     <span className="font-semibold align-middle cursor-pointer hover:underline text-primary" onClick={() => { setDetailsItem(m); setIsDetailsDialogOpen(true); }}>
                                                         {m.description || 'Servizio'}
                                                     </span>
-                                                    {m.notes && <span className="text-[10px] text-muted-foreground italic ml-2 align-middle">- {m.notes}</span>}
+                                                    {m.notes && <span className="text-xxs text-muted-foreground italic ml-2 align-middle">- {m.notes}</span>}
                                                 </div>
                                             </TableCell>
                                             <TableCell className="text-xs font-semibold text-muted-foreground">
@@ -814,7 +814,7 @@ export default function AccountingSheet() {
                                                     <div className="flex flex-col gap-1">
                                                         <span>{p.paymentMethod || "-"}</span>
                                                         {(p.createdBy || p.updatedBy) && (
-                                                            <div className="text-[10px] text-muted-foreground border-t pt-1 mt-1">
+                                                            <div className="text-xxs text-muted-foreground border-t pt-1 mt-1">
                                                                 {p.createdBy && (
                                                                     <div title="Creato da">👤 {p.createdBy} il {new Date(p.createdAt || '').toLocaleString('it-IT', { dateStyle: 'short', timeStyle: 'short' })}</div>
                                                                 )}

@@ -316,7 +316,7 @@ export function CourseSelector({
                                                 <div className="flex items-center gap-2">
                                                     <span className="font-medium truncate">{course.name}</span>
                                                     {course.sku && (
-                                                        <Badge variant="outline" className="text-[10px] h-5 px-1 py-0">{course.sku}</Badge>
+                                                        <Badge variant="outline" className="text-xxs h-5 px-1 py-0">{course.sku}</Badge>
                                                     )}
                                                 </div>
                                                 <div className="flex flex-wrap gap-2 text-xs text-muted-foreground mt-1">

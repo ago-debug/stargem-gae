@@ -39,7 +39,7 @@ export function PageNotesIndicator() {
                 >
                     <Pin className={`w-4 h-4 ${activeNotesCount > 0 ? "text-green-600 dark:text-green-500 fill-green-100 dark:fill-green-900/30" : "text-muted-foreground"}`} />
                     {activeNotesCount > 0 && (
-                        <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-green-500 text-[10px] font-bold text-white border-2 border-background">
+                        <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-green-500 text-xxs font-bold text-white border-2 border-background">
                             {activeNotesCount}
                         </span>
                     )}

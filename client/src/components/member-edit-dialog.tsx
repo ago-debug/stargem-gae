@@ -272,7 +272,7 @@ export function MemberEditDialog() {
                                         handleFiscalCodeChange(e.target.value);
                                     }}
                                 />
-                                {fiscalCodeError && <p className="text-[10px] text-destructive font-bold">{fiscalCodeError}</p>}
+                                {fiscalCodeError && <p className="text-xxs text-destructive font-bold">{fiscalCodeError}</p>}
                                 <ConflictBadge result={cfCheck} type="cf" />
                             </div>
                             <div className="space-y-2">
@@ -326,21 +326,21 @@ export function MemberEditDialog() {
                                 </div>
                                 <div className="grid grid-cols-2 gap-2">
                                     <div className="space-y-1">
-                                        <Label htmlFor="city" className="text-[10px]">Città</Label>
+                                        <Label htmlFor="city" className="text-xxs">Città</Label>
                                         <Input id="city" name="city" defaultValue={member?.city || ""} className="h-8" />
                                     </div>
                                     <div className="space-y-1">
-                                        <Label htmlFor="province" className="text-[10px]">Prov</Label>
+                                        <Label htmlFor="province" className="text-xxs">Prov</Label>
                                         <Input id="province" name="province" defaultValue={member?.province || ""} className="h-8 uppercase" maxLength={2} />
                                     </div>
                                 </div>
                                 <div className="grid grid-cols-2 gap-2 mt-2">
                                     <div className="space-y-1">
-                                        <Label htmlFor="postalCode" className="text-[10px]">CAP</Label>
+                                        <Label htmlFor="postalCode" className="text-xxs">CAP</Label>
                                         <Input id="postalCode" name="postalCode" defaultValue={member?.postalCode || ""} className="h-8" maxLength={5} />
                                     </div>
                                     <div className="space-y-1">
-                                        <Label htmlFor="country" className="text-[10px]">Stato</Label>
+                                        <Label htmlFor="country" className="text-xxs">Stato</Label>
                                         <Input id="country" name="country" defaultValue={member?.country || "Italia"} className="h-8" />
                                     </div>
                                 </div>

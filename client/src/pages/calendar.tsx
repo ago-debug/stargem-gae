@@ -2137,7 +2137,7 @@ export default function CalendarPage() {
                                                  const t = (evt.title || '').toUpperCase();
                                                  
                                                  if (type === 'chiusura' || t.includes('STRAORDINARI')) badgeColor = 'bg-orange-100 text-orange-800 border-l-[3px] border-orange-500';
-                                                 else if (type === 'ferie' || t.includes('FERIE')) badgeColor = 'bg-[#9D174D]/10 text-[#9D174D] border-l-[3px] border-[#9D174D]/50';
+                                                 else if (type === 'ferie' || t.includes('FERIE')) badgeColor = 'bg-[stargem-red]/10 text-[stargem-red] border-l-[3px] border-[stargem-red]/50';
                                                  else if (type === 'campus' || t.includes('CAM')) badgeColor = 'bg-sky-100 text-sky-800 border-l-[3px] border-sky-400';
                                                  else if (type === 'saggio' || t.includes('SAG')) badgeColor = 'bg-pink-100 text-pink-800 border-l-[3px] border-pink-400';
                                                  else if (t.includes('WS')) badgeColor = 'bg-orange-100 text-orange-800 border-l-[3px] border-orange-400';
@@ -2146,9 +2146,9 @@ export default function CalendarPage() {
                                                  else if (type === 'evento') badgeColor = 'bg-indigo-50 text-indigo-800 border-l-[3px] border-indigo-400';
 
                                                  return (
-                                                     <div key={evt.id} onClick={() => setLocation('/programmazione-date')} className={`px-2 py-2 rounded-[3px] text-[11px] font-medium cursor-pointer hover:opacity-80 transition-opacity shadow-sm ${badgeColor}`}>
+                                                     <div key={evt.id} onClick={() => setLocation('/programmazione-date')} className={`px-2 py-2 rounded-[3px] text-xxs font-medium cursor-pointer hover:opacity-80 transition-opacity shadow-sm ${badgeColor}`}>
                                                          {evt.title}
-                                                         {evt.description && <div className="text-[10px] font-normal opacity-80 mt-1 line-clamp-2 leading-tight">{evt.description}</div>}
+                                                         {evt.description && <div className="text-xxs font-normal opacity-80 mt-1 line-clamp-2 leading-tight">{evt.description}</div>}
                                                      </div>
                                                  );
                                             })}
@@ -2232,7 +2232,7 @@ export default function CalendarPage() {
                                         ? `80px repeat(7, minmax(120px, 1fr))`
                                         : `80px repeat(${studios?.length || 1}, minmax(140px, 1fr))`
                                 }}>
-                                <div className="p-3 border-r flex items-center justify-center font-bold text-[11px] text-[#444] dark:text-slate-300 uppercase bg-background sticky left-0 z-50 shadow-[2px_0_5px_rgba(0,0,0,0.05)]">
+                                <div className="p-3 border-r flex items-center justify-center font-bold text-xxs text-[#444] dark:text-slate-300 uppercase bg-background sticky left-0 z-50 shadow-[2px_0_5px_rgba(0,0,0,0.05)]">
                                     ore
                                 </div>
                                 {selectedDay === 'all' ? (
@@ -2264,7 +2264,7 @@ export default function CalendarPage() {
                                                 {/* Testata Data Base */}
                                                 <div className={`p-3 pb-1 flex flex-col items-center w-full ${headerBorderClass}`}>
                                                     <span>{day.label} {format(dayDate, "d")}</span>
-                                                    <span className={`text-[10px] font-normal ${isPublicHoliday ? 'text-red-500' : (isStudioClosed ? 'text-pink-500' : 'text-muted-foreground')}`}>{format(dayDate, "MMMM", { locale: it })}</span>
+                                                    <span className={`text-xxs font-normal ${isPublicHoliday ? 'text-red-500' : (isStudioClosed ? 'text-pink-500' : 'text-muted-foreground')}`}>{format(dayDate, "MMMM", { locale: it })}</span>
                                                     {isToday && <span className={`absolute top-1.5 right-1.5 text-[7.5px] px-[4px] py-[2px] rounded-sm font-black uppercase tracking-wider shadow-sm border ${isPublicHoliday ? 'bg-red-500 text-white border-red-600' : 'bg-yellow-400 text-yellow-900 border-yellow-500/30'}`}>Oggi</span>}
                                                 </div>
                                                 
@@ -2286,7 +2286,7 @@ export default function CalendarPage() {
                                                     if (evt.eventType === 'nota') bgColor = 'bg-yellow-100 border border-yellow-400 text-yellow-900';
                                                     
                                                     return (
-                                                        <div key={evt.id} className={`w-full text-[9px] py-[2px] px-1 font-bold truncate rounded-[3px] leading-tight ${bgColor}`} title={evt.title}>
+                                                        <div key={evt.id} className={`w-full text-xxxs py-[2px] px-1 font-bold truncate rounded-[3px] leading-tight ${bgColor}`} title={evt.title}>
                                                             {evt.title}
                                                         </div>
                                                     );
@@ -2297,9 +2297,9 @@ export default function CalendarPage() {
                                     })
                                 ) : (
                                     studios?.map(studio => (
-                                        <div key={studio.id} className="p-3 text-center border-r last:border-r-0 font-bold text-[11px] uppercase tracking-tight text-[#333] flex flex-col items-center justify-center min-w-[140px] bg-background">
+                                        <div key={studio.id} className="p-3 text-center border-r last:border-r-0 font-bold text-xxs uppercase tracking-tight text-[#333] flex flex-col items-center justify-center min-w-[140px] bg-background">
                                             <span>{studio.name}</span>
-                                            {studio.capacity && <span className="text-[9px] font-normal text-muted-foreground opacity-70">({studio.capacity}mq)</span>}
+                                            {studio.capacity && <span className="text-xxxs font-normal text-muted-foreground opacity-70">({studio.capacity}mq)</span>}
                                         </div>
                                     ))
                                 )}
@@ -2323,10 +2323,10 @@ export default function CalendarPage() {
                                     const heightPx = calendarLayout.cumulativeTops[nextMinOffset] - topPx;
                                     return (
                                         <div key={hour}
-                                            className="border-b border-[#eee] dark:border-slate-800 flex flex-col items-center justify-start text-[11px] font-bold text-[#666] dark:text-slate-400 bg-[#f8f9fa] dark:bg-slate-900 absolute w-full left-0 right-0 overflow-hidden"
+                                            className="border-b border-[#eee] dark:border-slate-800 flex flex-col items-center justify-start text-xxs font-bold text-[#666] dark:text-slate-400 bg-[#f8f9fa] dark:bg-slate-900 absolute w-full left-0 right-0 overflow-hidden"
                                             style={{ top: `${topPx}px`, height: `${heightPx}px` }}>
                                             <span className="pt-2">{hour.toString().padStart(2, "0")}.00</span>
-                                            {heightPx > 60 && <span className="absolute top-1/2 -translate-y-1/2 opacity-50 font-normal text-[9px]">{hour.toString().padStart(2, "0")}.30</span>}
+                                            {heightPx > 60 && <span className="absolute top-1/2 -translate-y-1/2 opacity-50 font-normal text-xxxs">{hour.toString().padStart(2, "0")}.30</span>}
                                         </div>
                                     );
                                 })}
@@ -2491,22 +2491,22 @@ export default function CalendarPage() {
                                                                 </div>
                                                             );
                                                         })()}
-                                                        <div className="font-bold text-[10px] mb-0.5 opacity-90 w-full pr-[45px] text-foreground">{evt.startTime} - {evt.endTime}</div>
+                                                        <div className="font-bold text-xxs mb-0.5 opacity-90 w-full pr-[45px] text-foreground">{evt.startTime} - {evt.endTime}</div>
                                                         <div className="font-extrabold text-[12px] leading-tight line-clamp-2 w-full uppercase pr-[45px] break-normal overflow-hidden text-foreground">
                                                             {evt.title}
                                                         </div>
-                                                        {ins1 && <div className="font-semibold text-[10px] truncate w-full opacity-90 mt-0.5 text-foreground">{ins1}</div>}
-                                                        {ins2 && <div className="font-semibold text-[10px] truncate w-full opacity-90 text-foreground">{ins2}</div>}
+                                                        {ins1 && <div className="font-semibold text-xxs truncate w-full opacity-90 mt-0.5 text-foreground">{ins1}</div>}
+                                                        {ins2 && <div className="font-semibold text-xxs truncate w-full opacity-90 text-foreground">{ins2}</div>}
                                                         
                                                         <div className="mt-auto w-full flex flex-col items-start gap-0.5 pt-1 shrink-0 z-10 w-full relative">
                                                             {evt.registryKey === "studioBookings" && (
-                                                                <div className="bg-black/5 px-2 py-0.5 rounded-full text-[9px] font-bold text-black/60 mb-1 w-fit">
+                                                                <div className="bg-black/5 px-2 py-0.5 rounded-full text-xxxs font-bold text-black/60 mb-1 w-fit">
                                                                     {evt.startTime}-{evt.endTime}
                                                                 </div>
                                                             )}
                                                             
                                                             {stats && (
-                                                                <div className="flex flex-wrap items-center gap-1.5 text-[9px] font-bold w-full bg-background/50 px-1.5 py-0.5 rounded border border-black/5 mt-0.5">
+                                                                <div className="flex flex-wrap items-center gap-1.5 text-xxxs font-bold w-full bg-background/50 px-1.5 py-0.5 rounded border border-black/5 mt-0.5">
                                                                     <span className="text-blue-700 whitespace-nowrap">U:{stats.men}</span>
                                                                     <span className="text-pink-700 whitespace-nowrap">D:{stats.women}</span>
                                                                     {availability !== null && (
@@ -2542,7 +2542,7 @@ export default function CalendarPage() {
                                                                         }
                                                                         
                                                                         return remainingOccurrences && remainingOccurrences > 0 ? (
-                                                                            <span className="text-[10px] font-semibold text-muted-foreground bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded shrink-0">
+                                                                            <span className="text-xxs font-semibold text-muted-foreground bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded shrink-0">
                                                                                 {remainingOccurrences} Lez
                                                                             </span>
                                                                         ) : <span className="w-4"></span>;
@@ -2562,7 +2562,7 @@ export default function CalendarPage() {
                                                                     {statusLabels.map(s => {
                                                                         const color = getStatusColor(s, activityStatuses);
                                                                         return (
-                                                                            <div key={s} className="text-[8px] font-bold uppercase tracking-wider leading-none truncate px-1 py-[1.5px] rounded-[2px]" style={color ? { backgroundColor: color, color: getContrastYIQ(color), border: `0.5px solid ${color}` } : { backgroundColor: s === "ATTIVO" ? "#15803d" : "#b91c1c", color: "#ffffff", border: '0.5px solid transparent' }}>
+                                                                            <div key={s} className="text-xxxs font-bold uppercase tracking-wider leading-none truncate px-1 py-[1.5px] rounded-[2px]" style={color ? { backgroundColor: color, color: getContrastYIQ(color), border: `0.5px solid ${color}` } : { backgroundColor: s === "ATTIVO" ? "#15803d" : "#b91c1c", color: "#ffffff", border: '0.5px solid transparent' }}>
                                                                                 {s}
                                                                             </div>
                                                                         );
@@ -2570,7 +2570,7 @@ export default function CalendarPage() {
                                                                     {internalLabels.length > 0 && internalLabels.map(tag => {
                                                                       const color = getStatusColor(tag, internalTagsList);
                                                                       return (
-                                                                        <div key={tag} className="text-[8px] font-bold uppercase tracking-wider leading-none truncate px-1 py-[1.5px] rounded-[2px]" style={color ? { backgroundColor: color, color: getContrastYIQ(color), border: `0.5px solid ${color}` } : { backgroundColor: '#4338ca', color: '#ffffff', border: '0.5px solid #4338ca' }}>
+                                                                        <div key={tag} className="text-xxxs font-bold uppercase tracking-wider leading-none truncate px-1 py-[1.5px] rounded-[2px]" style={color ? { backgroundColor: color, color: getContrastYIQ(color), border: `0.5px solid ${color}` } : { backgroundColor: '#4338ca', color: '#ffffff', border: '0.5px solid #4338ca' }}>
                                                                             {tag}
                                                                         </div>
                                                                       );
@@ -2579,14 +2579,14 @@ export default function CalendarPage() {
                                                             </div>
                                                             
                                                             {codeLabel && (
-                                                                <div className="bg-slate-100 dark:bg-slate-800 text-[8px] font-bold px-1.5 py-0.5 rounded text-muted-foreground break-all leading-tight w-full">
+                                                                <div className="bg-slate-100 dark:bg-slate-800 text-xxxs font-bold px-1.5 py-0.5 rounded text-muted-foreground break-all leading-tight w-full">
                                                                     {codeLabel}
                                                                 </div>
                                                             )}
                                                         </div>
                                                         
                                                         {evt.registryKey === "studioBookings" && evt.rawPayload?.amount && (
-                                                            <span className="text-[10px] font-bold absolute top-1 right-[75px] bg-background/90 px-1.5 py-0.5 rounded shadow-sm text-foreground border-black/5 border z-40">
+                                                            <span className="text-xxs font-bold absolute top-1 right-[75px] bg-background/90 px-1.5 py-0.5 rounded shadow-sm text-foreground border-black/5 border z-40">
                                                                 €{Number(evt.rawPayload.amount).toFixed(2)}
                                                             </span>
                                                         )}
@@ -2726,7 +2726,7 @@ export default function CalendarPage() {
                                     type="button"
                                     variant="ghost"
                                     size="sm"
-                                    className="h-6 px-2 text-[11px] gap-1 text-[#f43f5e] hover:bg-[#f43f5e]/10"
+                                    className="h-6 px-2 text-xxs gap-1 text-[stargem-red] hover:bg-[stargem-red]/10"
                                     onClick={() => setQuickAddServiceOpen(true)}
                                 >
                                     <Plus className="w-3.5 h-3.5" /> Nuovo Servizio
@@ -2797,7 +2797,7 @@ export default function CalendarPage() {
                                                         <Check className={`mr-2 h-4 w-4 ${bookingForm.serviceId === s.id ? "opacity-100" : "opacity-0"}`} />
                                                         <div className="flex flex-col">
                                                             <span>{s.name}</span>
-                                                            <span className="text-[10px] text-muted-foreground">€ {s.price}</span>
+                                                            <span className="text-xxs text-muted-foreground">€ {s.price}</span>
                                                         </div>
                                                     </CommandItem>
                                                 ))}
@@ -2845,7 +2845,7 @@ export default function CalendarPage() {
                         </div>
 
                         {bookingForm.paid && (
-                            <div className="space-y-4 pl-6 border-l-2 border-[#f43f5e]/20 ml-2 animate-in fade-in slide-in-from-left-2">
+                            <div className="space-y-4 pl-6 border-l-2 border-[stargem-red]/20 ml-2 animate-in fade-in slide-in-from-left-2">
                                 <div className="space-y-2">
                                     <Label>Importo Pagato (€) *</Label>
                                     <Input
@@ -2882,7 +2882,7 @@ export default function CalendarPage() {
                                     type="button"
                                     variant="ghost"
                                     size="sm"
-                                    className="h-6 px-2 text-[11px] gap-1 text-[#f43f5e] hover:bg-[#f43f5e]/10"
+                                    className="h-6 px-2 text-xxs gap-1 text-[stargem-red] hover:bg-[stargem-red]/10"
                                     onClick={() => setQuickAddMemberOpen(true)}
                                 >
                                     <UserPlus className="w-3.5 h-3.5" /> Nuovo Partecipante
@@ -2950,7 +2950,7 @@ export default function CalendarPage() {
                                                         <Check className={`mr-2 h-4 w-4 ${bookingForm.memberId === lastAddedMember.id ? "opacity-100" : "opacity-0"}`} />
                                                         <div className="flex flex-col">
                                                             <span className="font-bold">✨ {lastAddedMember.lastName} {lastAddedMember.firstName}</span>
-                                                            <span className="text-[10px] text-muted-foreground">{lastAddedMember.fiscalCode}</span>
+                                                            <span className="text-xxs text-muted-foreground">{lastAddedMember.fiscalCode}</span>
                                                         </div>
                                                     </CommandItem>
                                                 )}
@@ -2973,7 +2973,7 @@ export default function CalendarPage() {
                                                         <Check className={`mr-2 h-4 w-4 ${bookingForm.memberId === m.id ? "opacity-100" : "opacity-0"}`} />
                                                         <div className="flex flex-col">
                                                             <span>{m.lastName} {m.firstName}</span>
-                                                            <span className="text-[10px] text-muted-foreground">{m.fiscalCode}</span>
+                                                            <span className="text-xxs text-muted-foreground">{m.fiscalCode}</span>
                                                         </div>
                                                     </CommandItem>
                                                 ))}
@@ -2983,7 +2983,7 @@ export default function CalendarPage() {
                                 </PopoverContent>
                             </Popover>
                             {bookingForm.memberId && (
-                                <div className="mt-2 text-[11px] bg-muted p-2 rounded-md border border-border flex flex-col gap-1 animate-in fade-in slide-in-from-top-1">
+                                <div className="mt-2 text-xxs bg-muted p-2 rounded-md border border-border flex flex-col gap-1 animate-in fade-in slide-in-from-top-1">
                                     <div className="flex items-center gap-2 text-muted-foreground">
                                         <Mail className="w-3 h-3" />
                                         <span>{bookingForm.memberEmail || "Email non presente"}</span>
@@ -3104,7 +3104,7 @@ export default function CalendarPage() {
                                     <div className="space-y-3">
                                         <div className="flex items-center justify-between border-b pb-2">
                                             <h4 className="font-bold text-xs uppercase tracking-wider text-muted-foreground">Disponibilità</h4>
-                                            <Badge variant="outline" className="text-[10px]">
+                                            <Badge variant="outline" className="text-xxs">
                                                 {bookingForm.bookingDate ? format(new Date(bookingForm.bookingDate), 'dd/MM/yyyy') : "Seleziona data"}
                                             </Badge>
                                         </div>
@@ -3129,14 +3129,14 @@ export default function CalendarPage() {
                                                     >
                                                         <div className="flex items-center gap-2">
                                                             <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
-                                                            <span className="font-medium text-[11px]">{slot.start} - {slot.end}</span>
+                                                            <span className="font-medium text-xxs">{slot.start} - {slot.end}</span>
                                                         </div>
                                                         <Plus className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                                                     </Button>
                                                 ))}
                                             </div>
                                         )}
-                                        <p className="text-[10px] text-muted-foreground italic text-center pt-2 border-top border-dotted">
+                                        <p className="text-xxs text-muted-foreground italic text-center pt-2 border-top border-dotted">
                                             * Basato su corsi settimanali e prenotazioni esistenti
                                         </p>
                                     </div>
@@ -3219,7 +3219,7 @@ export default function CalendarPage() {
                                     </Button>
                                 )}
                                 <Button type="button" variant="outline" onClick={() => setEditingBooking(null)}>Annulla</Button>
-                                <Button type="submit" disabled={createBookingMutation.isPending || updateBookingMutation.isPending} className="bg-[#f43f5e] hover:bg-[#e11d48] text-white">
+                                <Button type="submit" disabled={createBookingMutation.isPending || updateBookingMutation.isPending} className="bg-[stargem-red] hover:bg-[stargem-red] text-white">
                                     {bookingForm.id ? "Salva" : "Crea"}
                                 </Button>
                             </div>
@@ -3446,7 +3446,7 @@ export default function CalendarPage() {
                         </div>
 
                         <Button
-                            className="w-full h-12 text-lg font-bold bg-[#f43f5e] hover:bg-[#e11d48] text-white"
+                            className="w-full h-12 text-lg font-bold bg-[stargem-red] hover:bg-[stargem-red] text-white"
                             type="button"
                             disabled={createMemberMutation.isPending}
                             onClick={() => {
@@ -3538,7 +3538,7 @@ export default function CalendarPage() {
                             <Label className="text-xs">Colore</Label>
                             <Input type="color" className="w-12 h-8 p-0" value={newServiceForm.color} onChange={e => setNewServiceForm(p => ({ ...p, color: e.target.value }))} />
                         </div>
-                        <Button className="w-full bg-[#f43f5e] hover:bg-[#e11d48] text-white" onClick={() => createServiceMutation.mutate({ ...newServiceForm, price: parseFloat(newServiceForm.price) })} disabled={createServiceMutation.isPending}>
+                        <Button className="w-full bg-[stargem-red] hover:bg-[stargem-red] text-white" onClick={() => createServiceMutation.mutate({ ...newServiceForm, price: parseFloat(newServiceForm.price) })} disabled={createServiceMutation.isPending}>
                             {createServiceMutation.isPending ? "Salvataggio..." : "Crea e Seleziona"}
                         </Button>
 

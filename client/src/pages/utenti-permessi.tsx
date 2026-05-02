@@ -489,7 +489,7 @@ export default function UtentiPermessi() {
                             <TableCell className={cn(iscUser("phone") && "sorted-column-cell")}>{u.phone || "-"}</TableCell>
                             <TableCell className={cn(iscUser("email") && "sorted-column-cell")}>{u.email || "-"}</TableCell>
                             <TableCell className={cn(iscUser("role") && "sorted-column-cell")}>
-                              <span className={`px-2 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider ${u.role === 'admin' ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 border border-amber-300 dark:border-amber-800/50' : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700'}`}>
+                              <span className={`px-2 py-1 rounded-full text-xxs uppercase font-bold tracking-wider ${u.role === 'admin' ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 border border-amber-300 dark:border-amber-800/50' : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700'}`}>
                                 {u.role === 'admin' ? 'MASTER' : (u.role || 'Nessuno')}
                               </span>
                             </TableCell>
@@ -712,7 +712,7 @@ export default function UtentiPermessi() {
                   ) : (
                     <>
                       <Upload className="w-4 h-4 text-white mb-1" />
-                      <span className="text-[9px] text-white font-medium">Carica</span>
+                      <span className="text-xxxs text-white font-medium">Carica</span>
                     </>
                   )}
                   <input type="file" className="hidden" accept="image/png, image/jpeg, image/webp" onChange={handleNewUserFileChange} disabled={uploadingNewUserImage} />
@@ -798,7 +798,7 @@ export default function UtentiPermessi() {
                   ) : (
                     <>
                       <Upload className="w-4 h-4 text-white mb-1" />
-                      <span className="text-[9px] text-white font-medium">Cambia</span>
+                      <span className="text-xxxs text-white font-medium">Cambia</span>
                     </>
                   )}
                   <input type="file" className="hidden" accept="image/png, image/jpeg, image/webp" onChange={handleEditUserFileChange} disabled={uploadingEditUserImage} />

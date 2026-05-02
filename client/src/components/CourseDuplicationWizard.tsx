@@ -539,7 +539,7 @@ export function CourseDuplicationWizard({
             </DialogDescription>
           </div>
           <div className="flex items-center justify-end gap-4 flex-1">
-            <div className="text-[10px] sm:text-xs text-yellow-700 bg-yellow-50 px-3 py-2 rounded-md border border-yellow-200 max-w-[600px] text-left leading-snug">
+            <div className="text-xxs sm:text-xs text-yellow-700 bg-yellow-50 px-3 py-2 rounded-md border border-yellow-200 max-w-[600px] text-left leading-snug">
               <strong className="mr-1">Sicurezza:</strong> I corsi selezionati verranno clonati vergini (no pagamenti/iscritti). La logica oraria originale verrà mantenuta, con nuove date inizio/fine limitate alla stagione considerata.
             </div>
             <Button onClick={handleBulkDeleteRequest} variant="outline" className="border-red-500 text-red-600 hover:bg-red-50 dark:bg-red-950/20 min-w-[150px] h-11" disabled={selectedCourseIds.size === 0}>
@@ -641,7 +641,7 @@ export function CourseDuplicationWizard({
                                     </TableCell>
                                     <TableCell className="align-top pt-4">
                                         <div className="font-semibold text-foreground line-clamp-1 truncate" title={course.name}>{course.name}</div>
-                                        <div className="text-[10px] font-mono text-muted-foreground mt-1 bg-slate-100 dark:bg-slate-800 p-0.5 px-1.5 rounded w-fit inline-block">
+                                        <div className="text-xxs font-mono text-muted-foreground mt-1 bg-slate-100 dark:bg-slate-800 p-0.5 px-1.5 rounded w-fit inline-block">
                                            {generateSKUForCourse({
                                                ...course, 
                                                name: courseOverrides[course.id]?.name ?? course.name,
@@ -665,7 +665,7 @@ export function CourseDuplicationWizard({
                                                value={courseOverrides[course.id]?.recurrenceType || course.recurrenceType || "weekly"}
                                                onValueChange={(val) => updateOverride(course.id, "recurrenceType", val)}
                                             >
-                                               <SelectTrigger className="h-7 text-[10px] bg-background text-muted-foreground"><SelectValue /></SelectTrigger>
+                                               <SelectTrigger className="h-7 text-xxs bg-background text-muted-foreground"><SelectValue /></SelectTrigger>
                                                <SelectContent>
                                                    <SelectItem value="weekly">Settimanale</SelectItem>
                                                    <SelectItem value="bimonthly">Bi-mensile</SelectItem>
@@ -683,7 +683,7 @@ export function CourseDuplicationWizard({
                                                value={courseOverrides[course.id]?.dayOfWeek || course.dayOfWeek || "none"}
                                                onValueChange={(val) => updateOverride(course.id, "dayOfWeek", val)}
                                             >
-                                               <SelectTrigger className="h-7 text-[10px] bg-background"><SelectValue /></SelectTrigger>
+                                               <SelectTrigger className="h-7 text-xxs bg-background"><SelectValue /></SelectTrigger>
                                                <SelectContent>
                                                    <SelectItem value="LUN">Lunedì</SelectItem>
                                                    <SelectItem value="MAR">Martedì</SelectItem>
@@ -695,8 +695,8 @@ export function CourseDuplicationWizard({
                                                </SelectContent>
                                             </Select>
                                             <div className="flex gap-1">
-                                               <Input disabled={!isSelected} type="time" className="h-7 text-[10px] w-[65px] px-1 bg-background" value={courseOverrides[course.id]?.startTime || course.startTime || ""} onChange={(e) => updateOverride(course.id, "startTime", e.target.value)} />
-                                               <Input disabled={!isSelected} type="time" className="h-7 text-[10px] w-[65px] px-1 bg-background" value={courseOverrides[course.id]?.endTime || course.endTime || ""} onChange={(e) => updateOverride(course.id, "endTime", e.target.value)} />
+                                               <Input disabled={!isSelected} type="time" className="h-7 text-xxs w-[65px] px-1 bg-background" value={courseOverrides[course.id]?.startTime || course.startTime || ""} onChange={(e) => updateOverride(course.id, "startTime", e.target.value)} />
+                                               <Input disabled={!isSelected} type="time" className="h-7 text-xxs w-[65px] px-1 bg-background" value={courseOverrides[course.id]?.endTime || course.endTime || ""} onChange={(e) => updateOverride(course.id, "endTime", e.target.value)} />
                                             </div>
                                         </div>
                                     </TableCell>
@@ -707,7 +707,7 @@ export function CourseDuplicationWizard({
                                                 value={courseOverrides[course.id]?.studioId?.toString() || course.studioId?.toString() || "none"}
                                                 onValueChange={(val) => updateOverride(course.id, "studioId", val === "none" ? null : parseInt(val))}
                                             >
-                                                <SelectTrigger className="h-7 text-[10px] bg-background">
+                                                <SelectTrigger className="h-7 text-xxs bg-background">
                                                     <SelectValue placeholder="Sala" />
                                                 </SelectTrigger>
                                                 <SelectContent>
@@ -722,7 +722,7 @@ export function CourseDuplicationWizard({
                                                 value={courseOverrides[course.id]?.instructorId?.toString() || course.instructorId?.toString() || "none"}
                                                 onValueChange={(val) => updateOverride(course.id, "instructorId", val === "none" ? null : parseInt(val))}
                                             >
-                                                <SelectTrigger className="h-7 text-[10px] bg-background">
+                                                <SelectTrigger className="h-7 text-xxs bg-background">
                                                     <SelectValue placeholder="Insegnante" />
                                                 </SelectTrigger>
                                                 <SelectContent>
@@ -739,14 +739,14 @@ export function CourseDuplicationWizard({
                                             <Input
                                                 type="date"
                                                 disabled={!isSelected}
-                                                className={`h-7 text-[10px] px-2 ${isSelected && !(courseOverrides[course.id]?.startDate || course.startDate) ? "border-red-400 bg-red-50 dark:bg-red-950/20" : "bg-background"}`}
+                                                className={`h-7 text-xxs px-2 ${isSelected && !(courseOverrides[course.id]?.startDate || course.startDate) ? "border-red-400 bg-red-50 dark:bg-red-950/20" : "bg-background"}`}
                                                 value={courseOverrides[course.id]?.startDate || (course.startDate ? new Date(course.startDate).toISOString().split('T')[0] : "")}
                                                 onChange={(e) => updateOverride(course.id, "startDate", e.target.value)}
                                             />
                                             <Input
                                                 type="date"
                                                 disabled={!isSelected}
-                                                className={`h-7 text-[10px] px-2 ${isSelected && !(courseOverrides[course.id]?.endDate || course.endDate) ? "border-red-400 bg-red-50 dark:bg-red-950/20" : "bg-background"}`}
+                                                className={`h-7 text-xxs px-2 ${isSelected && !(courseOverrides[course.id]?.endDate || course.endDate) ? "border-red-400 bg-red-50 dark:bg-red-950/20" : "bg-background"}`}
                                                 value={courseOverrides[course.id]?.endDate || (course.endDate ? new Date(course.endDate).toISOString().split('T')[0] : "")}
                                                 onChange={(e) => updateOverride(course.id, "endDate", e.target.value)}
                                             />

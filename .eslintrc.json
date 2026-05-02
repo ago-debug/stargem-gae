@@ -1,0 +1,20 @@
+{
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:tailwindcss/recommended"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "plugins": ["@typescript-eslint", "tailwindcss"],
+  "rules": {
+    "tailwindcss/no-custom-classname": "off",
+    "tailwindcss/no-arbitrary-value": "warn",
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/no-unused-vars": "off"
+  },
+  "settings": {
+    "tailwindcss": {
+      "callees": ["cn", "cva"]
+    }
+  }
+}

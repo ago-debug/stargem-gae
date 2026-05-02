@@ -274,23 +274,23 @@ export default function QuoteListini(props: QuoteListiniProps) {
                             {/* Second Level Header for Quota / Lezioni */}
                             <TableRow className="hover:bg-transparent shadow-sm">
                                 {/* Vuoti per le prime 3 colonne fisse che usano sticky in the first row implicitly (Wait, HTML table non gestisce bene rowSpan\colSpan con sticky left, per semplicità abbiamo un solo thead row o thead fix) */}
-                                <TableHead className="bg-slate-100 dark:bg-slate-800 z-30 border-r border-border sticky left-0 p-0 top-[40px]"></TableHead>
-                                <TableHead className="bg-slate-100 dark:bg-slate-800 z-30 border-r border-border sticky left-[96px] p-0 top-[40px]"></TableHead>
-                                <TableHead className="bg-slate-100 dark:bg-slate-800 border-r border-border top-[40px]"></TableHead>
+                                <TableHead className="bg-slate-100 dark:bg-slate-800 z-30 border-r border-border sticky left-0 p-0 top-10"></TableHead>
+                                <TableHead className="bg-slate-100 dark:bg-slate-800 z-30 border-r border-border sticky left-[96px] p-0 top-10"></TableHead>
+                                <TableHead className="bg-slate-100 dark:bg-slate-800 border-r border-border top-10"></TableHead>
 
                                 {PERIODS.map(p => (
                                     <React.Fragment key={`subhead-${p}`}>
-                                        <TableHead className="bg-muted text-muted-foreground text-center text-xs border-r border-border min-w-[80px] p-2 top-[40px]">Quota €</TableHead>
-                                        <TableHead className="bg-muted text-muted-foreground text-center text-xs border-r border-border min-w-[70px] p-2 top-[40px]">n° Lez.</TableHead>
+                                        <TableHead className="bg-muted text-muted-foreground text-center text-xs border-r border-border min-w-[80px] p-2 top-10">Quota €</TableHead>
+                                        <TableHead className="bg-muted text-muted-foreground text-center text-xs border-r border-border min-w-[70px] p-2 top-10">n° Lez.</TableHead>
                                     </React.Fragment>
                                 ))}
 
-                                <TableHead className="bg-slate-100 dark:bg-slate-800 border-r border-border top-[40px]"></TableHead>
+                                <TableHead className="bg-slate-100 dark:bg-slate-800 border-r border-border top-10"></TableHead>
 
                                 {PERIODS.map(p => (
-                                    <TableHead key={`calcr-${p}`} className="bg-emerald-50 dark:bg-emerald-950/20 border-r border-emerald-200 dark:border-emerald-900/50 min-w-[90px] top-[40px]"></TableHead>
+                                    <TableHead key={`calcr-${p}`} className="bg-emerald-50 dark:bg-emerald-950/20 border-r border-emerald-200 dark:border-emerald-900/50 min-w-[90px] top-10"></TableHead>
                                 ))}
-                                <TableHead className="bg-slate-100 dark:bg-slate-800 top-[40px]"></TableHead>
+                                <TableHead className="bg-slate-100 dark:bg-slate-800 top-10"></TableHead>
                             </TableRow>
                         </TableHeader>
 

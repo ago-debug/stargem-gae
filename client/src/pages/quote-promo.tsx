@@ -35,7 +35,7 @@ export default function QuotePromo() {
 
   return (
     <ErrorBoundary>
-      <div className="container mx-auto py-6 space-y-6">
+      <div className="max-w-7xl mx-auto p-6 md:p-8 space-y-6">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Quote e Promo</h1>

@@ -94,7 +94,7 @@ export function MembershipCard({ member }: MembershipCardProps) {
                     style={{ boxSizing: 'border-box' }}
                 >
                     {/* Top Red Tab */}
-                    <div className="absolute top-0 left-0 right-0 h-3 bg-[#e11d48]"></div>
+                    <div className="absolute top-0 left-0 right-0 h-3 bg-[stargem-red]"></div>
 
                     {/* Content Wrapper with increased bottom padding */}
                     <div className="flex flex-col items-center pt-6 pb-8 px-4 w-full h-full">
@@ -133,17 +133,17 @@ export function MembershipCard({ member }: MembershipCardProps) {
                         <div className="w-full flex flex-col space-y-1.5 text-center">
                             {/* Card Details */}
                             <div className="space-y-0.5">
-                                <div className="text-[7px] uppercase text-gray-400 font-bold leading-none tracking-tighter italic">Numero Tessera</div>
-                                <div className="text-sm font-black text-[#e11d48] leading-none">{cardNumber}</div>
+                                <div className="text-xxxs uppercase text-gray-400 font-bold leading-none tracking-tighter italic">Numero Tessera</div>
+                                <div className="text-sm font-black text-[stargem-red] leading-none">{cardNumber}</div>
 
                                 <div className="flex justify-center gap-4 mt-1">
                                     <div className="flex flex-col">
-                                        <span className="text-[6px] uppercase text-gray-400 font-bold leading-none">Rilascio</span>
-                                        <span className="text-[8px] font-bold text-foreground">{formatDate(issueDate)}</span>
+                                        <span className="text-xxxs uppercase text-gray-400 font-bold leading-none">Rilascio</span>
+                                        <span className="text-xxxs font-bold text-foreground">{formatDate(issueDate)}</span>
                                     </div>
                                     <div className="flex flex-col">
-                                        <span className="text-[6px] uppercase text-gray-400 font-bold leading-none">Scadenza</span>
-                                        <span className="text-[8px] font-bold text-[#e11d48]">{formatDate(expiryDate)}</span>
+                                        <span className="text-xxxs uppercase text-gray-400 font-bold leading-none">Scadenza</span>
+                                        <span className="text-xxxs font-bold text-[stargem-red]">{formatDate(expiryDate)}</span>
                                     </div>
                                 </div>
                             </div>
@@ -153,15 +153,15 @@ export function MembershipCard({ member }: MembershipCardProps) {
                             {/* Identity - Names and CF */}
                             <div className="space-y-1 pb-4">
                                 <div>
-                                    <div className="text-[7px] uppercase text-gray-400 font-bold leading-none tracking-tighter">Iscritto</div>
+                                    <div className="text-xxxs uppercase text-gray-400 font-bold leading-none tracking-tighter">Iscritto</div>
                                     <div className="text-xs font-black uppercase text-foreground leading-tight">
                                         {member.lastName} {member.firstName}
                                     </div>
                                 </div>
 
                                 <div>
-                                    <div className="text-[7px] uppercase text-gray-400 font-bold leading-none tracking-tighter">Codice Fiscale</div>
-                                    <div className="text-[9px] font-mono font-bold uppercase text-muted-foreground leading-none">
+                                    <div className="text-xxxs uppercase text-gray-400 font-bold leading-none tracking-tighter">Codice Fiscale</div>
+                                    <div className="text-xxxs font-mono font-bold uppercase text-muted-foreground leading-none">
                                         {member.fiscalCode || "----------------"}
                                     </div>
                                 </div>
@@ -172,7 +172,7 @@ export function MembershipCard({ member }: MembershipCardProps) {
             </div>
 
             <div className="px-4">
-                <Button onClick={downloadPDF} className="w-full font-bold bg-[#e11d48] hover:bg-[#be123c] text-white">
+                <Button onClick={downloadPDF} className="w-full font-bold bg-[stargem-red] hover:bg-[#be123c] text-white">
                     <Download className="w-4 h-4 mr-2" /> SCARICA TESSERA PDF
                 </Button>
             </div>

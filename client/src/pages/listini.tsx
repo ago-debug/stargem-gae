@@ -64,7 +64,7 @@ export default function PriceLists() {
     }
 
     return (
-        <div className="p-6 md:p-8 space-y-8 mx-auto">
+        <div className="max-w-7xl mx-auto p-6 md:p-8 space-y-6">
             <div className="flex justify-between items-center">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">Gestione Quote e Listini</h1>
@@ -119,14 +119,14 @@ export default function PriceLists() {
                                     className={`w-full text-left p-4 hover:bg-muted/50 transition-colors ${selectedList?.id === list.id ? "bg-primary/5 border-l-4 border-primary" : "border-l-4 border-transparent"}`}
                                 >
                                     <p className="font-semibold text-sm">{list.name}</p>
-                                    <div className="flex items-center gap-2 mt-1 text-[10px] text-muted-foreground uppercase tracking-widest">
+                                    <div className="flex items-center gap-2 mt-1 text-xxs text-muted-foreground uppercase tracking-widest">
                                         <Calendar className="w-3 h-3" />
                                         {format(new Date(list.validFrom), "dd/MM/yy")} - {format(new Date(list.validTo), "dd/MM/yy")}
                                     </div>
                                     {list.active ? (
-                                        <Badge variant="outline" className="mt-2 text-[8px] h-4 bg-green-50 text-green-700 border-green-200">ATTIVO</Badge>
+                                        <Badge variant="outline" className="mt-2 text-xxxs h-4 bg-green-50 text-green-700 border-green-200">ATTIVO</Badge>
                                     ) : (
-                                        <Badge variant="outline" className="mt-2 text-[8px] h-4 bg-gray-50 text-muted-foreground border-border">NON ATTIVO</Badge>
+                                        <Badge variant="outline" className="mt-2 text-xxxs h-4 bg-gray-50 text-muted-foreground border-border">NON ATTIVO</Badge>
                                     )}
                                 </button>
                             ))}
@@ -541,7 +541,7 @@ function PriceItemManager({ type, entities, activeItems, quotes, onUpsert, onDel
                             const activeItem = activeItems.find(i => i.entityId === entity.id);
                             return (
                                 <TableRow key={entity.id} className={activeItem ? "bg-primary/5" : ""}>
-                                    <TableCell className={cn("font-mono text-[10px] text-muted-foreground uppercase", isSortedColumn("sku") && "sorted-column-cell")}>{entity.sku || "-"}</TableCell>
+                                    <TableCell className={cn("font-mono text-xxs text-muted-foreground uppercase", isSortedColumn("sku") && "sorted-column-cell")}>{entity.sku || "-"}</TableCell>
                                     <TableCell className={cn("font-medium text-sm", isSortedColumn("name") && "sorted-column-cell")}>{entity.name}</TableCell>
                                     <TableCell className={cn("text-muted-foreground text-sm font-mono", isSortedColumn("price") && "sorted-column-cell")}>
                                         {entity.price ? `€ ${parseFloat(entity.price).toFixed(2)}` : "-"}

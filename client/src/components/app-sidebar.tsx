@@ -363,7 +363,7 @@ export function AppSidebar() {
         {isInsegnante && user && (
           <div className="flex flex-col items-center mt-4">
             <span className="font-bold text-foreground">Ciao {((user as any).lastName || user.firstName) ? `${(user as any).lastName || ""} ${user.firstName || ""}`.trim() : user.username} 👋</span>
-            <span className="bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-400 text-[10px] font-bold px-2 py-0.5 rounded mt-1 shadow-sm border border-amber-200 dark:border-amber-900/50">STAFF</span>
+            <span className="bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-400 text-xxs font-bold px-2 py-0.5 rounded mt-1 shadow-sm border border-amber-200 dark:border-amber-900/50">STAFF</span>
           </div>
         )}
       </SidebarHeader>
@@ -371,7 +371,7 @@ export function AppSidebar() {
       <SidebarContent>
         {isInsegnante ? (
           <SidebarGroup>
-            <SidebarGroupLabel className="text-primary font-bold uppercase tracking-wider text-[11px]">SEZIONE PERSONALE</SidebarGroupLabel>
+            <SidebarGroupLabel className="text-primary font-bold uppercase tracking-wider text-xxs">SEZIONE PERSONALE</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarMenuItem>
@@ -403,7 +403,7 @@ export function AppSidebar() {
           <>
             {filteredRegistration.length > 0 && (
           <SidebarGroup>
-            <SidebarGroupLabel className="text-primary font-bold uppercase tracking-wider text-[11px]">SEGRETERIA OPERATIVA</SidebarGroupLabel>
+            <SidebarGroupLabel className="text-primary font-bold uppercase tracking-wider text-xxs">SEGRETERIA OPERATIVA</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {filteredRegistration.map((item) => {
@@ -430,7 +430,7 @@ export function AppSidebar() {
 
         {filteredAccounting.length > 0 && (
           <SidebarGroup>
-            <SidebarGroupLabel className="text-primary font-bold uppercase tracking-wider text-[11px]">AMMINISTRAZIONE & CASSA</SidebarGroupLabel>
+            <SidebarGroupLabel className="text-primary font-bold uppercase tracking-wider text-xxs">AMMINISTRAZIONE & CASSA</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {filteredAccounting.map((item) => {
@@ -457,7 +457,7 @@ export function AppSidebar() {
 
         {filteredTeaching.length > 0 && (
           <SidebarGroup>
-            <SidebarGroupLabel className="text-primary font-bold uppercase tracking-wider text-[11px]">ATTIVITÀ E DIDATTICA</SidebarGroupLabel>
+            <SidebarGroupLabel className="text-primary font-bold uppercase tracking-wider text-xxs">ATTIVITÀ E DIDATTICA</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {filteredTeaching.map((item) => {
@@ -517,7 +517,7 @@ export function AppSidebar() {
 
         {filteredSecretariat.length > 0 && (
           <SidebarGroup>
-            <SidebarGroupLabel className="text-primary font-bold uppercase tracking-wider text-[11px]">RISORSE UMANE & TEAM</SidebarGroupLabel>
+            <SidebarGroupLabel className="text-primary font-bold uppercase tracking-wider text-xxs">RISORSE UMANE & TEAM</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {filteredSecretariat.map((item) => {
@@ -534,7 +534,7 @@ export function AppSidebar() {
                           <span className="flex-1 flex items-center justify-between">
                             {item.title}
                             {item.title === "GemTeam" && pendingPermessiCount > 0 && (
-                              <Badge variant="destructive" className="ml-auto flex shrink-0 items-center justify-center rounded-full px-1.5 py-0 text-[10px] h-4 min-w-[20px]">
+                              <Badge variant="destructive" className="ml-auto flex shrink-0 items-center justify-center rounded-full px-1.5 py-0 text-xxs h-4 min-w-[20px]">
                                 {pendingPermessiCount}
                               </Badge>
                             )}
@@ -551,7 +551,7 @@ export function AppSidebar() {
 
         {filteredConfig.length > 0 && (
           <SidebarGroup>
-            <SidebarGroupLabel className="text-primary font-bold uppercase tracking-wider text-[11px]">CONFIGURAZIONI CORE</SidebarGroupLabel>
+            <SidebarGroupLabel className="text-primary font-bold uppercase tracking-wider text-xxs">CONFIGURAZIONI CORE</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {filteredConfig.map((item) => {
@@ -578,7 +578,7 @@ export function AppSidebar() {
 
         {filteredAdminItems.length > 0 && (
           <SidebarGroup>
-            <SidebarGroupLabel className="text-primary font-bold uppercase tracking-wider text-[11px]">ADMIN / TECNICO</SidebarGroupLabel>
+            <SidebarGroupLabel className="text-primary font-bold uppercase tracking-wider text-xxs">ADMIN / TECNICO</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {filteredAdminItems.map((item) => {
@@ -637,24 +637,24 @@ export function AppSidebar() {
           return (
             <div className="mt-2 pb-2">
               <div className="flex items-center justify-between mb-2">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-primary flex items-center gap-2">
+                <p className="text-xxs font-bold uppercase tracking-wider text-primary flex items-center gap-2">
                   Connessioni Live
                   {onlineCount > 0 ? (
                     <span className="relative flex h-5 w-5">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                      <span className="relative inline-flex items-center justify-center rounded-full h-5 w-5 bg-emerald-500 text-white text-[10px] font-bold">
+                      <span className="relative inline-flex items-center justify-center rounded-full h-5 w-5 bg-emerald-500 text-white text-xxs font-bold">
                         {onlineCount}
                       </span>
                     </span>
                   ) : (
-                    <span className="flex items-center justify-center rounded-full h-5 w-5 bg-yellow-500 text-white text-[10px] font-bold">
+                    <span className="flex items-center justify-center rounded-full h-5 w-5 bg-yellow-500 text-white text-xxs font-bold">
                       0
                     </span>
                   )}
                 </p>
                 <Dialog>
                   <DialogTrigger asChild>
-                    <Button variant="outline" size="sm" className="h-[18px] px-1.5 text-[9px] bg-background hover:bg-muted border-border text-muted-foreground font-medium tracking-tight shadow-sm">
+                    <Button variant="outline" size="sm" className="h-[18px] px-1.5 text-xxxs bg-background hover:bg-muted border-border text-muted-foreground font-medium tracking-tight shadow-sm">
                       <Activity className="w-2.5 h-2.5 mr-1 text-primary" /> Processi
                     </Button>
                   </DialogTrigger>
@@ -747,7 +747,7 @@ export function AppSidebar() {
                         }
 
                         return (
-                          <span className={`text-[9px] shrink-0 ${isOnline ? 'text-foreground/80 font-medium' : 'text-slate-400'}`}>
+                          <span className={`text-xxxs shrink-0 ${isOnline ? 'text-foreground/80 font-medium' : 'text-slate-400'}`}>
                             {text}
                           </span>
                         );
@@ -764,7 +764,7 @@ export function AppSidebar() {
         {user && (
           <div className="mt-2 bg-muted border border-sidebar-border rounded-lg shadow-sm overflow-hidden flex-shrink-0">
             {!isInsegnante && latestActivity && (
-              <div className="px-3 pt-2 pb-1.5 text-[9px] text-muted-foreground/80 leading-tight space-y-1 select-none bg-background/50 border-b border-sidebar-border/50">
+              <div className="px-3 pt-2 pb-1.5 text-xxxs text-muted-foreground/80 leading-tight space-y-1 select-none bg-background/50 border-b border-sidebar-border/50">
                 <p className="flex justify-between items-center text-[8.5px]">
                   <span className="opacity-80">Aggiornato:</span>
                   <span className="font-medium text-slate-400 font-mono opacity-80">{new Intl.DateTimeFormat('it-IT', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(__BUILD_DATE__))}</span>
@@ -785,7 +785,7 @@ export function AppSidebar() {
                     {user.profileImageUrl ? (
                       <img src={user.profileImageUrl} alt="avatar" className="w-full h-full object-cover" />
                     ) : (
-                      <span className="text-[10px] font-bold text-primary">
+                      <span className="text-xxs font-bold text-primary">
                         {user.firstName ? user.firstName[0] : (user.username ? user.username[0].toUpperCase() : "?")}
                         {user.lastName ? user.lastName[0] : ""}
                       </span>
@@ -797,7 +797,7 @@ export function AppSidebar() {
                         ? `${user.lastName || ""} ${user.firstName || ""}`.trim()
                         : user.username}
                     </p>
-                    <p className="text-[8px] text-muted-foreground truncate uppercase tracking-widest font-bold">
+                    <p className="text-xxxs text-muted-foreground truncate uppercase tracking-widest font-bold">
                       {(() => {
                         switch (user.role?.toLowerCase()) {
                           case 'admin': return 'MASTER';

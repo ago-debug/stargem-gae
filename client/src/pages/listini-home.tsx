@@ -56,7 +56,7 @@ export default function ListiniHome() {
     const [activeTab, setActiveTab] = useState("q1c");
 
     return (
-        <div className="p-6 md:p-8 space-y-8 mx-auto">
+        <div className="max-w-7xl mx-auto p-6 md:p-8 space-y-6">
             <div className="flex items-center justify-between gap-4 flex-wrap">
                 <div className="flex items-center gap-3">
                     <Button variant="ghost" size="icon" onClick={() => window.history.back()} className="icon-gold-bg rounded-md h-8 w-8 flex-shrink-0" data-testid="button-back">
