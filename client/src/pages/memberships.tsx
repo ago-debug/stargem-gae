@@ -378,7 +378,7 @@ export default function Memberships() {
                         
                         const getPaymentBadgeConfig = () => {
                           if (membership.paymentStatus === 'paid') {
-                            return { className: 'bg-green-100 text-green-800 border-green-200', label: 'Saldato' };
+                            return { className: 'bg-green-100 text-green-800 dark:text-green-400 border-green-200', label: 'Saldato' };
                           }
                           const isZeroFee = !membership.fee || parseFloat(membership.fee.toString()) === 0;
                           if (isZeroFee && expiryInfo.variant === 'default') {
@@ -392,7 +392,7 @@ export default function Memberships() {
                           <TableRow 
                             key={membership.id} 
                             data-testid={`membership-row-${membership.id}`}
-                            className="cursor-pointer hover:bg-amber-50 dark:bg-amber-950/20/50 transition-colors"
+                            className="cursor-pointer hover:bg-amber-50 dark:bg-amber-950/20 transition-colors"
                             onClick={() => {
                                 const mem = membersData?.members?.find(m => m.id === membership.memberId);
                                 if (mem) {

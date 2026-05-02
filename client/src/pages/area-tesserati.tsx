@@ -64,7 +64,7 @@ export default function AreaTesserati() {
         <div className="md:col-span-4 space-y-6">
           <Card className="border-amber-200 dark:border-amber-900/50 shadow-sm relative overflow-hidden">
             <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-amber-400 to-amber-600"></div>
-            <CardHeader className="bg-amber-50 dark:bg-amber-950/20/50 pb-4 border-b pt-6">
+            <CardHeader className="bg-amber-50 dark:bg-amber-950/20 pb-4 border-b pt-6">
               <div className="flex items-center gap-4">
                 <div className="w-16 h-16 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 font-bold text-xl uppercase shadow-sm border border-amber-200 dark:border-amber-900/50">
                   {user?.firstName?.charAt(0) || user?.username?.charAt(0)}
@@ -196,7 +196,7 @@ export default function AreaTesserati() {
           </Card>
 
           <Card id="chat" className="border-amber-200 dark:border-amber-900/50 overflow-hidden flex flex-col h-[400px] shadow-sm">
-            <CardHeader className="bg-amber-50 dark:bg-amber-950/20/50 border-b py-3 px-4">
+            <CardHeader className="bg-amber-50 dark:bg-amber-950/20 border-b py-3 px-4">
               <CardTitle className="text-lg flex items-center gap-2 text-foreground">
                 <MessageCircle className="w-5 h-5 text-amber-600" />
                 GemChat Segreteria

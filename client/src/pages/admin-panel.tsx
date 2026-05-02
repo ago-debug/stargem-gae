@@ -380,7 +380,7 @@ export default function AdminPanel() {
                                     ) : (
                                         <XCircle className="w-5 h-5 text-red-600" />
                                     )}
-                                    <span className={`font-semibold ${syncStatus.success ? 'text-green-800' : 'text-red-800'}`}>
+                                    <span className={`font-semibold ${syncStatus.success ? 'text-green-800 dark:text-green-400' : 'text-red-800 dark:text-red-400'}`}>
                                         {syncStatus.success ? 'Operazione completata' : 'Operazione fallita'}
                                     </span>
                                 </div>
@@ -443,7 +443,7 @@ export default function AdminPanel() {
                                     ) : (
                                         <XCircle className="w-5 h-5 text-red-600" />
                                     )}
-                                    <span className={`font-semibold ${seedMethodsStatus.success ? 'text-green-800' : 'text-red-800'}`}>
+                                    <span className={`font-semibold ${seedMethodsStatus.success ? 'text-green-800 dark:text-green-400' : 'text-red-800 dark:text-red-400'}`}>
                                         {seedMethodsStatus.success ? 'Operazione completata' : 'Operazione fallita'}
                                     </span>
                                 </div>
@@ -572,8 +572,8 @@ export default function AdminPanel() {
                             </ul>
                         </div>
 
-                        <div className="p-3 bg-blue-50 dark:bg-blue-950/20 border border-blue-100 rounded-lg">
-                            <p className="text-xs text-blue-800 leading-relaxed">
+                        <div className="p-3 bg-blue-50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/50 rounded-lg">
+                            <p className="text-xs text-blue-800 dark:text-blue-300 leading-relaxed">
                                 <strong>Configurazione:</strong> Clicca su "Connetti Account" per scegliere l'account Google da utilizzare.
                                 Assicurati di aver configurato <code>GOOGLE_CLIENT_ID</code> e <code>GOOGLE_CLIENT_SECRET</code> nel file <code>.env</code>.
                             </p>

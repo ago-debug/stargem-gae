@@ -27,8 +27,8 @@ const PERIODS = [
 ];
 
 const CATEGORY_COLORS: Record<string, string> = {
-    "OPEN": "bg-green-100 text-green-800 border-green-300",
-    "ADULTI": "bg-blue-100 dark:bg-blue-900/30 text-blue-800 border-blue-300",
+    "OPEN": "bg-green-100 text-green-800 dark:text-green-400 border-green-300",
+    "ADULTI": "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 border-blue-300",
     "AEREAL": "bg-pink-100 text-pink-800 border-pink-300",
     "BAMBINI": "bg-orange-100 text-orange-800 border-orange-300",
     "TEEN": "bg-orange-100 text-orange-800 border-orange-300",
@@ -374,7 +374,7 @@ export default function QuoteListini(props: QuoteListiniProps) {
                                             }
 
                                             return (
-                                                <TableCell key={`calcval-${p}`} className="p-2 border-r border-emerald-100 dark:border-emerald-900/50 bg-emerald-50 dark:bg-emerald-950/20/30 text-right font-medium text-emerald-700">
+                                                <TableCell key={`calcval-${p}`} className="p-2 border-r border-emerald-100 dark:border-emerald-900/50 bg-emerald-50 dark:bg-emerald-950/20 text-right font-medium text-emerald-700">
                                                     {costo}
                                                 </TableCell>
                                             );

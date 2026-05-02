@@ -115,7 +115,7 @@ export default function WebhookStatus() {
          <Card className="bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-900/50">
             <CardContent className="p-4">
                <div className="text-xs font-semibold text-red-600 uppercase tracking-widest">Falliti</div>
-               <div className="text-2xl font-bold mt-1 text-red-800">{failedCount}</div>
+               <div className="text-2xl font-bold mt-1 text-red-800 dark:text-red-400">{failedCount}</div>
             </CardContent>
          </Card>
          <Card className="bg-slate-100 dark:bg-slate-800 border-border">

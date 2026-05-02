@@ -191,8 +191,8 @@ export function CarnetTab({ seasonId }: CarnetTabProps) {
                 if (carnet.status === 'exhausted') barColor = "bg-slate-400";
 
                 const daysLeft = carnet.expiresAt ? differenceInDays(new Date(carnet.expiresAt), new Date()) : null;
-                let badgeColor = "bg-green-100 text-green-800";
-                if (daysLeft !== null && daysLeft < 10) badgeColor = "bg-red-100 dark:bg-red-900/30 text-red-800 border-red-300";
+                let badgeColor = "bg-green-100 text-green-800 dark:text-green-400";
+                if (daysLeft !== null && daysLeft < 10) badgeColor = "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400 border-red-300";
                 else if (daysLeft !== null && daysLeft <= 30) badgeColor = "bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-400 border-amber-300 dark:border-amber-800/50";
 
                 const grpSizeNum = carnet.groupSize || 1;

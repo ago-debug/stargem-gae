@@ -302,7 +302,7 @@ export default function GestioneNote() {
                                 </TableHeader>
                                 <TableBody>
                                     {sortedAndFilteredNotes.map((note) => (
-                                        <TableRow key={`${note.id}-${note.status}`} className="group hover:bg-amber-50 dark:bg-amber-950/20/30 transition-colors">
+                                        <TableRow key={`${note.id}-${note.status}`} className="group hover:bg-amber-50 dark:bg-amber-950/20 transition-colors">
                                             <TableCell className={cn(isSortedColumn("status") && "sorted-column-cell")}>
                                                 {note.status === "active" ? (
                                                     <Badge className="bg-green-100 text-green-700 hover:bg-green-100 border-green-200">
@@ -336,7 +336,7 @@ export default function GestioneNote() {
                                                 <div className="flex flex-col gap-1 pr-4">
                                                     {(note.title || note.category !== "generale") && (
                                                         <div className="flex items-center">
-                                                            <span className="text-[10px] bg-amber-100 dark:bg-amber-900/30/50 text-amber-800 dark:text-amber-400 px-1.5 py-0.5 rounded uppercase font-semibold">
+                                                            <span className="text-[10px] bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-400 px-1.5 py-0.5 rounded uppercase font-semibold">
                                                                 {note.title || note.category}
                                                             </span>
                                                         </div>

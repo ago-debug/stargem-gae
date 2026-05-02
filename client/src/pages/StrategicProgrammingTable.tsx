@@ -325,7 +325,7 @@ export default function StrategicProgrammingTable() {
                                             const isSunday = getDay(day) === 0;
                                             
                                             // Determine background color based on events
-                                            let bgColor = isSunday ? 'bg-red-50 dark:bg-red-950/20/40' : '';
+                                            let bgColor = isSunday ? 'bg-red-50 dark:bg-red-950/20' : '';
                                             let cellContent = format(day, "d MMM", { locale: it });
 
                                             if (dayEvts.length > 0) {

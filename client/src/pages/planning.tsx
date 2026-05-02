@@ -663,7 +663,7 @@ export default function Planning() {
                                                 className={`relative min-h-[50px] p-1 text-xs transition-opacity duration-300 ${isValidDay ? 'border-r cursor-pointer hover:ring-2 hover:ring-blue-400 hover:z-20' : ''} ${
                                                     !isValidDay ? (isPastBodyMonth ? 'bg-slate-100 dark:bg-slate-800/80 border-transparent' : 'bg-background border-transparent') : 
                                                     (isToday ? 'bg-yellow-200 border-2 border-yellow-500 z-10 shadow-md scale-[1.02] transition-transform' : 
-                                                    (holidayName || isSunday ? (isPastBodyMonth ? 'bg-red-100 dark:bg-red-900/30/80' : 'bg-red-50 dark:bg-red-950/20/50') : 
+                                                    (holidayName || isSunday ? (isPastBodyMonth ? 'bg-red-100 dark:bg-red-900/30' : 'bg-red-50 dark:bg-red-950/20') : 
                                                     (isCurrentMonthCol ? 'bg-yellow-50/20' : 
                                                     (isSaturday ? (isPastBodyMonth ? 'bg-slate-200/50' : 'bg-slate-100 dark:bg-slate-800/50') : 
                                                     (isPastBodyMonth ? 'bg-slate-100 dark:bg-slate-800/80 border-border/50' : 'bg-background')))))

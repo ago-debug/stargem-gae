@@ -301,7 +301,7 @@ function DisciplinareTab({ staffList }: { staffList: any[] }) {
 
   return (
     <div className="space-y-6 mt-4">
-       <Alert variant="destructive" className="bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-900/50 text-red-800">
+       <Alert variant="destructive" className="bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-900/50 text-red-800 dark:text-red-400">
          <ShieldAlert className="h-4 w-4 stroke-red-800" />
          <AlertTitle>⚠️ Sezione riservata — accesso solo Direzione.</AlertTitle>
          <AlertDescription>

@@ -894,7 +894,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
 
           <TabsContent value="details" className="pt-2">
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div className={cn("flex flex-col gap-4 p-4 rounded-md border-2", (isCopy && opStates.length > 0) ? "bg-red-50 dark:bg-red-950/20/50 border-red-400" : "border-yellow-400 bg-background")}>
+              <div className={cn("flex flex-col gap-4 p-4 rounded-md border-2", (isCopy && opStates.length > 0) ? "bg-red-50 dark:bg-red-950/20 border-red-400" : "border-yellow-400 bg-background")}>
                 <div className="flex gap-4 w-full">
                   <MultiSelectStatus selectedStatuses={opStates} onChange={setOpStates} testIdPrefix="course" />
                   <MultiSelectInternal selectedTags={internalTags} onChange={setInternalTags} />

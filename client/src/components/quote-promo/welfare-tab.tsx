@@ -38,7 +38,7 @@ function WelfareProviderCard({ provider }: { provider: WelfareProvider }) {
   return (
     <Card className="flex flex-col">
       <CardHeader className="bg-muted border-b pb-4">
-        <CardTitle className="text-lg text-green-800">{formData.name}</CardTitle>
+        <CardTitle className="text-lg text-green-800 dark:text-green-400">{formData.name}</CardTitle>
       </CardHeader>
       <CardContent className="flex-1 space-y-5 pt-4">
         <div className="flex items-center justify-between">
@@ -193,8 +193,8 @@ export function WelfareTab() {
                         </div>
                      </div>
                      {rate.notes && (
-                        <div className="bg-blue-50 dark:bg-blue-950/20/50 p-2 rounded border border-blue-100 text-xs italic text-muted-foreground mt-2">
-                           <span className="font-semibold not-italic block mb-0.5 text-blue-800">Note operative:</span>
+                        <div className="bg-blue-50 dark:bg-blue-950/20 p-2 rounded border border-blue-100 dark:border-blue-900/50 text-xs italic text-muted-foreground mt-2">
+                           <span className="font-semibold not-italic block mb-0.5 text-blue-800 dark:text-blue-300">Note operative:</span>
                            {rate.notes}
                         </div>
                      )}

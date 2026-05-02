@@ -136,11 +136,11 @@ export default function Dashboard() {
               </CardContent>
             </Card>
 
-            <Card className="border-emerald-200 dark:border-emerald-900/50 bg-emerald-50 dark:bg-emerald-950/20/20 shadow-sm relative overflow-hidden">
+            <Card className="border-emerald-200 dark:border-emerald-900/50 bg-emerald-50 dark:bg-emerald-950/20 shadow-sm relative overflow-hidden">
               <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
                 <TrendingUp className="h-24 w-24" />
               </div>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b border-emerald-100 dark:border-emerald-900/50 bg-emerald-50 dark:bg-emerald-950/20/50">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b border-emerald-100 dark:border-emerald-900/50 bg-emerald-50 dark:bg-emerald-950/20">
                 <CardTitle className="text-sm font-bold text-emerald-800 dark:text-emerald-400">Incasso Globale (Mese)</CardTitle>
                 <TrendingUp className="h-4 w-4 text-emerald-600" />
               </CardHeader>
@@ -164,7 +164,7 @@ export default function Dashboard() {
                         <>
                           <div className="space-y-2">
                             <p className="text-[10px] uppercase font-bold text-emerald-600 tracking-wider">Il tuo Incasso Mensile</p>
-                            <div className="flex items-center justify-between text-sm p-2 rounded bg-emerald-100 dark:bg-emerald-900/30/50 border border-emerald-200 dark:border-emerald-900/50">
+                            <div className="flex items-center justify-between text-sm p-2 rounded bg-emerald-100 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-900/50">
                               <div className="flex flex-col">
                                 <span className="font-semibold text-emerald-900 dark:text-emerald-300">{myRevenue ? myRevenue.name : "Tu"}</span>
                                 <span className="text-[10px] text-emerald-700">{myRevenue ? myRevenue.count : 0} operazioni</span>
@@ -356,7 +356,7 @@ export default function Dashboard() {
             </>
           ) : (
             <>
-              <Card className={(alerts?.expiringCourses ?? 0) > 0 ? "border-amber-200 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-950/20/30" : ""}>
+              <Card className={(alerts?.expiringCourses ?? 0) > 0 ? "border-amber-200 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-950/20" : ""}>
                 <CardHeader>
                   <CardTitle className="text-lg">Corsi in Avvicinamento Fine</CardTitle>
                   <CardDescription>Terminano entro 14 giorni</CardDescription>
@@ -376,7 +376,7 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
 
-              <Card className={(alerts?.expiringWorkshops ?? 0) > 0 ? "border-amber-200 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-950/20/30" : ""}>
+              <Card className={(alerts?.expiringWorkshops ?? 0) > 0 ? "border-amber-200 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-950/20" : ""}>
                 <CardHeader>
                   <CardTitle className="text-lg">Workshop Imminenti / in Scadenza</CardTitle>
                   <CardDescription>Eventi attivi nei prossimi 14 giorni</CardDescription>
