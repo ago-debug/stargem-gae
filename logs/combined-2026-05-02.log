@@ -1706,3 +1706,5 @@
 {"level":"info","message":"GET /api/todos 304 in 300ms :: [{\"id\":1,\"text\":\"Implementare verifica SMS/Whats…","service":"stargem-manager","timestamp":"2026-05-02 02:14:43"}
 {"level":"info","message":"GET /api/team-comments 304 in 299ms :: [{\"id\":20,\"authorId\":\"admin-id\",\"authorN…","service":"stargem-manager","timestamp":"2026-05-02 02:14:43"}
 {"level":"info","message":"GET /api/users/presence/active 200 in 594ms :: [{\"id\":\"admin-id\",\"username\":\"ad…","service":"stargem-manager","timestamp":"2026-05-02 02:14:48"}
+{"level":"info","message":"GET /api/todos 304 in 298ms :: [{\"id\":1,\"text\":\"Implementare verifica SMS/Whats…","service":"stargem-manager","timestamp":"2026-05-02 02:14:53"}
+{"level":"info","message":"GET /api/team-comments 304 in 300ms :: [{\"id\":20,\"authorId\":\"admin-id\",\"authorN…","service":"stargem-manager","timestamp":"2026-05-02 02:14:53"}

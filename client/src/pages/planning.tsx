@@ -563,7 +563,7 @@ export default function Planning() {
                         <Button variant="ghost" size="sm" onClick={nextTimeSpan} disabled={isNextDisabled} className="text-muted-foreground hover:text-foreground h-7 disabled:opacity-30 disabled:hover:text-muted-foreground">Succ. &rarr;</Button>
                     </div>
 
-                    <div className="text-xs font-semibold text-amber-700 bg-amber-50 dark:bg-amber-950/20 px-3 py-1.5 rounded-md border border-amber-200 dark:border-amber-900/50 cursor-pointer hover:bg-amber-100 dark:bg-amber-900/30 transition-colors h-9 flex items-center shrink-0"
+                    <div className="text-xs font-semibold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/20 px-3 py-1.5 rounded-md border border-amber-200 dark:border-amber-900/50 cursor-pointer hover:bg-amber-100 dark:bg-amber-900/30 transition-colors h-9 flex items-center shrink-0"
                          onClick={() => {
                              setViewMode('annuale');
                              setStartYear(today.getMonth() < 8 ? today.getFullYear() - 1 : today.getFullYear());
@@ -605,8 +605,8 @@ export default function Planning() {
                                     const isCurrentMonth = monthObj.monthIndex === currentMonthIndex && 
                                         (monthObj.monthIndex < 8 ? startYear + 1 === today.getFullYear() : startYear === today.getFullYear());
                                     
-                                    const themeStyle = isMonthPast ? "bg-slate-200 text-foreground" : "bg-muted/80 text-muted-foreground";
-                                    const highlightStyle = isCurrentMonth ? "border-b-4 border-b-yellow-400 bg-yellow-100/50" : "";
+                                    const themeStyle = isMonthPast ? "bg-slate-200 dark:bg-slate-800 text-foreground" : "bg-muted/80 text-muted-foreground";
+                                    const highlightStyle = isCurrentMonth ? "border-b-4 border-b-yellow-400 dark:border-b-yellow-600 bg-yellow-100/50 dark:bg-yellow-900/20" : "";
                                     
                                     return (
                                         <div key={monthObj.label} className={`border-r px-2 py-2 flex flex-col items-center justify-center tracking-wide leading-tight ${themeStyle} ${highlightStyle}`}>
@@ -662,16 +662,16 @@ export default function Planning() {
                                                 }}
                                                 className={`relative min-h-[50px] p-1 text-xs transition-opacity duration-300 ${isValidDay ? 'border-r cursor-pointer hover:ring-2 hover:ring-blue-400 hover:z-20' : ''} ${
                                                     !isValidDay ? (isPastBodyMonth ? 'bg-slate-100 dark:bg-slate-800/80 border-transparent' : 'bg-background border-transparent') : 
-                                                    (isToday ? 'bg-yellow-200 border-2 border-yellow-500 z-10 shadow-md scale-[1.02] transition-transform' : 
+                                                    (isToday ? 'bg-yellow-200 dark:bg-yellow-900/40 border-2 border-yellow-500 dark:border-yellow-700 z-10 shadow-md scale-[1.02] transition-transform' : 
                                                     (holidayName || isSunday ? (isPastBodyMonth ? 'bg-red-100 dark:bg-red-900/30' : 'bg-red-50 dark:bg-red-950/20') : 
-                                                    (isCurrentMonthCol ? 'bg-yellow-50/20' : 
-                                                    (isSaturday ? (isPastBodyMonth ? 'bg-slate-200/50' : 'bg-slate-100 dark:bg-slate-800/50') : 
+                                                    (isCurrentMonthCol ? 'bg-yellow-50/20 dark:bg-yellow-900/10' : 
+                                                    (isSaturday ? (isPastBodyMonth ? 'bg-slate-200/50 dark:bg-slate-800/60' : 'bg-slate-100 dark:bg-slate-800/50') : 
                                                     (isPastBodyMonth ? 'bg-slate-100 dark:bg-slate-800/80 border-border/50' : 'bg-background')))))
                                                 } ${isPastBodyMonth && !isToday ? 'opacity-40 grayscale hover:opacity-100 hover:grayscale-0' : ''}`}
                                             >
                                                 {isValidDay && cellDate && (
                                                     <>
-                                                        <span className={`absolute top-1 right-1 text-[10px] font-bold ${isToday ? 'text-yellow-800 text-[11px] underline' : (holidayName || isSunday ? 'text-red-500' : 'text-slate-400')}`}>
+                                                        <span className={`absolute top-1 right-1 text-[10px] font-bold ${isToday ? 'text-yellow-800 dark:text-yellow-400 text-[11px] underline' : (holidayName || isSunday ? 'text-red-500' : 'text-slate-400')}`}>
                                                             {day} {format(cellDate, "EEE", { locale: it }).toUpperCase()}
                                                         </span>
                                                         <div className="mt-4 flex flex-col gap-0.5">
