@@ -19,6 +19,7 @@ Regole di progetto:
 11. Ogni task deve essere affrontato con questo flusso:
 12. **AGGIORNAMENTO STATO DB**: Alla fine di ogni lavoro/task, DEVI sempre calcolare o aggiornare lo "Stato DB Reale" e sovrascrivere/inserire questa mappatura in `_GAE_SVILUPPO/_ANTIGRAVITY/01_status_continui/D_Mappa_Dati_e_Frontend.md`, previo backup.
 13. **LETTURA INIZIO SESSIONE**: Quando apri una sessione operativa con Gaetano, leggi sempre prima: `00_LEGGIMI.md`, `MASTER_STATUS.md` in `_CLAUDE/01_canonici/`, il RECAP della chat attiva in `_CLAUDE/03_recap_chat/`, e la cartella `_CLAUDE/04_per_antigravity/`.
+14. **USO DEI WORKFLOW / STRUMENTI INTEGRATI**: Ricordati di utilizzare e proporre i workflow installati in `.agents/workflows/` per automatizzare le tue risposte: `/fix-logic-wf` (per fix backend mirati), `/fix-ui-wf` (per fix frontend mirati), `/riavvio-ambiente-wf` (per riconnettere DB/Server), e `/stop-go-wf` (per analisi conservative).
 
 FASE 1 — ANALISI
 - Comprendere lo stato attuale reale
