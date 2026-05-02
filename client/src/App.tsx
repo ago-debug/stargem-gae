@@ -28,7 +28,7 @@ const Courses = React.lazy(() => import("@/pages/courses"));
 const Workshops = React.lazy(() => import("@/pages/workshops"));
 const Categories = React.lazy(() => import("@/pages/categories"));
 const Studios = React.lazy(() => import("@/pages/studios"));
-const Memberships = React.lazy(() => import("@/pages/memberships"));
+
 const GemTeam = React.lazy(() => import("@/pages/gemteam"));
 const GemTeamMe = React.lazy(() => import("@/pages/gemteam-me"));
 const Payments = React.lazy(() => import("@/pages/payments"));
@@ -40,7 +40,7 @@ const ResetStagione = React.lazy(() => import("@/pages/reset-stagione"));
 const AuditLogs = React.lazy(() => import("@/pages/audit-logs"));
 
 const AnagraficaHome = React.lazy(() => import("@/pages/anagrafica-home"));
-const CardGenerator = React.lazy(() => import("@/pages/card-generator"));
+
 const AdminPanel = React.lazy(() => import("@/pages/admin-panel"));
 const CalendarPage = React.lazy(() => import("@/pages/calendar"));
 const BookingServiceCategories = React.lazy(() => import("@/pages/booking-service-categories"));
@@ -189,7 +189,13 @@ function Router() {
         <Redirect to="/attivita/workshops" />
       </Route>
       <Route path="/tessere">
-        <Redirect to="/tessere-certificati" />
+        <Redirect to="/gempass" />
+      </Route>
+      <Route path="/tessere-certificati">
+        <Redirect to="/gempass" />
+      </Route>
+      <Route path="/generazione-tessere">
+        <Redirect to="/gempass" />
       </Route>
       <ProtectedRoute path="/calendario-attivita" component={CalendarPage} />
       <ProtectedRoute path="/planning" component={Planning} />
@@ -200,7 +206,7 @@ function Router() {
       </Route>
       <ProtectedRoute path="/studios" component={Studios} />
       <ProtectedRoute path="/affitto-studio" component={StubAffittoStudio} />
-      <ProtectedRoute path="/tessere-certificati" component={Memberships} />
+
       <ProtectedRoute path="/pagamenti" component={Payments} />
       <ProtectedRoute path="/accessi" component={AccessControl} />
       <ProtectedRoute path="/report" component={Reports} />
@@ -215,7 +221,7 @@ function Router() {
       <ProtectedRoute path="/gemteam" component={GemTeam} />
       <ProtectedRoute path="/gemteam/me" component={GemTeamMe} />
       <ProtectedRoute path="/area-tesserati" component={AreaTesserati} />
-      <ProtectedRoute path="/generazione-tessere" component={CardGenerator} />
+
       <ProtectedRoute path="/admin" component={AdminPanel} />
       <ProtectedRoute path="/copilot" component={StubCopilot} />
       <ProtectedRoute path="/booking-services" component={BookingServices} />
