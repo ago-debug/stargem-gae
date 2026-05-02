@@ -784,7 +784,7 @@ export default function AnagraficaHome() {
                     ) : (
                       <div className="w-full h-full flex flex-col items-center justify-center text-muted-foreground">
                         <User className="w-8 h-8 mb-1 opacity-40" />
-                        <span className="text-[10px] uppercase font-bold tracking-tighter">Foto</span>
+                        <span className="text-xxs uppercase font-bold tracking-tighter">Foto</span>
                       </div>
                     )}
                   </div>
@@ -808,7 +808,7 @@ export default function AnagraficaHome() {
                       }}
                     />
                     {formData.photoUrl && (
-                      <Button variant="ghost" size="sm" onClick={() => setFormData(p => ({ ...p, photoUrl: null }))} className="h-6 px-2 text-[10px] text-destructive">
+                      <Button variant="ghost" size="sm" onClick={() => setFormData(p => ({ ...p, photoUrl: null }))} className="h-6 px-2 text-xxs text-destructive">
                         Rimuovi
                       </Button>
                     )}
@@ -1265,7 +1265,7 @@ export default function AnagraficaHome() {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="border-[#e11d48]/20 bg-[#e11d48]/5 hover:bg-[#e11d48]/10 text-primary font-bold"
+                        className="border-[stargem-red]/20 bg-[stargem-red]/5 hover:bg-[stargem-red]/10 text-primary font-bold"
                         onClick={() => {
                           if (selectedMember) {
                             setSelectedMemberForCard(selectedMember);

@@ -101,7 +101,7 @@ export function UserProfileDialog({ children, targetUser }: UserProfileDialogPro
           <DialogTitle>{targetUser ? `Profilo di ${targetUser.username}` : "Il Mio Profilo"}</DialogTitle>
           <DialogDescription>
             Personalizza {targetUser ? "l'account" : "il tuo account"}. Scegli una foto profilo e aggiorna i recapiti.
-            <br/><span className="text-[10px] text-muted-foreground block mt-1">(Supportati: JPG, PNG, WEBP. Max 2 Megabyte)</span>
+            <br/><span className="text-xxs text-muted-foreground block mt-1">(Supportati: JPG, PNG, WEBP. Max 2 Megabyte)</span>
           </DialogDescription>
         </DialogHeader>
 
@@ -121,7 +121,7 @@ export function UserProfileDialog({ children, targetUser }: UserProfileDialogPro
               ) : (
                 <>
                   <Upload className="w-5 h-5 text-white mb-1" />
-                  <span className="text-[10px] text-white font-medium">Carica</span>
+                  <span className="text-xxs text-white font-medium">Carica</span>
                 </>
               )}
               <input type="file" className="hidden" accept="image/png, image/jpeg, image/webp" onChange={handleFileChange} disabled={uploading} />

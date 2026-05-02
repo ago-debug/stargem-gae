@@ -273,7 +273,7 @@ export default function AuthPage() {
                             </div>
 
                             <span className="font-extrabold text-foreground text-[15px]">{mod.name}</span>
-                            <span className="text-[10px] uppercase tracking-wider text-slate-400 font-bold text-center mt-1 leading-tight">{mod.desc}</span>
+                            <span className="text-xxs uppercase tracking-wider text-slate-400 font-bold text-center mt-1 leading-tight">{mod.desc}</span>
                             {(mod as any).subLabel && (
                                <span style={{ color: '#F59E0B', fontSize: 9, fontStyle: 'italic' }} className="mt-1 font-bold">
                                  {(mod as any).subLabel}

@@ -1271,7 +1271,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
                           <div className="flex items-center gap-2 bg-red-50 dark:bg-red-950/20 p-1.5 rounded-md border border-red-200 dark:border-red-900/50 animate-in slide-in-from-left-2">
                              <div className="flex flex-col">
                                 <span className="text-xs font-bold text-red-700 px-2 leading-none uppercase">Confermi?</span>
-                                <span className="text-[10px] text-red-600 px-2 leading-none mt-1">Azione irreversibile</span>
+                                <span className="text-xxs text-red-600 px-2 leading-none mt-1">Azione irreversibile</span>
                              </div>
                              <Button type="button" variant="ghost" size="sm" className="h-7 text-xs hover:bg-red-100 dark:bg-red-900/30" onClick={() => setConfirmDelete(false)}>Annulla</Button>
                              <Button type="button" variant="destructive" size="sm" className="h-7 text-xs" onClick={() => { setConfirmDelete(false); onDelete(course.id); onOpenChange(false); }}>Sì, elimina</Button>

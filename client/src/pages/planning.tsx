@@ -50,7 +50,7 @@ const MONTHS_ORDERED = [
 const getStrategicColor = (type: string, title?: string) => {
     const t = (title || '').toUpperCase();
     if (type === 'chiusura' || t.includes('STRAORDINARI')) return 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300 border-l border-orange-400 dark:border-orange-800';
-    if (type === 'ferie' || t.includes('FERIE')) return 'bg-[#9D174D]/10 dark:bg-[#9D174D]/30 text-[#9D174D] dark:text-pink-300 border-l border-[#9D174D]/50';
+    if (type === 'ferie' || t.includes('FERIE')) return 'bg-[stargem-red]/10 dark:bg-[stargem-red]/30 text-[stargem-red] dark:text-pink-300 border-l border-[stargem-red]/50';
     if (type === 'campus' || t.includes('CAM')) return 'bg-sky-100 dark:bg-sky-900/30 text-sky-800 dark:text-sky-300 border-l border-sky-400 dark:border-sky-800';
     if (type === 'saggio' || t.includes('SAG')) return 'bg-pink-100 dark:bg-pink-900/30 text-pink-800 dark:text-pink-300 border-l border-pink-400 dark:border-pink-800';
     if (t.includes('WS')) return 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300 border-l border-orange-400 dark:border-orange-800';
@@ -329,7 +329,7 @@ export default function Planning() {
 
         if (resolvedHolidayName) {
             cellEvents.push(
-                <div key={`hol_${day}_${realMonthIndex}`} className="mb-1 mt-0.5 w-full bg-red-50 dark:bg-red-950/20 text-red-700 border border-red-300 px-1 py-0.5 text-[11px] font-medium rounded text-center uppercase shadow-sm truncate">
+                <div key={`hol_${day}_${realMonthIndex}`} className="mb-1 mt-0.5 w-full bg-red-50 dark:bg-red-950/20 text-red-700 border border-red-300 px-1 py-0.5 text-xxs font-medium rounded text-center uppercase shadow-sm truncate">
                     {resolvedHolidayName}
                 </div>
             );
@@ -357,7 +357,7 @@ export default function Planning() {
 
                 cellEvents.push(
                     <Link to={`/calendario-attivita?date=${dateStr}`} key={`breakdown-${key}`}>
-                        <div className={`mb-1 mt-0.5 rounded border px-1 py-0.5 text-[11px] font-medium shadow-sm transition-colors truncate cursor-pointer ${colorClass}`}>
+                        <div className={`mb-1 mt-0.5 rounded border px-1 py-0.5 text-xxs font-medium shadow-sm transition-colors truncate cursor-pointer ${colorClass}`}>
                             {key} ({count})
                         </div>
                     </Link>
@@ -381,7 +381,7 @@ export default function Planning() {
 
             const elementBlock = (
                 <div 
-                    className={`mb-1 mt-0.5 break-words whitespace-normal leading-tight rounded px-1.5 py-1 text-[11px] sm:text-xs font-medium shadow-sm cursor-pointer hover:opacity-90 transition-opacity ${e.colorClass}`} 
+                    className={`mb-1 mt-0.5 break-words whitespace-normal leading-tight rounded px-1.5 py-1 text-xxs sm:text-xs font-medium shadow-sm cursor-pointer hover:opacity-90 transition-opacity ${e.colorClass}`} 
                     title={e.title}
                     onClick={(event) => {
                         if (!linkTo && e.id.toString().startsWith('strat_')) {
@@ -611,7 +611,7 @@ export default function Planning() {
                                     return (
                                         <div key={monthObj.label} className={`border-r px-2 py-2 flex flex-col items-center justify-center tracking-wide leading-tight ${themeStyle} ${highlightStyle}`}>
                                             <span className="font-bold text-[13px] uppercase">{monthObj.label}</span>
-                                            <span className="text-[11px] font-semibold opacity-75">{monthObj.monthIndex < 8 ? startYear + 1 : startYear}</span>
+                                            <span className="text-xxs font-semibold opacity-75">{monthObj.monthIndex < 8 ? startYear + 1 : startYear}</span>
                                         </div>
                                     );
                                 })}
@@ -671,7 +671,7 @@ export default function Planning() {
                                             >
                                                 {isValidDay && cellDate && (
                                                     <>
-                                                        <span className={`absolute top-1 right-1 text-[10px] font-bold ${isToday ? 'text-yellow-800 dark:text-yellow-400 text-[11px] underline' : (holidayName || isSunday ? 'text-red-500' : 'text-slate-400')}`}>
+                                                        <span className={`absolute top-1 right-1 text-xxs font-bold ${isToday ? 'text-yellow-800 dark:text-yellow-400 text-xxs underline' : (holidayName || isSunday ? 'text-red-500' : 'text-slate-400')}`}>
                                                             {day} {format(cellDate, "EEE", { locale: it }).toUpperCase()}
                                                         </span>
                                                         <div className="mt-4 flex flex-col gap-0.5">

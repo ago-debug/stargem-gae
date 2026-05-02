@@ -129,7 +129,7 @@ export function ConvenzioniTab({ seasonId }: ConvenzioniTabProps) {
                 </CardContent>
                 <CardFooter className="bg-muted pt-3 flex justify-between items-center border-t">
                   <div className="flex flex-col">
-                     <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Restrizioni Extra</span>
+                     <span className="text-xxs uppercase font-bold tracking-wider text-slate-400">Restrizioni Extra</span>
                      <span className="text-xs font-mono text-foreground/80">{conv.excludeOtherPromos ? "Non cumulabile" : "Cumulabile"}</span>
                   </div>
                   <Button variant="outline" size="sm" className="hidden border-indigo-200 text-indigo-700">Modifica</Button>

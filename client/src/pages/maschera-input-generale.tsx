@@ -704,7 +704,7 @@ export default function MascheraInputGenerale(props?: any) {
   const renderMancaDato = (val: string | undefined | null) => {
     if (selectedMemberId && actionFromUrl !== "new" && (!val || String(val).trim() === "")) {
       return (
-        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-[10px] font-bold text-red-500 select-none pointer-events-none z-10">
+        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-xxs font-bold text-red-500 select-none pointer-events-none z-10">
           <AlertTriangle className="w-3 h-3 fill-red-500 text-white" /> Manca Dato
         </div>
       );
@@ -1021,18 +1021,18 @@ export default function MascheraInputGenerale(props?: any) {
             return (
               <div key={e.id} className="grid grid-cols-[140px_180px_240px_1fr_auto] items-center p-2.5 bg-muted/20 border rounded-md group hover:bg-muted/40 transition-colors gap-3">
                 <div className="font-bold text-sm truncate" title={assoc?.name}>{assoc?.name || 'Attività non trovata'}</div>
-                <div className="font-medium text-[11px] text-foreground truncate" title={assoc?.sku || undefined}>{assoc?.sku}</div>
+                <div className="font-medium text-xxs text-foreground truncate" title={assoc?.sku || undefined}>{assoc?.sku}</div>
                 <div className="text-xs text-muted-foreground flex items-center gap-2 truncate">
                   <span>Registrata il: {new Date(e.enrollmentDate || e.createdAt || new Date()).toLocaleDateString('it-IT')}</span>
                 </div>
                 <div className="flex items-center gap-1 overflow-hidden flex-1">
                   {hasDetails && e.details.map((detStr: string, idx: number) => {
                     const color = enrollmentDetails?.find((d: any) => d.name === detStr)?.color;
-                    return <EnrollmentDetailBadge key={idx} name={detStr} color={color} className="h-5 py-0.5 px-2 text-[10px] truncate max-w-[120px]" />;
+                    return <EnrollmentDetailBadge key={idx} name={detStr} color={color} className="h-5 py-0.5 px-2 text-xxs truncate max-w-[120px]" />;
                   })}
                 </div>
                 <div className="flex items-center justify-end gap-3 pl-2">
-                  <Badge variant={e.status === 'active' ? 'default' : 'secondary'} className={e.status === 'active' ? 'bg-green-100 text-green-800 dark:text-green-400 hover:bg-green-200 border-green-300 text-[10px] h-5' : 'text-[10px] h-5'}>
+                  <Badge variant={e.status === 'active' ? 'default' : 'secondary'} className={e.status === 'active' ? 'bg-green-100 text-green-800 dark:text-green-400 hover:bg-green-200 border-green-300 text-xxs h-5' : 'text-xxs h-5'}>
                     {e.status === 'active' ? 'Attiva' : e.status || '?'}
                   </Badge>
                   <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity"
@@ -2187,7 +2187,7 @@ export default function MascheraInputGenerale(props?: any) {
                   {topTesseraScad && (
                     <div 
                       className={cn(
-                        "px-2 py-0.5 text-[11px] font-bold rounded-md border tracking-wide uppercase transition-colors",
+                        "px-2 py-0.5 text-xxs font-bold rounded-md border tracking-wide uppercase transition-colors",
                         isTesseraExpired 
                           ? "bg-red-50 dark:bg-red-950/20 text-red-600 border-red-300 shadow-sm shadow-red-100" 
                           : "bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 border-emerald-300 shadow-sm shadow-emerald-100"
@@ -3581,7 +3581,7 @@ export default function MascheraInputGenerale(props?: any) {
                     <Label className="uppercase text-xs font-semibold text-muted-foreground flex items-center gap-2">
                       Dettagli Algoritmo
                       {currentMember?.crmProfileOverride && (
-                        <Badge variant="outline" className="border-amber-500 text-amber-600 bg-amber-50 dark:bg-amber-950/20 h-5 text-[10px] px-1.5 flex items-center gap-1 cursor-help leading-none" title="Forzatura manuale attiva">
+                        <Badge variant="outline" className="border-amber-500 text-amber-600 bg-amber-50 dark:bg-amber-950/20 h-5 text-xxs px-1.5 flex items-center gap-1 cursor-help leading-none" title="Forzatura manuale attiva">
                           <ShieldAlert className="w-3 h-3" />
                           Forzato
                         </Badge>
@@ -4124,7 +4124,7 @@ export default function MascheraInputGenerale(props?: any) {
                             </div>
 
                             {/* Codice Corso (SKU) */}
-                            <div className="font-medium text-[11px] text-foreground truncate" title={course?.sku || undefined}>
+                            <div className="font-medium text-xxs text-foreground truncate" title={course?.sku || undefined}>
                               {course?.sku}
                             </div>
 
@@ -4136,13 +4136,13 @@ export default function MascheraInputGenerale(props?: any) {
                             
                             {/* Dettagli Partecipazione (Modalità) */}
                             <div className="flex flex-col items-start gap-1 overflow-hidden">
-                              {e.participationType === 'FREE_TRIAL' && <Badge variant="outline" className="text-[10px] bg-green-50 text-green-700 border-green-200 font-medium">Prova Gratuita</Badge>}
-                              {e.participationType === 'PAID_TRIAL' && <Badge variant="outline" className="text-[10px] bg-amber-50 dark:bg-amber-950/20 text-amber-700 border-amber-200 dark:border-amber-900/50 font-medium">Prova a Pagamento</Badge>}
-                              {e.participationType === 'SINGLE_LESSON' && <Badge variant="outline" className="text-[10px] bg-purple-50 text-purple-700 border-purple-200 font-medium">Lezione Singola</Badge>}
-                              {(!e.participationType || e.participationType === 'STANDARD_COURSE') && <Badge variant="outline" className="text-[10px] bg-blue-50 dark:bg-blue-950/20 text-blue-700 border-blue-200 font-medium">Iscrizione Standard</Badge>}
+                              {e.participationType === 'FREE_TRIAL' && <Badge variant="outline" className="text-xxs bg-green-50 text-green-700 border-green-200 font-medium">Prova Gratuita</Badge>}
+                              {e.participationType === 'PAID_TRIAL' && <Badge variant="outline" className="text-xxs bg-amber-50 dark:bg-amber-950/20 text-amber-700 border-amber-200 dark:border-amber-900/50 font-medium">Prova a Pagamento</Badge>}
+                              {e.participationType === 'SINGLE_LESSON' && <Badge variant="outline" className="text-xxs bg-purple-50 text-purple-700 border-purple-200 font-medium">Lezione Singola</Badge>}
+                              {(!e.participationType || e.participationType === 'STANDARD_COURSE') && <Badge variant="outline" className="text-xxs bg-blue-50 dark:bg-blue-950/20 text-blue-700 border-blue-200 font-medium">Iscrizione Standard</Badge>}
                               
                               {e.targetDate && (
-                                <span className="text-[10px] text-muted-foreground flex items-center gap-1 font-medium mt-0.5">
+                                <span className="text-xxs text-muted-foreground flex items-center gap-1 font-medium mt-0.5">
                                   <Calendar className="w-2.5 h-2.5"/>
                                   {new Date(e.targetDate).toLocaleDateString('it-IT')}
                                 </span>
@@ -4158,7 +4158,7 @@ export default function MascheraInputGenerale(props?: any) {
                                     key={idx}
                                     name={detStr}
                                     color={color}
-                                    className="h-5 py-0.5 px-2 text-[10px] truncate max-w-[120px]"
+                                    className="h-5 py-0.5 px-2 text-xxs truncate max-w-[120px]"
                                   />
                                 );
                               })}
@@ -4166,7 +4166,7 @@ export default function MascheraInputGenerale(props?: any) {
 
                             {/* Stato e Azioni */}
                             <div className="flex items-center justify-end gap-3 pl-2">
-                              <Badge variant={e.status === 'active' ? 'default' : 'secondary'} className={e.status === 'active' ? 'bg-green-100 text-green-800 dark:text-green-400 hover:bg-green-200 border-green-300 text-[10px] h-5' : 'text-[10px] h-5'}>
+                              <Badge variant={e.status === 'active' ? 'default' : 'secondary'} className={e.status === 'active' ? 'bg-green-100 text-green-800 dark:text-green-400 hover:bg-green-200 border-green-300 text-xxs h-5' : 'text-xxs h-5'}>
                                 {e.status === 'active' ? 'Attivo' : e.status}
                               </Badge>
                               <Button
@@ -4203,7 +4203,7 @@ export default function MascheraInputGenerale(props?: any) {
                   <CreditCard className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                   <span className="text-muted-foreground line-through decoration-muted-foreground/50">Prove a Pagamento</span>
                 </div>
-                <Badge variant="outline" className="text-[10px] bg-amber-50 dark:bg-amber-950/20 text-amber-700 border-amber-200 dark:border-amber-900/50 font-normal">Sola Lettura (Usa modulo Corsi)</Badge>
+                <Badge variant="outline" className="text-xxs bg-amber-50 dark:bg-amber-950/20 text-amber-700 border-amber-200 dark:border-amber-900/50 font-normal">Sola Lettura (Usa modulo Corsi)</Badge>
               </h3>
               {renderGenericEnrollmentList(memberPtEnrollments, paidTrials, removePtEnrollmentMutation, "Nessuna prova a pagamento registrata.", "Storico Prove a Pagamento", "le prove a pagamento", "paidTrialId")}
             </div>
@@ -4215,7 +4215,7 @@ export default function MascheraInputGenerale(props?: any) {
                   <Gift className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                   <span className="text-muted-foreground line-through decoration-muted-foreground/50">Prove Gratuite</span>
                 </div>
-                <Badge variant="outline" className="text-[10px] bg-amber-50 dark:bg-amber-950/20 text-amber-700 border-amber-200 dark:border-amber-900/50 font-normal">Sola Lettura (Usa modulo Corsi)</Badge>
+                <Badge variant="outline" className="text-xxs bg-amber-50 dark:bg-amber-950/20 text-amber-700 border-amber-200 dark:border-amber-900/50 font-normal">Sola Lettura (Usa modulo Corsi)</Badge>
               </h3>
               {renderGenericEnrollmentList(memberFtEnrollments, freeTrials, removeFtEnrollmentMutation, "Nessuna prova gratuita registrata.", "Storico Prove Gratuite", "le prove gratuite", "freeTrialId")}
             </div>
@@ -4227,7 +4227,7 @@ export default function MascheraInputGenerale(props?: any) {
                   <BookOpen className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                   <span className="text-muted-foreground line-through decoration-muted-foreground/50">Lezioni Singole</span>
                 </div>
-                <Badge variant="outline" className="text-[10px] bg-amber-50 dark:bg-amber-950/20 text-amber-700 border-amber-200 dark:border-amber-900/50 font-normal">Sola Lettura (Usa modulo Corsi)</Badge>
+                <Badge variant="outline" className="text-xxs bg-amber-50 dark:bg-amber-950/20 text-amber-700 border-amber-200 dark:border-amber-900/50 font-normal">Sola Lettura (Usa modulo Corsi)</Badge>
               </h3>
               {renderGenericEnrollmentList(memberSlEnrollments, singleLessons, removeSlEnrollmentMutation, "Nessuna lezione singola registrata.", "Storico Lezioni Singole", "le lezioni singole", "singleLessonId")}
             </div>

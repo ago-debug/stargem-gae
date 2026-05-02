@@ -95,7 +95,7 @@ export default function VacationCategories() {
   const categoryTree = getCategoryTree();
 
   return (
-    <div className="p-6 md:p-8 space-y-8 mx-auto">
+    <div className="max-w-7xl mx-auto p-6 md:p-8 space-y-6">
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={() => window.history.back()} className="icon-gold-bg rounded-md h-8 w-8 flex-shrink-0" data-testid="button-back">
@@ -152,7 +152,7 @@ export default function VacationCategories() {
                           <p className="text-xs text-muted-foreground truncate italic">{category.description}</p>
                         )}
                       </div>
-                      <Badge variant="secondary" className="bg-muted-foreground/10 text-muted-foreground border-none text-[10px] font-bold h-5">
+                      <Badge variant="secondary" className="bg-muted-foreground/10 text-muted-foreground border-none text-xxs font-bold h-5">
                         {category.children?.length || 0} sottocategorie
                       </Badge>
                     </div>

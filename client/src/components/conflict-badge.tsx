@@ -42,7 +42,7 @@ export function ConflictBadge({ result, type }: ConflictBadgeProps) {
           <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
           <span>✗ {typeLabel} già presente nel sistema</span>
         </div>
-        <div className="ml-5 space-y-0.5 text-[11px] opacity-90">
+        <div className="ml-5 space-y-0.5 text-xxs opacity-90">
           <div>Scheda: {result.conflict.name} {result.conflict.email ? `· ${result.conflict.email}` : ''}</div>
           <a
             href={`/members/${result.conflict.id}`}

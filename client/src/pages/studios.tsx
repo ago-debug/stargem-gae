@@ -229,7 +229,7 @@ export default function Studios() {
   };
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
+    <div className="max-w-7xl mx-auto p-6 md:p-8 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Studios/Sale</h1>
@@ -500,7 +500,7 @@ export default function Studios() {
                     </TableCell>
                     <TableCell className={cn(isSortedColumn("calendar") && "sorted-column-cell")}>
                       {studio.googleCalendarId ? (
-                        <Badge variant="outline" className="font-mono text-[10px]">
+                        <Badge variant="outline" className="font-mono text-xxs">
                           {studio.googleCalendarId}
                         </Badge>
                       ) : (

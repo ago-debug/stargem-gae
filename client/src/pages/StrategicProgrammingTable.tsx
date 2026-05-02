@@ -317,7 +317,7 @@ export default function StrategicProgrammingTable() {
                                         className={`hover:bg-muted/80 transition-all duration-300 group ${isCurrentWeek ? 'bg-yellow-50/40 dark:bg-yellow-900/20 ring-1 ring-yellow-400 dark:ring-yellow-700' : ''} ${isPastWeek ? 'opacity-40 grayscale hover:opacity-100 hover:grayscale-0 bg-muted/50' : ''}`}
                                     >
                                         <td className="border p-2 text-center font-bold text-slate-400">{row.weekNum}</td>
-                                        <td className="border p-2 font-mono text-[10px] text-muted-foreground font-medium">
+                                        <td className="border p-2 font-mono text-xxs text-muted-foreground font-medium">
                                             {format(row.start, "dd/MM")} - {format(row.end, "dd/MM/yy")}
                                         </td>
                                         {row.days.map(day => {
@@ -356,7 +356,7 @@ export default function StrategicProgrammingTable() {
                                                                             openEditModal(evt);
                                                                         }
                                                                     }}
-                                                                    className={`text-[10px] sm:text-[11px] leading-tight w-full py-0.5 text-center text-balance break-words focus:outline-none ${
+                                                                    className={`text-xxs sm:text-xxs leading-tight w-full py-0.5 text-center text-balance break-words focus:outline-none ${
                                                                         isHoliday 
                                                                             ? 'text-red-700 font-bold tracking-tight' 
                                                                             : (() => {
@@ -364,7 +364,7 @@ export default function StrategicProgrammingTable() {
                                                                                 const type = evt.eventType;
                                                                                 let color = 'bg-background/95 text-foreground'; // Default
                                                                                 if (type === 'chiusura' || t.includes('STRAORDINARI')) color = 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300 border-l border-orange-400 dark:border-orange-800';
-                                                                                else if (type === 'ferie' || t.includes('FERIE')) color = 'bg-[#9D174D]/10 dark:bg-[#9D174D]/30 text-[#9D174D] dark:text-pink-300 border-l border-[#9D174D]/50';
+                                                                                else if (type === 'ferie' || t.includes('FERIE')) color = 'bg-[stargem-red]/10 dark:bg-[stargem-red]/30 text-[stargem-red] dark:text-pink-300 border-l border-[stargem-red]/50';
                                                                                 else if (type === 'campus' || t.includes('CAM')) color = 'bg-sky-100 dark:bg-sky-900/30 text-sky-800 dark:text-sky-300 border-l border-sky-400 dark:border-sky-800';
                                                                                 else if (type === 'saggio' || t.includes('SAG')) color = 'bg-pink-100 dark:bg-pink-900/30 text-pink-800 dark:text-pink-300 border-l border-pink-400 dark:border-pink-800';
                                                                                 else if (t.includes('WS')) color = 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300 border-l border-orange-400 dark:border-orange-800';
@@ -386,16 +386,16 @@ export default function StrategicProgrammingTable() {
                                                 </td>
                                             );
                                         })}
-                                        <td className="border p-2 align-top text-[11px] text-foreground/80 bg-muted/30">
+                                        <td className="border p-2 align-top text-xxs text-foreground/80 bg-muted/30">
                                             <div className="flex flex-col gap-1">
                                                 {uniqueEvents.length === 0 ? (
-                                                    <span className="text-slate-400 italic text-[10px]">Nessuna nota in questa settimana</span>
+                                                    <span className="text-slate-400 italic text-xxs">Nessuna nota in questa settimana</span>
                                                 ) : (
                                                     uniqueEvents.map(evt => (
                                                         <div key={evt?.id} className="font-medium bg-background p-1.5 rounded shadow-sm border border-slate-100 flex items-start justify-between group/evt">
                                                             <div className="flex flex-col text-[12px] leading-tight mt-0.5">
                                                                 <span>{getEventLabel(evt)}</span>
-                                                                {evt?.description && <span className="text-muted-foreground font-medium text-[11px]">({evt.description})</span>}
+                                                                {evt?.description && <span className="text-muted-foreground font-medium text-xxs">({evt.description})</span>}
                                                             </div>
                                                             <div className="flex gap-1 ml-2 shrink-0 transition-opacity">
                                                                 {(() => {
@@ -537,7 +537,7 @@ export default function StrategicProgrammingTable() {
                             <div className="space-y-2">
                                 <Label>Data Fine <span className="text-red-500">*</span></Label>
                                 <Input type="date" value={modalEndDate} onChange={e => setModalEndDate(e.target.value)} />
-                                {!modalEndDate && <p className="text-[10px] text-red-500 font-medium">Obbligatoria</p>}
+                                {!modalEndDate && <p className="text-xxs text-red-500 font-medium">Obbligatoria</p>}
                             </div>
                         </div>
                     </div>

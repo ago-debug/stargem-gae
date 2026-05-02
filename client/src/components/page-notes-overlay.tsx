@@ -177,11 +177,11 @@ export function PageNotesOverlay() {
                             if ((e.target as HTMLElement).closest('button')) return;
                             toggleMinimize(note.id);
                         }}>
-                            <span className="text-[10px] uppercase font-bold text-amber-800 dark:text-amber-400 tracking-wider font-mono truncate max-w-[130px]" title={note.title || note.category || 'Generale'}>
+                            <span className="text-xxs uppercase font-bold text-amber-800 dark:text-amber-400 tracking-wider font-mono truncate max-w-[130px]" title={note.title || note.category || 'Generale'}>
                                 {note.authorName} ({note.title || note.category || 'Generale'})
                             </span>
                             <div className="flex gap-1 items-center bg-yellow-50/50 px-1 rounded">
-                                <span className="text-[9px] text-amber-700/70 mr-1">
+                                <span className="text-xxxs text-amber-700/70 mr-1">
                                     {note.createdAt ? format(new Date(note.createdAt), "dd MMM", { locale: it }) : ''}
                                 </span>
 
@@ -229,7 +229,7 @@ export function PageNotesOverlay() {
                                         <Button size="icon" variant="ghost" className="h-6 w-6 text-stone-400 hover:text-stone-600" onClick={() => setEditingNoteId(null)}>
                                             <X className="w-3 h-3" />
                                         </Button>
-                                        <Button size="sm" className="h-6 px-2 text-[10px] bg-amber-500 hover:bg-amber-600" onClick={() => saveEdit(note.id)} disabled={updateMutation.isPending || !editContent.trim()}>
+                                        <Button size="sm" className="h-6 px-2 text-xxs bg-amber-500 hover:bg-amber-600" onClick={() => saveEdit(note.id)} disabled={updateMutation.isPending || !editContent.trim()}>
                                             <Save className="w-3 h-3 mr-1" /> Salva
                                         </Button>
                                     </div>
@@ -255,7 +255,7 @@ export function PageNotesOverlay() {
                             className="h-8 text-xs font-medium flex-1"
                         />
                         <Select value={newCategory} onValueChange={setNewCategory}>
-                            <SelectTrigger className="h-8 w-[100px] text-[10px] border-amber-200 dark:border-amber-900/50">
+                            <SelectTrigger className="h-8 w-[100px] text-xxs border-amber-200 dark:border-amber-900/50">
                                 <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
@@ -277,7 +277,7 @@ export function PageNotesOverlay() {
                             <Button
                                 variant="outline"
                                 size="sm"
-                                className="h-7 px-2.5 text-[10px] text-indigo-600 gap-1.5 border-indigo-200 bg-indigo-50/50 hover:bg-indigo-100 hover:text-indigo-700"
+                                className="h-7 px-2.5 text-xxs text-indigo-600 gap-1.5 border-indigo-200 bg-indigo-50/50 hover:bg-indigo-100 hover:text-indigo-700"
                                 onClick={handleCopilot}
                                 disabled={copilotMutation.isPending}
                             >

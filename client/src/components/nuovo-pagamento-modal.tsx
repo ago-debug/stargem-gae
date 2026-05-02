@@ -573,7 +573,7 @@ export function NuovoPagamentoModal({
                                                     {selectedMember ? (
                                                         <div className="flex flex-col items-start overflow-hidden">
                                                             <span className="font-bold truncate text-base">{selectedMember.lastName} {selectedMember.firstName}</span>
-                                                            <span className="text-[10px] text-muted-foreground uppercase">{selectedMember.fiscalCode || 'No CF'}</span>
+                                                            <span className="text-xxs text-muted-foreground uppercase">{selectedMember.fiscalCode || 'No CF'}</span>
                                                         </div>
                                                     ) : (
                                                         <span className="text-muted-foreground">Cerca per cognome, nome o CF...</span>
@@ -634,7 +634,7 @@ export function NuovoPagamentoModal({
                                                                         <div className="flex flex-col">
                                                                             <span className="font-bold">{member.lastName} {member.firstName}</span>
                                                                             {member.fiscalCode && (
-                                                                                <span className="text-[10px] text-muted-foreground">{member.fiscalCode}</span>
+                                                                                <span className="text-xxs text-muted-foreground">{member.fiscalCode}</span>
                                                                             )}
                                                                         </div>
                                                                     </CommandItem>
@@ -696,7 +696,7 @@ export function NuovoPagamentoModal({
                                                 <Check className="w-5 h-5" />
                                             </div>
                                             <div>
-                                                <p className="text-[9px] font-bold uppercase tracking-widest opacity-80 text-green-800 dark:text-green-400 mb-0.5">Totale Versato</p>
+                                                <p className="text-xxxs font-bold uppercase tracking-widest opacity-80 text-green-800 dark:text-green-400 mb-0.5">Totale Versato</p>
                                                 <p className="text-xl font-black text-green-700">€{totalPaid.toFixed(2)}</p>
                                             </div>
                                         </div>
@@ -706,7 +706,7 @@ export function NuovoPagamentoModal({
                                                 <ChevronsUpDown className="w-5 h-5" />
                                             </div>
                                             <div>
-                                                <p className="text-[9px] font-bold uppercase tracking-widest opacity-80 text-rose-800 mb-0.5">Residuo da Pagare</p>
+                                                <p className="text-xxxs font-bold uppercase tracking-widest opacity-80 text-rose-800 mb-0.5">Residuo da Pagare</p>
                                                 <p className="text-xl font-black text-rose-600">€{totalInSospeso.toFixed(2)}</p>
                                             </div>
                                         </div>
@@ -729,19 +729,19 @@ export function NuovoPagamentoModal({
                                             }} className={cn("p-4 transition-colors relative flex justify-between items-center group", debt.remaining > 0.01 ? "hover:bg-muted cursor-pointer" : "opacity-75")}>
                                                 <div className="flex flex-col">
                                                     <span className="font-bold text-foreground text-sm">{debt.description}</span>
-                                                    <span className="text-[10px] text-muted-foreground uppercase">{debt.date ? new Date(debt.date).toLocaleDateString('it-IT') : ""} - {debt.type}</span>
+                                                    <span className="text-xxs text-muted-foreground uppercase">{debt.date ? new Date(debt.date).toLocaleDateString('it-IT') : ""} - {debt.type}</span>
                                                 </div>
                                                 <div className="flex items-center gap-2">
                                                     <div>
                                                         {debt.remaining <= 0.01 ? (
-                                                            <div className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase border border-green-200">PAGATO</div>
+                                                            <div className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xxs font-bold tracking-wide uppercase border border-green-200">PAGATO</div>
                                                         ) : debt.paid > 0.01 ? (
-                                                            <div className="bg-black text-white px-3 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase text-center flex flex-col leading-none">
+                                                            <div className="bg-black text-white px-3 py-1 rounded-full text-xxs font-bold tracking-wide uppercase text-center flex flex-col leading-none">
                                                                 <span>Da pagare: €{debt.remaining.toFixed(2)}</span>
-                                                                <span className="text-[8px] text-orange-300">Parziale</span>
+                                                                <span className="text-xxxs text-orange-300">Parziale</span>
                                                             </div>
                                                         ) : (
-                                                            <div className="bg-black text-white px-3 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase">Da pagare: €{debt.remaining.toFixed(2)}</div>
+                                                            <div className="bg-black text-white px-3 py-1 rounded-full text-xxs font-bold tracking-wide uppercase">Da pagare: €{debt.remaining.toFixed(2)}</div>
                                                         )}
                                                     </div>
                                                     {user?.role === 'admin' && debt.remaining > 0.01 && (
@@ -1157,7 +1157,7 @@ function CartTableRow({
                               placeholder="0"
                           />
                           {row.activityType && (
-                            <div className="flex items-center gap-1 text-[10px] text-muted-foreground whitespace-nowrap w-1/2">
+                            <div className="flex items-center gap-1 text-xxs text-muted-foreground whitespace-nowrap w-1/2">
                               Suggerimento:
                               <PriceTag
                                 category={row.activityType === 'corsi' ? 'adulti' : row.activityType}
@@ -1221,9 +1221,9 @@ function CartTableRow({
                     <div className="space-y-1">
                         <div className="flex justify-between items-center">
                            <Label className="text-xs text-blue-700 truncate">Cod. Sconto</Label>
-                           {row.promoCodeStatus === 'valid' && <Badge variant="outline" className="h-4 text-[9px] px-1 bg-green-50 text-green-700 border-green-200" title={row.promoCodeMessage}>VALIDO</Badge>}
-                           {row.promoCodeStatus === 'invalid' && <Badge variant="destructive" className="h-4 text-[9px] px-1" title={row.promoCodeMessage}>NON VALIDO</Badge>}
-                           {row.promoCodeStatus === 'error' && <Badge variant="outline" className="h-4 text-[9px] px-1 bg-amber-50 dark:bg-amber-950/20 text-amber-700 border-amber-200 dark:border-amber-900/50" title={row.promoCodeMessage}>ERRORE</Badge>}
+                           {row.promoCodeStatus === 'valid' && <Badge variant="outline" className="h-4 text-xxxs px-1 bg-green-50 text-green-700 border-green-200" title={row.promoCodeMessage}>VALIDO</Badge>}
+                           {row.promoCodeStatus === 'invalid' && <Badge variant="destructive" className="h-4 text-xxxs px-1" title={row.promoCodeMessage}>NON VALIDO</Badge>}
+                           {row.promoCodeStatus === 'error' && <Badge variant="outline" className="h-4 text-xxxs px-1 bg-amber-50 dark:bg-amber-950/20 text-amber-700 border-amber-200 dark:border-amber-900/50" title={row.promoCodeMessage}>ERRORE</Badge>}
                            {row.promoCodeStatus === 'validating' && <Loader2 className="w-3 h-3 animate-spin text-blue-500" />}
                         </div>
                         <Input 

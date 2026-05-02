@@ -121,7 +121,7 @@ export function TeoCopilot() {
                     </Button>
                 </form>
            </div>
-           <div className="text-[10px] text-center text-slate-400">
+           <div className="text-xxs text-center text-slate-400">
                TeoCopilot può commettere errori. Usa le risposte come supporto operativo.
            </div>
         </div>

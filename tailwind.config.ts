@@ -81,6 +81,11 @@ export default {
           busy: "rgb(239 68 68)",
           offline: "rgb(156 163 175)",
         },
+        "stargem-red": "#e11d48",
+      },
+      fontSize: {
+        "xxs": "10px",
+        "xxxs": "8px",
       },
       fontFamily: {
         sans: ["var(--font-sans)"],

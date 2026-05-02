@@ -67,7 +67,7 @@ export default function Dashboard() {
   });
 
   return (
-    <div className="p-6 md:p-8 space-y-8 mx-auto">
+    <div className="max-w-7xl mx-auto p-6 md:p-8 space-y-6">
       <div>
         <h1 className="text-3xl font-semibold text-foreground mb-2">Dashboard Segreteria</h1>
         <p className="text-muted-foreground">Panoramica del sistema di gestione corsi</p>
@@ -163,11 +163,11 @@ export default function Dashboard() {
                       return (
                         <>
                           <div className="space-y-2">
-                            <p className="text-[10px] uppercase font-bold text-emerald-600 tracking-wider">Il tuo Incasso Mensile</p>
+                            <p className="text-xxs uppercase font-bold text-emerald-600 tracking-wider">Il tuo Incasso Mensile</p>
                             <div className="flex items-center justify-between text-sm p-2 rounded bg-emerald-100 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-900/50">
                               <div className="flex flex-col">
                                 <span className="font-semibold text-emerald-900 dark:text-emerald-300">{myRevenue ? myRevenue.name : "Tu"}</span>
-                                <span className="text-[10px] text-emerald-700">{myRevenue ? myRevenue.count : 0} operazioni</span>
+                                <span className="text-xxs text-emerald-700">{myRevenue ? myRevenue.count : 0} operazioni</span>
                               </div>
                               <span className="font-bold text-emerald-700">€{myRevenue ? myRevenue.amount.toFixed(2) : "0.00"}</span>
                             </div>
@@ -187,7 +187,7 @@ export default function Dashboard() {
                                   <div key={idx} className="flex items-center justify-between text-sm p-1.5 rounded bg-background border border-emerald-50">
                                     <div className="flex flex-col">
                                       <span className="font-semibold text-foreground/80">{rm.name}</span>
-                                      <span className="text-[10px] text-muted-foreground">{rm.count} operazioni</span>
+                                      <span className="text-xxs text-muted-foreground">{rm.count} operazioni</span>
                                     </div>
                                     <span className="font-bold text-emerald-600">€{rm.amount.toFixed(2)}</span>
                                   </div>

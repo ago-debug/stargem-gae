@@ -63,7 +63,7 @@ export function SharedActivityLog({ hideTitle = false, type = "all" }: { hideTit
                   {log.user.username}
                 </TableCell>
                 <TableCell className={cn("align-top pt-3", iscLog("action") && "sorted-column-cell")}>
-                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${log.action === 'CREATE' ? 'bg-green-100 text-green-700' :
+                  <span className={`px-2 py-0.5 rounded text-xxs font-bold uppercase ${log.action === 'CREATE' ? 'bg-green-100 text-green-700' :
                     log.action === 'UPDATE' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700' :
                       log.action === 'DELETE' ? 'bg-red-100 dark:bg-red-900/30 text-red-700' :
                         log.action === 'LOGIN' ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700' :

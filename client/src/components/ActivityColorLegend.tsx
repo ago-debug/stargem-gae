@@ -13,7 +13,7 @@ const ACTIVITY_LEGEND = [
   { label: "Campus", badge: "CAM", color: "#0369a1" },
   { label: "Affitti", badge: "AFT", color: "#374151" },
   { label: "Chiusura Straordinaria", badge: "CHS", color: "#ea580c" },
-  { label: "Chiusure Studio / Ferie", badge: "CHI", color: "#9D174D" },
+  { label: "Chiusure Studio / Ferie", badge: "CHI", color: "stargem-red" },
   { label: "Note / Promozione", badge: "NOT", color: "#ca8a04" },
 ];
 
@@ -29,7 +29,7 @@ export function ActivityColorLegend({ variant = "card" }: { variant?: "card" | "
           )}
           
           <span 
-            className="px-1.5 py-0.5 rounded text-[10px] font-bold"
+            className="px-1.5 py-0.5 rounded text-xxs font-bold"
             style={item.color ? {
               backgroundColor: `${item.color}20`,
               color: item.color,

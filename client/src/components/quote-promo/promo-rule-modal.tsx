@@ -153,7 +153,7 @@ export function PromoRuleModal({
           <div className="space-y-2">
              <Label>Usi Massimi Totali</Label>
              <Input type="number" value={formData.maxUses} onChange={e => setFormData({ ...formData, maxUses: e.target.value })} placeholder="Es. 100 limitati" />
-             <p className="text-[10px] text-muted-foreground">Lascia vuoto per infiniti</p>
+             <p className="text-xxs text-muted-foreground">Lascia vuoto per infiniti</p>
           </div>
 
           <div className="flex items-center justify-between border p-3 rounded-md bg-muted">

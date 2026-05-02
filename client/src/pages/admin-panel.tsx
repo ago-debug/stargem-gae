@@ -391,7 +391,7 @@ export default function AdminPanel() {
                                             <Terminal className="w-3 h-3" />
                                             Output console
                                         </div>
-                                        <pre className="text-[10px] font-mono p-3 bg-slate-950 text-slate-50 rounded overflow-x-auto max-h-60">
+                                        <pre className="text-xxs font-mono p-3 bg-slate-950 text-slate-50 rounded overflow-x-auto max-h-60">
                                             {syncStatus.stdout || ''}
                                             {syncStatus.stderr || ''}
                                             {syncStatus.message || ''}
@@ -562,7 +562,7 @@ export default function AdminPanel() {
                                         <XCircle className="w-3 h-3 mr-1" /> Non collegato
                                     </Badge>
                                 )}
-                                <span className="text-[10px] text-muted-foreground uppercase bg-muted px-1.5 py-0.5 rounded font-medium">
+                                <span className="text-xxs text-muted-foreground uppercase bg-muted px-1.5 py-0.5 rounded font-medium">
                                     Metodo: {googleStatus?.method || 'Caricamento...'}
                                 </span>
                             </div>

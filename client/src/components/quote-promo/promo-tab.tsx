@@ -130,7 +130,7 @@ export function PromoTab({ seasonId }: PromoTabProps) {
                         <span className="text-xs">
                           {promo.validFrom ? new Date(promo.validFrom).toLocaleDateString() : 'N/A'} - {promo.validTo ? new Date(promo.validTo).toLocaleDateString() : 'Infinite'}
                         </span>
-                        {isExpired && <Badge variant="destructive" className="w-fit text-[9px] h-3 px-1">SCADUTO</Badge>}
+                        {isExpired && <Badge variant="destructive" className="w-fit text-xxxs h-3 px-1">SCADUTO</Badge>}
                       </div>
                     </TableCell>
                     <TableCell>
@@ -145,8 +145,8 @@ export function PromoTab({ seasonId }: PromoTabProps) {
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-col gap-1">
-                        {promo.excludeOpen && <Badge variant="outline" className="w-fit text-[9px] h-4 bg-red-50 dark:bg-red-950/20 text-red-700 border-red-200 dark:border-red-900/50">NO OPEN</Badge>}
-                        {promo.notCumulative && <Badge variant="outline" className="w-fit text-[9px] h-4 bg-amber-50 dark:bg-amber-950/20 text-amber-700 border-amber-200 dark:border-amber-900/50">NO CUMULO</Badge>}
+                        {promo.excludeOpen && <Badge variant="outline" className="w-fit text-xxxs h-4 bg-red-50 dark:bg-red-950/20 text-red-700 border-red-200 dark:border-red-900/50">NO OPEN</Badge>}
+                        {promo.notCumulative && <Badge variant="outline" className="w-fit text-xxxs h-4 bg-amber-50 dark:bg-amber-950/20 text-amber-700 border-amber-200 dark:border-amber-900/50">NO CUMULO</Badge>}
                       </div>
                     </TableCell>
                     <TableCell className="text-right">

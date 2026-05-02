@@ -393,7 +393,7 @@ export default function Commenti() {
                             <span className="font-medium text-sm text-foreground">
                               {reply.authorName} &rarr; <span className="font-bold text-foreground/80">{getAssignedName(reply.assignedTo)}</span>
                             </span>
-                            <span className="text-[11px] text-muted-foreground flex items-center gap-1">
+                            <span className="text-xxs text-muted-foreground flex items-center gap-1">
                               <Clock className="w-3 h-3" />
                               {formatDate(reply.createdAt)}
                             </span>

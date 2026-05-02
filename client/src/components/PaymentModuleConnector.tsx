@@ -93,7 +93,7 @@ export function PaymentModuleConnector({ basePrice, itemName, onPaymentComplete,
                 {isPriceUnlocked ? <Unlock className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
               </div>
             </div>
-            {isPriceUnlocked && <p className="text-[10px] text-destructive italic">Prezzo sovrascritto manualmente. Verrà loggato.</p>}
+            {isPriceUnlocked && <p className="text-xxs text-destructive italic">Prezzo sovrascritto manualmente. Verrà loggato.</p>}
           </div>
 
           <div className="space-y-2">

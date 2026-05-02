@@ -1304,7 +1304,7 @@ export default function Members() {
                               </TooltipProvider>
                             )}
                             {member.dataQualityFlag === 'mancano_dati_obbligatori' && (
-                              <Badge variant="destructive" className="ml-2 py-0 h-5 text-[10px]">CF MANCANTE</Badge>
+                              <Badge variant="destructive" className="ml-2 py-0 h-5 text-xxs">CF MANCANTE</Badge>
                             )}
                           </div>
                         </TableCell>
@@ -1429,7 +1429,7 @@ export default function Members() {
                       <TableRow className="bg-muted/30 border-t-0 hover:bg-muted/40">
                         <TableCell colSpan={9} className="py-2 pl-4 md:pl-10">
                           <div className="flex items-center gap-3 flex-wrap">
-                            <span className="text-[10px] font-bold uppercase text-muted-foreground mr-2">Azioni rapide:</span>
+                            <span className="text-xxs font-bold uppercase text-muted-foreground mr-2">Azioni rapide:</span>
                             <Button
                               variant="outline"
                               size="sm"
@@ -1539,7 +1539,7 @@ export default function Members() {
                 ) : (
                   <div className="w-full h-full flex flex-col items-center justify-center text-muted-foreground">
                     <Camera className="w-10 h-10 mb-1 opacity-40" />
-                    <span className="text-[10px] uppercase font-bold tracking-tighter">Fototessera</span>
+                    <span className="text-xxs uppercase font-bold tracking-tighter">Fototessera</span>
                   </div>
                 )}
                 {photoPreview && (
@@ -1563,7 +1563,7 @@ export default function Members() {
                   className="hidden"
                   onChange={handlePhotoChange}
                 />
-                <p className="text-[10px] text-muted-foreground italic">Max 1MB, formato fototessera</p>
+                <p className="text-xxs text-muted-foreground italic">Max 1MB, formato fototessera</p>
 
                 {editingMember && (
                   <Button

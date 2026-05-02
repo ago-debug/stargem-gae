@@ -75,7 +75,7 @@ export function IndividualPricing({ formData, updateForm, membersList }: { formD
         <div className="space-y-3">
           <div className="flex items-center gap-2">
             <Label className="font-semibold">Prezzo Finale (€)</Label>
-            {!hasTessera && <Badge variant="destructive" className="text-[10px]">INCL. IVA 22% (Non Tesserato)</Badge>}
+            {!hasTessera && <Badge variant="destructive" className="text-xxs">INCL. IVA 22% (Non Tesserato)</Badge>}
           </div>
           <Input 
             type="number" 

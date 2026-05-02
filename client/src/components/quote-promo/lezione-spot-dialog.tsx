@@ -217,7 +217,7 @@ export function LezioneSpotDialog() {
                       </SelectContent>
                    </Select>
                    {locationType === "domicilio" && (
-                     <p className="text-[10px] text-orange-600 font-medium">Preventivo zona/trasferta a consuntivo</p>
+                     <p className="text-xxs text-orange-600 font-medium">Preventivo zona/trasferta a consuntivo</p>
                    )}
                 </div>
              </div>

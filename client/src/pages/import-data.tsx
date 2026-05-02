@@ -717,12 +717,12 @@ export default function ImportData() {
                     <Icon className={`w-8 h-8 ${entityType === t.type ? 'text-primary' : 'text-muted-foreground'}`} />
                     <div className="font-semibold">{t.label}</div>
                     <div className="text-xs text-muted-foreground min-h-[32px]">{t.desc}</div>
-                    <Badge variant={t.type === 'members' || t.type === 'enrollments' ? 'default' : 'secondary'} className="text-[10px] w-full justify-center whitespace-normal text-center">{t.badge}</Badge>
+                    <Badge variant={t.type === 'members' || t.type === 'enrollments' ? 'default' : 'secondary'} className="text-xxs w-full justify-center whitespace-normal text-center">{t.badge}</Badge>
                     {t.alert && (
-                       <div className="text-[10px] font-medium text-amber-700 mt-2 bg-amber-50 dark:bg-amber-950/20 p-1 rounded w-full line-clamp-2">{t.alert}</div>
+                       <div className="text-xxs font-medium text-amber-700 mt-2 bg-amber-50 dark:bg-amber-950/20 p-1 rounded w-full line-clamp-2">{t.alert}</div>
                     )}
                     <div className="mt-auto pt-4 w-full">
-                        <div className="text-[10px] text-muted-foreground mb-2">{t.fonti}</div>
+                        <div className="text-xxs text-muted-foreground mb-2">{t.fonti}</div>
                         <Button variant="ghost" size="sm" className="w-full text-xs" onClick={(e) => { e.stopPropagation(); downloadTemplate(t.type); }} title="Scarica il template CSV con tutte le colonne supportate">Template</Button>
                     </div>
                   </CardContent>
@@ -762,7 +762,7 @@ export default function ImportData() {
                         <>
                           <p className="text-sm font-medium">Trascina qui il file oppure clicca per selezionarlo</p>
                           <p className="text-xs text-muted-foreground mt-1">Formati supportati: .csv .xlsx .xls</p>
-                          <p className="text-[10px] text-muted-foreground/70 mt-2">Il separatore viene rilevato automaticamente (, o ;)</p>
+                          <p className="text-xxs text-muted-foreground/70 mt-2">Il separatore viene rilevato automaticamente (, o ;)</p>
                         </>
                       )}
                     </label>

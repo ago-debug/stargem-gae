@@ -201,7 +201,7 @@ export default function GestioneNote() {
                                     value={customTargetUrl}
                                     onChange={e => setCustomTargetUrl(e.target.value)}
                                 />
-                                <p className="text-[10px] text-muted-foreground mt-1">La nota comparirà sulla campanella (puntina in alto a destra) unicamente nella pagina selezionata.</p>
+                                <p className="text-xxs text-muted-foreground mt-1">La nota comparirà sulla campanella (puntina in alto a destra) unicamente nella pagina selezionata.</p>
                             </div>
                             
                             <div className="flex gap-3">
@@ -321,7 +321,7 @@ export default function GestioneNote() {
                                                         {note.createdAt ? format(new Date(note.createdAt), "dd MMM yy, HH:mm", { locale: it }) : "-"}
                                                     </div>
                                                     {note.updatedAt && note.updatedAt !== note.createdAt && (
-                                                        <div className="flex items-center gap-1 text-[10px] text-slate-400" title="Ultima modifica/aggiornamento">
+                                                        <div className="flex items-center gap-1 text-xxs text-slate-400" title="Ultima modifica/aggiornamento">
                                                             Mod: {format(new Date(note.updatedAt), "dd MMM yy, HH:mm", { locale: it })}
                                                         </div>
                                                     )}
@@ -336,7 +336,7 @@ export default function GestioneNote() {
                                                 <div className="flex flex-col gap-1 pr-4">
                                                     {(note.title || note.category !== "generale") && (
                                                         <div className="flex items-center">
-                                                            <span className="text-[10px] bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-400 px-1.5 py-0.5 rounded uppercase font-semibold">
+                                                            <span className="text-xxs bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-400 px-1.5 py-0.5 rounded uppercase font-semibold">
                                                                 {note.title || note.category}
                                                             </span>
                                                         </div>
@@ -348,7 +348,7 @@ export default function GestioneNote() {
                                             </TableCell>
                                             <TableCell className={cn(isSortedColumn("section") && "sorted-column-cell")}>
                                                 <Link href={note.targetUrl || "/"} className="hover:opacity-80 transition-opacity">
-                                                    <Badge variant="secondary" className="bg-slate-100 dark:bg-slate-800/80 text-muted-foreground text-[10px] font-mono border-border cursor-pointer hover:bg-amber-100 dark:bg-amber-900/30 hover:text-amber-800 dark:text-amber-400" title={`Vai a: ${note.targetUrl || "/"}`}>
+                                                    <Badge variant="secondary" className="bg-slate-100 dark:bg-slate-800/80 text-muted-foreground text-xxs font-mono border-border cursor-pointer hover:bg-amber-100 dark:bg-amber-900/30 hover:text-amber-800 dark:text-amber-400" title={`Vai a: ${note.targetUrl || "/"}`}>
                                                         {TARGET_PAGES.find(p => p.value === note.targetUrl)?.label || note.targetUrl || "Generale"}
                                                     </Badge>
                                                 </Link>
@@ -357,7 +357,7 @@ export default function GestioneNote() {
                                                 {note.status === "archived" && note.deletedBy && (
                                                     <div className="flex flex-col gap-0.5">
                                                         <span className="text-xs font-bold text-muted-foreground uppercase">{note.deletedBy}</span> 
-                                                        {note.deletedAt && <span className="text-[10px] text-slate-400">{format(new Date(note.deletedAt), "dd/MM/yyyy HH:mm")}</span>}
+                                                        {note.deletedAt && <span className="text-xxs text-slate-400">{format(new Date(note.deletedAt), "dd/MM/yyyy HH:mm")}</span>}
                                                     </div>
                                                 )}
                                             </TableCell>

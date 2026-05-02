@@ -838,7 +838,7 @@ export default function GemTeam() {
                             <td className="p-4 font-bold text-foreground flex items-center gap-3">
                               <Avatar className={`w-8 h-8 border ring-1 ring-offset-1 ${dip.team === 'segreteria' ? 'ring-pink-100' : 'ring-slate-100'}`}>
                                 {dip.photo_url ? <AvatarImage src={dip.photo_url} /> : null}
-                                <AvatarFallback className={`text-[10px] ${TEAM_COLORS[dip.team]}`}>{dip.nome.charAt(0)}{dip.cognome.charAt(0)}</AvatarFallback>
+                                <AvatarFallback className={`text-xxs ${TEAM_COLORS[dip.team]}`}>{dip.nome.charAt(0)}{dip.cognome.charAt(0)}</AvatarFallback>
                               </Avatar>
                               {dip.cognome} {dip.nome}
                             </td>
@@ -921,12 +921,12 @@ export default function GemTeam() {
                     <CardContent className="p-5 flex flex-col items-center text-center relative">
                       {/* Badge Attivo */}
                       {dip.attivo ? (
-                        <div className="absolute top-3 right-3 flex items-center gap-1 bg-green-50 text-green-700 px-2 py-0.5 rounded-full text-[10px] font-bold border border-green-200">
+                        <div className="absolute top-3 right-3 flex items-center gap-1 bg-green-50 text-green-700 px-2 py-0.5 rounded-full text-xxs font-bold border border-green-200">
                           <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
                           IN SERVIZIO
                         </div>
                       ) : (
-                        <div className="absolute top-3 right-3 flex items-center gap-1 bg-slate-100 dark:bg-slate-800 text-muted-foreground px-2 py-0.5 rounded-full text-[10px] font-bold border border-border">
+                        <div className="absolute top-3 right-3 flex items-center gap-1 bg-slate-100 dark:bg-slate-800 text-muted-foreground px-2 py-0.5 rounded-full text-xxs font-bold border border-border">
                           <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
                           FUORI SERVIZIO
                         </div>
@@ -942,7 +942,7 @@ export default function GemTeam() {
                       </Avatar>
                       
                       <h3 className="font-bold text-foreground truncate w-full px-2">{dip.cognome} {dip.nome}</h3>
-                      <Badge variant="secondary" className={`mt-1 mb-3 text-[10px] uppercase font-bold tracking-wider ${TEAM_COLORS[dip.team] || 'bg-slate-200 text-foreground'}`}>
+                      <Badge variant="secondary" className={`mt-1 mb-3 text-xxs uppercase font-bold tracking-wider ${TEAM_COLORS[dip.team] || 'bg-slate-200 text-foreground'}`}>
                         {TEAM_LABELS[dip.team] || (dip.team === 'Staff' || dip.team === 'staff' ? 'COLLABORATORE EXT' : dip.team)}
                       </Badge>
                       
@@ -992,7 +992,7 @@ export default function GemTeam() {
                               onValueChange={(val) => updateTeamMutation.mutate({ id: selectedSheetDip.id, team: val })}
                               disabled={updateTeamMutation.isPending}
                             >
-                              <SelectTrigger className={`mt-2 h-7 text-[10px] w-auto inline-flex font-bold tracking-wider uppercase border-transparent ${TEAM_COLORS[selectedSheetDip.team]} ${updateTeamMutation.isPending ? 'opacity-50' : ''}`}>
+                              <SelectTrigger className={`mt-2 h-7 text-xxs w-auto inline-flex font-bold tracking-wider uppercase border-transparent ${TEAM_COLORS[selectedSheetDip.team]} ${updateTeamMutation.isPending ? 'opacity-50' : ''}`}>
                                 <SelectValue placeholder="Seleziona..." />
                               </SelectTrigger>
                               <SelectContent>
@@ -1005,7 +1005,7 @@ export default function GemTeam() {
                               </SelectContent>
                             </Select>
                           ) : (
-                            <Badge variant="secondary" className={`mt-2 text-[10px] uppercase font-bold tracking-wider ${TEAM_COLORS[selectedSheetDip.team]}`}>
+                            <Badge variant="secondary" className={`mt-2 text-xxs uppercase font-bold tracking-wider ${TEAM_COLORS[selectedSheetDip.team]}`}>
                               {TEAM_LABELS[selectedSheetDip.team]}
                             </Badge>
                           )}
@@ -1284,9 +1284,9 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
 
 
                     {isSameDay(turniDate, new Date()) ? (
-        <Badge onClick={() => setTurniDate(new Date())} className="bg-emerald-500 hover:bg-emerald-600 text-[10px] cursor-pointer">OGGI</Badge>
+        <Badge onClick={() => setTurniDate(new Date())} className="bg-emerald-500 hover:bg-emerald-600 text-xxs cursor-pointer">OGGI</Badge>
     ) : (
-        <Badge onClick={() => setTurniDate(new Date())} variant="outline" className="text-emerald-600 border-emerald-500 hover:bg-emerald-50 dark:bg-emerald-950/20 text-[10px] cursor-pointer bg-background">OGGI</Badge>
+        <Badge onClick={() => setTurniDate(new Date())} variant="outline" className="text-emerald-600 border-emerald-500 hover:bg-emerald-50 dark:bg-emerald-950/20 text-xxs cursor-pointer bg-background">OGGI</Badge>
     )}
                   </div>
                 </div>
@@ -1389,7 +1389,7 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
     {postazioniApi.map((p: any) => (
       <div key={p.id} className="flex items-center justify-between p-2 border rounded-md shadow-sm opacity-100 bg-background hover:border-blue-200">
         <span className="text-xs font-bold text-foreground uppercase">{p.nome}</span>
-        <Button disabled variant="outline" size="sm" className="h-6 text-[10px]">Attiva</Button>
+        <Button disabled variant="outline" size="sm" className="h-6 text-xxs">Attiva</Button>
       </div>
     ))}
   </div>
@@ -1420,10 +1420,10 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
 
                     {isTemplateMode && (
                         <div className="flex items-center gap-2 border-l border-r border-border px-3 h-8 bg-violet-50 rounded-md">
-                           <span className="text-[10px] font-bold text-violet-600 uppercase">Stai editando:</span>
+                           <span className="text-xxs font-bold text-violet-600 uppercase">Stai editando:</span>
                            <div className="flex gap-1">
                              {['A', 'B', 'C', 'D', 'E'].map(l => (
-                                <Button key={l} variant={templatePreset === l ? "default" : "outline"} size="sm" className={`h-6 w-6 p-0 text-[10px] ${templatePreset === l ? 'bg-violet-600 hover:bg-violet-700 text-white' : 'border-violet-200 text-violet-700 bg-background hover:bg-violet-100'}`} onClick={() => setTemplatePreset(l)}>{l}</Button>
+                                <Button key={l} variant={templatePreset === l ? "default" : "outline"} size="sm" className={`h-6 w-6 p-0 text-xxs ${templatePreset === l ? 'bg-violet-600 hover:bg-violet-700 text-white' : 'border-violet-200 text-violet-700 bg-background hover:bg-violet-100'}`} onClick={() => setTemplatePreset(l)}>{l}</Button>
                              ))}
                            </div>
                         </div>
@@ -1517,22 +1517,22 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                   {/* Raggruppamento Team */}
                   <tr>
                     <th className="w-20 min-w-[80px] bg-muted border-r border-border"></th>
-                    {filteredSegreteria.length > 0 && <th colSpan={filteredSegreteria.length} style={{backgroundColor: '#EAF3DE', color: '#3B6D11'}} className="border-r border-border py-1 px-2 text-center font-bold text-[10px] uppercase tracking-widest truncate">Segreteria</th>}
-                    {filteredManutenzione.length > 0 && <th colSpan={filteredManutenzione.length} style={{backgroundColor: '#FAEEDA', color: '#633806'}} className="border-r border-border py-1 px-2 text-center font-bold text-[10px] uppercase tracking-widest truncate">Manutenzione</th>}
-                    {filteredUfficio.length > 0 && <th colSpan={filteredUfficio.length} style={{backgroundColor: '#E6F1FB', color: '#185FA5'}} className="border-r border-border py-1 px-2 text-center font-bold text-[10px] uppercase tracking-widest truncate">Ufficio</th>}
-                    {filteredAmministrazione.length > 0 && <th colSpan={filteredAmministrazione.length} style={{backgroundColor: '#E1F5EE', color: '#0F6E56'}} className="border-r border-border py-1 px-2 text-center font-bold text-[10px] uppercase tracking-widest truncate">Amministrazione</th>}
-                    {filteredComunicazione.length > 0 && <th colSpan={filteredComunicazione.length} style={{backgroundColor: '#FAECE7', color: '#993C1D'}} className="border-r border-border py-1 px-2 text-center font-bold text-[10px] uppercase tracking-widest truncate">Comunicazione</th>}
-                    {filteredDirezione.length > 0 && <th colSpan={filteredDirezione.length} style={{backgroundColor: '#EEEDFE', color: '#3C3489'}} className="border-r border-border py-1 px-2 text-center font-bold text-[10px] uppercase tracking-widest truncate">Direzione</th>}
+                    {filteredSegreteria.length > 0 && <th colSpan={filteredSegreteria.length} style={{backgroundColor: '#EAF3DE', color: '#3B6D11'}} className="border-r border-border py-1 px-2 text-center font-bold text-xxs uppercase tracking-widest truncate">Segreteria</th>}
+                    {filteredManutenzione.length > 0 && <th colSpan={filteredManutenzione.length} style={{backgroundColor: '#FAEEDA', color: '#633806'}} className="border-r border-border py-1 px-2 text-center font-bold text-xxs uppercase tracking-widest truncate">Manutenzione</th>}
+                    {filteredUfficio.length > 0 && <th colSpan={filteredUfficio.length} style={{backgroundColor: '#E6F1FB', color: '#185FA5'}} className="border-r border-border py-1 px-2 text-center font-bold text-xxs uppercase tracking-widest truncate">Ufficio</th>}
+                    {filteredAmministrazione.length > 0 && <th colSpan={filteredAmministrazione.length} style={{backgroundColor: '#E1F5EE', color: '#0F6E56'}} className="border-r border-border py-1 px-2 text-center font-bold text-xxs uppercase tracking-widest truncate">Amministrazione</th>}
+                    {filteredComunicazione.length > 0 && <th colSpan={filteredComunicazione.length} style={{backgroundColor: '#FAECE7', color: '#993C1D'}} className="border-r border-border py-1 px-2 text-center font-bold text-xxs uppercase tracking-widest truncate">Comunicazione</th>}
+                    {filteredDirezione.length > 0 && <th colSpan={filteredDirezione.length} style={{backgroundColor: '#EEEDFE', color: '#3C3489'}} className="border-r border-border py-1 px-2 text-center font-bold text-xxs uppercase tracking-widest truncate">Direzione</th>}
                   </tr>
 
                   {/* Nomi Dipendenti */}
                   <tr>
-                    <th className="bg-slate-100 dark:bg-slate-800 border-r border-border text-[10px] text-muted-foreground font-bold p-1 w-20 min-w-[80px]">ORA</th>
+                    <th className="bg-slate-100 dark:bg-slate-800 border-r border-border text-xxs text-muted-foreground font-bold p-1 w-20 min-w-[80px]">ORA</th>
                     {[...filteredSegreteria, ...filteredManutenzione, ...filteredUfficio, ...filteredAmministrazione, ...filteredComunicazione, ...filteredDirezione].map(dip => (
                       <th key={dip.id} className={`bg-background border-r border-border p-1.5 group ${turniViewMode === 'singola' ? 'w-full' : 'w-28 min-w-[112px]'}`}>
                          <div className="flex items-center justify-center gap-1">
                             {isMaster && <GripVertical className="h-3 w-3 text-slate-300 cursor-grab opacity-0 group-hover:opacity-100 transition-opacity" />}
-                            <span className="text-[10px] font-bold text-foreground/80 uppercase truncate" title={dip.nome + ' ' + dip.cognome}>
+                            <span className="text-xxs font-bold text-foreground/80 uppercase truncate" title={dip.nome + ' ' + dip.cognome}>
       {dip.nome.split(' ')[0]} {dip.cognome ? dip.cognome.charAt(0) + '.' : ''}
     </span>
                          </div>
@@ -1544,7 +1544,7 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                 <tbody className="divide-y divide-slate-100">
                   {HOURS.map(hour => (
                     <tr key={hour} className="group hover:bg-muted/50 transition-colors">
-                      <td className="bg-muted border-r border-b border-border text-center text-[11px] font-semibold text-muted-foreground p-1 select-none sticky left-0 shadow-[1px_0_0_rgba(200,200,200,0.5)] z-10 w-20 h-[22px]">
+                      <td className="bg-muted border-r border-b border-border text-center text-xxs font-semibold text-muted-foreground p-1 select-none sticky left-0 shadow-[1px_0_0_rgba(200,200,200,0.5)] z-10 w-20 h-[22px]">
                         {hour}
                       </td>
                       {[...filteredSegreteria, ...filteredManutenzione, ...filteredUfficio, ...filteredAmministrazione, ...filteredComunicazione, ...filteredDirezione].map(dip => {
@@ -1660,7 +1660,7 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                                             />
                                           </div>
                                         )}
-                                        <span className="text-[9px] font-bold uppercase truncate max-w-full">
+                                        <span className="text-xxxs font-bold uppercase truncate max-w-full">
                                           {hasConflict && <AlertTriangle className="h-2 w-2 mr-0.5 inline pb-0.5"/>}
                                           {turniFiltrato.postazione}
                                         </span>
@@ -1674,29 +1674,29 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                                                 <h5 className="font-bold text-indigo-800 text-xs mb-3">Azione Massiva ({selectedShifts.length} slot)</h5>
                                                 <div className="flex flex-col gap-3">
                                                    <div className="space-y-1">
-                                                     <label className="text-[10px] font-semibold text-muted-foreground uppercase">Copia/Sposta verso:</label>
+                                                     <label className="text-xxs font-semibold text-muted-foreground uppercase">Copia/Sposta verso:</label>
                                                      <div className="flex flex-col gap-2">
-                                                       <select id="mass-emp-select" className="w-full h-8 rounded-md border border-input bg-background px-2 text-[10px] uppercase shadow-sm">
+                                                       <select id="mass-emp-select" className="w-full h-8 rounded-md border border-input bg-background px-2 text-xxs uppercase shadow-sm">
                                                           <option value={dip.id}>👉 Stesso Dipendente</option>
                                                           {dipendenti.filter(d => !isSystemEmployee(d) && d.id !== dip.id).map(d => (
                                                             <option key={d.id} value={d.id}>{d.nome} {d.cognome}</option>
                                                           ))}
                                                        </select>
-                                                       <Input type="date" id="mass-date-select" className="h-8 w-full text-[10px] bg-background px-2" defaultValue={formattedTurniDate} />
+                                                       <Input type="date" id="mass-date-select" className="h-8 w-full text-xxs bg-background px-2" defaultValue={formattedTurniDate} />
                                                      </div>
                                                    </div>
                                                 </div>
                                               </div>
                                               
                                               <div className="flex gap-2">
-                                                <Button size="sm" variant="outline" className="flex-1 h-8 text-[10px]" onClick={async () => {
+                                                <Button size="sm" variant="outline" className="flex-1 h-8 text-xxs" onClick={async () => {
                                                      const empTgt = parseInt((document.getElementById('mass-emp-select') as HTMLSelectElement).value);
                                                      const dateTgt = (document.getElementById('mass-date-select') as HTMLInputElement).value;
                                                      const tgtUrl = `/api/gemteam/turni/scheduled/mass-action-granular${isTemplateMode ? `?isTemplate=${templatePreset}` : ''}`;
                                                      await fetch(tgtUrl, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'duplicate', employeeTarget: empTgt, dateTarget: dateTgt, cells: selectedShifts }) });
                                                      setSelectedShifts([]); refetchScheduled(); document.dispatchEvent(new MouseEvent('mousedown', { bubbles: true })); toast({title: "Duplicati", description: `Slot duplicati con successo.`});
                                                 }}>Duplica</Button>
-                                                <Button size="sm" className="flex-1 h-8 text-[10px] bg-indigo-600 hover:bg-indigo-700 text-white" onClick={async () => {
+                                                <Button size="sm" className="flex-1 h-8 text-xxs bg-indigo-600 hover:bg-indigo-700 text-white" onClick={async () => {
                                                      const empTgt = parseInt((document.getElementById('mass-emp-select') as HTMLSelectElement).value);
                                                      const dateTgt = (document.getElementById('mass-date-select') as HTMLInputElement).value;
                                                      const tgtUrl = `/api/gemteam/turni/scheduled/mass-action-granular${isTemplateMode ? `?isTemplate=${templatePreset}` : ''}`;
@@ -1704,7 +1704,7 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                                                      setSelectedShifts([]); refetchScheduled(); document.dispatchEvent(new MouseEvent('mousedown', { bubbles: true })); toast({title: "Spostati", description: `Slot spostati con successo.`});
                                                 }}>Sposta</Button>
                                               </div>
-                                              <Button variant="destructive" size="sm" className="h-8 text-[10px] w-full" onClick={async () => {
+                                              <Button variant="destructive" size="sm" className="h-8 text-xxs w-full" onClick={async () => {
                                                  if (!confirm(`Sei sicuro di voler eliminare le ${selectedShifts.length} celle selezionate?`)) return;
                                                  const tgtUrl = `/api/gemteam/turni/scheduled/mass-action-granular${isTemplateMode ? `?isTemplate=${templatePreset}` : ''}`;
                                                  await fetch(tgtUrl, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'delete', cells: selectedShifts }) });
@@ -1763,8 +1763,8 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                                                 </div>
 
                                                 <div className="flex justify-between items-center mt-6 pt-3 border-t border-slate-100">
-                                                   <Button type="button" variant="destructive" size="sm" className="h-8 text-[11px] px-3 font-semibold" onClick={(e) => { e.preventDefault(); deleteShiftMutation.mutate(turniFiltrato.id);}}>Elimina</Button>
-                                                   <Button type="submit" size="sm" className="h-8 text-[11px] px-6 font-semibold bg-amber-500 hover:bg-amber-600 text-white" disabled={shiftMutation.isPending}>{shiftMutation.isPending ? "..." : "Salva"}</Button>
+                                                   <Button type="button" variant="destructive" size="sm" className="h-8 text-xxs px-3 font-semibold" onClick={(e) => { e.preventDefault(); deleteShiftMutation.mutate(turniFiltrato.id);}}>Elimina</Button>
+                                                   <Button type="submit" size="sm" className="h-8 text-xxs px-6 font-semibold bg-amber-500 hover:bg-amber-600 text-white" disabled={shiftMutation.isPending}>{shiftMutation.isPending ? "..." : "Salva"}</Button>
                                                 </div>
                                               </form>
                                            </div>
@@ -1928,7 +1928,7 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
 
                 <tfoot className="sticky bottom-0 z-20 shadow-[0_-1px_3px_rgba(0,0,0,0.05)] bg-background border-t-2 border-border">
                   <tr>
-                    <td className="bg-slate-100 dark:bg-slate-800 border-r border-border text-center text-[10px] font-extrabold text-muted-foreground p-2 select-none sticky left-0 shadow-[1px_0_0_rgba(200,200,200,0.5)] z-10 tracking-widest uppercase">
+                    <td className="bg-slate-100 dark:bg-slate-800 border-r border-border text-center text-xxs font-extrabold text-muted-foreground p-2 select-none sticky left-0 shadow-[1px_0_0_rgba(200,200,200,0.5)] z-10 tracking-widest uppercase">
                       TOT ORE
                     </td>
                     {[...filteredSegreteria, ...filteredManutenzione, ...filteredUfficio, ...filteredAmministrazione, ...filteredComunicazione, ...filteredDirezione].map(dip => (
@@ -1964,13 +1964,13 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                 <table id="griglia-settimanale" className="w-full border-collapse min-w-max bg-background table-fixed">
                   <thead className="sticky top-0 z-20 shadow-sm border-b border-border">
                     <tr>
-                      <th className="w-40 min-w-40 bg-muted border-r border-border p-2 text-left text-[11px] text-muted-foreground font-bold uppercase tracking-widest shadow-[1px_0_0_rgba(200,200,200,0.5)] z-30">
+                      <th className="w-40 min-w-40 bg-muted border-r border-border p-2 text-left text-xxs text-muted-foreground font-bold uppercase tracking-widest shadow-[1px_0_0_rgba(200,200,200,0.5)] z-30">
                         Dipendente
                       </th>
                       {[0,1,2,3,4,5,6].map(offset => {
                           const d = addDays(startOfWeek(turniDate, { weekStartsOn: 1 }), offset);
                           return (
-                             <th key={offset} className="w-32 bg-muted border-r border-border p-2 text-center text-[10px] font-bold text-foreground/80 uppercase">
+                             <th key={offset} className="w-32 bg-muted border-r border-border p-2 text-center text-xxs font-bold text-foreground/80 uppercase">
                                  {format(d, 'EEEE dd/MM', { locale: it })}
                              </th>
                           );
@@ -1980,7 +1980,7 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                   <tbody className="divide-y divide-slate-100">
                     {dipendenti.filter(d => !isSystemEmployee(d)).map((dip, idx) => (
                         <tr key={dip.id} className={`hover:bg-slate-100 dark:bg-slate-800 transition-colors border-b-2 border-border ${idx % 2 === 0 ? 'bg-background' : 'bg-muted/50'}`}>
-                            <td className="p-2 border-r border-border font-semibold text-[11px] text-foreground/80 sticky left-0 z-10 shadow-[1px_0_0_rgba(200,200,200,0.5)] truncate max-w-[160px] bg-inherit align-top">
+                            <td className="p-2 border-r border-border font-semibold text-xxs text-foreground/80 sticky left-0 z-10 shadow-[1px_0_0_rgba(200,200,200,0.5)] truncate max-w-[160px] bg-inherit align-top">
                                <div className="sticky top-0">{dip.nome} {dip.cognome}</div>
                             </td>
                             {[0,1,2,3,4,5,6].map(offset => {
@@ -1996,11 +1996,11 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                                           const hasConflict = t.hasConflict || false;
                                           return (
                                               <div key={t.id} title={hasConflict ? "Conflitto registrato" : ""} className={`w-full min-h-[30px] rounded border flex flex-col items-center justify-center p-1 shadow-sm text-center ${hasConflict ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400 border-red-300 ring-2 ring-red-500/30' : ''}`} style={(!hasConflict && postInfo?.colore) ? {backgroundColor: postInfo.colore, color: '#1e293b', borderColor: 'rgba(0,0,0,0.1)'} : {}}>
-                                                  <span className="text-[9px] font-bold uppercase truncate max-w-full">
+                                                  <span className="text-xxxs font-bold uppercase truncate max-w-full">
                                                      {hasConflict && <AlertTriangle className="h-2 w-2 mr-0.5 inline pb-0.5"/>}
                                                      {t.postazione}
                                                   </span>
-                                                  <span className="text-[8px] opacity-80 font-medium">{(t.oraInizio || '').substring(0,5)} - {(t.oraFine || '').substring(0,5)}</span>
+                                                  <span className="text-xxxs opacity-80 font-medium">{(t.oraInizio || '').substring(0,5)} - {(t.oraFine || '').substring(0,5)}</span>
                                               </div>
                                           )
                                       })}
@@ -2055,7 +2055,7 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
               ) : (
                 <div className="w-full border rounded-xl overflow-x-auto shadow-inner bg-muted scrollbar-thin relative">
                   <table className="w-full text-xs text-center border-collapse">
-                    <thead className="bg-slate-200 border-b border-border sticky top-0 z-10 text-[10px] text-muted-foreground font-bold uppercase tracking-widest hidden sm:table-header-group">
+                    <thead className="bg-slate-200 border-b border-border sticky top-0 z-10 text-xxs text-muted-foreground font-bold uppercase tracking-widest hidden sm:table-header-group">
                       <tr>
                         <th className="sticky left-0 bg-slate-200 p-2 text-left min-w-[150px] border-r border-border shadow-[1px_0_0_0_#cbd5e1] z-20">Dipendente</th>
                         {Array.from({length: 30}, (_, i) => {
@@ -2065,8 +2065,8 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                           return (
                             <th key={day} className={`p-1 border border-border w-[36px] min-w-[36px] max-w-[36px] ${isWeekend ? 'bg-slate-300 text-muted-foreground' : 'text-foreground/80'}`}>
                               <div className="flex flex-col items-center">
-                                <span className="text-[11px] mb-0.5">{day}</span>
-                                <span className="text-[9px] opacity-70 font-medium">{l}</span>
+                                <span className="text-xxs mb-0.5">{day}</span>
+                                <span className="text-xxxs opacity-70 font-medium">{l}</span>
                               </div>
                             </th>
                           );
@@ -2105,15 +2105,15 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                                     <PopoverTrigger asChild>
                                       <div className={`w-full h-8 flex items-center justify-center cursor-pointer relative hover:ring-1 hover:ring-inset hover:ring-blue-400 hover:z-10 transition-all ${badgeColor}`}>
                                         {isEdited && <div className="absolute top-0.5 right-0.5 w-1 h-1 bg-orange-500 rounded-full" />}
-                                        <span className="text-[10px]">{!isNaN(parseFloat(val)) && val !== "" ? fmtOre(parseFloat(val)) : val}</span>
+                                        <span className="text-xxs">{!isNaN(parseFloat(val)) && val !== "" ? fmtOre(parseFloat(val)) : val}</span>
                                       </div>
                                     </PopoverTrigger>
                                     <PopoverContent className="w-48 p-3 shadow-xl" align="center">
                                       <h4 className="text-xs font-bold text-muted-foreground mb-2 uppercase">{dip.nome} — Giorno {day} ({l})</h4>
                                       <div className="grid grid-cols-3 gap-1.5 mb-3">
-                                        <Button variant="outline" size="sm" className="h-7 text-[10px] bg-sky-50 hover:bg-sky-100" onClick={() => updatePresenza(dip.id, day, 'FE')}>FE</Button>
-                                        <Button variant="outline" size="sm" className="h-7 text-[10px] bg-yellow-50 hover:bg-yellow-100" onClick={() => updatePresenza(dip.id, day, 'PE')}>PE</Button>
-                                        <Button variant="outline" size="sm" className="h-7 text-[10px] bg-orange-50 hover:bg-orange-100" onClick={() => updatePresenza(dip.id, day, 'ML')}>ML</Button>
+                                        <Button variant="outline" size="sm" className="h-7 text-xxs bg-sky-50 hover:bg-sky-100" onClick={() => updatePresenza(dip.id, day, 'FE')}>FE</Button>
+                                        <Button variant="outline" size="sm" className="h-7 text-xxs bg-yellow-50 hover:bg-yellow-100" onClick={() => updatePresenza(dip.id, day, 'PE')}>PE</Button>
+                                        <Button variant="outline" size="sm" className="h-7 text-xxs bg-orange-50 hover:bg-orange-100" onClick={() => updatePresenza(dip.id, day, 'ML')}>ML</Button>
                                       </div>
                                       <div className="flex gap-2">
                                         <Input 
@@ -2142,7 +2142,7 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                     </tbody>
                     <tfoot>
                       <tr className="bg-slate-800 text-white font-bold h-10 border-t-2 border-slate-900 sticky bottom-0 z-20 shadow-[0_-2px_4px_rgba(0,0,0,0.1)]">
-                        <td className="sticky left-0 bg-slate-800 p-2 text-right uppercase text-[10px] tracking-widest shadow-[1px_0_0_0_#1e293b] border-r border-slate-700 z-30 ring-1 ring-slate-800">
+                        <td className="sticky left-0 bg-slate-800 p-2 text-right uppercase text-xxs tracking-widest shadow-[1px_0_0_0_#1e293b] border-r border-slate-700 z-30 ring-1 ring-slate-800">
                           Totale Ore Giorno
                         </td>
                         {Array.from({length: 30}, (_, i) => {
@@ -2154,7 +2154,7 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                             if (!isNaN(parsed)) colSum += parsed;
                           });
                           return (
-                            <td key={day} className="text-[10px] border border-slate-700 tabular-nums">
+                            <td key={day} className="text-xxs border border-slate-700 tabular-nums">
                               {colSum > 0 ? fmtOre(colSum) : ""}
                             </td>
                           );
@@ -2176,12 +2176,12 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
               )}
 
               <div className="flex flex-wrap gap-2 pt-2 px-4 shadow-none">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center mr-2">Legenda Assenze</span>
-                <Badge variant="outline" className="text-[9px] px-1.5 py-0.5 bg-sky-100 text-sky-800">FE - Ferie</Badge>
-                <Badge variant="outline" className="text-[9px] px-1.5 py-0.5 bg-yellow-100 text-yellow-800">PE - Permesso</Badge>
-                <Badge variant="outline" className="text-[9px] px-1.5 py-0.5 bg-orange-100 text-orange-800">ML - Malattia</Badge>
-                <Badge variant="outline" className="text-[9px] px-1.5 py-0.5 bg-purple-100 text-purple-800">F - Festività</Badge>
-                <Badge variant="outline" className="text-[9px] px-1.5 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400">AI - Ass. Ingiustificata</Badge>
+                <span className="text-xxs font-bold text-slate-400 uppercase tracking-widest flex items-center mr-2">Legenda Assenze</span>
+                <Badge variant="outline" className="text-xxxs px-1.5 py-0.5 bg-sky-100 text-sky-800">FE - Ferie</Badge>
+                <Badge variant="outline" className="text-xxxs px-1.5 py-0.5 bg-yellow-100 text-yellow-800">PE - Permesso</Badge>
+                <Badge variant="outline" className="text-xxxs px-1.5 py-0.5 bg-orange-100 text-orange-800">ML - Malattia</Badge>
+                <Badge variant="outline" className="text-xxxs px-1.5 py-0.5 bg-purple-100 text-purple-800">F - Festività</Badge>
+                <Badge variant="outline" className="text-xxxs px-1.5 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400">AI - Ass. Ingiustificata</Badge>
               </div>
 
             </CardContent>
@@ -2277,7 +2277,7 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                       </td>
                       <td className="p-2">
                         <Select defaultValue="AMM">
-                          <SelectTrigger className="h-8 text-[11px] bg-background font-bold text-muted-foreground border-dashed">
+                          <SelectTrigger className="h-8 text-xxs bg-background font-bold text-muted-foreground border-dashed">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -2297,7 +2297,7 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                         <Input type="number" placeholder="Min" defaultValue={60} className="h-8 text-xs font-bold text-center bg-background w-full min-w-[60px]" />
                       </td>
                       <td className="p-2 text-center">
-                        <Button size="sm" className="h-8 w-full gap-1 font-bold text-[11px]">
+                        <Button size="sm" className="h-8 w-full gap-1 font-bold text-xxs">
                           <Plus className="w-3 h-3" /> Add
                         </Button>
                       </td>
@@ -2305,9 +2305,9 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                   </tbody>
                   <tfoot>
                     <tr className="bg-slate-800 text-white font-bold border-t-4 border-slate-900 border-solid drop-shadow-md h-12">
-                      <td colSpan={4} className="p-3 text-right uppercase tracking-widest text-[11px] opacity-90">Totale Turno (Minuti):</td>
+                      <td colSpan={4} className="p-3 text-right uppercase tracking-widest text-xxs opacity-90">Totale Turno (Minuti):</td>
                       <td className="p-3 text-center text-emerald-400 text-xl tabular-nums">180</td>
-                      <td className="p-3 text-center text-slate-400 text-[10px]">3.0h</td>
+                      <td className="p-3 text-center text-slate-400 text-xxs">3.0h</td>
                     </tr>
                   </tfoot>
                 </table>
@@ -2402,7 +2402,7 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                   </div>
                 ) : (
                   <table className="w-full text-left text-sm whitespace-nowrap border-collapse min-w-[700px]">
-                    <thead className="bg-slate-200 border-b border-border text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                    <thead className="bg-slate-200 border-b border-border text-xxs font-bold text-muted-foreground uppercase tracking-widest">
                       <tr>
                         <th className="p-3 pl-4">Dipendente / Team</th>
                         <th className="p-3 text-center w-20">Ore Tot</th>
@@ -2430,7 +2430,7 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                     </tbody>
                     <tfoot>
                       <tr className="bg-slate-800 text-white font-bold h-12">
-                        <td className="p-3 pl-4 text-right uppercase tracking-widest text-[11px] opacity-90">Totale Globale:</td>
+                        <td className="p-3 pl-4 text-right uppercase tracking-widest text-xxs opacity-90">Totale Globale:</td>
                         <td className="p-3 text-center text-emerald-400 text-xl tabular-nums">{fmtOre(reportData.reduce((acc: number, cur: any) => acc + (parseFloat(cur.ore_totali) || 0), 0))}</td>
                         <td className="p-3 text-center">{reportData.reduce((acc: number, cur: any) => acc + (parseInt(cur.giorni_lavorati) || 0), 0)}</td>
                         <td className="p-3 text-center">{reportData.reduce((acc: number, cur: any) => acc + (cur.cnt_FE || 0), 0)}</td>

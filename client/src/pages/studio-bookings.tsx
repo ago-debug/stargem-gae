@@ -751,7 +751,7 @@ export default function StudioBookings() {
                                     type="button"
                                     variant="ghost"
                                     size="sm"
-                                    className="h-6 px-2 text-[11px] gap-1 text-[#f43f5e] hover:bg-[#f43f5e]/10"
+                                    className="h-6 px-2 text-xxs gap-1 text-[stargem-red] hover:bg-[stargem-red]/10"
                                     onClick={() => setQuickAddServiceOpen(true)}
                                 >
                                     <Plus className="w-3.5 h-3.5" /> Nuovo Servizio
@@ -796,7 +796,7 @@ export default function StudioBookings() {
                                                         <Check className={`mr-2 h-4 w-4 ${bookingForm.serviceId === s.id ? "opacity-100" : "opacity-0"}`} />
                                                         <div className="flex flex-col">
                                                             <span>{s.name}</span>
-                                                            <span className="text-[10px] text-muted-foreground">€ {s.price}</span>
+                                                            <span className="text-xxs text-muted-foreground">€ {s.price}</span>
                                                         </div>
                                                     </CommandItem>
                                                 ))}
@@ -844,7 +844,7 @@ export default function StudioBookings() {
                         </div>
 
                         {bookingForm.paid && (
-                            <div className="space-y-4 pl-6 border-l-2 border-[#f43f5e]/20 ml-2 animate-in fade-in slide-in-from-left-2">
+                            <div className="space-y-4 pl-6 border-l-2 border-[stargem-red]/20 ml-2 animate-in fade-in slide-in-from-left-2">
                                 <div className="space-y-2">
                                     <Label>Importo Pagato (€) *</Label>
                                     <Input
@@ -875,7 +875,7 @@ export default function StudioBookings() {
                                     type="button"
                                     variant="ghost"
                                     size="sm"
-                                    className="h-6 px-2 text-[11px] gap-1 text-[#f43f5e] hover:bg-[#f43f5e]/10"
+                                    className="h-6 px-2 text-xxs gap-1 text-[stargem-red] hover:bg-[stargem-red]/10"
                                     onClick={() => setQuickAddMemberOpen(true)}
                                 >
                                     <UserPlus className="w-3.5 h-3.5" /> Nuovo Partecipante
@@ -943,7 +943,7 @@ export default function StudioBookings() {
                                                         <Check className={`mr-2 h-4 w-4 ${bookingForm.memberId === lastAddedMember.id ? "opacity-100" : "opacity-0"}`} />
                                                         <div className="flex flex-col">
                                                             <span className="font-bold">✨ {lastAddedMember.lastName} {lastAddedMember.firstName}</span>
-                                                            <span className="text-[10px] text-muted-foreground">{lastAddedMember.fiscalCode}</span>
+                                                            <span className="text-xxs text-muted-foreground">{lastAddedMember.fiscalCode}</span>
                                                         </div>
                                                     </CommandItem>
                                                 )}
@@ -966,7 +966,7 @@ export default function StudioBookings() {
                                                         <Check className={`mr-2 h-4 w-4 ${bookingForm.memberId === m.id ? "opacity-100" : "opacity-0"}`} />
                                                         <div className="flex flex-col">
                                                             <span>{m.lastName} {m.firstName}</span>
-                                                            <span className="text-[10px] text-muted-foreground">{m.fiscalCode}</span>
+                                                            <span className="text-xxs text-muted-foreground">{m.fiscalCode}</span>
                                                         </div>
                                                     </CommandItem>
                                                 ))}
@@ -976,7 +976,7 @@ export default function StudioBookings() {
                                 </PopoverContent>
                             </Popover>
                             {bookingForm.memberId && (
-                                <div className="mt-2 text-[11px] bg-muted p-2 rounded-md border border-border flex flex-col gap-1 animate-in fade-in slide-in-from-top-1">
+                                <div className="mt-2 text-xxs bg-muted p-2 rounded-md border border-border flex flex-col gap-1 animate-in fade-in slide-in-from-top-1">
                                     <div className="flex items-center gap-2 text-muted-foreground">
                                         <Mail className="w-3 h-3" />
                                         <span>{bookingForm.memberEmail || "Email non presente"}</span>
@@ -1050,7 +1050,7 @@ export default function StudioBookings() {
                                     <div className="space-y-3">
                                         <div className="flex items-center justify-between border-b pb-2">
                                             <h4 className="font-bold text-xs uppercase tracking-wider text-muted-foreground">Disponibilità</h4>
-                                            <Badge variant="outline" className="text-[10px]">
+                                            <Badge variant="outline" className="text-xxs">
                                                 {bookingForm.bookingDate ? format(new Date(bookingForm.bookingDate), 'dd/MM/yyyy') : "Seleziona data"}
                                             </Badge>
                                         </div>
@@ -1079,14 +1079,14 @@ export default function StudioBookings() {
                                                     >
                                                         <div className="flex items-center gap-2">
                                                             <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
-                                                            <span className="font-medium text-[11px]">{slot.start} - {slot.end}</span>
+                                                            <span className="font-medium text-xxs">{slot.start} - {slot.end}</span>
                                                         </div>
                                                         <Plus className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                                                     </Button>
                                                 ))}
                                             </div>
                                         )}
-                                        <p className="text-[10px] text-muted-foreground italic text-center pt-2 border-top border-dotted">
+                                        <p className="text-xxs text-muted-foreground italic text-center pt-2 border-top border-dotted">
                                             * Basato su corsi settimanali e prenotazioni esistenti
                                         </p>
                                     </div>
@@ -1133,7 +1133,7 @@ export default function StudioBookings() {
                                 </Button>
                             )}
                             <Button type="button" variant="outline" onClick={() => setEditingBooking(null)}>Annulla</Button>
-                            <Button type="submit" disabled={createBookingMutation.isPending || updateBookingMutation.isPending} className="bg-[#f43f5e] hover:bg-[#e11d48] text-white">
+                            <Button type="submit" disabled={createBookingMutation.isPending || updateBookingMutation.isPending} className="bg-[stargem-red] hover:bg-[stargem-red] text-white">
                                 {bookingForm.id ? "Salva" : "Crea"}
                             </Button>
                         </DialogFooter>
@@ -1236,7 +1236,7 @@ export default function StudioBookings() {
                         </div>
 
                         <Button
-                            className="w-full h-12 text-lg font-bold bg-[#f43f5e] hover:bg-[#e11d48] text-white"
+                            className="w-full h-12 text-lg font-bold bg-[stargem-red] hover:bg-[stargem-red] text-white"
                             type="button"
                             disabled={createMemberMutation.isPending}
                             onClick={() => {
@@ -1286,7 +1286,7 @@ export default function StudioBookings() {
                             <Label className="text-xs">Colore</Label>
                             <Input type="color" className="w-12 h-8 p-0" value={newServiceForm.color} onChange={e => setNewServiceForm(p => ({ ...p, color: e.target.value }))} />
                         </div>
-                        <Button className="w-full bg-[#f43f5e] hover:bg-[#e11d48] text-white" onClick={() => createServiceMutation.mutate({ ...newServiceForm, price: parseFloat(newServiceForm.price) })} disabled={createServiceMutation.isPending}>
+                        <Button className="w-full bg-[stargem-red] hover:bg-[stargem-red] text-white" onClick={() => createServiceMutation.mutate({ ...newServiceForm, price: parseFloat(newServiceForm.price) })} disabled={createServiceMutation.isPending}>
                             {createServiceMutation.isPending ? "Salvataggio..." : "Crea e Seleziona"}
                         </Button>
                     </div>

@@ -44,7 +44,7 @@ function MembershipCardInternal({ member }: { member: Member }) {
 
     return (
         <div className="relative w-[220px] h-[360px] bg-background overflow-hidden font-sans border border-gray-100 flex flex-col items-center">
-            <div className="absolute top-0 left-0 right-0 h-3 bg-[#e11d48]"></div>
+            <div className="absolute top-0 left-0 right-0 h-3 bg-[stargem-red]"></div>
             <div className="flex flex-col items-center pt-6 pb-8 px-4 w-full h-full">
                 <div className="mb-2 h-7 flex justify-center items-center w-full">
                     <img src={logoStarGem} alt="Logo" className="h-full object-contain" />
@@ -57,28 +57,28 @@ function MembershipCardInternal({ member }: { member: Member }) {
                 </div>
                 <div className="w-full text-center space-y-1.5">
                     <div className="space-y-0.5">
-                        <div className="text-[7px] uppercase text-gray-400 font-bold">Numero Tessera</div>
-                        <div className="text-sm font-black text-[#e11d48]">{cardNumber}</div>
+                        <div className="text-xxxs uppercase text-gray-400 font-bold">Numero Tessera</div>
+                        <div className="text-sm font-black text-[stargem-red]">{cardNumber}</div>
                         <div className="flex justify-center gap-4 mt-1">
                             <div className="flex flex-col">
-                                <span className="text-[6px] uppercase text-gray-400 font-bold">Rilascio</span>
-                                <span className="text-[8px] font-bold">{formatDate(issueDate)}</span>
+                                <span className="text-xxxs uppercase text-gray-400 font-bold">Rilascio</span>
+                                <span className="text-xxxs font-bold">{formatDate(issueDate)}</span>
                             </div>
                             <div className="flex flex-col">
-                                <span className="text-[6px] uppercase text-gray-400 font-bold">Scadenza</span>
-                                <span className="text-[8px] font-bold text-[#e11d48]">{formatDate(expiryDate)}</span>
+                                <span className="text-xxxs uppercase text-gray-400 font-bold">Scadenza</span>
+                                <span className="text-xxxs font-bold text-[stargem-red]">{formatDate(expiryDate)}</span>
                             </div>
                         </div>
                     </div>
                     <div className="w-full h-[0.5px] bg-gray-100 opacity-50"></div>
                     <div className="space-y-1 pb-4">
                         <div>
-                            <div className="text-[7px] uppercase text-gray-400 font-bold">Cliente / Associato</div>
-                            <div className="text-[10px] font-black uppercase leading-tight">{member.lastName} {member.firstName}</div>
+                            <div className="text-xxxs uppercase text-gray-400 font-bold">Cliente / Associato</div>
+                            <div className="text-xxs font-black uppercase leading-tight">{member.lastName} {member.firstName}</div>
                         </div>
                         <div>
-                            <div className="text-[7px] uppercase text-gray-400 font-bold">Codice Fiscale</div>
-                            <div className="text-[9px] font-mono font-bold uppercase text-muted-foreground">{member.fiscalCode || "--- --- ---"}</div>
+                            <div className="text-xxxs uppercase text-gray-400 font-bold">Codice Fiscale</div>
+                            <div className="text-xxxs font-mono font-bold uppercase text-muted-foreground">{member.fiscalCode || "--- --- ---"}</div>
                         </div>
                     </div>
                 </div>
@@ -252,7 +252,7 @@ export function TabStampaTessere() {
                                     setSearchQuery(e.target.value);
                                     setPage(1);
                                 }}
-                                className="pl-10 h-10 border-2 focus-visible:ring-[#e11d48]"
+                                className="pl-10 h-10 border-2 focus-visible:ring-[stargem-red]"
                             />
                         </div>
                         <div className="flex items-center gap-2">
@@ -272,7 +272,7 @@ export function TabStampaTessere() {
                                 disabled={selectedMemberIds.size === 0 || isGeneratingBulk}
                                 size="sm"
                                 onClick={handleBulkDownload}
-                                className="h-10 px-6 bg-[#e11d48] hover:bg-[#be123c] shadow-md font-bold text-white transition-all transform hover:scale-105"
+                                className="h-10 px-6 bg-[stargem-red] hover:bg-[#be123c] shadow-md font-bold text-white transition-all transform hover:scale-105"
                             >
                                 {isGeneratingBulk ? (
                                     <> <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Generando... </>
@@ -307,11 +307,11 @@ export function TabStampaTessere() {
                                                 <Checkbox
                                                     checked={selectedMemberIds.has(member.id)}
                                                     onCheckedChange={() => toggleSelectMember(member.id)}
-                                                    className="border-2 data-[state=checked]:bg-[#e11d48]"
+                                                    className="border-2 data-[state=checked]:bg-[stargem-red]"
                                                 />
                                             </TableCell>
                                             <TableCell className={cn("font-bold", isSortedColumn("name") && "sorted-column-cell")}>{member.lastName} {member.firstName}</TableCell>
-                                            <TableCell className={cn("font-mono text-[#e11d48] text-sm", isSortedColumn("cardNumber") && "sorted-column-cell")}>
+                                            <TableCell className={cn("font-mono text-[stargem-red] text-sm", isSortedColumn("cardNumber") && "sorted-column-cell")}>
                                                 {(member as any).activeMembership?.membershipNumber || member.cardNumber || "--"}
                                             </TableCell>
                                             <TableCell className={cn("font-mono text-xs text-muted-foreground", isSortedColumn("fiscalCode") && "sorted-column-cell")}>{member.fiscalCode}</TableCell>
@@ -323,7 +323,7 @@ export function TabStampaTessere() {
                                                         setPreviewMember(member);
                                                         setIsPreviewDialogOpen(true);
                                                     }}
-                                                    className="font-bold text-xs hover:bg-[#e11d48]/10 hover:text-[#e11d48]"
+                                                    className="font-bold text-xs hover:bg-[stargem-red]/10 hover:text-[stargem-red]"
                                                 >
                                                     <Smartphone className="w-4 h-4 mr-2" />
                                                     ANTEPRIMA

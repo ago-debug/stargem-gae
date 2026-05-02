@@ -111,12 +111,12 @@ export default function AreaTesserati() {
               <div className="space-y-3">
                 <div className="flex items-center justify-between p-3 bg-muted rounded-lg border border-slate-100">
                   <span className="text-sm font-medium text-foreground/80">Regolamento Generale</span>
-                  <Badge variant="outline" className="text-emerald-600 border-emerald-200 dark:border-emerald-900/50 bg-emerald-50 dark:bg-emerald-950/20 text-[10px] uppercase font-bold tracking-wider">FIRMATO</Badge>
+                  <Badge variant="outline" className="text-emerald-600 border-emerald-200 dark:border-emerald-900/50 bg-emerald-50 dark:bg-emerald-950/20 text-xxs uppercase font-bold tracking-wider">FIRMATO</Badge>
                 </div>
                 <div className="flex items-center justify-between p-3 bg-muted rounded-lg border border-slate-100">
                   <span className="text-sm font-medium text-foreground/80">Certificato Medico</span>
                   {documents.find((d:any) => d.type === 'medical') ? (
-                    <Badge variant="outline" className="text-emerald-600 border-emerald-200 dark:border-emerald-900/50 bg-emerald-50 dark:bg-emerald-950/20 text-[10px] uppercase font-bold tracking-wider">CARICATO</Badge>
+                    <Badge variant="outline" className="text-emerald-600 border-emerald-200 dark:border-emerald-900/50 bg-emerald-50 dark:bg-emerald-950/20 text-xxs uppercase font-bold tracking-wider">CARICATO</Badge>
                   ) : (
                     <Button variant="outline" size="sm" className="h-7 text-xs border-dashed border-red-200 dark:border-red-900/50 text-red-600 hover:bg-red-50 dark:bg-red-950/20 hover:text-red-700">
                        Carica file
@@ -156,7 +156,7 @@ export default function AreaTesserati() {
                           <span>{enr.room}</span>
                         </p>
                       </div>
-                      <Badge variant="outline" className="bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 border-emerald-200 dark:border-emerald-900/50 uppercase tracking-widest text-[9px] font-bold">ISCRITTO</Badge>
+                      <Badge variant="outline" className="bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 border-emerald-200 dark:border-emerald-900/50 uppercase tracking-widest text-xxxs font-bold">ISCRITTO</Badge>
                     </div>
                   ))}
                 </div>
@@ -184,7 +184,7 @@ export default function AreaTesserati() {
                         <p className="text-sm font-medium text-foreground">{pay.description || 'Quota'}</p>
                         <p className="text-xs text-muted-foreground mt-0.5">
                           {new Date(pay.date).toLocaleDateString()}
-                          {pay.method && <span className="ml-2 px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded border text-[10px] uppercase font-semibold">{pay.method}</span>}
+                          {pay.method && <span className="ml-2 px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded border text-xxs uppercase font-semibold">{pay.method}</span>}
                         </p>
                       </div>
                       <span className="font-bold text-foreground">€ {Number(pay.amount).toFixed(2)}</span>
@@ -231,7 +231,7 @@ export default function AreaTesserati() {
                         <div key={msg.id} className={`flex ${msg.senderType === 'member' ? 'justify-end' : 'justify-start'}`}>
                           <div className={`max-w-[80%] px-4 py-2 text-sm shadow-sm ${msg.senderType === 'member' ? 'bg-gradient-to-b from-amber-500 to-amber-600 text-white rounded-2xl rounded-br-sm' : 'bg-background border text-foreground rounded-2xl rounded-bl-sm pb-3 text-left'}`}>
                             {msg.content}
-                            <div className={`text-[9px] mt-1 text-right block ${msg.senderType === 'member' ? 'text-amber-100' : 'text-slate-400'}`}>
+                            <div className={`text-xxxs mt-1 text-right block ${msg.senderType === 'member' ? 'text-amber-100' : 'text-slate-400'}`}>
                               {new Date(msg.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                             </div>
                           </div>

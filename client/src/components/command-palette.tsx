@@ -42,7 +42,7 @@ export function CommandPalette() {
               placeholder="Chiedi a Teo o cerca funzioni (es. Iscrivi utente...)" 
               className="flex h-16 w-full rounded-md bg-transparent py-3 text-lg outline-none placeholder:text-slate-400 disabled:cursor-not-allowed disabled:opacity-50" 
             />
-            <kbd className="ml-2 hidden sm:inline-flex items-center gap-1 rounded border border-border bg-slate-100 dark:bg-slate-800 px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
+            <kbd className="ml-2 hidden sm:inline-flex items-center gap-1 rounded border border-border bg-slate-100 dark:bg-slate-800 px-1.5 font-mono text-xxs font-medium text-muted-foreground">
               <span className="text-xs">ESC</span>
             </kbd>
           </div>
