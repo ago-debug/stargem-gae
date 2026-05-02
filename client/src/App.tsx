@@ -60,14 +60,7 @@ const Attivita = React.lazy(() => import("@/pages/attivita"));
 const IscrittiPerAttivita = React.lazy(() => import("@/pages/iscritti_per_attivita"));
 const TodoList = React.lazy(() => import("@/pages/todo-list"));
 const Commenti = React.lazy(() => import("@/pages/commenti"));
-const SchedaCorso = React.lazy(() => import("@/pages/scheda-corso"));
-const SchedaWorkshop = React.lazy(() => import("@/pages/scheda-workshop"));
-const SchedaDomenica = React.lazy(() => import("@/pages/scheda-domenica"));
-const SchedaAllenamento = React.lazy(() => import("@/pages/scheda-allenamento"));
-const SchedaLezioneIndividuale = React.lazy(() => import("@/pages/scheda-lezione-individuale"));
-const SchedaCampus = React.lazy(() => import("@/pages/scheda-campus"));
-const SchedaSaggio = React.lazy(() => import("@/pages/scheda-saggio"));
-const SchedaVacanzaStudio = React.lazy(() => import("@/pages/scheda-vacanza-studio"));
+const SchedaAttivita = React.lazy(() => import("@/pages/scheda-attivita"));
 const Planning = React.lazy(() => import("@/pages/planning"));
 const GemPass = React.lazy(() => import("@/pages/gempass"));
 const GemStaff = React.lazy(() => import("@/pages/gemstaff"));
@@ -252,14 +245,14 @@ function Router() {
       <ProtectedRoute path="/quote-promo" component={QuotePromo} />
       <ProtectedRoute path="/webhook-status" component={WebhookStatus} />
       <ProtectedRoute path="/wc-mapping" component={WcMapping} />
-      <ProtectedRoute path="/scheda-corso" component={SchedaCorso} />
-      <ProtectedRoute path="/scheda-workshop" component={SchedaWorkshop} />
-      <ProtectedRoute path="/scheda-domenica" component={SchedaDomenica} />
-      <ProtectedRoute path="/scheda-allenamento" component={SchedaAllenamento} />
-      <ProtectedRoute path="/scheda-lezione-individuale" component={SchedaLezioneIndividuale} />
-      <ProtectedRoute path="/scheda-campus" component={SchedaCampus} />
-      <ProtectedRoute path="/scheda-saggio" component={SchedaSaggio} />
-      <ProtectedRoute path="/scheda-vacanza-studio" component={SchedaVacanzaStudio} />
+      <ProtectedRoute path="/scheda-corso" component={SchedaAttivita} />
+      <ProtectedRoute path="/scheda-workshop" component={SchedaAttivita} />
+      <ProtectedRoute path="/scheda-domenica" component={SchedaAttivita} />
+      <ProtectedRoute path="/scheda-allenamento" component={SchedaAttivita} />
+      <ProtectedRoute path="/scheda-lezione-individuale" component={SchedaAttivita} />
+      <ProtectedRoute path="/scheda-campus" component={SchedaAttivita} />
+      <ProtectedRoute path="/scheda-saggio" component={SchedaAttivita} />
+      <ProtectedRoute path="/scheda-vacanza-studio" component={SchedaAttivita} />
       <ProtectedRoute path="/attivita/corsi" component={Courses} />
       <ProtectedRoute path="/attivita/workshops" component={Workshops} />
       <ProtectedRoute path="/attivita/domeniche-movimento" component={SundayActivities} />

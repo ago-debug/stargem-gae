@@ -44,7 +44,7 @@ import type {
 } from "@shared/schema";
 import { buildEnrolledMembersData } from "@/lib/enrollments";
 
-export default function SchedaCorso() {
+export default function SchedaAttivita() {
   const [location, setLocation] = useLocation();
   const [genderFilter, setGenderFilter] = useState<"all" | "M" | "F">("all");
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -93,6 +93,14 @@ export default function SchedaCorso() {
     return map;
   }, [strategicEventsData]);
 
+  const formatActivityType = (type?: string | null) => {
+    if (!type) return "Attività";
+    if (type === "corsi") return "Corso";
+    if (type === "domeniche") return "Domenica in Movimento";
+    if (type === "lezioni_individuali") return "Lezione Individuale";
+    return type.charAt(0).toUpperCase() + type.slice(1).replace("_", " ");
+  };
+
   if (
     coursesLoading ||
     enrolledMembersLoading ||
@@ -111,7 +119,7 @@ export default function SchedaCorso() {
     return (
       <div className="p-6 md:p-8 mx-auto">
         <div className="bg-background p-6 rounded-xl border shadow-sm">
-          <h1 className="text-2xl font-bold text-foreground">Scheda Corso</h1>
+          <h1 className="text-2xl font-bold text-foreground">Scheda Attività</h1>
           <p className="text-muted-foreground mt-2">
             Parametro <code>courseId</code> mancante o non valido nell’URL.
           </p>
@@ -134,9 +142,9 @@ export default function SchedaCorso() {
     return (
       <div className="p-6 md:p-8 mx-auto">
         <div className="bg-background p-6 rounded-xl border shadow-sm">
-          <h1 className="text-2xl font-bold text-foreground">Scheda Corso</h1>
+          <h1 className="text-2xl font-bold text-foreground">Scheda Attività</h1>
           <p className="text-muted-foreground mt-2">
-            Corso non trovato per <code>courseId={String(courseId)}</code>.
+            Attività non trovata per <code>courseId={String(courseId)}</code>.
           </p>
           <div className="mt-4">
             <Button
@@ -311,7 +319,7 @@ export default function SchedaCorso() {
               </div>
               <div>
                 <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-3">
-                  Scheda Corso {course ? `- ${course.name}` : ""}
+                  Scheda {formatActivityType(course?.activityType)} {course ? `- ${course.name}` : ""}
                 </h1>
                 <p className="text-muted-foreground mt-1 flex items-center gap-2">
                   <span className="inline-flex h-2 w-2 rounded-full bg-gold"></span>
