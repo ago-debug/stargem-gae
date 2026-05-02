@@ -16,6 +16,9 @@ import { Pagination, PaginationContent, PaginationItem, PaginationLink, Paginati
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useDebounce } from "@/hooks/use-debounce";
+import { TabTessereEnte } from "@/components/gempass/TabTessereEnte";
+import { TabCertificati } from "@/components/gempass/TabCertificati";
+import { TabStampaTessere } from "@/components/gempass/TabStampaTessere";
 
 interface MembershipRecord {
   id: number;
@@ -362,8 +365,11 @@ export default function GemPass() {
       <Tabs defaultValue="tessere-attive" className="w-full">
         <TabsList className="w-full justify-start overflow-auto">
           <TabsTrigger value="tessere-attive">Tessere Attive</TabsTrigger>
+          <TabsTrigger value="tessere-ente">Tessere Ente</TabsTrigger>
+          <TabsTrigger value="certificati">Certificati Medici</TabsTrigger>
           <TabsTrigger value="nuova-domanda">Nuova Domanda</TabsTrigger>
           <TabsTrigger value="documenti-firme">Documenti & Firme</TabsTrigger>
+          <TabsTrigger value="stampa">Stampa Massiva</TabsTrigger>
           <TabsTrigger value="statistiche">Statistiche</TabsTrigger>
         </TabsList>
         
@@ -990,6 +996,18 @@ export default function GemPass() {
               <p className="text-sm font-medium text-muted-foreground mt-1 uppercase tracking-wide">Totale Stagione</p>
             </div>
           </div>
+        </TabsContent>
+
+        <TabsContent value="tessere-ente">
+          <TabTessereEnte />
+        </TabsContent>
+
+        <TabsContent value="certificati">
+          <TabCertificati />
+        </TabsContent>
+
+        <TabsContent value="stampa">
+          <TabStampaTessere />
         </TabsContent>
       </Tabs>
 

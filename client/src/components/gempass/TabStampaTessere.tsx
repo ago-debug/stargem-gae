@@ -1,6 +1,6 @@
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { type Member } from "@shared/schema";
+import type { Member } from "@shared/schema";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,19 +11,116 @@ import { useToast } from "@/hooks/use-toast";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { cn } from "@/lib/utils";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { MembershipCard } from "@/components/membership-card";
+import QRCode from "qrcode";
+import { useDebounce } from "@/hooks/use-debounce";
 
-function useDebounce<T>(value: T, delay: number): T {
-    const [debouncedValue, setDebouncedValue] = useState<T>(value);
+const logoStarGem = "/logo_stargem.png";
+
+function MembershipCardInternal({ member }: { member: Member }) {
+    const [qrCodeUrl, setQrCodeUrl] = useState<string>("");
+
+    const activeMembership = (member as any).activeMembership;
+    const barcodeData = activeMembership?.barcode || member.cardNumber || member.fiscalCode || "";
+    const cardNumber = activeMembership?.membershipNumber || member.cardNumber || "--- ---";
+    const issueDate = activeMembership?.issueDate || member.cardIssueDate;
+    const expiryDate = activeMembership?.expiryDate || member.cardExpiryDate;
+
     useEffect(() => {
-        const handler = setTimeout(() => setDebouncedValue(value), delay);
-        return () => clearTimeout(handler);
-    }, [value, delay]);
-    return debouncedValue;
+        if (barcodeData) {
+            QRCode.toDataURL(barcodeData, { width: 400, margin: 0 }, (err, url) => {
+                if (!err) setQrCodeUrl(url);
+            });
+        }
+    }, [barcodeData]);
+
+    const formatDate = (date: any) => {
+        if (!date) return "--/--/----";
+        return new Date(date).toLocaleDateString('it-IT');
+    };
+
+    return (
+        <div className="relative w-[220px] h-[360px] bg-background overflow-hidden font-sans border border-gray-100 flex flex-col items-center">
+            <div className="absolute top-0 left-0 right-0 h-3 bg-[#e11d48]"></div>
+            <div className="flex flex-col items-center pt-6 pb-8 px-4 w-full h-full">
+                <div className="mb-2 h-7 flex justify-center items-center w-full">
+                    <img src={logoStarGem} alt="Logo" className="h-full object-contain" />
+                </div>
+                <div className="w-20 h-20 bg-gray-50 border border-gray-100 overflow-hidden mb-2 shadow-inner">
+                    {member.photoUrl && <img src={member.photoUrl} alt="Foto" className="w-full h-full object-cover" />}
+                </div>
+                <div className="mb-2">
+                    {qrCodeUrl && <img src={qrCodeUrl} alt="QR" className="w-20 h-20" />}
+                </div>
+                <div className="w-full text-center space-y-1.5">
+                    <div className="space-y-0.5">
+                        <div className="text-[7px] uppercase text-gray-400 font-bold">Numero Tessera</div>
+                        <div className="text-sm font-black text-[#e11d48]">{cardNumber}</div>
+                        <div className="flex justify-center gap-4 mt-1">
+                            <div className="flex flex-col">
+                                <span className="text-[6px] uppercase text-gray-400 font-bold">Rilascio</span>
+                                <span className="text-[8px] font-bold">{formatDate(issueDate)}</span>
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-[6px] uppercase text-gray-400 font-bold">Scadenza</span>
+                                <span className="text-[8px] font-bold text-[#e11d48]">{formatDate(expiryDate)}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="w-full h-[0.5px] bg-gray-100 opacity-50"></div>
+                    <div className="space-y-1 pb-4">
+                        <div>
+                            <div className="text-[7px] uppercase text-gray-400 font-bold">Cliente / Associato</div>
+                            <div className="text-[10px] font-black uppercase leading-tight">{member.lastName} {member.firstName}</div>
+                        </div>
+                        <div>
+                            <div className="text-[7px] uppercase text-gray-400 font-bold">Codice Fiscale</div>
+                            <div className="text-[9px] font-mono font-bold uppercase text-muted-foreground">{member.fiscalCode || "--- --- ---"}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
 }
 
-export default function CardGenerator() {
+function MembershipCardDialog({
+    isOpen,
+    onOpenChange,
+    member
+}: {
+    isOpen: boolean;
+    onOpenChange: (open: boolean) => void;
+    member: Member | null;
+}) {
+    if (!member) return null;
+
+    return (
+        <Dialog open={isOpen} onOpenChange={onOpenChange}>
+            <DialogContent className="max-w-md bg-background border-2">
+                <DialogHeader className="border-b pb-4 mb-4">
+                    <DialogTitle className="text-2xl font-black italic tracking-tighter">Anteprima Card</DialogTitle>
+                    <DialogDescription>
+                        Visualizzazione card di {member.lastName} {member.firstName}
+                    </DialogDescription>
+                </DialogHeader>
+
+                <MembershipCard member={member} />
+
+                <DialogFooter className="mt-6">
+                    <Button variant="outline" onClick={() => onOpenChange(false)} className="w-full font-bold">
+                        CHIUDI
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    );
+}
+
+export function TabStampaTessere() {
     const { toast } = useToast();
     const [searchQuery, setSearchQuery] = useState("");
     const debouncedSearch = useDebounce(searchQuery, 300);
@@ -50,7 +147,6 @@ export default function CardGenerator() {
     });
 
     const totalPages = Math.ceil((membersData?.total || 0) / pageSize);
-
     const members = membersData?.members || [];
 
     const { sortConfig, handleSort, sortItems, isSortedColumn } = useSortableTable<Member & { activeMembership?: any }>("name");
@@ -88,7 +184,6 @@ export default function CardGenerator() {
         toast({ title: "Generazione Massiva", description: `Preparazione di ${selectedMembers.length} tessere...` });
 
         try {
-            // Give time for the hidden elements to render
             await new Promise(resolve => setTimeout(resolve, 2000));
 
             const pdf = new jsPDF({
@@ -105,13 +200,12 @@ export default function CardGenerator() {
             for (let i = 0; i < cardElements.length; i++) {
                 const element = cardElements[i] as HTMLElement;
 
-                // Wait for any images inside this specific element to load
                 const images = Array.from(element.querySelectorAll('img'));
                 await Promise.all(images.map(img => {
                     if (img.complete) return Promise.resolve();
                     return new Promise(resolve => {
                         img.onload = resolve;
-                        img.onerror = resolve; // Continue even if an image fails
+                        img.onerror = resolve; 
                     });
                 }));
 
@@ -145,15 +239,7 @@ export default function CardGenerator() {
     };
 
     return (
-        <div className="p-6 md:p-8 space-y-6 mx-auto">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold italic tracking-tighter">Generazione Tessere</h1>
-                    <p className="text-muted-foreground">Gestione ed esportazione massiva delle tessere soci (PDF Multi-pagina)</p>
-                </div>
-                <IdCard className="w-10 h-10 text-[#e11d48] opacity-20" />
-            </div>
-
+        <div className="space-y-6 mt-4">
             <Card>
                 <CardHeader className="pb-4">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -275,7 +361,6 @@ export default function CardGenerator() {
                 </CardContent>
             </Card>
 
-            {/* Container per Generazione Massiva - Tecnincamente visibile ma fuori schermo */}
             <div
                 ref={bulkContainerRef}
                 className="fixed"
@@ -301,111 +386,5 @@ export default function CardGenerator() {
                 onOpenChange={setIsPreviewDialogOpen}
             />
         </div>
-    );
-}
-
-const logoStarGem = "/logo_stargem.png";
-import QRCode from "qrcode";
-
-function MembershipCardInternal({ member }: { member: Member }) {
-    const [qrCodeUrl, setQrCodeUrl] = useState<string>("");
-
-    const activeMembership = (member as any).activeMembership;
-    const barcodeData = activeMembership?.barcode || member.cardNumber || member.fiscalCode || "";
-    const cardNumber = activeMembership?.membershipNumber || member.cardNumber || "--- ---";
-    const issueDate = activeMembership?.issueDate || member.cardIssueDate;
-    const expiryDate = activeMembership?.expiryDate || member.cardExpiryDate;
-
-    useEffect(() => {
-        if (barcodeData) {
-            QRCode.toDataURL(barcodeData, { width: 400, margin: 0 }, (err, url) => {
-                if (!err) setQrCodeUrl(url);
-            });
-        }
-    }, [barcodeData]);
-
-    const formatDate = (date: any) => {
-        if (!date) return "--/--/----";
-        return new Date(date).toLocaleDateString('it-IT');
-    };
-
-    return (
-        <div className="relative w-[220px] h-[360px] bg-background overflow-hidden font-sans border border-gray-100 flex flex-col items-center">
-            <div className="absolute top-0 left-0 right-0 h-3 bg-[#e11d48]"></div>
-            <div className="flex flex-col items-center pt-6 pb-8 px-4 w-full h-full">
-                <div className="mb-2 h-7 flex justify-center items-center w-full">
-                    <img src={logoStarGem} alt="Logo" className="h-full object-contain" />
-                </div>
-                <div className="w-20 h-20 bg-gray-50 border border-gray-100 overflow-hidden mb-2 shadow-inner">
-                    {member.photoUrl && <img src={member.photoUrl} alt="Foto" className="w-full h-full object-cover" />}
-                </div>
-                <div className="mb-2">
-                    {qrCodeUrl && <img src={qrCodeUrl} alt="QR" className="w-20 h-20" />}
-                </div>
-                <div className="w-full text-center space-y-1.5">
-                    <div className="space-y-0.5">
-                        <div className="text-[7px] uppercase text-gray-400 font-bold">Numero Tessera</div>
-                        <div className="text-sm font-black text-[#e11d48]">{cardNumber}</div>
-                        <div className="flex justify-center gap-4 mt-1">
-                            <div className="flex flex-col">
-                                <span className="text-[6px] uppercase text-gray-400 font-bold">Rilascio</span>
-                                <span className="text-[8px] font-bold">{formatDate(issueDate)}</span>
-                            </div>
-                            <div className="flex flex-col">
-                                <span className="text-[6px] uppercase text-gray-400 font-bold">Scadenza</span>
-                                <span className="text-[8px] font-bold text-[#e11d48]">{formatDate(expiryDate)}</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="w-full h-[0.5px] bg-gray-100 opacity-50"></div>
-                    <div className="space-y-1 pb-4">
-                        <div>
-                            <div className="text-[7px] uppercase text-gray-400 font-bold">Cliente / Associato</div>
-                            <div className="text-[10px] font-black uppercase leading-tight">{member.lastName} {member.firstName}</div>
-                        </div>
-                        <div>
-                            <div className="text-[7px] uppercase text-gray-400 font-bold">Codice Fiscale</div>
-                            <div className="text-[9px] font-mono font-bold uppercase text-muted-foreground">{member.fiscalCode || "--- --- ---"}</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-}
-
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { MembershipCard } from "@/components/membership-card";
-
-function MembershipCardDialog({
-    isOpen,
-    onOpenChange,
-    member
-}: {
-    isOpen: boolean;
-    onOpenChange: (open: boolean) => void;
-    member: Member | null;
-}) {
-    if (!member) return null;
-
-    return (
-        <Dialog open={isOpen} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-md bg-background border-2">
-                <DialogHeader className="border-b pb-4 mb-4">
-                    <DialogTitle className="text-2xl font-black italic tracking-tighter">Anteprima Card</DialogTitle>
-                    <DialogDescription>
-                        Visualizzazione card di {member.lastName} {member.firstName}
-                    </DialogDescription>
-                </DialogHeader>
-
-                <MembershipCard member={member} />
-
-                <DialogFooter className="mt-6">
-                    <Button variant="outline" onClick={() => onOpenChange(false)} className="w-full font-bold">
-                        CHIUDI
-                    </Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
     );
 }

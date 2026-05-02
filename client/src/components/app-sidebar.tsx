@@ -105,16 +105,6 @@ const registrationItems = [
     icon: BadgeCheck,
   },
   {
-    title: "Tessere e Certificati Medici",
-    url: "/tessere-certificati",
-    icon: IdCard,
-  },
-  {
-    title: "Generazione Tessere",
-    url: "/generazione-tessere",
-    icon: ScanBarcode,
-  },
-  {
     title: "Controllo Accessi",
     url: "/accessi",
     icon: ShieldCheck,
