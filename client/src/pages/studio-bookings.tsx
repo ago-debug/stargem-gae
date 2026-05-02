@@ -31,6 +31,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { Label } from "@/components/ui/label";
 import {
     Search,
@@ -118,10 +119,21 @@ export default function StudioBookings() {
     });
     const [newServiceForm, setNewServiceForm] = useState({ name: "", price: "0", color: "#3b82f6" });
 
+    const [page, setPage] = useState(1);
+    const pageSize = 50;
+
     // Queries
-    const { data: bookings, isLoading: bookingsLoading } = useQuery<any[]>({
-        queryKey: ["/api/studio-bookings"],
+    const { data: bookingsResponse, isLoading: bookingsLoading } = useQuery<{data: any[], total: number}>({
+        queryKey: ["/api/studio-bookings", { page, pageSize }],
+        queryFn: async () => {
+            const res = await fetch(`/api/studio-bookings?page=${page}&pageSize=${pageSize}`);
+            if (!res.ok) throw new Error("Errore fetch prenotazioni");
+            return res.json();
+        }
     });
+
+    const bookings = bookingsResponse?.data || [];
+    const totalPages = Math.ceil((bookingsResponse?.total || 0) / pageSize);
 
     const { data: studios } = useQuery<Studio[]>({
         queryKey: ["/api/studios"],
@@ -694,6 +706,30 @@ export default function StudioBookings() {
                             </TableBody>
                         </Table>
                     </div>
+
+                    {totalPages > 1 && (
+                        <div className="mt-4 flex justify-end">
+                            <Pagination>
+                                <PaginationContent>
+                                    <PaginationItem>
+                                        <PaginationPrevious 
+                                            onClick={() => setPage(p => Math.max(1, p - 1))}
+                                            className={page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                                        />
+                                    </PaginationItem>
+                                    <PaginationItem>
+                                        <span className="text-sm px-4">Pagina {page} di {totalPages}</span>
+                                    </PaginationItem>
+                                    <PaginationItem>
+                                        <PaginationNext 
+                                            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                                            className={page === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                                        />
+                                    </PaginationItem>
+                                </PaginationContent>
+                            </Pagination>
+                        </div>
+                    )}
                 </CardContent>
             </Card>
 

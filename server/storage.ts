@@ -236,6 +236,16 @@ export interface IStorage {
     instructorLastName?: string | null;
     specialization?: string | null;
   })[]>;
+  getStudioBookingsPaginated(page?: number, pageSize?: number, seasonId?: number): Promise<{data: (StudioBooking & {
+    memberFirstName?: string | null;
+    memberLastName?: string | null;
+    studioName?: string | null;
+    serviceName?: string | null;
+    serviceColor?: string | null;
+    instructorFirstName?: string | null;
+    instructorLastName?: string | null;
+    specialization?: string | null;
+  })[], total: number}>;
   getStudioBookingsBySeason(seasonId: number): Promise<(StudioBooking & {
     memberFirstName?: string | null;
     memberLastName?: string | null;
@@ -371,6 +381,7 @@ export interface IStorage {
   // Memberships
   getMemberships(): Promise<Membership[]>;
   getMembershipsWithMembers(): Promise<(Membership & { memberFirstName?: string; memberLastName?: string; memberFiscalCode?: string })[]>;
+  getMembershipsPaginated(page: number, pageSize: number, search?: string, status?: string, type?: string): Promise<{ data: any[], total: number }>;
   getMembership(id: number): Promise<Membership | undefined>;
   getMembershipByBarcode(barcode: string): Promise<Membership | undefined>;
   getMembershipsByMemberId(memberId: number): Promise<Membership[]>;
@@ -381,6 +392,7 @@ export interface IStorage {
   // Medical Certificates
   getMedicalCertificates(): Promise<MedicalCertificate[]>;
   getMedicalCertificatesWithMembers(): Promise<(MedicalCertificate & { memberFirstName?: string; memberLastName?: string; memberFiscalCode?: string })[]>;
+  getMedicalCertificatesPaginated(page: number, pageSize: number, search?: string, status?: string): Promise<{ data: any[], total: number }>;
   getMedicalCertificatesByMemberId(memberId: number): Promise<MedicalCertificate[]>;
   getMedicalCertificate(id: number): Promise<MedicalCertificate | undefined>;
   createMedicalCertificate(cert: InsertMedicalCertificate): Promise<MedicalCertificate>;
@@ -396,6 +408,7 @@ export interface IStorage {
 
   // Payments
   getPayments(): Promise<Payment[]>;
+  getPaymentsPaginated(page?: number, pageSize?: number, search?: string, memberId?: number, seasonId?: number): Promise<{data: (Payment & { memberFirstName?: string; memberLastName?: string; createdBy?: string; updatedBy?: string })[], total: number}>;
   getPaymentsWithMembers(): Promise<(Payment & { memberFirstName?: string; memberLastName?: string })[]>;
   getPaymentsByMemberId(memberId: number): Promise<Payment[]>;
   getPaymentsBySeason(seasonId: number): Promise<Payment[]>;
@@ -406,6 +419,7 @@ export interface IStorage {
 
   // Enrollments
   getEnrollments(): Promise<(Enrollment & { memberFirstName?: string | null; memberLastName?: string | null; memberEmail?: string | null; memberFiscalCode?: string | null; memberGender?: string | null })[]>;
+  getEnrollmentsPaginated(page?: number, pageSize?: number, memberId?: number, seasonId?: number, activityType?: string): Promise<{data: (Enrollment & { memberFirstName?: string | null; memberLastName?: string | null; memberEmail?: string | null; memberFiscalCode?: string | null; memberGender?: string | null; courseSku?: string | null; courseInstructorName?: string | null })[], total: number}>;
   getEnrollmentsByMember(memberId: number): Promise<(Enrollment & { memberFirstName?: string | null; memberLastName?: string | null; memberEmail?: string | null; memberFiscalCode?: string | null; memberGender?: string | null })[]>;
   getEnrollmentsBySeason(seasonId: number, activityType?: string): Promise<(Enrollment & { memberFirstName?: string | null; memberLastName?: string | null; memberEmail?: string | null; memberFiscalCode?: string | null; memberGender?: string | null; courseSku?: string | null; courseInstructorName?: string | null })[]>;
   getEnrollment(id: number): Promise<Enrollment | undefined>;
@@ -415,6 +429,7 @@ export interface IStorage {
 
   // Access Logs
   getAccessLogs(limit?: number): Promise<(AccessLog & { memberFirstName?: string | null; memberLastName?: string | null })[]>;
+  getAccessLogsPaginated(page?: number, pageSize?: number): Promise<{data: (AccessLog & { memberFirstName?: string | null; memberLastName?: string | null })[], total: number}>;
   createAccessLog(log: InsertAccessLog): Promise<AccessLog>;
 
   // Attendances
@@ -1008,6 +1023,54 @@ export class DatabaseStorage implements IStorage {
   */
 
   // ==== Studio Bookings ====
+  async getStudioBookingsPaginated(page: number = 1, pageSize: number = 50, seasonId?: number): Promise<{data: (StudioBooking & {
+    memberFirstName?: string | null;
+    memberLastName?: string | null;
+    studioName?: string | null;
+    serviceName?: string | null;
+    serviceColor?: string | null;
+    instructorFirstName?: string | null;
+    instructorLastName?: string | null;
+    specialization?: string | null;
+  })[], total: number}> {
+    const instructorMembers = aliasedTable(members, 'instructorMembers');
+    let baseQuery = db
+      .select({
+        ...getTableColumns(studioBookings),
+        memberFirstName: members.firstName,
+        memberLastName: members.lastName,
+        studioName: studios.name,
+        serviceName: bookingServices.name,
+        serviceColor: bookingServices.color,
+        instructorFirstName: instructorMembers.firstName,
+        instructorLastName: instructorMembers.lastName,
+      })
+      .from(studioBookings)
+      .leftJoin(members, eq(studioBookings.memberId, members.id))
+      .leftJoin(studios, eq(studioBookings.studioId, studios.id))
+      .leftJoin(bookingServices, eq(studioBookings.serviceId, bookingServices.id))
+      .leftJoin(instructorMembers, eq(studioBookings.instructorId, instructorMembers.id))
+      .$dynamic();
+
+    if (seasonId) {
+      baseQuery = baseQuery.where(eq(studioBookings.seasonId, seasonId));
+    }
+
+    const countQuery = db.select({ count: sql`count(*)` }).from(studioBookings);
+    if (seasonId) {
+      countQuery.where(eq(studioBookings.seasonId, seasonId));
+    }
+    const [totalCountResult] = await countQuery;
+    const total = Number(totalCountResult.count);
+
+    const result = await baseQuery
+      .orderBy(desc(studioBookings.bookingDate), desc(studioBookings.startTime))
+      .limit(pageSize)
+      .offset((page - 1) * pageSize);
+
+    return { data: result, total };
+  }
+
   async getStudioBookings(startDate?: Date, endDate?: Date, seasonId?: number): Promise<(StudioBooking & {
     memberFirstName?: string | null;
     memberLastName?: string | null;
@@ -2277,6 +2340,90 @@ export class DatabaseStorage implements IStorage {
     return result as any;
   }
 
+  async getMembershipsPaginated(page: number, pageSize: number, search?: string, status?: string, type?: string): Promise<{ data: any[], total: number }> {
+    const offset = (page - 1) * pageSize;
+    let whereClause = sql`1=1`;
+
+    if (search) {
+      const s = `%${search.toLowerCase()}%`;
+      whereClause = sql`${whereClause} AND (
+        LOWER(${memberships.membershipNumber}) LIKE ${s} OR
+        LOWER(${members.lastName}) LIKE ${s} OR
+        LOWER(${members.firstName}) LIKE ${s} OR
+        LOWER(${members.fiscalCode}) LIKE ${s}
+      )`;
+    }
+
+    if (status) {
+      whereClause = sql`${whereClause} AND ${memberships.status} = ${status}`;
+    }
+
+    if (type) {
+      whereClause = sql`${whereClause} AND ${memberships.type} = ${type}`; // assuming 'type' is mapped to memberships.type or membershipType?
+      // Wait, let's check schema. In getMembershipsWithMembers, it selects `type: memberships.type`. So we use memberships.type. But the frontend passed `membership_type`, let's map it to memberships.membershipType if it's the correct column. Let's use `memberships.membershipType` since earlier code showed `schema.memberships.membershipType`.
+    }
+
+    // Let me fix the type logic immediately
+    let typeClause = sql``;
+    if (type) {
+      typeClause = sql` AND ${memberships.membershipType} = ${type}`;
+    }
+
+    const conditions = sql`${whereClause}${typeClause}`;
+
+    const [countResult] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(memberships)
+      .leftJoin(members, eq(memberships.memberId, members.id))
+      .where(conditions);
+      
+    const total = countResult?.count || 0;
+
+    const baseIds = await db
+      .select({ id: memberships.id })
+      .from(memberships)
+      .leftJoin(members, eq(memberships.memberId, members.id))
+      .where(conditions)
+      .orderBy(desc(memberships.expiryDate), desc(memberships.id))
+      .limit(pageSize)
+      .offset(offset);
+
+    const membershipIds = baseIds.map(row => row.id);
+
+    if (membershipIds.length === 0) {
+      return { data: [], total };
+    }
+
+    const data = await db
+      .select({
+        id: memberships.id,
+        memberId: memberships.memberId,
+        membershipNumber: memberships.membershipNumber,
+        previousMembershipNumber: memberships.previousMembershipNumber,
+        barcode: memberships.barcode,
+        issueDate: memberships.issueDate,
+        expiryDate: memberships.expiryDate,
+        status: memberships.status,
+        membershipType: memberships.membershipType,
+        type: memberships.type,
+        fee: memberships.fee,
+        createdAt: memberships.createdAt,
+        updatedAt: memberships.updatedAt,
+        memberFirstName: members.firstName,
+        memberLastName: members.lastName,
+        memberFiscalCode: members.fiscalCode,
+        paymentDate: payments.paidDate,
+        paymentStatus: payments.status,
+      })
+      .from(memberships)
+      .leftJoin(members, eq(memberships.memberId, members.id))
+      .leftJoin(payments, eq(memberships.id, payments.membershipId))
+      .where(inArray(memberships.id, membershipIds))
+      .orderBy(desc(memberships.expiryDate), desc(memberships.id));
+
+    return { data: data as any[], total };
+  }
+
   async getMembership(id: number): Promise<Membership | undefined> {
     const [membership] = await db.select().from(memberships).where(eq(memberships.id, id));
     return membership;
@@ -2370,6 +2517,56 @@ export class DatabaseStorage implements IStorage {
       .leftJoin(members, eq(medicalCertificates.memberId, members.id))
       .orderBy(desc(medicalCertificates.expiryDate));
     return result as any;
+  }
+
+  async getMedicalCertificatesPaginated(page: number, pageSize: number, search?: string, status?: string): Promise<{ data: any[], total: number }> {
+    const offset = (page - 1) * pageSize;
+    let whereClause = sql`1=1`;
+
+    if (search) {
+      const s = `%${search.toLowerCase()}%`;
+      whereClause = sql`${whereClause} AND (
+        LOWER(${members.lastName}) LIKE ${s} OR
+        LOWER(${members.firstName}) LIKE ${s} OR
+        LOWER(${members.fiscalCode}) LIKE ${s}
+      )`;
+    }
+
+    if (status) {
+      whereClause = sql`${whereClause} AND ${medicalCertificates.status} = ${status}`;
+    }
+
+    const [countResult] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(medicalCertificates)
+      .leftJoin(members, eq(medicalCertificates.memberId, members.id))
+      .where(whereClause);
+      
+    const total = countResult?.count || 0;
+
+    const data = await db
+      .select({
+        id: medicalCertificates.id,
+        memberId: medicalCertificates.memberId,
+        issueDate: medicalCertificates.issueDate,
+        expiryDate: medicalCertificates.expiryDate,
+        doctorName: medicalCertificates.doctorName,
+        notes: medicalCertificates.notes,
+        status: medicalCertificates.status,
+        createdAt: medicalCertificates.createdAt,
+        updatedAt: medicalCertificates.updatedAt,
+        memberFirstName: members.firstName,
+        memberLastName: members.lastName,
+        memberFiscalCode: members.fiscalCode,
+      })
+      .from(medicalCertificates)
+      .leftJoin(members, eq(medicalCertificates.memberId, members.id))
+      .where(whereClause)
+      .orderBy(desc(medicalCertificates.expiryDate), desc(medicalCertificates.id))
+      .limit(pageSize)
+      .offset(offset);
+
+    return { data: data as any[], total };
   }
 
   async getMedicalCertificatesByMemberId(memberId: number): Promise<MedicalCertificate[]> {
@@ -2468,6 +2665,95 @@ export class DatabaseStorage implements IStorage {
   async getPayments(): Promise<Payment[]> {
     return await db.select().from(payments).orderBy(desc(payments.createdAt));
   }
+
+  async getPaymentsPaginated(page: number = 1, pageSize: number = 50, search?: string, memberId?: number, seasonId?: number): Promise<{data: (Payment & { memberFirstName?: string; memberLastName?: string; createdBy?: string; updatedBy?: string })[], total: number}> {
+    const createdUser = alias(users, "createdUser");
+    const updatedUser = alias(users, "updatedUser");
+
+    let baseQuery = db
+      .select({
+        id: payments.id,
+        memberId: payments.memberId,
+        enrollmentId: payments.enrollmentId,
+        amount: payments.amount,
+        type: payments.type,
+        description: payments.description,
+        dueDate: payments.dueDate,
+        paidDate: payments.paidDate,
+        status: payments.status,
+        paymentMethod: payments.paymentMethod,
+        paymentMethodId: payments.paymentMethodId,
+        notes: payments.notes,
+        createdAt: payments.createdAt,
+        updatedAt: payments.updatedAt,
+        memberFirstName: members.firstName,
+        memberLastName: members.lastName,
+        seasonId: payments.seasonId,
+        bookingId: payments.bookingId,
+        membershipId: payments.membershipId,
+        createdById: payments.createdById,
+        updatedById: payments.updatedById,
+        createdBy: createdUser.username,
+        updatedBy: updatedUser.username,
+      })
+      .from(payments)
+      .leftJoin(members, eq(payments.memberId, members.id))
+      .leftJoin(createdUser, eq(payments.createdById, createdUser.id))
+      .leftJoin(updatedUser, eq(payments.updatedById, updatedUser.id))
+      .$dynamic();
+
+    const conditions = [];
+    if (memberId) {
+      conditions.push(eq(payments.memberId, memberId));
+    }
+    if (seasonId) {
+      conditions.push(eq(payments.seasonId, seasonId));
+    }
+    if (search) {
+      const searchLower = search.toLowerCase();
+      conditions.push(
+        or(
+          like(sql`lower(${members.firstName})`, `%${searchLower}%`),
+          like(sql`lower(${members.lastName})`, `%${searchLower}%`),
+          like(sql`lower(${payments.description})`, `%${searchLower}%`)
+        )
+      );
+    }
+
+    if (conditions.length > 0) {
+      baseQuery = baseQuery.where(and(...conditions));
+    }
+
+    // Clone the query builder for counting
+    const countQuery = db.select({ count: sql`count(*)` }).from(payments);
+    if (conditions.length > 0) {
+      const countConditions = [];
+      if (memberId) countConditions.push(eq(payments.memberId, memberId));
+      if (seasonId) countConditions.push(eq(payments.seasonId, seasonId));
+      if (search) {
+        countQuery.leftJoin(members, eq(payments.memberId, members.id));
+        const searchLower = search.toLowerCase();
+        countConditions.push(
+          or(
+            like(sql`lower(${members.firstName})`, `%${searchLower}%`),
+            like(sql`lower(${members.lastName})`, `%${searchLower}%`),
+            like(sql`lower(${payments.description})`, `%${searchLower}%`)
+          )
+        );
+      }
+      countQuery.where(and(...countConditions));
+    }
+    const [totalCountResult] = await countQuery;
+    const total = Number(totalCountResult.count);
+
+    const result = await baseQuery
+      .orderBy(desc(payments.createdAt))
+      .limit(pageSize)
+      .offset((page - 1) * pageSize);
+
+    return { data: result as any, total };
+  }
+
 
   async getPaymentsWithMembers(): Promise<(Payment & { memberFirstName?: string; memberLastName?: string; createdBy?: string; updatedBy?: string })[]> {
     const createdUser = alias(users, "createdUser");
@@ -2586,6 +2872,71 @@ export class DatabaseStorage implements IStorage {
   }
 
   // ==== Enrollments ====
+  async getEnrollmentsPaginated(page: number = 1, pageSize: number = 50, memberId?: number, seasonId?: number, activityType?: string): Promise<{data: (Enrollment & { memberFirstName?: string | null; memberLastName?: string | null; memberEmail?: string | null; memberFiscalCode?: string | null; memberGender?: string | null; courseSku?: string | null; courseInstructorName?: string | null })[], total: number}> {
+    const instructorMember = aliasedTable(members, 'instructorMember');
+    let baseQuery = db
+      .select({
+        id: enrollments.id,
+        memberId: enrollments.memberId,
+        courseId: enrollments.courseId,
+        participationType: enrollments.participationType,
+        targetDate: enrollments.targetDate,
+        enrollmentDate: enrollments.enrollmentDate,
+        status: enrollments.status,
+        notes: enrollments.notes,
+        details: enrollments.details,
+        createdAt: enrollments.createdAt,
+        memberFirstName: members.firstName,
+        memberLastName: members.lastName,
+        memberEmail: members.email,
+        memberFiscalCode: members.fiscalCode,
+        memberGender: members.gender,
+        courseSku: courses.sku,
+        courseInstructorName: sql<string>`CONCAT(COALESCE(${instructorMember.firstName}, ''), ' ', COALESCE(${instructorMember.lastName}, ''))`,
+      })
+      .from(enrollments)
+      .leftJoin(members, eq(enrollments.memberId, members.id))
+      .leftJoin(courses, eq(enrollments.courseId, courses.id))
+      .leftJoin(instructorMember, eq(courses.instructorId, instructorMember.id))
+      .$dynamic();
+
+    const conditions = [];
+    if (memberId) {
+      conditions.push(eq(enrollments.memberId, memberId));
+    }
+    if (seasonId) {
+      conditions.push(eq(courses.seasonId, seasonId));
+    }
+    if (activityType) {
+      conditions.push(eq(courses.activityType, activityType));
+    }
+
+    if (conditions.length > 0) {
+      baseQuery = baseQuery.where(and(...conditions));
+    }
+
+    const countQuery = db.select({ count: sql`count(*)` }).from(enrollments);
+    if (conditions.length > 0) {
+      const countConditions = [];
+      if (memberId) countConditions.push(eq(enrollments.memberId, memberId));
+      if (seasonId || activityType) {
+        countQuery.leftJoin(courses, eq(enrollments.courseId, courses.id));
+        if (seasonId) countConditions.push(eq(courses.seasonId, seasonId));
+        if (activityType) countConditions.push(eq(courses.activityType, activityType));
+      }
+      countQuery.where(and(...countConditions));
+    }
+    const [totalCountResult] = await countQuery;
+    const total = Number(totalCountResult.count);
+
+    const result = await baseQuery
+      .orderBy(desc(enrollments.createdAt))
+      .limit(pageSize)
+      .offset((page - 1) * pageSize);
+
+    return { data: result as any, total };
+  }
+
   async getEnrollments(): Promise<(Enrollment & { memberFirstName?: string | null; memberLastName?: string | null; memberEmail?: string | null; memberFiscalCode?: string | null; memberGender?: string | null })[]> {
     const result = await db
       .select({
@@ -2713,6 +3064,34 @@ export class DatabaseStorage implements IStorage {
   }
 
   // ==== Access Logs ====
+  async getAccessLogsPaginated(page: number = 1, pageSize: number = 50): Promise<{data: (AccessLog & { memberFirstName?: string | null; memberLastName?: string | null })[], total: number}> {
+    const baseQuery = db
+      .select({
+        id: accessLogs.id,
+        memberId: accessLogs.memberId,
+        barcode: accessLogs.barcode,
+        accessTime: accessLogs.accessTime,
+        accessType: accessLogs.accessType,
+        membershipStatus: accessLogs.membershipStatus,
+        notes: accessLogs.notes,
+        memberFirstName: members.firstName,
+        memberLastName: members.lastName,
+      })
+      .from(accessLogs)
+      .leftJoin(members, eq(accessLogs.memberId, members.id));
+
+    const countQuery = db.select({ count: sql`count(*)` }).from(accessLogs);
+    const [totalCountResult] = await countQuery;
+    const total = Number(totalCountResult.count);
+
+    const result = await baseQuery
+      .orderBy(desc(accessLogs.accessTime))
+      .limit(pageSize)
+      .offset((page - 1) * pageSize);
+
+    return { data: result, total };
+  }
+
   async getAccessLogs(limit: number = 100): Promise<(AccessLog & { memberFirstName?: string | null; memberLastName?: string | null })[]> {
     const result = await db
       .select({

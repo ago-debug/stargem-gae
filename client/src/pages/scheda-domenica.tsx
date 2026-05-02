@@ -51,11 +51,9 @@ export default function SchedaDomenica() {
             queryKey: [`/api/courses/${courseId}/enrolled-members`],
             enabled: !!courseId,
         });
-    const { data: payments, isLoading: paymentsLoading } = useQuery<Payment[]>({ queryKey: ["/api/payments"] });
-
     const { sortConfig, handleSort, sortItems, isSortedColumn } = useSortableTable<any>("lastName");
     
-    if (coursesLoading || enrolledMembersLoading || paymentsLoading) {
+    if (coursesLoading || enrolledMembersLoading) {
         return (
             <div className="p-6 md:p-8 space-y-6 mx-auto">
                 <Skeleton className="h-12 w-64" />
@@ -103,8 +101,8 @@ export default function SchedaDomenica() {
 
 
         const enrolledMembersData = (enrolledMembersRaw || []).map((data: any) => {
-        const hasPaidPayments = payments?.some((p: any) => p.status === 'paid' && Number(p.enrollmentId) === Number(data.enrollment_id));
-        const hasAnyPayments = payments?.some((p: any) => Number(p.enrollmentId) === Number(data.enrollment_id));
+        const hasPaidPayments = data.has_paid_payments > 0;
+        const hasAnyPayments = data.has_pending_payments > 0 || hasPaidPayments;
         const paymentStatusBadge = hasPaidPayments ?
             <Badge className="bg-green-500/10 text-green-700 hover:bg-green-500/20 shadow-none border-0">Regolare</Badge> :
             (hasAnyPayments ?

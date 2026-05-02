@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { cn } from "@/lib/utils";
 
 function useDebounce<T>(value: T, delay: number): T {
@@ -26,6 +27,8 @@ export default function CardGenerator() {
     const { toast } = useToast();
     const [searchQuery, setSearchQuery] = useState("");
     const debouncedSearch = useDebounce(searchQuery, 300);
+    const [page, setPage] = useState(1);
+    const pageSize = 50;
     const [selectedMemberIds, setSelectedMemberIds] = useState<Set<number>>(new Set());
     const [isPreviewDialogOpen, setIsPreviewDialogOpen] = useState(false);
     const [previewMember, setPreviewMember] = useState<Member | null>(null);
@@ -33,11 +36,11 @@ export default function CardGenerator() {
     const bulkContainerRef = useRef<HTMLDivElement>(null);
 
     const { data: membersData, isLoading } = useQuery<{ members: Member[]; total: number }>({
-        queryKey: ["/api/members", { page: 1, pageSize: 1000, search: debouncedSearch }],
+        queryKey: ["/api/members", { page, pageSize, search: debouncedSearch }],
         queryFn: async () => {
             const params = new URLSearchParams({
-                page: "1",
-                pageSize: "1000",
+                page: String(page),
+                pageSize: String(pageSize),
                 search: debouncedSearch,
             });
             const res = await fetch(`/api/members?${params}`);
@@ -45,6 +48,8 @@ export default function CardGenerator() {
             return res.json();
         }
     });
+
+    const totalPages = Math.ceil((membersData?.total || 0) / pageSize);
 
     const members = membersData?.members || [];
 
@@ -157,7 +162,10 @@ export default function CardGenerator() {
                             <Input
                                 placeholder="Cerca iscritti per cognome, nome o CF..."
                                 value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
+                                onChange={(e) => {
+                                    setSearchQuery(e.target.value);
+                                    setPage(1);
+                                }}
                                 className="pl-10 h-10 border-2 focus-visible:ring-[#e11d48]"
                             />
                         </div>
@@ -241,6 +249,29 @@ export default function CardGenerator() {
                             </TableBody>
                         </Table>
                     </div>
+                    {totalPages > 1 && (
+                        <div className="mt-4 flex justify-end">
+                            <Pagination>
+                                <PaginationContent>
+                                    <PaginationItem>
+                                        <PaginationPrevious 
+                                            onClick={() => setPage(p => Math.max(1, p - 1))}
+                                            className={page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                                        />
+                                    </PaginationItem>
+                                    <PaginationItem>
+                                        <span className="text-sm px-4">Pagina {page} di {totalPages}</span>
+                                    </PaginationItem>
+                                    <PaginationItem>
+                                        <PaginationNext 
+                                            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                                            className={page === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                                        />
+                                    </PaginationItem>
+                                </PaginationContent>
+                            </Pagination>
+                        </div>
+                    )}
                 </CardContent>
             </Card>
 

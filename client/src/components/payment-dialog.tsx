@@ -303,6 +303,11 @@ export function PaymentDialog({
             return;
         }
 
+        if (formData.totaleQuota !== undefined && formData.totaleQuota !== null && formData.totaleQuota < 0) {
+            setError("L'importo del pagamento non può essere negativo. Controlla il Totale Quota.");
+            return;
+        }
+
         if (isGratuito && adminCode !== "000zzz") {
             setError("Codice Admin non valido per la gratuità.");
             return;
