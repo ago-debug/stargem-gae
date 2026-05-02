@@ -29,7 +29,7 @@ export function ConvenzioniTab({ seasonId }: ConvenzioniTabProps) {
 
   const getTypeStyle = (type: string | null) => {
     switch (type) {
-      case "universita": return { color: "bg-blue-100 dark:bg-blue-900/30 text-blue-800 border-blue-200", icon: <Landmark className="w-4 h-4 mr-1" />, label: "Università" };
+      case "universita": return { color: "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 border-blue-200", icon: <Landmark className="w-4 h-4 mr-1" />, label: "Università" };
       case "forze_ordine": return { color: "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/50", icon: <Shield className="w-4 h-4 mr-1" />, label: "Forze dell'Ordine" };
       case "azienda": return { color: "bg-violet-100 text-violet-800 border-violet-200", icon: <Building className="w-4 h-4 mr-1" />, label: "Azienda" };
       case "scuola": return { color: "bg-orange-100 text-orange-800 border-orange-200", icon: <GraduationCap className="w-4 h-4 mr-1" />, label: "Scuola" };

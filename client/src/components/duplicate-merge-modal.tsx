@@ -201,7 +201,7 @@ export function DuplicateMergeModal({
             </div>
 
             {hasCfConflict && (
-              <div className="bg-red-100 dark:bg-red-900/30 text-red-800 p-3 rounded text-sm font-semibold border border-red-200 dark:border-red-900/50">
+              <div className="bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400 p-3 rounded text-sm font-semibold border border-red-200 dark:border-red-900/50">
                 Attenzione: CF diversi. Verifica prima di unire e seleziona il CF corretto da mantenere.
               </div>
             )}
@@ -320,10 +320,10 @@ export function DuplicateMergeModal({
               // Determine style by score/reason
               let badgeColor = "bg-primary/20 text-primary";
               const reasonStr = duplicate.matchReasons?.map(r=>r.field).join(", ") || duplicate.reason;
-              if (duplicate.score >= 8 || duplicate.reason === "CF Identico") badgeColor = "bg-red-100 dark:bg-red-900/30 text-red-800 border-red-200 dark:border-red-900/50";
+              if (duplicate.score >= 8 || duplicate.reason === "CF Identico") badgeColor = "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400 border-red-200 dark:border-red-900/50";
               else if (duplicate.score >= 6) badgeColor = "bg-orange-100 text-orange-800 border-orange-200";
               else if (duplicate.score >= 4) badgeColor = "bg-yellow-100 text-yellow-800 border-yellow-200";
-              else badgeColor = "bg-blue-100 dark:bg-blue-900/30 text-blue-800 border-blue-200";
+              else badgeColor = "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 border-blue-200";
 
               return (
                 <Card key={duplicate.id1 + "-" + duplicate.id2} className="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">

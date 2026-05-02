@@ -1032,7 +1032,7 @@ export default function MascheraInputGenerale(props?: any) {
                   })}
                 </div>
                 <div className="flex items-center justify-end gap-3 pl-2">
-                  <Badge variant={e.status === 'active' ? 'default' : 'secondary'} className={e.status === 'active' ? 'bg-green-100 text-green-800 hover:bg-green-200 border-green-300 text-[10px] h-5' : 'text-[10px] h-5'}>
+                  <Badge variant={e.status === 'active' ? 'default' : 'secondary'} className={e.status === 'active' ? 'bg-green-100 text-green-800 dark:text-green-400 hover:bg-green-200 border-green-300 text-[10px] h-5' : 'text-[10px] h-5'}>
                     {e.status === 'active' ? 'Attiva' : e.status || '?'}
                   </Badge>
                   <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity"
@@ -2375,7 +2375,7 @@ export default function MascheraInputGenerale(props?: any) {
                             value={allegati.domandaTesseramento.accettato || ''}
                             onValueChange={(v) => updateAllegato('domandaTesseramento', 'accettato', v)}
                           >
-                            <SelectTrigger className={`h-7 text-xs ${allegati.domandaTesseramento.accettato === 'si' ? 'bg-green-100 border-green-400 text-green-800' : allegati.domandaTesseramento.accettato === 'no' ? 'bg-orange-100 border-orange-400 text-orange-800' : ''}`}>
+                            <SelectTrigger className={`h-7 text-xs ${allegati.domandaTesseramento.accettato === 'si' ? 'bg-green-100 border-green-400 text-green-800 dark:text-green-400' : allegati.domandaTesseramento.accettato === 'no' ? 'bg-orange-100 border-orange-400 text-orange-800' : ''}`}>
                               <SelectValue placeholder="Seleziona" />
                             </SelectTrigger>
                             <SelectContent>
@@ -2475,7 +2475,7 @@ export default function MascheraInputGenerale(props?: any) {
                             value={allegati.regolamento.accettato || ''}
                             onValueChange={(v) => updateAllegato('regolamento', 'accettato', v)}
                           >
-                            <SelectTrigger className={`h-7 text-xs ${allegati.regolamento.accettato === 'si' ? 'bg-green-100 border-green-400 text-green-800' : allegati.regolamento.accettato === 'no' ? 'bg-orange-100 border-orange-400 text-orange-800' : ''}`}>
+                            <SelectTrigger className={`h-7 text-xs ${allegati.regolamento.accettato === 'si' ? 'bg-green-100 border-green-400 text-green-800 dark:text-green-400' : allegati.regolamento.accettato === 'no' ? 'bg-orange-100 border-orange-400 text-orange-800' : ''}`}>
                               <SelectValue placeholder="Seleziona" />
                             </SelectTrigger>
                             <SelectContent>
@@ -2575,7 +2575,7 @@ export default function MascheraInputGenerale(props?: any) {
                             value={allegati.privacy.accettata || ''}
                             onValueChange={(v) => updateAllegato('privacy', 'accettata', v)}
                           >
-                            <SelectTrigger className={`h-7 text-xs ${allegati.privacy.accettata === 'si' ? 'bg-green-100 border-green-400 text-green-800' : allegati.privacy.accettata === 'no' ? 'bg-orange-100 border-orange-400 text-orange-800' : ''}`}>
+                            <SelectTrigger className={`h-7 text-xs ${allegati.privacy.accettata === 'si' ? 'bg-green-100 border-green-400 text-green-800 dark:text-green-400' : allegati.privacy.accettata === 'no' ? 'bg-orange-100 border-orange-400 text-orange-800' : ''}`}>
                               <SelectValue placeholder="Seleziona" />
                             </SelectTrigger>
                             <SelectContent>
@@ -3674,7 +3674,7 @@ export default function MascheraInputGenerale(props?: any) {
                                     variant="ghost"
                                     size="icon"
                                     title="Copia Testo per Email/WhatsApp"
-                                    className="text-blue-600 hover:text-blue-800"
+                                    className="text-blue-600 hover:text-blue-800 dark:text-blue-300"
                                     onClick={() => handleCopyReceipt(payment)}
                                   >
                                     <Copy className="h-4 w-4" />
@@ -4166,7 +4166,7 @@ export default function MascheraInputGenerale(props?: any) {
 
                             {/* Stato e Azioni */}
                             <div className="flex items-center justify-end gap-3 pl-2">
-                              <Badge variant={e.status === 'active' ? 'default' : 'secondary'} className={e.status === 'active' ? 'bg-green-100 text-green-800 hover:bg-green-200 border-green-300 text-[10px] h-5' : 'text-[10px] h-5'}>
+                              <Badge variant={e.status === 'active' ? 'default' : 'secondary'} className={e.status === 'active' ? 'bg-green-100 text-green-800 dark:text-green-400 hover:bg-green-200 border-green-300 text-[10px] h-5' : 'text-[10px] h-5'}>
                                 {e.status === 'active' ? 'Attivo' : e.status}
                               </Badge>
                               <Button

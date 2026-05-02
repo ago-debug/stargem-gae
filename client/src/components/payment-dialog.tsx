@@ -598,29 +598,29 @@ export function PaymentDialog({
                                 {/* Blocco Sconto 1 */}
                                 <div className="space-y-1">
                                     <Label className="text-xs text-blue-700 truncate">Cod. Sconto 1 (T)</Label>
-                                    <Input className="h-9 bg-blue-50 dark:bg-blue-950/20/30 font-mono text-xs uppercase" placeholder="Cod. Campagna" value={formData.codiceSconto} onChange={(e) => handleChange("codiceSconto", e.target.value)} />
+                                    <Input className="h-9 bg-blue-50 dark:bg-blue-950/20 font-mono text-xs uppercase" placeholder="Cod. Campagna" value={formData.codiceSconto} onChange={(e) => handleChange("codiceSconto", e.target.value)} />
                                 </div>
                                 <div className="space-y-1">
                                     <Label className="text-xs text-blue-700 truncate">Valore (U)</Label>
-                                    <Input type="number" className="h-9 bg-blue-50 dark:bg-blue-950/20/30 text-right" placeholder="€ 0.00" value={formData.valoreSconto || ''} onChange={(e) => handleChange("valoreSconto", parseFloat(e.target.value) || 0)} />
+                                    <Input type="number" className="h-9 bg-blue-50 dark:bg-blue-950/20 text-right" placeholder="€ 0.00" value={formData.valoreSconto || ''} onChange={(e) => handleChange("valoreSconto", parseFloat(e.target.value) || 0)} />
                                 </div>
                                 <div className="space-y-1">
                                     <Label className="text-xs text-blue-700 truncate">% Sconto (V)</Label>
-                                    <Input type="number" step="0.01" className="h-9 bg-blue-50 dark:bg-blue-950/20/30 text-right" placeholder="%" value={formData.percentualeSconto || ''} onChange={(e) => handleChange("percentualeSconto", parseFloat(e.target.value) || 0)} />
+                                    <Input type="number" step="0.01" className="h-9 bg-blue-50 dark:bg-blue-950/20 text-right" placeholder="%" value={formData.percentualeSconto || ''} onChange={(e) => handleChange("percentualeSconto", parseFloat(e.target.value) || 0)} />
                                 </div>
 
                                 {/* Blocco Sconto 2 */}
                                 <div className="space-y-1">
                                     <Label className="text-xs text-emerald-700 truncate">Cod. Promo 2 (W)</Label>
-                                    <Input className="h-9 bg-emerald-50 dark:bg-emerald-950/20/30 font-mono text-xs uppercase" placeholder="Cod. Personale" value={formData.codiciPromo} onChange={(e) => handleChange("codiciPromo", e.target.value)} />
+                                    <Input className="h-9 bg-emerald-50 dark:bg-emerald-950/20 font-mono text-xs uppercase" placeholder="Cod. Personale" value={formData.codiciPromo} onChange={(e) => handleChange("codiciPromo", e.target.value)} />
                                 </div>
                                 <div className="space-y-1">
                                     <Label className="text-xs text-emerald-700 truncate">Valore (X)</Label>
-                                    <Input type="number" className="h-9 bg-emerald-50 dark:bg-emerald-950/20/30 text-right" placeholder="€ 0.00" value={formData.valorePromo || ''} onChange={(e) => handleChange("valorePromo", parseFloat(e.target.value) || 0)} />
+                                    <Input type="number" className="h-9 bg-emerald-50 dark:bg-emerald-950/20 text-right" placeholder="€ 0.00" value={formData.valorePromo || ''} onChange={(e) => handleChange("valorePromo", parseFloat(e.target.value) || 0)} />
                                 </div>
                                 <div className="space-y-1">
                                     <Label className="text-xs text-emerald-700 truncate">% Promo</Label>
-                                    <Input type="number" step="0.01" className="h-9 bg-emerald-50 dark:bg-emerald-950/20/30 text-right" placeholder="%" value={formData.percentualePromo || ''} onChange={(e) => handleChange("percentualePromo", parseFloat(e.target.value) || 0)} />
+                                    <Input type="number" step="0.01" className="h-9 bg-emerald-50 dark:bg-emerald-950/20 text-right" placeholder="%" value={formData.percentualePromo || ''} onChange={(e) => handleChange("percentualePromo", parseFloat(e.target.value) || 0)} />
                                 </div>
                             </div>
                         </div>
@@ -729,7 +729,7 @@ export function PaymentDialog({
                         </div>
 
                         <div className="flex flex-col space-y-4 border-t pt-4">
-                            <div className="flex items-center gap-2 border p-3 rounded-md bg-red-50 dark:bg-red-950/20/50">
+                            <div className="flex items-center gap-2 border p-3 rounded-md bg-red-50 dark:bg-red-950/20">
                                 <Checkbox
                                     id="gratuita"
                                     checked={isGratuito}
@@ -763,7 +763,7 @@ export function PaymentDialog({
                                     <div className="flex items-start gap-3">
                                         <AlertTriangle className="text-red-600 animate-pulse mt-0.5" size={20} />
                                         <div>
-                                            <h4 className="font-semibold text-red-800">Attenzione: Corso al completo!</h4>
+                                            <h4 className="font-semibold text-red-800 dark:text-red-400">Attenzione: Corso al completo!</h4>
                                             <p className="text-sm text-red-700">Il corso ha raggiunto la capienza massima ({selectedCourseData?.maxCapacity || 0} iscritti).</p>
                                         </div>
                                     </div>
@@ -778,7 +778,7 @@ export function PaymentDialog({
                                         </div>
                                         {formData.forzaIscrizioneAdmin && (
                                             <div className="flex items-center space-x-2 max-w-sm">
-                                                <Label className="w-1/3 text-red-800">Codice Admin</Label>
+                                                <Label className="w-1/3 text-red-800 dark:text-red-400">Codice Admin</Label>
                                                 <Input
                                                     type="password"
                                                     className="border-red-300 focus-visible:ring-red-500"

@@ -768,7 +768,7 @@ export default function AnagraficaHome() {
                     <div className="flex items-center">
                       <AlertTriangle className="h-5 w-5 text-red-600 mr-2" />
                       <div>
-                        <span className="text-sm font-bold text-red-800 block">CF MANCANTE — Tessera non assegnabile</span>
+                        <span className="text-sm font-bold text-red-800 dark:text-red-400 block">CF MANCANTE — Tessera non assegnabile</span>
                         <span className="text-xs text-red-700">Impossibile completare il tesseramento senza un Codice Fiscale valido.</span>
                       </div>
                     </div>

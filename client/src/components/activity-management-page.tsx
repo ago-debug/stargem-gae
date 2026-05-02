@@ -721,7 +721,7 @@ export default function ActivityManagementPage({
 
       {activityType === "training" && (
         <div className="p-4 mt-6 border border-blue-500/30 bg-blue-500/5 rounded-md space-y-4">
-          <h4 className="text-sm font-semibold text-blue-900 border-b border-blue-500/20 pb-2">Parametri Allenamento Autonomo</h4>
+          <h4 className="text-sm font-semibold text-blue-900 dark:text-blue-300 border-b border-blue-500/20 pb-2">Parametri Allenamento Autonomo</h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Livello Consigliato / Intensità</Label>

@@ -305,7 +305,7 @@ export default function GemStaffMe() {
                   const val = complianceData?.[item.key];
                   const hasDoc = !!val;
                   return (
-                    <div key={item.key} className={`border rounded-lg p-4 flex flex-col justify-between h-full bg-card transition-colors ${hasDoc ? 'border-green-200 bg-green-50/30' : 'border-red-100 bg-red-50 dark:bg-red-950/20/30'}`}>
+                    <div key={item.key} className={`border rounded-lg p-4 flex flex-col justify-between h-full bg-card transition-colors ${hasDoc ? 'border-green-200 bg-green-50/30' : 'border-red-100 dark:border-red-900/50 bg-red-50 dark:bg-red-950/20'}`}>
                       <div className="flex items-start justify-between">
                          <div className="text-sm font-medium pr-2">{item.label}</div>
                          <div className="mt-0.5">

@@ -89,7 +89,7 @@ export default function QuotePromo() {
           </Alert>
         )}
         {isFuture && (
-          <Alert variant="default" className="mb-6 bg-blue-50 dark:bg-blue-950/20/50 border-blue-200 text-blue-800">
+          <Alert variant="default" className="mb-6 bg-blue-50 dark:bg-blue-950/20 border-blue-200 text-blue-800 dark:text-blue-300">
             <InfoIcon className="h-4 w-4 text-blue-600" />
             <AlertDescription className="font-medium">
               Stai configurando una stagione futura — {selectedSeason?.name}. Le modifiche saranno attive dal {new Date(selectedSeason?.startDate).toLocaleDateString()}.

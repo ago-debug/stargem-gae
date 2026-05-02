@@ -12,11 +12,11 @@ import type { PromoRule } from "@shared/schema";
 
 const getTargetBadgeColor = (target: string) => {
   switch (target) {
-    case "public": return "bg-blue-100 dark:bg-blue-900/30 text-blue-800";
+    case "public": return "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300";
     case "company": return "bg-purple-100 text-purple-800";
     case "staff": return "bg-orange-100 text-orange-800";
-    case "personal": return "bg-red-100 dark:bg-red-900/30 text-red-800";
-    case "welfare": return "bg-green-100 text-green-800";
+    case "personal": return "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400";
+    case "welfare": return "bg-green-100 text-green-800 dark:text-green-400";
     default: return "bg-slate-100 dark:bg-slate-800 text-foreground";
   }
 };

@@ -6,7 +6,7 @@ import { GestioneFamily, getActivityById, getActiveActivities } from "@/config/a
 export const CATEGORY_COLORS_PALETTE = [
     "bg-emerald-100 dark:bg-emerald-900/30 border-emerald-500 text-emerald-900 dark:text-emerald-300 shadow-md opacity-95 hover:opacity-100",
     "bg-purple-100 border-purple-500 text-purple-900 shadow-md opacity-95 hover:opacity-100",
-    "bg-blue-100 dark:bg-blue-900/30 border-blue-500 text-blue-900 shadow-md opacity-95 hover:opacity-100",
+    "bg-blue-100 dark:bg-blue-900/30 border-blue-500 text-blue-900 dark:text-blue-300 shadow-md opacity-95 hover:opacity-100",
     "bg-rose-100 border-rose-500 text-rose-900 shadow-md opacity-95 hover:opacity-100",
     "bg-amber-100 dark:bg-amber-900/30 border-amber-500 text-amber-900 dark:text-amber-300 shadow-md opacity-95 hover:opacity-100",
     "bg-indigo-100 border-indigo-500 text-indigo-900 shadow-md opacity-95 hover:opacity-100",
@@ -30,7 +30,7 @@ export const ACTIVITY_TYPE_COLORS: Record<string, string> = {
     "campus": "bg-teal-100 text-teal-800 border-teal-300",
     "servizi": "bg-slate-200 text-foreground border-border", // Eventi Esterni / Custom Ext.
     "corsi": "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-400 border-emerald-300", // Corsi standard
-    "prove-gratuite": "bg-blue-100 dark:bg-blue-900/30 text-blue-800 border-blue-300",
+    "prove-gratuite": "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 border-blue-300",
     "prove-pagamento": "bg-cyan-100 text-cyan-800 border-cyan-300",
     "lezioni-individuali": "bg-purple-100 text-purple-800 border-purple-300",
     "lezioni-singole": "bg-fuchsia-100 text-fuchsia-800 border-fuchsia-300",

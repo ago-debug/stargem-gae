@@ -955,7 +955,7 @@ export default function GemPass() {
               <div className="text-4xl font-bold text-amber-700">{statScadenza}</div>
               <p className="text-sm font-medium text-amber-600 mt-1 uppercase tracking-wide">In Scadenza (30 gg)</p>
             </div>
-            <div className="bg-red-50 dark:bg-red-950/20 border border-red-100 rounded-xl p-6 flex flex-col items-center justify-center text-center shadow-sm">
+            <div className="bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/50 rounded-xl p-6 flex flex-col items-center justify-center text-center shadow-sm">
               <XCircle className="w-8 h-8 text-red-500 mb-3" />
               <div className="text-4xl font-bold text-red-700">{statScadute}</div>
               <p className="text-sm font-medium text-red-600 mt-1 uppercase tracking-wide">Scadute</p>

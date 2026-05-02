@@ -1986,7 +1986,7 @@ export default function CalendarPage() {
                             const isFutureDay = isAfter(startOfDay(refDate), startOfDay(today));
                             let boxClass = "hidden md:inline-flex items-center px-3 h-10 text-sm font-bold rounded-md shadow-sm border shrink-0 whitespace-nowrap";
                             if (isCurrentDay) boxClass += " bg-yellow-100/80 border-yellow-300 text-yellow-800";
-                            else if (isFutureDay) boxClass += " bg-blue-100 dark:bg-blue-900/30/80 border-blue-300 text-blue-800";
+                            else if (isFutureDay) boxClass += " bg-blue-100 dark:bg-blue-900/30 border-blue-300 text-blue-800 dark:text-blue-300";
                             else boxClass += " bg-slate-100 dark:bg-slate-800/80 border-border text-muted-foreground";
                             return (
                                 <div className={boxClass}>
@@ -2226,13 +2226,13 @@ export default function CalendarPage() {
                     <div className="min-w-full w-fit flex flex-col relative min-h-full">
                         {/* Header: Ore | (Days or Studios) */}
                         <div className="sticky top-0 z-40 bg-background shadow-sm">
-                            <div className={`grid border-b bg-[#f8f9fa]`}
+                            <div className={`grid border-b bg-[#f8f9fa] dark:bg-slate-900`}
                                 style={{
                                     gridTemplateColumns: selectedDay === 'all'
                                         ? `80px repeat(7, minmax(120px, 1fr))`
                                         : `80px repeat(${studios?.length || 1}, minmax(140px, 1fr))`
                                 }}>
-                                <div className="p-3 border-r flex items-center justify-center font-bold text-[11px] text-[#444] uppercase bg-background sticky left-0 z-50 shadow-[2px_0_5px_rgba(0,0,0,0.05)]">
+                                <div className="p-3 border-r flex items-center justify-center font-bold text-[11px] text-[#444] dark:text-slate-300 uppercase bg-background sticky left-0 z-50 shadow-[2px_0_5px_rgba(0,0,0,0.05)]">
                                     ore
                                 </div>
                                 {selectedDay === 'all' ? (
@@ -2270,7 +2270,7 @@ export default function CalendarPage() {
                                                 
                                                 {/* Banner Festività */}
                                                 {(isPublicHoliday || isStudioClosed) && (
-                                                    <div className={`w-full text-xs font-bold px-1 pb-1 pt-1 flex justify-center items-center ${isPublicHoliday ? 'text-red-600 bg-red-100 dark:bg-red-900/30/50 border-b border-red-100' : 'text-pink-600 bg-pink-100/50 border-b border-pink-100'}`}>
+                                                    <div className={`w-full text-xs font-bold px-1 pb-1 pt-1 flex justify-center items-center ${isPublicHoliday ? 'text-red-600 bg-red-100 dark:bg-red-900/30 border-b border-red-100 dark:border-red-900/50' : 'text-pink-600 bg-pink-100/50 border-b border-pink-100'}`}>
                                                         {isPublicHoliday ? `☀️ ${holidayName || "Festività"}` : `🔒 Studio Chiuso`}
                                                     </div>
                                                 )}
@@ -2315,7 +2315,7 @@ export default function CalendarPage() {
                                 height: `${calendarLayout.cumulativeTops[TOTAL_MINUTES]}px`
                             }}>
                             {/* Hour Labels */}
-                            <div className="border-r bg-[#f8f9fa] relative z-30 sticky left-0 shadow-[2px_0_5px_rgba(0,0,0,0.05)] h-full">
+                            <div className="border-r bg-[#f8f9fa] dark:bg-slate-900 relative z-30 sticky left-0 shadow-[2px_0_5px_rgba(0,0,0,0.05)] h-full">
                                 {HOURS.map((hour, idx) => {
                                     const minOffset = idx * 60;
                                     const nextMinOffset = (idx + 1) * 60;
@@ -2323,7 +2323,7 @@ export default function CalendarPage() {
                                     const heightPx = calendarLayout.cumulativeTops[nextMinOffset] - topPx;
                                     return (
                                         <div key={hour}
-                                            className="border-b border-[#eee] flex flex-col items-center justify-start text-[11px] font-bold text-[#666] bg-[#f8f9fa] absolute w-full left-0 right-0 overflow-hidden"
+                                            className="border-b border-[#eee] dark:border-slate-800 flex flex-col items-center justify-start text-[11px] font-bold text-[#666] dark:text-slate-400 bg-[#f8f9fa] dark:bg-slate-900 absolute w-full left-0 right-0 overflow-hidden"
                                             style={{ top: `${topPx}px`, height: `${heightPx}px` }}>
                                             <span className="pt-2">{hour.toString().padStart(2, "0")}.00</span>
                                             {heightPx > 60 && <span className="absolute top-1/2 -translate-y-1/2 opacity-50 font-normal text-[9px]">{hour.toString().padStart(2, "0")}.30</span>}
@@ -2340,7 +2340,7 @@ export default function CalendarPage() {
                                         : `repeat(${studios?.length || 1}, minmax(140px, 1fr))`
                                 }}>
                                 {calendarLayout.columns.map((col, colIdx) => (
-                                    <div key={col.id} className="relative h-full border-r last:border-r-0 border-[#eee]">
+                                    <div key={col.id} className="relative h-full border-r last:border-r-0 border-[#eee] dark:border-slate-800">
                                         {HOURS.map((hour, idx) => {
                                             const minOffset = idx * 60;
                                             const nextMinOffset = (idx + 1) * 60;
@@ -2348,7 +2348,7 @@ export default function CalendarPage() {
                                             const heightPx = calendarLayout.cumulativeTops[nextMinOffset] - topPx;
                                             return (
                                                 <div key={hour}
-                                                    className="absolute left-0 right-0 border-b border-[#eee] hover:bg-muted cursor-crosshair transition-colors"
+                                                    className="absolute left-0 right-0 border-b border-[#eee] dark:border-slate-800 hover:bg-muted cursor-crosshair transition-colors"
                                                     style={{ top: `${topPx}px`, height: `${heightPx}px` }}
                                                     onClick={() => {
                                                         const dayId = col.type === 'day' ? col.id : selectedDay;
@@ -2609,7 +2609,7 @@ export default function CalendarPage() {
             </Card>
 
             {/* Bottom Sticky Day Selector - Outside scroll container for best visibility like Planning's Legend */}
-            <div className="bg-[#f8f9fa] border-t px-6 py-2 flex items-center justify-start gap-1 z-30 shadow-[0_-4px_10px_rgba(0,0,0,0.05)] shrink-0 mx-[-1.5rem] overflow-x-auto hide-scrollbar flex-nowrap">
+            <div className="bg-[#f8f9fa] dark:bg-slate-900 border-t px-6 py-2 flex items-center justify-start gap-1 z-30 shadow-[0_-4px_10px_rgba(0,0,0,0.05)] shrink-0 mx-[-1.5rem] overflow-x-auto hide-scrollbar flex-nowrap">
                 <Button
                     variant={selectedDay === "all" ? "default" : "ghost"}
                     size="sm"

@@ -968,7 +968,7 @@ export default function ImportData() {
                           {(dryRunData.missingCfRecords?.length > 0 || dryRunData.invalidCfRecords?.length > 0) && (
                             <Alert variant="destructive" className="bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-900/50">
                               <AlertCircle className="h-4 w-4 text-red-600" />
-                              <AlertTitle className="text-red-800">
+                              <AlertTitle className="text-red-800 dark:text-red-400">
                                 {(dryRunData.missingCfRecords?.length || 0) + (dryRunData.invalidCfRecords?.length || 0)} record con CF mancante o non valido non verranno importati.
                               </AlertTitle>
                               <AlertDescription className="text-red-700 mt-2">
@@ -1012,7 +1012,7 @@ export default function ImportData() {
                           {dryRunData.routingStats && (
                             <Alert className="bg-blue-50 dark:bg-blue-950/20 border-blue-200">
                               <CheckCircle className="h-4 w-4 text-blue-600" />
-                              <AlertTitle className="text-blue-800">Smart Routing attivo:</AlertTitle>
+                              <AlertTitle className="text-blue-800 dark:text-blue-300">Smart Routing attivo:</AlertTitle>
                               <AlertDescription className="text-blue-700 mt-2">
                                 <ul className="list-disc pl-4">
                                   {dryRunData.routingStats.tessere > 0 && <li>{dryRunData.routingStats.tessere} tessere → memberships</li>}

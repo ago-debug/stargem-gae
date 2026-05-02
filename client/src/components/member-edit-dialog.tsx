@@ -403,9 +403,9 @@ export function MemberEditDialog() {
 
                         <Separator />
 
-                        <div className="flex items-center justify-between bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg border border-blue-100">
+                        <div className="flex items-center justify-between bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg border border-blue-100 dark:border-blue-900/50">
                             <div className="space-y-0.5">
-                                <h5 className="font-bold text-blue-900 text-sm">Certificato Medico</h5>
+                                <h5 className="font-bold text-blue-900 dark:text-blue-300 text-sm">Certificato Medico</h5>
                                 <p className="text-xs text-blue-700">Abilita per inserire la data di scadenza</p>
                             </div>
                             <div className="flex items-center gap-4">

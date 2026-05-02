@@ -696,7 +696,7 @@ export function NuovoPagamentoModal({
                                                 <Check className="w-5 h-5" />
                                             </div>
                                             <div>
-                                                <p className="text-[9px] font-bold uppercase tracking-widest opacity-80 text-green-800 mb-0.5">Totale Versato</p>
+                                                <p className="text-[9px] font-bold uppercase tracking-widest opacity-80 text-green-800 dark:text-green-400 mb-0.5">Totale Versato</p>
                                                 <p className="text-xl font-black text-green-700">€{totalPaid.toFixed(2)}</p>
                                             </div>
                                         </div>
@@ -816,10 +816,10 @@ export function NuovoPagamentoModal({
                             </Card>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <Card className="shadow-sm bg-blue-50 dark:bg-blue-950/20/30 border-blue-100">
+                                <Card className="shadow-sm bg-blue-50 dark:bg-blue-950/20 border-blue-100 dark:border-blue-900/50">
                                     <CardContent className="p-4 flex items-center justify-between">
                                         <div>
-                                            <h3 className="font-bold text-blue-900">1 QUOTA TESSERA</h3>
+                                            <h3 className="font-bold text-blue-900 dark:text-blue-300">1 QUOTA TESSERA</h3>
                                             <p className="text-xs text-blue-700/70">Aggiungi quota associazione obbligatoria (+€25.00)</p>
                                         </div>
                                         <Button variant={includeTessera ? "default" : "outline"} onClick={() => setIncludeTessera(!includeTessera)}>
@@ -828,7 +828,7 @@ export function NuovoPagamentoModal({
                                     </CardContent>
                                 </Card>
 
-                                <Card className="shadow-sm bg-red-50 dark:bg-red-950/20/30 border-red-100">
+                                <Card className="shadow-sm bg-red-50 dark:bg-red-950/20 border-red-100 dark:border-red-900/50">
                                     <CardContent className="p-4 flex items-center justify-between">
                                         <div>
                                             <h3 className="font-bold text-red-900">1 LEZIONE DI PROVA</h3>
@@ -1038,7 +1038,7 @@ function CartTableRow({
                 </Button>
                 <div className="flex-1 space-y-4">
                     <div className="flex items-center gap-4 border-b pb-3 mb-2">
-                        <div className="p-2 bg-blue-100 dark:bg-blue-900/30/50 rounded-full text-blue-700">
+                        <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-full text-blue-700">
                             <ShoppingCart className="w-5 h-5" />
                         </div>
                         <div>
@@ -1170,9 +1170,9 @@ function CartTableRow({
                 </div>
 
                 {row.activityType === 'corsi' && (
-                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 mt-4 mb-4 p-3 bg-blue-50 dark:bg-blue-950/20/50 rounded-lg border border-blue-100">
+                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 mt-4 mb-4 p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-100 dark:border-blue-900/50">
                         <div className="space-y-1">
-                            <Label className="text-xs text-blue-800 truncate font-bold">Modalità Partecipazione</Label>
+                            <Label className="text-xs text-blue-800 dark:text-blue-300 truncate font-bold">Modalità Partecipazione</Label>
                             <Select value={row.participationType || "STANDARD_COURSE"} onValueChange={(val) => {
                                 updateRowBatch(row.id, { 
                                     participationType: val,
@@ -1192,7 +1192,7 @@ function CartTableRow({
                         </div>
                         {['FREE_TRIAL', 'PAID_TRIAL', 'SINGLE_LESSON'].includes(row.participationType) && (
                             <div className="space-y-1">
-                                <Label className="text-xs text-blue-800 truncate font-bold">Data Lezione/Prova *</Label>
+                                <Label className="text-xs text-blue-800 dark:text-blue-300 truncate font-bold">Data Lezione/Prova *</Label>
                                 <Input
                                     type="date"
                                     className="h-9 bg-background border-blue-200"
@@ -1207,15 +1207,15 @@ function CartTableRow({
                 <div className="grid grid-cols-1 xl:grid-cols-6 gap-4">
                     <div className="space-y-1">
                         <Label className="text-xs text-emerald-700 truncate">Cod. Promo</Label>
-                        <Input className="h-9 bg-emerald-50 dark:bg-emerald-950/20/30 font-mono text-xs uppercase" placeholder="COD. PERSONALE" />
+                        <Input className="h-9 bg-emerald-50 dark:bg-emerald-950/20 font-mono text-xs uppercase" placeholder="COD. PERSONALE" />
                     </div>
                     <div className="space-y-1">
                         <Label className="text-xs text-emerald-700 truncate">Valore</Label>
-                        <Input type="number" className="h-9 bg-emerald-50 dark:bg-emerald-950/20/30 text-right" placeholder="€ 0.00" />
+                        <Input type="number" className="h-9 bg-emerald-50 dark:bg-emerald-950/20 text-right" placeholder="€ 0.00" />
                     </div>
                     <div className="space-y-1">
                         <Label className="text-xs text-emerald-700 truncate">% Promo</Label>
-                        <Input type="number" step="0.01" className="h-9 bg-emerald-50 dark:bg-emerald-950/20/30 text-right" placeholder="%" value={row.discountPercent2 || ""} onChange={(e) => updateRow(row.id, 'discountPercent2', e.target.value)} />
+                        <Input type="number" step="0.01" className="h-9 bg-emerald-50 dark:bg-emerald-950/20 text-right" placeholder="%" value={row.discountPercent2 || ""} onChange={(e) => updateRow(row.id, 'discountPercent2', e.target.value)} />
                     </div>
 
                     <div className="space-y-1">
@@ -1227,7 +1227,7 @@ function CartTableRow({
                            {row.promoCodeStatus === 'validating' && <Loader2 className="w-3 h-3 animate-spin text-blue-500" />}
                         </div>
                         <Input 
-                           className="h-9 bg-blue-50 dark:bg-blue-950/20/30 font-mono text-xs uppercase" 
+                           className="h-9 bg-blue-50 dark:bg-blue-950/20 font-mono text-xs uppercase" 
                            placeholder="COD. CAMPAGNA" 
                            value={row.discountCode || ""} 
                            onChange={(e) => updateRow(row.id, 'discountCode', e.target.value)} 
@@ -1242,11 +1242,11 @@ function CartTableRow({
                     </div>
                     <div className="space-y-1">
                         <Label className="text-xs text-blue-700 truncate">Valore</Label>
-                        <Input type="number" className="h-9 bg-blue-50 dark:bg-blue-950/20/30 text-right text-green-700 font-bold" placeholder="€ 0.00" value={row.discountAmount || ""} readOnly />
+                        <Input type="number" className="h-9 bg-blue-50 dark:bg-blue-950/20 text-right text-green-700 font-bold" placeholder="€ 0.00" value={row.discountAmount || ""} readOnly />
                     </div>
                     <div className="space-y-1">
                         <Label className="text-xs text-blue-700 truncate">% Sconto</Label>
-                        <Input type="number" step="0.01" className="h-9 bg-blue-50 dark:bg-blue-950/20/30 text-right" placeholder="%" value={row.discountPercent1 || ""} onChange={(e) => updateRow(row.id, 'discountPercent1', e.target.value)} />
+                        <Input type="number" step="0.01" className="h-9 bg-blue-50 dark:bg-blue-950/20 text-right" placeholder="%" value={row.discountPercent1 || ""} onChange={(e) => updateRow(row.id, 'discountPercent1', e.target.value)} />
                     </div>
                 </div>
 

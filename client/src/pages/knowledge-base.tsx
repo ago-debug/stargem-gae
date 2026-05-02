@@ -48,9 +48,9 @@ export default function KnowledgeBase() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="bg-blue-50 dark:bg-blue-950/20/50 p-4 flex items-start gap-3 rounded-lg border border-blue-100">
+                <div className="bg-blue-50 dark:bg-blue-950/20 p-4 flex items-start gap-3 rounded-lg border border-blue-100 dark:border-blue-900/50">
                   <Info className="w-5 h-5 text-blue-600 mt-0.5 shrink-0" />
-                  <div className="text-sm text-blue-900 leading-relaxed">
+                  <div className="text-sm text-blue-900 dark:text-blue-300 leading-relaxed">
                     <p className="font-semibold mb-1">Come funzionano i Permessi (Security by Design)</p>
                     <p>Il gestionale maschera automaticamente le aree non abilitate. Se a un dipendente è bloccato l'accesso alla sezione "Incassi" o "Configurazioni", queste spariranno fisicamente dallo schermo e dal menu di sinistra, impedendo ogni tentazione o errore umano.</p>
                   </div>
@@ -74,12 +74,12 @@ export default function KnowledgeBase() {
                       </AccordionTrigger>
                       <AccordionContent className="px-4 pb-4 pt-2">
                         <div className="grid grid-cols-2 gap-4 mt-2">
-                          <div className="border rounded-md p-3 bg-green-50/50 border-green-100">
-                            <p className="text-sm font-semibold text-green-800 mb-2 flex items-center gap-2"><CheckCircle2 className="w-4 h-4" /> POTERI ATTIVI</p>
+                          <div className="border rounded-md p-3 bg-green-50/50 border-green-100 dark:border-green-900/50">
+                            <p className="text-sm font-semibold text-green-800 dark:text-green-400 mb-2 flex items-center gap-2"><CheckCircle2 className="w-4 h-4" /> POTERI ATTIVI</p>
                             <p className="text-sm text-foreground/80"><strong>TOTALE (100%).</strong> Nessuna preclusione.<br/>Gestisce importazioni, elimazioni, log di controllo e creazione di account lavorativi.</p>
                           </div>
-                          <div className="border rounded-md p-3 bg-red-50 dark:bg-red-950/20/50 border-red-100">
-                            <p className="text-sm font-semibold text-red-800 mb-2 flex items-center gap-2">🚫 COSA GLI VIENE NASCOSTO</p>
+                          <div className="border rounded-md p-3 bg-red-50 dark:bg-red-950/20 border-red-100 dark:border-red-900/50">
+                            <p className="text-sm font-semibold text-red-800 dark:text-red-400 mb-2 flex items-center gap-2">🚫 COSA GLI VIENE NASCOSTO</p>
                             <p className="text-sm text-foreground/80">Nulla.</p>
                           </div>
                         </div>
@@ -98,8 +98,8 @@ export default function KnowledgeBase() {
                       </AccordionTrigger>
                       <AccordionContent className="px-4 pb-4 pt-2">
                         <div className="grid grid-cols-2 gap-4 mt-2">
-                          <div className="border rounded-md p-3 bg-green-50/50 border-green-100">
-                            <p className="text-sm font-semibold text-green-800 mb-2 flex items-center gap-2"><CheckCircle2 className="w-4 h-4" /> POTERI ATTIVI</p>
+                          <div className="border rounded-md p-3 bg-green-50/50 border-green-100 dark:border-green-900/50">
+                            <p className="text-sm font-semibold text-green-800 dark:text-green-400 mb-2 flex items-center gap-2"><CheckCircle2 className="w-4 h-4" /> POTERI ATTIVI</p>
                             <ul className="text-sm text-foreground/80 space-y-1 ml-4 list-disc marker:text-slate-400">
                               <li>Amministrazione totale (Cassa, Report)</li>
                               <li>Gestione Listini e Sconti</li>
@@ -107,8 +107,8 @@ export default function KnowledgeBase() {
                               <li>Risorse Umane e Staff</li>
                             </ul>
                           </div>
-                          <div className="border rounded-md p-3 bg-red-50 dark:bg-red-950/20/50 border-red-100">
-                            <p className="text-sm font-semibold text-red-800 mb-2 flex items-center gap-2">🚫 COSA GLI VIENE NASCOSTO</p>
+                          <div className="border rounded-md p-3 bg-red-50 dark:bg-red-950/20 border-red-100 dark:border-red-900/50">
+                            <p className="text-sm font-semibold text-red-800 dark:text-red-400 mb-2 flex items-center gap-2">🚫 COSA GLI VIENE NASCOSTO</p>
                             <ul className="text-sm text-foreground/80 space-y-1 ml-4 list-disc marker:text-slate-400">
                               <li>Log e Audit di Sicurezza Sistema</li>
                               <li>Utenti e Permessi (Non può manipolare password o alzare il proprio ruolo)</li>
@@ -131,8 +131,8 @@ export default function KnowledgeBase() {
                       </AccordionTrigger>
                       <AccordionContent className="px-4 pb-4 pt-2">
                         <div className="grid grid-cols-2 gap-4 mt-2">
-                          <div className="border rounded-md p-3 bg-green-50/50 border-green-100">
-                            <p className="text-sm font-semibold text-green-800 mb-2 flex items-center gap-2"><CheckCircle2 className="w-4 h-4" /> POTERI ATTIVI</p>
+                          <div className="border rounded-md p-3 bg-green-50/50 border-green-100 dark:border-green-900/50">
+                            <p className="text-sm font-semibold text-green-800 dark:text-green-400 mb-2 flex items-center gap-2"><CheckCircle2 className="w-4 h-4" /> POTERI ATTIVI</p>
                             <ul className="text-sm text-foreground/80 space-y-1 ml-4 list-disc marker:text-slate-400">
                               <li>Maschera Input, Anagrafica Generale</li>
                               <li>Emissione Nuove Tessere e Iscrizioni</li>
@@ -141,8 +141,8 @@ export default function KnowledgeBase() {
                               <li>Affitti / Prenotazioni Aule</li>
                             </ul>
                           </div>
-                          <div className="border rounded-md p-3 bg-red-50 dark:bg-red-950/20/50 border-red-100">
-                            <p className="text-sm font-semibold text-red-800 mb-2 flex items-center gap-2">🚫 COSA GLI VIENE NASCOSTO</p>
+                          <div className="border rounded-md p-3 bg-red-50 dark:bg-red-950/20 border-red-100 dark:border-red-900/50">
+                            <p className="text-sm font-semibold text-red-800 dark:text-red-400 mb-2 flex items-center gap-2">🚫 COSA GLI VIENE NASCOSTO</p>
                             <ul className="text-sm text-foreground/80 space-y-1 ml-4 list-disc marker:text-slate-400">
                               <li>**Scheda Contabile e Resoconti Globali**</li>
                               <li>**Listini e Quote base** (Non possono cambiare i prezzi alla radice)</li>
@@ -165,8 +165,8 @@ export default function KnowledgeBase() {
                       </AccordionTrigger>
                       <AccordionContent className="px-4 pb-4 pt-2">
                         <div className="grid grid-cols-2 gap-4 mt-2">
-                          <div className="border rounded-md p-3 bg-green-50/50 border-green-100">
-                            <p className="text-sm font-semibold text-green-800 mb-2 flex items-center gap-2"><CheckCircle2 className="w-4 h-4" /> POTERI ATTIVI</p>
+                          <div className="border rounded-md p-3 bg-green-50/50 border-green-100 dark:border-green-900/50">
+                            <p className="text-sm font-semibold text-green-800 dark:text-green-400 mb-2 flex items-center gap-2"><CheckCircle2 className="w-4 h-4" /> POTERI ATTIVI</p>
                             <ul className="text-sm text-foreground/80 space-y-1 ml-4 list-disc marker:text-slate-400">
                               <li>**Controllo Accessi** (per far entrare la gente)</li>
                               <li>**Maschera Input Locale**</li>
@@ -174,8 +174,8 @@ export default function KnowledgeBase() {
                               <li>Inserimento "Note" e "ToDo List" per colleghi</li>
                             </ul>
                           </div>
-                          <div className="border rounded-md p-3 bg-red-50 dark:bg-red-950/20/50 border-red-100">
-                            <p className="text-sm font-semibold text-red-800 mb-2 flex items-center gap-2">🚫 COSA GLI VIENE NASCOSTO</p>
+                          <div className="border rounded-md p-3 bg-red-50 dark:bg-red-950/20 border-red-100 dark:border-red-900/50">
+                            <p className="text-sm font-semibold text-red-800 dark:text-red-400 mb-2 flex items-center gap-2">🚫 COSA GLI VIENE NASCOSTO</p>
                             <ul className="text-sm text-foreground/80 space-y-1 ml-4 list-disc marker:text-slate-400">
                               <li>**Tutto il denaro.** Nessun accesso ai Pagamenti.</li>
                               <li>Anagrafica Generale.</li>
@@ -198,16 +198,16 @@ export default function KnowledgeBase() {
                       </AccordionTrigger>
                       <AccordionContent className="px-4 pb-4 pt-2">
                         <div className="grid grid-cols-2 gap-4 mt-2">
-                          <div className="border rounded-md p-3 bg-green-50/50 border-green-100">
-                            <p className="text-sm font-semibold text-green-800 mb-2 flex items-center gap-2"><CheckCircle2 className="w-4 h-4" /> POTERI ATTIVI</p>
+                          <div className="border rounded-md p-3 bg-green-50/50 border-green-100 dark:border-green-900/50">
+                            <p className="text-sm font-semibold text-green-800 dark:text-green-400 mb-2 flex items-center gap-2"><CheckCircle2 className="w-4 h-4" /> POTERI ATTIVI</p>
                             <ul className="text-sm text-foreground/80 space-y-1 ml-4 list-disc marker:text-slate-400">
                               <li>**Calendario Corsi (Sola Lettura)** (per vedere il proprio orario di lavoro)</li>
                               <li>**Iscritti per Attività** (Per fare l'appello dei soli corsisti propri)</li>
                               <li>Inserisci Nota</li>
                             </ul>
                           </div>
-                          <div className="border rounded-md p-3 bg-red-50 dark:bg-red-950/20/50 border-red-100">
-                            <p className="text-sm font-semibold text-red-800 mb-2 flex items-center gap-2">🚫 COSA GLI VIENE NASCOSTO</p>
+                          <div className="border rounded-md p-3 bg-red-50 dark:bg-red-950/20 border-red-100 dark:border-red-900/50">
+                            <p className="text-sm font-semibold text-red-800 dark:text-red-400 mb-2 flex items-center gap-2">🚫 COSA GLI VIENE NASCOSTO</p>
                             <ul className="text-sm text-foreground/80 space-y-1 ml-4 list-disc marker:text-slate-400">
                               <li>**Il 90% dell'Azienda**. Dalla contabilità all'anagrafica globale, ai listini, fino alle comunicazioni private del team.</li>
                             </ul>

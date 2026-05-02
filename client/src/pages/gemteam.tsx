@@ -98,8 +98,8 @@ const TIME_SLOTS = Array.from({length: 31}, (_, i) => {
 });
 
 const SHIFT_COLORS: Record<string, string> = {
-  "RECEPTION": "bg-green-100 text-green-800 border-green-200",
-  "PRIMO": "bg-blue-100 dark:bg-blue-900/30 text-blue-800 border-blue-200",
+  "RECEPTION": "bg-green-100 text-green-800 dark:text-green-400 border-green-200",
+  "PRIMO": "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 border-blue-200",
   "SECONDO": "bg-sky-100 text-sky-800 border-sky-200",
   "UFFICIO": "bg-orange-100 text-orange-800 border-orange-200",
   "AMM.ZIONE": "bg-purple-100 text-purple-800 border-purple-200",
@@ -109,7 +109,7 @@ const SHIFT_COLORS: Record<string, string> = {
   "RIUNIONE": "bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-400 border-amber-200 dark:border-amber-900/50",
   "STUDIO_1": "bg-cyan-100 text-cyan-800 border-cyan-200",
   "STUDIO_2": "bg-cyan-100 text-cyan-800 border-cyan-200",
-  "MALATTIA": "bg-red-100 dark:bg-red-900/30 text-red-800 border-red-200 dark:border-red-900/50",
+  "MALATTIA": "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400 border-red-200 dark:border-red-900/50",
   "PERMESSO": "bg-orange-100 text-orange-800 border-orange-200",
 };
 
@@ -129,7 +129,7 @@ const PRESENZE_COLORS: Record<string, string> = {
   "PE": "bg-yellow-100 text-yellow-800",
   "ML": "bg-orange-100 text-orange-800",
   "F": "bg-purple-100 text-purple-800",
-  "AI": "bg-red-100 dark:bg-red-900/30 text-red-800"
+  "AI": "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400"
 };
 
 function fmtOre(ore: number | null): string {
@@ -745,7 +745,7 @@ export default function GemTeam() {
               <Card className="bg-blue-50 dark:bg-blue-950/20 border-blue-200 shadow-sm">
                 <CardContent className="p-4 flex flex-col items-center text-center">
                   <span className="text-3xl font-black text-blue-600 mb-1">{checkInStats.online}</span>
-                  <span className="text-xs font-bold uppercase tracking-wider text-blue-800">Connessi</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-blue-800 dark:text-blue-300">Connessi</span>
                 </CardContent>
               </Card>
               <Card className="bg-slate-100 dark:bg-slate-800 border-border shadow-sm">
@@ -754,16 +754,16 @@ export default function GemTeam() {
                   <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Usciti</span>
                 </CardContent>
               </Card>
-              <Card className="bg-yellow-50 border-yellow-200 shadow-sm">
+              <Card className="bg-yellow-50 dark:bg-yellow-950/20 border-yellow-200 dark:border-yellow-900/50 shadow-sm">
                 <CardContent className="p-4 flex flex-col items-center text-center">
                   <span className="text-3xl font-black text-yellow-600 mb-1">{checkInStats.attesi}</span>
-                  <span className="text-xs font-bold uppercase tracking-wider text-yellow-800">Non Pervenuti</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-yellow-800 dark:text-yellow-400">Non Pervenuti</span>
                 </CardContent>
               </Card>
-              <Card className="bg-rose-50 border-rose-200 shadow-sm">
+              <Card className="bg-rose-50 dark:bg-rose-950/20 border-rose-200 dark:border-rose-900/50 shadow-sm">
                 <CardContent className="p-4 flex flex-col items-center text-center">
                   <span className="text-3xl font-black text-rose-600 mb-1">{checkInStats.assenti}</span>
-                  <span className="text-xs font-bold uppercase tracking-wider text-rose-800">Assenti</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-rose-800 dark:text-rose-400">Assenti</span>
                 </CardContent>
               </Card>
             </div>
@@ -828,8 +828,8 @@ export default function GemTeam() {
                         const statoColors: Record<string, string> = {
                           "IN": "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/50",
                           "OUT": "bg-slate-100 dark:bg-slate-800 text-foreground/80 border-border",
-                          "ATTESO": "bg-yellow-100 text-yellow-800 border-yellow-200",
-                          "ASSENTE": "bg-rose-100 text-rose-800 border-rose-200"
+                          "ATTESO": "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400 border-yellow-200 dark:border-yellow-900/50",
+                          "ASSENTE": "bg-rose-100 dark:bg-rose-900/30 text-rose-800 dark:text-rose-400 border-rose-200 dark:border-rose-900/50"
                         };
                         const statoLabel = stato === "IN" ? "🟢 IN SEDE" : (stato === "OUT" && chk?.lastTimestamp) ? "⚪ USCITO" : (stato === "ASSENTE") ? "🔴 ASSENTE" : "🟡 ATTESO";
 
@@ -892,7 +892,7 @@ export default function GemTeam() {
                 <ToggleGroupItem value="tutti" className="px-3 h-8 text-xs font-semibold data-[state=on]:bg-slate-800 data-[state=on]:text-white">Tutti</ToggleGroupItem>
                 <ToggleGroupItem value="segreteria" className="px-3 h-8 text-xs font-semibold data-[state=on]:bg-pink-100 data-[state=on]:text-pink-800">Segreteria</ToggleGroupItem>
                 <ToggleGroupItem value="ass_manutenzione" className="px-3 h-8 text-xs font-semibold data-[state=on]:bg-orange-100 data-[state=on]:text-orange-800">Manutenzione</ToggleGroupItem>
-                <ToggleGroupItem value="ufficio" className="px-3 h-8 text-xs font-semibold data-[state=on]:bg-blue-100 dark:bg-blue-900/30 data-[state=on]:text-blue-800">Ufficio</ToggleGroupItem>
+                <ToggleGroupItem value="ufficio" className="px-3 h-8 text-xs font-semibold data-[state=on]:bg-blue-100 dark:bg-blue-900/30 data-[state=on]:text-blue-800 dark:text-blue-300">Ufficio</ToggleGroupItem>
                 <ToggleGroupItem value="amministrazione" className="px-3 h-8 text-xs font-semibold data-[state=on]:bg-purple-100 data-[state=on]:text-purple-800">Amministrazione</ToggleGroupItem>
                 <ToggleGroupItem value="collaboratori" className="px-3 h-8 text-xs font-semibold data-[state=on]:bg-slate-200 data-[state=on]:text-foreground">Collaboratori</ToggleGroupItem>
               </ToggleGroup>
@@ -1172,7 +1172,7 @@ export default function GemTeam() {
                         <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3 flex items-center gap-2">
                           <ClipboardList className="w-4 h-4" /> Turno Oggi
                         </h4>
-                        <div className="bg-blue-50 dark:bg-blue-950/20/50 rounded-xl p-6 border border-blue-100 border-dashed text-center">
+                        <div className="bg-blue-50 dark:bg-blue-950/20 rounded-xl p-6 border border-blue-100 dark:border-blue-900/50 border-dashed text-center">
                           <p className="text-sm text-blue-700 font-medium">Dato disponibile dopo F1-003.</p>
                         </div>
                       </section>
@@ -1647,7 +1647,7 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                                         }}
                                         title={hasConflict ? "Conflitto registrato" : ""} 
                                         style={postInfo?.colore ? {backgroundColor: postInfo.colore, color: '#1e293b', borderColor: 'rgba(0,0,0,0.1)'} : {}} 
-                                        className={`${hasConflict ? 'bg-red-100 dark:bg-red-900/30 text-red-800 border-red-300 opacity-70' : 'bg-indigo-100 text-indigo-800 border-indigo-200'} ${selectedShifts.some(s => s.shiftId === turniFiltrato.id && s.hour === hour) ? 'ring-2 ring-indigo-600 ring-offset-1' : ''} w-full h-full min-h-[20px] rounded border flex flex-col items-center justify-center p-0.5 shadow-sm hover:brightness-95 relative group`}
+                                        className={`${hasConflict ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400 border-red-300 opacity-70' : 'bg-indigo-100 text-indigo-800 border-indigo-200'} ${selectedShifts.some(s => s.shiftId === turniFiltrato.id && s.hour === hour) ? 'ring-2 ring-indigo-600 ring-offset-1' : ''} w-full h-full min-h-[20px] rounded border flex flex-col items-center justify-center p-0.5 shadow-sm hover:brightness-95 relative group`}
                                       >
                                         {isMaster && (
                                           <div className="absolute top-0 right-0 p-0 z-10 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
@@ -1995,7 +1995,7 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                                           const postInfo = postazioniApi.find((p:any) => p.nome === t.postazione);
                                           const hasConflict = t.hasConflict || false;
                                           return (
-                                              <div key={t.id} title={hasConflict ? "Conflitto registrato" : ""} className={`w-full min-h-[30px] rounded border flex flex-col items-center justify-center p-1 shadow-sm text-center ${hasConflict ? 'bg-red-100 dark:bg-red-900/30 text-red-800 border-red-300 ring-2 ring-red-500/30' : ''}`} style={(!hasConflict && postInfo?.colore) ? {backgroundColor: postInfo.colore, color: '#1e293b', borderColor: 'rgba(0,0,0,0.1)'} : {}}>
+                                              <div key={t.id} title={hasConflict ? "Conflitto registrato" : ""} className={`w-full min-h-[30px] rounded border flex flex-col items-center justify-center p-1 shadow-sm text-center ${hasConflict ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400 border-red-300 ring-2 ring-red-500/30' : ''}`} style={(!hasConflict && postInfo?.colore) ? {backgroundColor: postInfo.colore, color: '#1e293b', borderColor: 'rgba(0,0,0,0.1)'} : {}}>
                                                   <span className="text-[9px] font-bold uppercase truncate max-w-full">
                                                      {hasConflict && <AlertTriangle className="h-2 w-2 mr-0.5 inline pb-0.5"/>}
                                                      {t.postazione}
@@ -2085,8 +2085,8 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                         }
 
                         return (
-                          <tr key={dip.id} className="hover:bg-blue-50 dark:bg-blue-950/20/40 relative group border-b border-border">
-                            <td className="sticky left-0 bg-background border-r border-border p-2 text-left font-semibold text-foreground/80 whitespace-nowrap shadow-[1px_0_0_0_#e2e8f0] z-10 group-hover:bg-blue-50 dark:bg-blue-950/20/40 flex items-center justify-between">
+                          <tr key={dip.id} className="hover:bg-blue-50 dark:bg-blue-950/20 relative group border-b border-border">
+                            <td className="sticky left-0 bg-background border-r border-border p-2 text-left font-semibold text-foreground/80 whitespace-nowrap shadow-[1px_0_0_0_#e2e8f0] z-10 group-hover:bg-blue-50 dark:bg-blue-950/20 flex items-center justify-between">
                               <span>{dip.cognome} {dip.nome.charAt(0)}.</span>
                               <div className={`w-2 h-2 rounded-full ml-2 ${TEAM_COLORS[dip.team]?.split(' ')[0]}`} />
                             </td>
@@ -2181,7 +2181,7 @@ Applicando il preset "${l}", TUTTI i turni scritti dal Lunedì alla Domenica di 
                 <Badge variant="outline" className="text-[9px] px-1.5 py-0.5 bg-yellow-100 text-yellow-800">PE - Permesso</Badge>
                 <Badge variant="outline" className="text-[9px] px-1.5 py-0.5 bg-orange-100 text-orange-800">ML - Malattia</Badge>
                 <Badge variant="outline" className="text-[9px] px-1.5 py-0.5 bg-purple-100 text-purple-800">F - Festività</Badge>
-                <Badge variant="outline" className="text-[9px] px-1.5 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-800">AI - Ass. Ingiustificata</Badge>
+                <Badge variant="outline" className="text-[9px] px-1.5 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400">AI - Ass. Ingiustificata</Badge>
               </div>
 
             </CardContent>

@@ -190,15 +190,15 @@ export default function GemTeamMe() {
                   <div className="w-24 h-24 bg-blue-500 text-white rounded-full flex items-center justify-center mb-6 shadow-[0_8px_30px_rgb(59,130,246,0.4)]">
                     <CheckCircle2 className="w-12 h-12" />
                   </div>
-                  <h2 className="text-4xl font-black text-blue-900 mb-2">Turno Completato</h2>
+                  <h2 className="text-4xl font-black text-blue-900 dark:text-blue-300 mb-2">Turno Completato</h2>
                   <p className="text-xl text-blue-700 font-medium mb-8">Ottimo lavoro per oggi.</p>
                   
                   <div className="grid grid-cols-2 gap-4 w-full max-w-md mt-4">
-                    <div className="bg-background p-4 rounded-2xl border-2 border-blue-100 shadow-sm text-center">
+                    <div className="bg-background p-4 rounded-2xl border-2 border-blue-100 dark:border-blue-900/50 shadow-sm text-center">
                       <span className="block text-sm font-bold text-blue-400 uppercase tracking-widest mb-1">Inizio</span>
                       <span className="text-2xl font-black text-foreground/80">{inTime?.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}</span>
                     </div>
-                    <div className="bg-background p-4 rounded-2xl border-2 border-blue-100 shadow-sm text-center">
+                    <div className="bg-background p-4 rounded-2xl border-2 border-blue-100 dark:border-blue-900/50 shadow-sm text-center">
                       <span className="block text-sm font-bold text-blue-400 uppercase tracking-widest mb-1">Fine</span>
                       <span className="text-2xl font-black text-foreground/80">{currentTime.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}</span>
                     </div>
@@ -217,7 +217,7 @@ export default function GemTeamMe() {
             <CardContent className="p-6">
               <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Il mio turno oggi</h3>
               <div className="bg-muted border-2 border-slate-100 rounded-2xl p-5">
-                <span className="inline-block bg-blue-100 dark:bg-blue-900/30 text-blue-800 font-bold px-3 py-1 rounded-lg text-sm mb-3">RECEPTION</span>
+                <span className="inline-block bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 font-bold px-3 py-1 rounded-lg text-sm mb-3">RECEPTION</span>
                 <div className="text-3xl font-black text-foreground/80 tracking-tight">08:30 <span className="text-slate-300">→</span> 14:30</div>
               </div>
             </CardContent>
@@ -318,7 +318,7 @@ export default function GemTeamMe() {
                       const isRejected = req.stato === 'REJECTED';
                       
                       return (
-                        <div key={index} className="flex justify-between items-center bg-background border-2 border-slate-100 p-5 rounded-2xl shadow-sm hover:border-blue-100 hover:shadow-md transition-all">
+                        <div key={index} className="flex justify-between items-center bg-background border-2 border-slate-100 p-5 rounded-2xl shadow-sm hover:border-blue-100 dark:border-blue-900/50 hover:shadow-md transition-all">
                           <div>
                             <div className="flex items-center gap-3 mb-1">
                               <Badge variant="outline" className="bg-slate-100 dark:bg-slate-800 font-black text-foreground/80">{req.tipo}</Badge>
