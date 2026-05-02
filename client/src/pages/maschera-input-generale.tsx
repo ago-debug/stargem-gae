@@ -40,6 +40,8 @@ import type { Course, Instructor, Category, Studio } from "@shared/schema";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useMemberStore } from "@/store/useMemberStore";
+import { CrmFormProvider, useCrmForm } from "@/components/crm/CrmFormContext";
+import { TabAnagrafica } from "@/components/crm/TabAnagrafica";
 import { getActiveActivities } from "@/config/activities";
 function useBarcodeScanner(onScan: (barcode: string) => void) {
   useEffect(() => {
@@ -134,13 +136,29 @@ export const defaultBottomSectionsState: BottomSectionsState = {
   certificatoMedico: { dataScadenza: "", dataRinnovo: "", rilasciatoDa: "", pagamento: "", aNoi: "", tipo: "" }
 };
 
-export default function MascheraInputGenerale(props?: any) {
+function MascheraInputGeneraleContent(props?: any) {
   const [, setLocation] = useLocation();
   const searchString = useSearch();
   const urlParams = new URLSearchParams(searchString);
   const memberIdFromUrl = props?.params?.id || urlParams.get('memberId') || urlParams.get('editMemberId');
   const actionFromUrl = urlParams.get('action');
   const { user } = useAuth();
+
+  const {
+    formData, setFormData,
+    dirtyFields, setDirtyFields,
+    handleChange: handleChangeCtx,
+    allegati, setAllegati,
+    openAllegatoSections, setOpenAllegatoSections,
+    bottomSectionsData, setBottomSectionsData,
+    photoFile, setPhotoFile,
+    attivitaCorso, setAttivitaCorso,
+    attivitaCodice, setAttivitaCodice,
+    attivitaEnrollmentDetails, setAttivitaEnrollmentDetails,
+    verificaStato, setVerificaStato,
+    avviaVerifica: avviaVerificaCtx
+  } = useCrmForm();
+
   
   const canaliAcquisizione = useCustomListValues("provenienza_marketing");
   const quickAddCanale = useQuickAddCustomList("provenienza_marketing");
@@ -172,82 +190,22 @@ export default function MascheraInputGenerale(props?: any) {
     domandaTesseramento: { hasFile: false, data: "", accettato: "" },
   };
 
-  const [allegati, setAllegati] = useState<AllegatiState>(() => {
-    const saved = sessionStorage.getItem("mascheraInputAllegati");
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        return {
-          ...defaultAllegatiState,
-          ...parsed,
-          // Ensure nested objects also fallback correctly
-          regolamento: { ...defaultAllegatiState.regolamento, ...parsed.regolamento },
-          privacy: { ...defaultAllegatiState.privacy, ...parsed.privacy },
-          certificatoMedico: { ...defaultAllegatiState.certificatoMedico, ...parsed.certificatoMedico },
-          ricevutePagamenti: { ...defaultAllegatiState.ricevutePagamenti, ...parsed.ricevutePagamenti },
-          modelloDetrazione: { ...defaultAllegatiState.modelloDetrazione, ...parsed.modelloDetrazione },
-          creditiScolastici: { ...defaultAllegatiState.creditiScolastici, ...parsed.creditiScolastici },
-          tesserinoTecnico: { ...defaultAllegatiState.tesserinoTecnico, ...parsed.tesserinoTecnico },
-          tesseraEnte: { ...defaultAllegatiState.tesseraEnte, ...parsed.tesseraEnte },
-          domandaTesseramento: { ...defaultAllegatiState.domandaTesseramento, ...parsed.domandaTesseramento },
-        };
-      } catch (e) {
-        console.error("Failed to parse saved allegati", e);
-      }
-    }
-    return defaultAllegatiState;
-  });
+  /* allegati moved to context */
 
-  const [bottomSectionsData, setBottomSectionsData] = useState<BottomSectionsState>(() => {
-    const saved = sessionStorage.getItem("mascheraInputBottomSections");
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        console.error("Failed to parse saved bottomSections", e);
-      }
-    }
-    return defaultBottomSectionsState;
-  });
+  /* bottomSections moved to context */
 
-  useEffect(() => {
-    sessionStorage.setItem("mascheraInputBottomSections", JSON.stringify(bottomSectionsData));
-  }, [bottomSectionsData]);
+  
 
-  useEffect(() => {
-    try {
-      sessionStorage.setItem("mascheraInputAllegati", JSON.stringify(allegati));
-    } catch (e) {
-      console.warn("Could not save allegati to sessionStorage (likely quota exceeded)", e);
-    }
-  }, [allegati]);
+  
 
   // Unified Enrollment form states
   const [unifiedCourseId, setUnifiedCourseId] = useState<string>("");
   const [unifiedParticipationType, setUnifiedParticipationType] = useState<string>("STANDARD_COURSE");
   const [unifiedTargetDate, setUnifiedTargetDate] = useState<string>("");
 
-  const [photoFile, setPhotoFile] = useState<{ file: File | null; preview: string | null }>(() => {
-    const saved = sessionStorage.getItem("mascheraInputPhoto");
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        // We can only restore the base64 preview, not the actual File object
-        return { file: null, preview: parsed.preview };
-      } catch (e) {
-        console.error("Failed to parse saved photo", e);
-      }
-    }
-    return { file: null, preview: null };
-  });
+  /* photoFile moved to context */
 
-  useEffect(() => {
-    try {
-      sessionStorage.setItem("mascheraInputPhoto", JSON.stringify({ preview: photoFile.preview }));
-    } catch (e) {
-      console.warn("Could not save photo to sessionStorage", e);
-    }
-  }, [photoFile]);
+  
 
   const compressImage = (file: File, maxWidth = 1200, quality = 0.7): Promise<string> => {
     return new Promise((resolve) => {
@@ -309,7 +267,7 @@ export default function MascheraInputGenerale(props?: any) {
     setDirtyFields((prev: Record<string, boolean>) => ({ ...prev, photo: true }));
   };
 
-  const [openAllegatoSections, setOpenAllegatoSections] = useState<Record<string, boolean>>({});
+  /* openAllegatoSections moved */
 
   const toggleAllegatoSection = (key: string) => {
     setOpenAllegatoSections(prev => ({ ...prev, [key]: !prev[key] }));
@@ -460,39 +418,15 @@ export default function MascheraInputGenerale(props?: any) {
     etaGen2: "",
   };
 
-  const [formData, setFormData] = useState(() => {
-    const saved = sessionStorage.getItem("mascheraInputFormData");
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        console.error("Failed to parse saved formData", e);
-      }
-    }
-    return defaultFormData;
-  });
+  /* formData moved to context */
 
   // Track modified fields for Color Coding
-  const [dirtyFields, setDirtyFields] = useState<Record<string, boolean>>(() => {
-    const saved = sessionStorage.getItem("mascheraInputDirtyFields");
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        console.error("Failed to parse saved dirtyFields", e);
-      }
-    }
-    return {};
-  });
+  /* dirtyFields moved to context */
 
   // Save to sessionStorage whenever formData or dirtyFields change
-  useEffect(() => {
-    sessionStorage.setItem("mascheraInputFormData", JSON.stringify(formData));
-  }, [formData]);
+  
 
-  useEffect(() => {
-    sessionStorage.setItem("mascheraInputDirtyFields", JSON.stringify(dirtyFields));
-  }, [dirtyFields]);
+  
   const [isSaved, setIsSaved] = useState(false);
 
   // Helper for input color coding based on user requirements
@@ -607,14 +541,7 @@ export default function MascheraInputGenerale(props?: any) {
   const [showGiftFields, setShowGiftFields] = useState<boolean>(false);
   const [showDuplicatesModal, setShowDuplicatesModal] = useState(false);
 
-  const [verificaStato, setVerificaStato] = useState({
-    telefono: false,
-    email: false,
-    telGen1: false,
-    emailGen1: false,
-    telGen2: false,
-    emailGen2: false,
-  });
+  /* verificaStato moved */
 
   const toggleVerifica = (campo: keyof typeof verificaStato) => {
     setVerificaStato(prev => ({ ...prev, [campo]: !prev[campo] }));
@@ -1712,41 +1639,17 @@ export default function MascheraInputGenerale(props?: any) {
   );
 
   // Stato campi Corso e Codice per ogni sotto-sezione Attività
-  const [attivitaCorso, setAttivitaCorso] = useState<Record<AttivitaKey, string>>(() => {
-    const saved = sessionStorage.getItem("mascheraInputAttivitaCorso");
-    if (saved) {
-      try { return JSON.parse(saved); } catch (e) { console.error("Failed to parse saved attivitaCorso", e); }
-    }
-    return defaultAttivitaText;
-  });
+  /* attivitaCorso moved to context */
 
-  const [attivitaCodice, setAttivitaCodice] = useState<Record<AttivitaKey, string>>(() => {
-    const saved = sessionStorage.getItem("mascheraInputAttivitaCodice");
-    if (saved) {
-      try { return JSON.parse(saved); } catch (e) { console.error("Failed to parse saved attivitaCodice", e); }
-    }
-    return defaultAttivitaText;
-  });
+  /* attivitaCodice moved to context */
 
-  const [attivitaEnrollmentDetails, setAttivitaEnrollmentDetails] = useState<Record<AttivitaKey, string[]>>(() => {
-    const saved = sessionStorage.getItem("mascheraInputAttivitaEnrollmentDetails");
-    if (saved) {
-      try { return JSON.parse(saved); } catch (e) { console.error("Failed to parse saved attivitaEnrollmentDetails", e); }
-    }
-    return defaultAttivitaArray;
-  });
+  /* attivitaEnrollmentDetails moved to context */
 
-  useEffect(() => {
-    sessionStorage.setItem("mascheraInputAttivitaCorso", JSON.stringify(attivitaCorso));
-  }, [attivitaCorso]);
+  
 
-  useEffect(() => {
-    sessionStorage.setItem("mascheraInputAttivitaCodice", JSON.stringify(attivitaCodice));
-  }, [attivitaCodice]);
+  
 
-  useEffect(() => {
-    sessionStorage.setItem("mascheraInputAttivitaEnrollmentDetails", JSON.stringify(attivitaEnrollmentDetails));
-  }, [attivitaEnrollmentDetails]);
+  
 
 
   const handleSavePayment = (payment: PaymentData) => {
@@ -4455,5 +4358,34 @@ export default function MascheraInputGenerale(props?: any) {
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+export default function MascheraInputGenerale(props?: any) {
+  const urlParams = new URLSearchParams(window.location.search);
+  const memberIdStr = props?.params?.id || urlParams.get('memberId') || urlParams.get('editMemberId');
+  const actionFromUrl = urlParams.get('action');
+  
+  const [verificaStato, setVerificaStato] = useState({
+    telefono: false,
+    email: false,
+    cfGen1: false,
+    cfGen2: false
+  });
+
+  const avviaVerifica = (type: string, field: string) => {
+    setVerificaStato(prev => ({ ...prev, [field]: true }));
+  };
+
+  return (
+    <CrmFormProvider
+      selectedMemberId={memberIdStr ? Number(memberIdStr) : null}
+      actionFromUrl={actionFromUrl}
+      verificaStato={verificaStato}
+      setVerificaStato={setVerificaStato}
+      avviaVerifica={avviaVerifica}
+    >
+      <MascheraInputGeneraleContent {...props} />
+    </CrmFormProvider>
   );
 }
