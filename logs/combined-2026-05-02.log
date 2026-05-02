@@ -3067,3 +3067,194 @@
 {"level":"info","message":"GET /api/users/presence/active 200 in 594ms :: [{\"id\":\"admin-id\",\"username\":\"ad…","service":"stargem-manager","timestamp":"2026-05-02 11:28:03"}
 {"level":"info","message":"GET /api/team-comments 304 in 349ms :: [{\"id\":20,\"authorId\":\"admin-id\",\"authorN…","service":"stargem-manager","timestamp":"2026-05-02 11:28:08"}
 {"level":"info","message":"GET /api/todos 304 in 368ms :: [{\"id\":1,\"text\":\"Implementare verifica SMS/Whats…","service":"stargem-manager","timestamp":"2026-05-02 11:28:08"}
+{"level":"info","message":"GET /api/gemteam/permessi/pending-count 304 in 251ms :: {\"count\":0}","service":"stargem-manager","timestamp":"2026-05-02 11:28:17"}
+{"level":"info","message":"GET /api/team-comments 304 in 281ms :: [{\"id\":20,\"authorId\":\"admin-id\",\"authorN…","service":"stargem-manager","timestamp":"2026-05-02 11:28:19"}
+{"level":"info","message":"GET /api/todos 304 in 311ms :: [{\"id\":1,\"text\":\"Implementare verifica SMS/Whats…","service":"stargem-manager","timestamp":"2026-05-02 11:28:19"}
+{"level":"info","message":"GET /api/users/presence/active 304 in 420ms :: [{\"id\":\"admin-id\",\"username\":\"ad…","service":"stargem-manager","timestamp":"2026-05-02 11:28:19"}
+{"level":"info","message":"GET /api/team-comments 304 in 295ms :: [{\"id\":20,\"authorId\":\"admin-id\",\"authorN…","service":"stargem-manager","timestamp":"2026-05-02 11:28:29"}
+{"level":"info","message":"GET /api/todos 304 in 276ms :: [{\"id\":1,\"text\":\"Implementare verifica SMS/Whats…","service":"stargem-manager","timestamp":"2026-05-02 11:28:29"}
+{"level":"info","message":"GET /api/users/presence/active 304 in 528ms :: [{\"id\":\"admin-id\",\"username\":\"ad…","service":"stargem-manager","timestamp":"2026-05-02 11:28:34"}
+{"level":"info","message":"GET /api/team-comments 304 in 312ms :: [{\"id\":20,\"authorId\":\"admin-id\",\"authorN…","service":"stargem-manager","timestamp":"2026-05-02 11:28:39"}
+{"level":"info","message":"GET /api/todos 304 in 313ms :: [{\"id\":1,\"text\":\"Implementare verifica SMS/Whats…","service":"stargem-manager","timestamp":"2026-05-02 11:28:39"}
+{"level":"info","message":"POST /api/users/presence/heartbeat 200 in 368ms :: {\"success\":true}","service":"stargem-manager","timestamp":"2026-05-02 11:28:46"}
+{"level":"info","message":"GET /api/todos 304 in 319ms :: [{\"id\":1,\"text\":\"Implementare verifica SMS/Whats…","service":"stargem-manager","timestamp":"2026-05-02 12:39:56"}
+{"level":"info","message":"GET /api/team-comments 304 in 360ms :: [{\"id\":20,\"authorId\":\"admin-id\",\"authorN…","service":"stargem-manager","timestamp":"2026-05-02 12:39:56"}
+{"level":"info","message":"GET /api/users/presence/active 200 in 578ms :: [{\"id\":\"admin-id\",\"username\":\"ad…","service":"stargem-manager","timestamp":"2026-05-02 12:39:56"}
+{"level":"info","message":"POST /api/users/presence/heartbeat 200 in 279ms :: {\"success\":true}","service":"stargem-manager","timestamp":"2026-05-02 12:39:56"}
+{"level":"info","message":"GET /api/team-notes 304 in 232ms :: []","service":"stargem-manager","timestamp":"2026-05-02 12:39:57"}
+{"level":"info","message":"GET /api/gempass/firme-all 304 in 239ms :: [{\"id\":1,\"memberId\":1,\"seasonId\":1,\"…","service":"stargem-manager","timestamp":"2026-05-02 12:39:57"}
+{"level":"info","message":"GET /api/seasons/active 304 in 265ms :: {\"id\":1,\"name\":\"Stagione 2025/2026\",\"de…","service":"stargem-manager","timestamp":"2026-05-02 12:39:58"}
+{"level":"info","message":"GET /api/gempass/tessere 200 in 7009ms :: [{\"id\":17030,\"memberId\":15885,\"member…","service":"stargem-manager","timestamp":"2026-05-02 12:40:04"}
+{"level":"info","message":"GET /api/todos 304 in 309ms :: [{\"id\":1,\"text\":\"Implementare verifica SMS/Whats…","service":"stargem-manager","timestamp":"2026-05-02 12:40:06"}
+{"level":"info","message":"GET /api/team-comments 304 in 323ms :: [{\"id\":20,\"authorId\":\"admin-id\",\"authorN…","service":"stargem-manager","timestamp":"2026-05-02 12:40:06"}
+{"level":"info","message":"GET /api/users/presence/active 200 in 570ms :: [{\"id\":\"admin-id\",\"username\":\"ad…","service":"stargem-manager","timestamp":"2026-05-02 12:40:11"}
+{"level":"info","message":"GET /api/todos 304 in 305ms :: [{\"id\":1,\"text\":\"Implementare verifica SMS/Whats…","service":"stargem-manager","timestamp":"2026-05-02 12:40:16"}
+{"level":"info","message":"GET /api/team-comments 304 in 303ms :: [{\"id\":20,\"authorId\":\"admin-id\",\"authorN…","service":"stargem-manager","timestamp":"2026-05-02 12:40:16"}
+{"level":"info","message":"GET /api/gemteam/permessi/pending-count 304 in 173ms :: {\"count\":0}","service":"stargem-manager","timestamp":"2026-05-02 12:40:17"}
+{"level":"info","message":"GET /api/todos 304 in 276ms :: [{\"id\":1,\"text\":\"Implementare verifica SMS/Whats…","service":"stargem-manager","timestamp":"2026-05-02 12:40:27"}
+{"level":"info","message":"GET /api/team-comments 304 in 326ms :: [{\"id\":20,\"authorId\":\"admin-id\",\"authorN…","service":"stargem-manager","timestamp":"2026-05-02 12:40:27"}
+{"level":"info","message":"GET /api/users/presence/active 200 in 475ms :: [{\"id\":\"admin-id\",\"username\":\"ad…","service":"stargem-manager","timestamp":"2026-05-02 12:40:27"}
+{"level":"info","message":"POST /api/users/presence/heartbeat 200 in 369ms :: {\"success\":true}","service":"stargem-manager","timestamp":"2026-05-02 12:40:36"}
+{"level":"info","message":"GET /api/todos 304 in 240ms :: [{\"id\":1,\"text\":\"Implementare verifica SMS/Whats…","service":"stargem-manager","timestamp":"2026-05-02 12:40:37"}
+{"level":"info","message":"GET /api/team-comments 304 in 230ms :: [{\"id\":20,\"authorId\":\"admin-id\",\"authorN…","service":"stargem-manager","timestamp":"2026-05-02 12:40:37"}
+{"level":"info","message":"GET /api/team-notes 304 in 266ms :: []","service":"stargem-manager","timestamp":"2026-05-02 12:40:38"}
+{"level":"info","message":"GET /api/members/entity-cards 304 in 214ms :: [{\"id\":2218,\"userId\":null,\"firstN…","service":"stargem-manager","timestamp":"2026-05-02 12:40:38"}
+{"level":"info","message":"GET /api/medical-certificates 200 in 215ms :: [{\"id\":2471,\"memberId\":17092,\"iss…","service":"stargem-manager","timestamp":"2026-05-02 12:40:38"}
+{"level":"info","message":"GET /api/members 304 in 268ms :: {\"members\":[{\"id\":15616,\"firstName\":\"LIA\",\"las…","service":"stargem-manager","timestamp":"2026-05-02 12:40:38"}
+{"level":"info","message":"GET /api/team-notes 304 in 368ms :: []","service":"stargem-manager","timestamp":"2026-05-02 12:40:41"}
+{"level":"info","message":"GET /api/config/center-hours 304 in 177ms :: {\"start\":\"07:00\",\"end\":\"23:30\",\"da…","service":"stargem-manager","timestamp":"2026-05-02 12:40:42"}
+{"level":"info","message":"GET /api/payment-methods 500 in 190ms :: {\"message\":\"Failed to fetch payment me…","service":"stargem-manager","timestamp":"2026-05-02 12:40:42"}
+{"level":"info","message":"GET /api/studios 304 in 211ms :: [{\"id\":10,\"name\":\"STUDIO 01 (80mq)\",\"floor\":\"\"…","service":"stargem-manager","timestamp":"2026-05-02 12:40:42"}
+{"level":"info","message":"GET /api/courses 304 in 237ms :: [{\"id\":827,\"sku\":\"2526GEDDOVEN20\",\"name\":\"Cors…","service":"stargem-manager","timestamp":"2026-05-02 12:40:42"}
+{"level":"info","message":"GET /api/custom-lists/genere 304 in 243ms :: {\"id\":21,\"name\":\"Generi Workshop\",…","service":"stargem-manager","timestamp":"2026-05-02 12:40:42"}
+{"level":"info","message":"GET /api/workshops 200 in 168ms","service":"stargem-manager","timestamp":"2026-05-02 12:40:42"}
+{"level":"info","message":"GET /api/instructors 304 in 206ms :: [{\"id\":2336,\"userId\":null,\"firstName\":\"ANT…","service":"stargem-manager","timestamp":"2026-05-02 12:40:42"}
+{"level":"info","message":"GET /api/workshop-attendances 200 in 156ms","service":"stargem-manager","timestamp":"2026-05-02 12:40:42"}
+{"level":"info","message":"GET /api/quotes 304 in 178ms :: [{\"id\":27,\"name\":\"sconto 20\",\"amount\":\"20.00\",\"…","service":"stargem-manager","timestamp":"2026-05-02 12:40:42"}
+{"level":"info","message":"GET /api/enrollments 304 in 356ms :: [{\"id\":256,\"memberId\":14240,\"courseId\":385…","service":"stargem-manager","timestamp":"2026-05-02 12:40:42"}
+{"level":"info","message":"GET /api/booking-services 304 in 185ms :: [{\"id\":8,\"name\":\"Lezione Zaccaria\",\"d…","service":"stargem-manager","timestamp":"2026-05-02 12:40:42"}
+{"level":"info","message":"GET /api/studio-bookings 304 in 242ms :: []","service":"stargem-manager","timestamp":"2026-05-02 12:40:42"}
+{"level":"info","message":"GET /api/custom-lists/categorie 304 in 230ms :: {\"id\":23,\"name\":\"Categorie\",\"sy…","service":"stargem-manager","timestamp":"2026-05-02 12:40:42"}
+{"level":"info","message":"GET /api/custom-lists/stato_corso 304 in 242ms :: {\"id\":34,\"name\":\"Stato Corso\"…","service":"stargem-manager","timestamp":"2026-05-02 12:40:42"}
+{"level":"info","message":"GET /api/custom-lists/tag_interni 304 in 219ms :: {\"id\":35,\"name\":\"Interno Cors…","service":"stargem-manager","timestamp":"2026-05-02 12:40:43"}
+{"level":"info","message":"GET /api/seasons 304 in 218ms :: [{\"id\":2,\"name\":\"2026/2027\",\"description\":null…","service":"stargem-manager","timestamp":"2026-05-02 12:40:43"}
+{"level":"info","message":"GET /api/strategic-events 304 in 264ms :: [{\"id\":48,\"title\":\"Ferragosto\",\"descr…","service":"stargem-manager","timestamp":"2026-05-02 12:40:43"}
+{"level":"info","message":"GET /api/workshops 200 in 305ms","service":"stargem-manager","timestamp":"2026-05-02 12:40:43"}
+{"level":"info","message":"GET /api/users/presence/active 200 in 496ms :: [{\"id\":\"admin-id\",\"username\":\"ad…","service":"stargem-manager","timestamp":"2026-05-02 12:40:43"}
+{"level":"info","message":"GET /api/strategic-events 304 in 363ms :: [{\"id\":61,\"title\":\"Ferragosto\",\"descr…","service":"stargem-manager","timestamp":"2026-05-02 12:40:43"}
+{"level":"info","message":"GET /api/courses 304 in 398ms :: [{\"id\":845,\"sku\":\"2627MALINMER17\",\"name\":\"Danz…","service":"stargem-manager","timestamp":"2026-05-02 12:40:43"}
+{"level":"info","message":"GET /api/workshops 200 in 300ms","service":"stargem-manager","timestamp":"2026-05-02 12:40:43"}
+{"level":"info","message":"GET /api/custom-lists/nomi_corsi 304 in 213ms :: {\"id\":15,\"name\":\"Generi Corsi\"…","service":"stargem-manager","timestamp":"2026-05-02 12:40:43"}
+{"level":"info","message":"GET /api/activity-statuses 304 in 202ms :: [{\"id\":5,\"name\":\"APERTO\",\"color\":\"#2…","service":"stargem-manager","timestamp":"2026-05-02 12:40:43"}
+{"level":"info","message":"GET /api/custom-lists/fascia_eta 304 in 239ms :: {\"id\":6,\"name\":\"Fascia età\",\"s…","service":"stargem-manager","timestamp":"2026-05-02 12:40:43"}
+{"level":"info","message":"GET /api/courses 304 in 267ms :: [{\"id\":827,\"sku\":\"2526GEDDOVEN20\",\"name\":\"Cors…","service":"stargem-manager","timestamp":"2026-05-02 12:40:43"}
+{"level":"info","message":"GET /api/custom-lists/posti_disponibili 304 in 259ms :: {\"id\":14,\"name\":\"Posti …","service":"stargem-manager","timestamp":"2026-05-02 12:40:43"}
+{"level":"info","message":"GET /api/custom-lists/pacchetti_prenotazioni 304 in 248ms :: {\"items\":[]}","service":"stargem-manager","timestamp":"2026-05-02 12:40:43"}
+{"level":"info","message":"GET /api/custom-lists/campus 304 in 235ms :: {\"id\":22,\"name\":\"Campus\",\"systemNa…","service":"stargem-manager","timestamp":"2026-05-02 12:40:43"}
+{"level":"info","message":"GET /api/custom-lists/numero_persone 304 in 236ms :: {\"id\":25,\"name\":\"Numero Pe…","service":"stargem-manager","timestamp":"2026-05-02 12:40:43"}
+{"level":"info","message":"GET /api/custom-lists/livello 304 in 268ms :: {\"id\":5,\"name\":\"Livello\",\"systemN…","service":"stargem-manager","timestamp":"2026-05-02 12:40:43"}
+{"level":"info","message":"GET /api/courses 304 in 278ms :: [{\"id\":845,\"sku\":\"2627MALINMER17\",\"name\":\"Danz…","service":"stargem-manager","timestamp":"2026-05-02 12:40:43"}
+{"level":"info","message":"GET /api/strategic-events/closed-days 304 in 311ms :: {\"closedDays\":[\"2026-11-0…","service":"stargem-manager","timestamp":"2026-05-02 12:40:44"}
+{"level":"info","message":"GET /api/courses 304 in 279ms :: [{\"id\":845,\"sku\":\"2627MALINMER17\",\"name\":\"Danz…","service":"stargem-manager","timestamp":"2026-05-02 12:40:44"}
+{"level":"info","message":"GET /api/memberships 200 in 7011ms :: [{\"id\":17030,\"memberId\":15885,\"membership…","service":"stargem-manager","timestamp":"2026-05-02 12:40:45"}
+{"level":"info","message":"GET /api/todos 304 in 307ms :: [{\"id\":1,\"text\":\"Implementare verifica SMS/Whats…","service":"stargem-manager","timestamp":"2026-05-02 12:40:47"}
+{"level":"info","message":"GET /api/team-comments 304 in 318ms :: [{\"id\":20,\"authorId\":\"admin-id\",\"authorN…","service":"stargem-manager","timestamp":"2026-05-02 12:40:47"}
+{"level":"info","message":"GET /api/todos 304 in 302ms :: [{\"id\":1,\"text\":\"Implementare verifica SMS/Whats…","service":"stargem-manager","timestamp":"2026-05-02 12:40:57"}
+{"level":"info","message":"GET /api/team-comments 304 in 303ms :: [{\"id\":20,\"authorId\":\"admin-id\",\"authorN…","service":"stargem-manager","timestamp":"2026-05-02 12:40:58"}
+{"level":"info","message":"GET /api/users/presence/active 304 in 422ms :: [{\"id\":\"admin-id\",\"username\":\"ad…","service":"stargem-manager","timestamp":"2026-05-02 12:40:58"}
+{"level":"info","message":"GET /api/gempass/tessere 200 in 6790ms :: [{\"id\":18413,\"memberId\":17609,\"member…","service":"stargem-manager","timestamp":"2026-05-02 12:41:06"}
+{"level":"info","message":"POST /api/users/presence/heartbeat 200 in 286ms :: {\"success\":true}","service":"stargem-manager","timestamp":"2026-05-02 12:41:06"}
+{"level":"info","message":"GET /api/todos 304 in 280ms :: [{\"id\":1,\"text\":\"Implementare verifica SMS/Whats…","service":"stargem-manager","timestamp":"2026-05-02 12:41:08"}
+{"level":"info","message":"GET /api/team-comments 304 in 279ms :: [{\"id\":20,\"authorId\":\"admin-id\",\"authorN…","service":"stargem-manager","timestamp":"2026-05-02 12:41:08"}
+{"level":"info","message":"GET /api/team-notes 304 in 238ms :: []","service":"stargem-manager","timestamp":"2026-05-02 12:41:08"}
+{"level":"info","message":"GET /api/workshops 200 in 130ms","service":"stargem-manager","timestamp":"2026-05-02 12:41:09"}
+{"level":"info","message":"GET /api/vacation-studies 200 in 130ms","service":"stargem-manager","timestamp":"2026-05-02 12:41:09"}
+{"level":"info","message":"GET /api/recitals 200 in 155ms","service":"stargem-manager","timestamp":"2026-05-02 12:41:09"}
+{"level":"info","message":"GET /api/campus 200 in 156ms","service":"stargem-manager","timestamp":"2026-05-02 12:41:09"}
+{"level":"info","message":"GET /api/sunday-activities 200 in 183ms","service":"stargem-manager","timestamp":"2026-05-02 12:41:09"}
+{"level":"info","message":"GET /api/strategic-events 304 in 197ms :: [{\"id\":61,\"title\":\"Ferragosto\",\"descr…","service":"stargem-manager","timestamp":"2026-05-02 12:41:09"}
+{"level":"info","message":"GET /api/activities-unified-preview 304 in 759ms :: [{\"id\":\"course_7_2025-09-01…","service":"stargem-manager","timestamp":"2026-05-02 12:41:09"}
+{"level":"info","message":"GET /api/users/presence/active 200 in 514ms :: [{\"id\":\"admin-id\",\"username\":\"ad…","service":"stargem-manager","timestamp":"2026-05-02 12:41:14"}
+{"level":"info","message":"GET /api/gemteam/permessi/pending-count 304 in 259ms :: {\"count\":0}","service":"stargem-manager","timestamp":"2026-05-02 12:41:17"}
+{"level":"info","message":"GET /api/todos 304 in 251ms :: [{\"id\":1,\"text\":\"Implementare verifica SMS/Whats…","service":"stargem-manager","timestamp":"2026-05-02 12:41:18"}
+{"level":"info","message":"GET /api/team-comments 304 in 252ms :: [{\"id\":20,\"authorId\":\"admin-id\",\"authorN…","service":"stargem-manager","timestamp":"2026-05-02 12:41:18"}
+{"level":"info","message":"GET /api/team-notes 304 in 269ms :: []","service":"stargem-manager","timestamp":"2026-05-02 12:41:19"}
+{"level":"info","message":"GET /api/team-notes 304 in 324ms :: []","service":"stargem-manager","timestamp":"2026-05-02 12:41:24"}
+{"level":"info","message":"GET /api/team-notes 304 in 327ms :: []","service":"stargem-manager","timestamp":"2026-05-02 12:41:26"}
+{"level":"info","message":"GET /api/todos 304 in 315ms :: [{\"id\":1,\"text\":\"Implementare verifica SMS/Whats…","service":"stargem-manager","timestamp":"2026-05-02 12:41:28"}
+{"level":"info","message":"GET /api/team-comments 304 in 336ms :: [{\"id\":20,\"authorId\":\"admin-id\",\"authorN…","service":"stargem-manager","timestamp":"2026-05-02 12:41:28"}
+{"level":"info","message":"GET /api/team-notes 304 in 378ms :: []","service":"stargem-manager","timestamp":"2026-05-02 12:41:28"}
+{"level":"info","message":"GET /api/gemstaff/insegnanti 304 in 236ms :: [{\"id\":3,\"firstName\":\"ROBERTO\",\"la…","service":"stargem-manager","timestamp":"2026-05-02 12:41:29"}
+{"level":"info","message":"GET /api/gemstaff/pt 304 in 262ms :: [{\"id\":2,\"firstName\":\"MARCO\",\"lastName\":\"M…","service":"stargem-manager","timestamp":"2026-05-02 12:41:29"}
+{"level":"info","message":"GET /api/users/presence/active 304 in 410ms :: [{\"id\":\"admin-id\",\"username\":\"ad…","service":"stargem-manager","timestamp":"2026-05-02 12:41:29"}
+{"level":"info","message":"GET /api/team-notes 304 in 297ms :: []","service":"stargem-manager","timestamp":"2026-05-02 12:41:30"}
+{"level":"info","message":"GET /api/gemteam/turni/week-assignment 304 in 215ms :: {\"settimana\":\"A\",\"weekSt…","service":"stargem-manager","timestamp":"2026-05-02 12:41:31"}
+{"level":"info","message":"GET /api/gemteam/turni/eventi-giorno 304 in 215ms :: [{\"title\":\"No corsi\",\"even…","service":"stargem-manager","timestamp":"2026-05-02 12:41:31"}
+{"level":"info","message":"GET /api/gemteam/presenze/2026/04 304 in 216ms :: [{\"id\":3776,\"employeeId\":16,\"…","service":"stargem-manager","timestamp":"2026-05-02 12:41:31"}
+{"level":"info","message":"GET /api/gemteam/turni/scheduled 304 in 216ms :: []","service":"stargem-manager","timestamp":"2026-05-02 12:41:31"}
+{"level":"info","message":"GET /api/gemteam/postazioni 304 in 231ms :: [{\"id\":1,\"nome\":\"AMM.ZIONE\",\"contaO…","service":"stargem-manager","timestamp":"2026-05-02 12:41:31"}
+{"level":"info","message":"GET /api/gemteam/dipendenti 200 in 371ms :: [{\"id\":1,\"memberId\":9556,\"userId\":\"…","service":"stargem-manager","timestamp":"2026-05-02 12:41:31"}
+{"level":"info","message":"GET /api/gemteam/report/lock/2026/04 200 in 232ms","service":"stargem-manager","timestamp":"2026-05-02 12:41:31"}
+{"level":"info","message":"GET /api/gemteam/turni 304 in 298ms :: [{\"id\":1660,\"employeeId\":1,\"settimanaTip…","service":"stargem-manager","timestamp":"2026-05-02 12:41:31"}
+{"level":"info","message":"GET /api/gemteam/checkin/oggi 304 in 324ms :: [{\"employeeId\":15,\"firstName\":\"AD…","service":"stargem-manager","timestamp":"2026-05-02 12:41:31"}
+{"level":"info","message":"GET /api/team-notes 304 in 372ms :: []","service":"stargem-manager","timestamp":"2026-05-02 12:41:35"}
+{"level":"info","message":"GET /api/team-notes 304 in 224ms :: [{\"id\":26,\"authorId\":\"admin-id\",\"authorName…","service":"stargem-manager","timestamp":"2026-05-02 12:41:35"}
+{"level":"info","message":"GET /api/team-notes/archived 304 in 250ms :: [{\"id\":19,\"authorId\":\"admin-id\",\"a…","service":"stargem-manager","timestamp":"2026-05-02 12:41:35"}
+{"level":"info","message":"POST /api/users/presence/heartbeat 200 in 283ms :: {\"success\":true}","service":"stargem-manager","timestamp":"2026-05-02 12:41:36"}
+{"level":"info","message":"GET /api/todos 304 in 304ms :: [{\"id\":1,\"text\":\"Implementare verifica SMS/Whats…","service":"stargem-manager","timestamp":"2026-05-02 12:41:39"}
+{"level":"info","message":"GET /api/team-comments 304 in 284ms :: [{\"id\":20,\"authorId\":\"admin-id\",\"authorN…","service":"stargem-manager","timestamp":"2026-05-02 12:41:39"}
+{"level":"info","message":"GET /api/users/presence/active 200 in 544ms :: [{\"id\":\"admin-id\",\"username\":\"ad…","service":"stargem-manager","timestamp":"2026-05-02 12:41:45"}
+{"level":"info","message":"GET /api/team-notes 304 in 251ms :: []","service":"stargem-manager","timestamp":"2026-05-02 12:41:48"}
+{"level":"info","message":"GET /api/todos 304 in 247ms :: [{\"id\":1,\"text\":\"Implementare verifica SMS/Whats…","service":"stargem-manager","timestamp":"2026-05-02 12:41:49"}
+{"level":"info","message":"GET /api/team-comments 304 in 220ms :: [{\"id\":20,\"authorId\":\"admin-id\",\"authorN…","service":"stargem-manager","timestamp":"2026-05-02 12:41:49"}
+{"level":"info","message":"GET /api/todos 304 in 321ms :: [{\"id\":1,\"text\":\"Implementare verifica SMS/Whats…","service":"stargem-manager","timestamp":"2026-05-02 12:41:59"}
+{"level":"info","message":"GET /api/team-comments 304 in 322ms :: [{\"id\":20,\"authorId\":\"admin-id\",\"authorN…","service":"stargem-manager","timestamp":"2026-05-02 12:41:59"}
+{"level":"info","message":"GET /api/users/presence/active 304 in 613ms :: [{\"id\":\"admin-id\",\"username\":\"ad…","service":"stargem-manager","timestamp":"2026-05-02 12:42:00"}
+{"level":"info","message":"Server started. Serving on port 5001","service":"stargem-manager","timestamp":"2026-05-02 12:42:09"}
+{"level":"info","message":"GET /api/user 200 in 140ms :: {\"id\":\"admin-id\",\"username\":\"admin\",\"password\":\"d…","service":"stargem-manager","timestamp":"2026-05-02 12:42:14"}
+{"level":"info","message":"GET /api/latest-activity 304 in 293ms :: {\"id\":2597,\"userId\":\"admin-id\",\"action…","service":"stargem-manager","timestamp":"2026-05-02 12:42:14"}
+{"level":"info","message":"GET /api/gemteam/permessi/pending-count 304 in 406ms :: {\"count\":0}","service":"stargem-manager","timestamp":"2026-05-02 12:42:14"}
+{"level":"info","message":"GET /api/activities-summary 304 in 466ms :: {\"corsi\":{\"total\":314,\"active\":294}…","service":"stargem-manager","timestamp":"2026-05-02 12:42:14"}
+{"level":"info","message":"GET /api/team-notes 304 in 463ms :: []","service":"stargem-manager","timestamp":"2026-05-02 12:42:14"}
+{"level":"info","message":"GET /api/users/presence/active 200 in 761ms :: [{\"id\":\"admin-id\",\"username\":\"ad…","service":"stargem-manager","timestamp":"2026-05-02 12:42:15"}
+{"level":"info","message":"GET /api/team-comments 304 in 415ms :: [{\"id\":20,\"authorId\":\"admin-id\",\"authorN…","service":"stargem-manager","timestamp":"2026-05-02 12:42:15"}
+{"level":"info","message":"GET /api/todos 304 in 513ms :: [{\"id\":1,\"text\":\"Implementare verifica SMS/Whats…","service":"stargem-manager","timestamp":"2026-05-02 12:42:15"}
+{"level":"info","message":"POST /api/users/presence/heartbeat 200 in 626ms :: {\"success\":true}","service":"stargem-manager","timestamp":"2026-05-02 12:42:15"}
+{"level":"info","message":"GET /api/client-categories 200 in 233ms","service":"stargem-manager","timestamp":"2026-05-02 12:42:15"}
+{"level":"info","message":"GET /api/payments 304 in 295ms :: []","service":"stargem-manager","timestamp":"2026-05-02 12:42:15"}
+{"level":"info","message":"GET /api/participant-types 500 in 293ms :: {\"message\":\"Failed to fetch particip…","service":"stargem-manager","timestamp":"2026-05-02 12:42:15"}
+{"level":"info","message":"GET /api/members 304 in 323ms :: {\"members\":[{\"id\":15616,\"firstName\":\"LIA\",\"las…","service":"stargem-manager","timestamp":"2026-05-02 12:42:15"}
+{"level":"info","message":"GET /api/courses 304 in 326ms :: [{\"id\":827,\"sku\":\"2526GEDDOVEN20\",\"name\":\"Cors…","service":"stargem-manager","timestamp":"2026-05-02 12:42:15"}
+{"level":"info","message":"GET /api/enrollments 304 in 470ms :: [{\"id\":65,\"memberId\":14194,\"courseId\":7,\"p…","service":"stargem-manager","timestamp":"2026-05-02 12:42:15"}
+{"level":"info","message":"GET /api/subscription-types 500 in 269ms :: {\"message\":\"Failed to fetch subscri…","service":"stargem-manager","timestamp":"2026-05-02 12:42:15"}
+{"level":"info","message":"GET /api/members/counts-by-type 304 in 377ms :: {\"partecipanti\":\"4826\",\"staff\":…","service":"stargem-manager","timestamp":"2026-05-02 12:42:16"}
+{"level":"info","message":"GET /api/members 304 in 408ms :: {\"members\":[{\"id\":15616,\"firstName\":\"LIA\",\"las…","service":"stargem-manager","timestamp":"2026-05-02 12:42:16"}
+{"level":"info","message":"GET /api/members/missing-data 304 in 474ms :: {\"missingFiscalCode\":731,\"missing…","service":"stargem-manager","timestamp":"2026-05-02 12:42:16"}
+{"level":"info","message":"GET /api/members/duplicates 304 in 470ms :: [{\"id1\":16881,\"id2\":18708,\"name1\":\"…","service":"stargem-manager","timestamp":"2026-05-02 12:42:16"}
+{"level":"info","message":"GET /api/team-notes 304 in 361ms :: []","service":"stargem-manager","timestamp":"2026-05-02 12:42:17"}
+{"level":"info","message":"Server started. Serving on port 5001","service":"stargem-manager","timestamp":"2026-05-02 12:42:21"}
+{"level":"info","message":"GET /api/user 200 in 161ms :: {\"id\":\"admin-id\",\"username\":\"admin\",\"password\":\"d…","service":"stargem-manager","timestamp":"2026-05-02 12:42:25"}
+{"level":"info","message":"GET /api/gemteam/permessi/pending-count 304 in 356ms :: {\"count\":0}","service":"stargem-manager","timestamp":"2026-05-02 12:42:26"}
+{"level":"info","message":"GET /api/latest-activity 304 in 417ms :: {\"id\":2597,\"userId\":\"admin-id\",\"action…","service":"stargem-manager","timestamp":"2026-05-02 12:42:26"}
+{"level":"info","message":"GET /api/activities-summary 304 in 603ms :: {\"corsi\":{\"total\":314,\"active\":294}…","service":"stargem-manager","timestamp":"2026-05-02 12:42:26"}
+{"level":"info","message":"GET /api/users/presence/active 200 in 679ms :: [{\"id\":\"admin-id\",\"username\":\"ad…","service":"stargem-manager","timestamp":"2026-05-02 12:42:26"}
+{"level":"info","message":"GET /api/team-notes 304 in 470ms :: []","service":"stargem-manager","timestamp":"2026-05-02 12:42:26"}
+{"level":"info","message":"GET /api/todos 304 in 378ms :: [{\"id\":1,\"text\":\"Implementare verifica SMS/Whats…","service":"stargem-manager","timestamp":"2026-05-02 12:42:26"}
+{"level":"info","message":"GET /api/team-comments 304 in 430ms :: [{\"id\":20,\"authorId\":\"admin-id\",\"authorN…","service":"stargem-manager","timestamp":"2026-05-02 12:42:26"}
+{"level":"info","message":"POST /api/users/presence/heartbeat 200 in 643ms :: {\"success\":true}","service":"stargem-manager","timestamp":"2026-05-02 12:42:26"}
+{"level":"info","message":"GET /api/gempass/firme-all 304 in 261ms :: [{\"id\":1,\"memberId\":1,\"seasonId\":1,\"…","service":"stargem-manager","timestamp":"2026-05-02 12:42:27"}
+{"level":"info","message":"GET /api/seasons/active 304 in 287ms :: {\"id\":1,\"name\":\"Stagione 2025/2026\",\"de…","service":"stargem-manager","timestamp":"2026-05-02 12:42:27"}
+{"level":"info","message":"GET /api/gempass/tessere 200 in 6897ms :: {\"data\":[{\"id\":18413,\"memberId\":17609…","service":"stargem-manager","timestamp":"2026-05-02 12:42:33"}
+{"level":"info","message":"GET /api/todos 304 in 305ms :: [{\"id\":1,\"text\":\"Implementare verifica SMS/Whats…","service":"stargem-manager","timestamp":"2026-05-02 12:42:36"}
+{"level":"info","message":"GET /api/team-comments 304 in 307ms :: [{\"id\":20,\"authorId\":\"admin-id\",\"authorN…","service":"stargem-manager","timestamp":"2026-05-02 12:42:37"}
+{"level":"info","message":"GET /api/team-notes 304 in 409ms :: []","service":"stargem-manager","timestamp":"2026-05-02 12:42:41"}
+{"level":"info","message":"GET /api/users/presence/active 200 in 686ms :: [{\"id\":\"admin-id\",\"username\":\"ad…","service":"stargem-manager","timestamp":"2026-05-02 12:42:42"}
+{"level":"info","message":"GET /api/members/entity-cards 304 in 499ms :: [{\"id\":2218,\"userId\":null,\"firstN…","service":"stargem-manager","timestamp":"2026-05-02 12:42:42"}
+{"level":"info","message":"GET /api/medical-certificates 304 in 502ms :: [{\"id\":2471,\"memberId\":17092,\"iss…","service":"stargem-manager","timestamp":"2026-05-02 12:42:42"}
+{"level":"info","message":"GET /api/members 304 in 554ms :: {\"members\":[{\"id\":15616,\"firstName\":\"LIA\",\"las…","service":"stargem-manager","timestamp":"2026-05-02 12:42:42"}
+{"level":"info","message":"GET /api/todos 304 in 302ms :: [{\"id\":1,\"text\":\"Implementare verifica SMS/Whats…","service":"stargem-manager","timestamp":"2026-05-02 12:42:47"}
+{"level":"info","message":"GET /api/team-comments 304 in 300ms :: [{\"id\":20,\"authorId\":\"admin-id\",\"authorN…","service":"stargem-manager","timestamp":"2026-05-02 12:42:47"}
+{"level":"info","message":"GET /api/memberships 200 in 7419ms :: [{\"id\":18413,\"memberId\":17609,\"membership…","service":"stargem-manager","timestamp":"2026-05-02 12:42:49"}
+{"level":"info","message":"GET /api/team-notes 304 in 350ms :: []","service":"stargem-manager","timestamp":"2026-05-02 12:42:51"}
+{"level":"info","message":"GET /api/members 304 in 228ms :: {\"members\":[{\"id\":15616,\"firstName\":\"LIA\",\"las…","service":"stargem-manager","timestamp":"2026-05-02 12:42:52"}
+{"level":"info","message":"POST /api/users/presence/heartbeat 200 in 372ms :: {\"success\":true}","service":"stargem-manager","timestamp":"2026-05-02 12:42:56"}
+{"level":"info","message":"GET /api/team-comments 304 in 243ms :: [{\"id\":20,\"authorId\":\"admin-id\",\"authorN…","service":"stargem-manager","timestamp":"2026-05-02 12:42:57"}
+{"level":"info","message":"GET /api/todos 304 in 327ms :: [{\"id\":1,\"text\":\"Implementare verifica SMS/Whats…","service":"stargem-manager","timestamp":"2026-05-02 12:42:57"}
+{"level":"info","message":"GET /api/users/presence/active 200 in 550ms :: [{\"id\":\"admin-id\",\"username\":\"ad…","service":"stargem-manager","timestamp":"2026-05-02 12:42:57"}
+{"level":"info","message":"GET /api/team-notes 304 in 257ms :: []","service":"stargem-manager","timestamp":"2026-05-02 12:43:00"}
+{"level":"info","message":"GET /api/team-comments 304 in 305ms :: [{\"id\":20,\"authorId\":\"admin-id\",\"authorN…","service":"stargem-manager","timestamp":"2026-05-02 12:43:07"}
+{"level":"info","message":"GET /api/todos 304 in 330ms :: [{\"id\":1,\"text\":\"Implementare verifica SMS/Whats…","service":"stargem-manager","timestamp":"2026-05-02 12:43:07"}
+{"level":"info","message":"GET /api/users/presence/active 304 in 592ms :: [{\"id\":\"admin-id\",\"username\":\"ad…","service":"stargem-manager","timestamp":"2026-05-02 12:43:13"}
+{"level":"info","message":"Server started. Serving on port 5001","service":"stargem-manager","timestamp":"2026-05-02 12:43:19"}
+{"level":"info","message":"POST /api/users/presence/offline 200 in 1278ms :: {\"success\":true}","service":"stargem-manager","timestamp":"2026-05-02 12:43:21"}
+{"level":"info","message":"GET /api/user 200 in 192ms :: {\"id\":\"admin-id\",\"username\":\"admin\",\"password\":\"d…","service":"stargem-manager","timestamp":"2026-05-02 12:43:23"}
+{"level":"info","message":"GET /api/latest-activity 304 in 277ms :: {\"id\":2597,\"userId\":\"admin-id\",\"action…","service":"stargem-manager","timestamp":"2026-05-02 12:43:23"}
+{"level":"info","message":"GET /api/gemteam/permessi/pending-count 304 in 296ms :: {\"count\":0}","service":"stargem-manager","timestamp":"2026-05-02 12:43:23"}
+{"level":"info","message":"GET /api/activities-summary 304 in 367ms :: {\"corsi\":{\"total\":314,\"active\":294}…","service":"stargem-manager","timestamp":"2026-05-02 12:43:23"}
+{"level":"info","message":"GET /api/users/presence/active 200 in 639ms :: [{\"id\":\"admin-id\",\"username\":\"ad…","service":"stargem-manager","timestamp":"2026-05-02 12:43:24"}
+{"level":"info","message":"GET /api/team-notes 304 in 493ms :: []","service":"stargem-manager","timestamp":"2026-05-02 12:43:24"}
+{"level":"info","message":"GET /api/team-comments 304 in 470ms :: [{\"id\":20,\"authorId\":\"admin-id\",\"authorN…","service":"stargem-manager","timestamp":"2026-05-02 12:43:24"}
+{"level":"info","message":"GET /api/todos 304 in 447ms :: [{\"id\":1,\"text\":\"Implementare verifica SMS/Whats…","service":"stargem-manager","timestamp":"2026-05-02 12:43:24"}
+{"level":"info","message":"POST /api/users/presence/heartbeat 200 in 657ms :: {\"success\":true}","service":"stargem-manager","timestamp":"2026-05-02 12:43:24"}
+{"level":"info","message":"GET /api/gempass/firme-all 304 in 258ms :: [{\"id\":1,\"memberId\":1,\"seasonId\":1,\"…","service":"stargem-manager","timestamp":"2026-05-02 12:43:24"}
+{"level":"info","message":"GET /api/seasons/active 304 in 284ms :: {\"id\":1,\"name\":\"Stagione 2025/2026\",\"de…","service":"stargem-manager","timestamp":"2026-05-02 12:43:24"}

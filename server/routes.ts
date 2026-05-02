@@ -3506,7 +3506,17 @@ app.get("/api/gempass/tessere", isAuthenticated, async (req, res) => {
         m.fiscalCode?.toLowerCase().includes(s)
       );
     }
-    return res.json(result);
+    const total = result.length;
+    let paginatedData = result;
+    
+    const p = parseInt(String(req.query.page || '1'));
+    const s = parseInt(String(req.query.pageSize || '50'));
+    if (!isNaN(p) && !isNaN(s)) {
+      const start = (p - 1) * s;
+      paginatedData = result.slice(start, start + s);
+    }
+
+    return res.json({ data: paginatedData, total });
   } catch (error) {
     console.error('[GemPass] GET /tessere error:', error);
     return res.status(500).json({ error: 'Errore nel recupero tessere' });
@@ -6000,7 +6010,7 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
       }
 
       // Strict Validation: Prevent Negative Amounts
-      if (validatedData.amount != null && validatedData.amount < 0) {
+      if (validatedData.amount != null && Number(validatedData.amount) < 0) {
         throw new Error("Sicurezza Pagamenti: L'importo del pagamento non può essere negativo.");
       }
 
@@ -6041,7 +6051,7 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
       }
 
       // Strict Validation: Prevent Negative Amounts
-      if (nextAmount != null && nextAmount < 0) {
+      if (nextAmount != null && Number(nextAmount) < 0) {
         throw new Error("Sicurezza Pagamenti: L'importo del pagamento non può essere negativo.");
       }
 
