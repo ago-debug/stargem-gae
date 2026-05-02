@@ -2962,6 +2962,7 @@ Regole:
           m.first_name,
           m.last_name,
           m.email,
+          m.phone,
           m.gender,
           mem.membership_number,
           mem.expiry_date as membership_expiry_date,
