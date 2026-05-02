@@ -1,0 +1,5 @@
+{"level":"error","message":"Unhandled Rejection at: [object Promise], reason: ReferenceError: registerMembersRoutes is not defined","service":"stargem-manager","timestamp":"2026-05-02 03:23:08"}
+{"level":"error","message":"Unhandled Rejection at: [object Promise], reason: ReferenceError: registerMembersRoutes is not defined","service":"stargem-manager","timestamp":"2026-05-02 03:36:20"}
+{"level":"error","message":"Unhandled Rejection at: [object Promise], reason: ReferenceError: checkPermission is not defined","service":"stargem-manager","timestamp":"2026-05-02 03:36:24"}
+{"level":"error","message":"Unhandled Rejection at: [object Promise], reason: ReferenceError: checkPermission is not defined","service":"stargem-manager","timestamp":"2026-05-02 03:37:43"}
+{"level":"error","message":"Unhandled Rejection at: [object Promise], reason: ReferenceError: checkPermission is not defined","service":"stargem-manager","timestamp":"2026-05-02 11:22:29"}

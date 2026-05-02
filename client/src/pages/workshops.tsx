@@ -543,11 +543,11 @@ export default function Workshops() {
                               acc[cat] = (acc[cat] || 0) + 1;
                               return acc;
                             }, {} as Record<string, number>)
-                          ).sort((a,b) => b[1] - a[1])
+                          ).sort((a, b) => (b[1] as number) - (a[1] as number))
                           .map(([cat, count]) => (
                             <div key={cat} className="flex justify-between text-muted-foreground">
                               <span className="truncate pr-2">{cat}</span>
-                              <span className="font-semibold">{count}</span>
+                              <span className="font-semibold">{count as number}</span>
                             </div>
                         ))}
                       </div>
@@ -561,11 +561,11 @@ export default function Workshops() {
                               acc[name] = (acc[name] || 0) + 1;
                               return acc;
                             }, {} as Record<string, number>)
-                          ).sort((a,b) => b[1] - a[1])
+                          ).sort((a, b) => (b[1] as number) - (a[1] as number))
                           .map(([name, count]) => (
                             <div key={name} className="flex justify-between text-muted-foreground">
                               <span className="truncate pr-2">{name}</span>
-                              <span className="font-semibold">{count}</span>
+                              <span className="font-semibold">{count as number}</span>
                             </div>
                         ))}
                       </div>

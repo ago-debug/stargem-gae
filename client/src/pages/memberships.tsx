@@ -22,6 +22,8 @@ import { SortableTableHead, useSortableTable } from "@/components/sortable-table
 import { cn } from "@/lib/utils";
 import type { Membership, InsertMembership, MedicalCertificate, InsertMedicalCertificate, Member } from "@shared/schema";
 import { useEffect } from "react";
+import { useDebounce } from "@/hooks/use-debounce";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 
 export default function Memberships() {
   const { toast } = useToast();
@@ -46,13 +48,37 @@ export default function Memberships() {
   const [certMemberSearch, setCertMemberSearch] = useState("");
   const [selectedCertMember, setSelectedCertMember] = useState<Member | null>(null);
 
-  const { data: memberships, isLoading: membershipsLoading } = useQuery<Membership[]>({
-    queryKey: ["/api/memberships"],
-  });
+  const [membershipPage, setMembershipPage] = useState(1);
+  const [certPage, setCertPage] = useState(1);
+  const debouncedMembershipSearch = useDebounce(membershipSearch, 500);
+  const debouncedCertificateSearch = useDebounce(certificateSearch, 500);
+  const pageSize = 50;
 
-  const { data: certificates, isLoading: certificatesLoading } = useQuery<MedicalCertificate[]>({
-    queryKey: ["/api/medical-certificates"],
+  const { data: membershipsResponse, isLoading: membershipsLoading } = useQuery<{data: Membership[], total: number}>({
+    queryKey: ["/api/memberships", membershipPage, pageSize, debouncedMembershipSearch],
+    queryFn: async () => {
+      const params = new URLSearchParams({ page: String(membershipPage), pageSize: String(pageSize) });
+      if (debouncedMembershipSearch) params.set('search', debouncedMembershipSearch);
+      const res = await fetch(`/api/memberships?${params.toString()}`);
+      if (!res.ok) throw new Error("Errore fetch memberships");
+      return res.json();
+    }
   });
+  const memberships = membershipsResponse?.data || [];
+  const membershipTotalPages = Math.ceil((membershipsResponse?.total || 0) / pageSize);
+
+  const { data: certificatesResponse, isLoading: certificatesLoading } = useQuery<{data: MedicalCertificate[], total: number}>({
+    queryKey: ["/api/medical-certificates", certPage, pageSize, debouncedCertificateSearch],
+    queryFn: async () => {
+      const params = new URLSearchParams({ page: String(certPage), pageSize: String(pageSize) });
+      if (debouncedCertificateSearch) params.set('search', debouncedCertificateSearch);
+      const res = await fetch(`/api/medical-certificates?${params.toString()}`);
+      if (!res.ok) throw new Error("Errore fetch certificati");
+      return res.json();
+    }
+  });
+  const certificates = certificatesResponse?.data || [];
+  const certTotalPages = Math.ceil((certificatesResponse?.total || 0) / pageSize);
 
   const { data: membersData } = useQuery<{ members: Member[], total: number }>({
     queryKey: ["/api/members"],
@@ -318,7 +344,10 @@ export default function Memberships() {
                 <Input
                   placeholder="Cerca per cognome, nome o codice fiscale..."
                   value={membershipSearch}
-                  onChange={(e) => setMembershipSearch(e.target.value)}
+                  onChange={(e) => {
+                    setMembershipSearch(e.target.value);
+                    setMembershipPage(1);
+                  }}
                   className="pl-10"
                   data-testid="input-search-memberships"
                 />
@@ -338,13 +367,7 @@ export default function Memberships() {
                   <p className="text-sm">Inizia creando la prima tessera</p>
                 </div>
               ) : (() => {
-                const filteredMembershipsRaw = memberships.filter((membership: any) => {
-                  if (!membershipSearch || membershipSearch.length < 3) return true;
-                  const searchLower = membershipSearch.toLowerCase();
-                  const memberName = `${membership.memberFirstName || ""} ${membership.memberLastName || ""}`.toLowerCase();
-                  const fiscalCode = membership.memberFiscalCode?.toLowerCase() || "";
-                  return memberName.includes(searchLower) || fiscalCode.includes(searchLower);
-                });
+                const filteredMembershipsRaw = memberships;
                 const filteredMemberships = tsMemberships.sortItems(filteredMembershipsRaw, getMembershipSortValue);
 
                 if (filteredMemberships.length === 0) {
@@ -450,6 +473,30 @@ export default function Memberships() {
               })()}
             </CardContent>
           </Card>
+          
+          {membershipTotalPages > 1 && (
+            <div className="mt-4 flex justify-end">
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious 
+                      onClick={() => setMembershipPage(p => Math.max(1, p - 1))}
+                      className={membershipPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                    />
+                  </PaginationItem>
+                  <PaginationItem>
+                    <span className="text-sm px-4">Pagina {membershipPage} di {membershipTotalPages}</span>
+                  </PaginationItem>
+                  <PaginationItem>
+                    <PaginationNext 
+                      onClick={() => setMembershipPage(p => Math.min(membershipTotalPages, p + 1))}
+                      className={membershipPage === membershipTotalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value="certificates" className="space-y-6">
@@ -473,7 +520,10 @@ export default function Memberships() {
                 <Input
                   placeholder="Cerca per cognome, nome o codice fiscale..."
                   value={certificateSearch}
-                  onChange={(e) => setCertificateSearch(e.target.value)}
+                  onChange={(e) => {
+                    setCertificateSearch(e.target.value);
+                    setCertPage(1);
+                  }}
                   className="pl-10"
                   data-testid="input-search-certificates"
                 />
@@ -493,13 +543,7 @@ export default function Memberships() {
                   <p className="text-sm">Inizia aggiungendo il primo certificato</p>
                 </div>
               ) : (() => {
-                const filteredCertificatesRaw = certificates.filter((cert: any) => {
-                  if (!certificateSearch || certificateSearch.length < 3) return true;
-                  const searchLower = certificateSearch.toLowerCase();
-                  const memberName = `${cert.memberFirstName || ""} ${cert.memberLastName || ""}`.toLowerCase();
-                  const fiscalCode = cert.memberFiscalCode?.toLowerCase() || "";
-                  return memberName.includes(searchLower) || fiscalCode.includes(searchLower);
-                });
+                const filteredCertificatesRaw = certificates;
                 const filteredCertificates = tsCertificates.sortItems(filteredCertificatesRaw, getCertificateSortValue);
 
                 if (filteredCertificates.length === 0) {
@@ -563,6 +607,30 @@ export default function Memberships() {
               })()}
             </CardContent>
           </Card>
+          
+          {certTotalPages > 1 && (
+            <div className="mt-4 flex justify-end">
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious 
+                      onClick={() => setCertPage(p => Math.max(1, p - 1))}
+                      className={certPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                    />
+                  </PaginationItem>
+                  <PaginationItem>
+                    <span className="text-sm px-4">Pagina {certPage} di {certTotalPages}</span>
+                  </PaginationItem>
+                  <PaginationItem>
+                    <PaginationNext 
+                      onClick={() => setCertPage(p => Math.min(certTotalPages, p + 1))}
+                      className={certPage === certTotalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value="entity-cards" className="space-y-6">

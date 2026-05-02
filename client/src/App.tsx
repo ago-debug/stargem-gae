@@ -1,3 +1,4 @@
+import React, { Suspense } from "react";
 import { Switch, Route, Redirect, useRoute } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -16,77 +17,77 @@ import { CommandPalette } from "@/components/command-palette";
 import { useAuth, AuthProvider } from "@/hooks/use-auth";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { User as SelectUser } from "@shared/schema";
-import NotFound from "@/pages/not-found";
-import Landing from "@/pages/landing";
-import AuthPage from "@/pages/auth-page";
-import FirstLogin from "@/pages/first-login";
-import ForgotPassword from "@/pages/forgot-password";
-import Dashboard from "@/pages/dashboard";
-import Members from "@/pages/members";
-import Courses from "@/pages/courses";
-import Workshops from "@/pages/workshops";
-import Categories from "@/pages/categories";
-import Studios from "@/pages/studios";
-import Memberships from "@/pages/memberships";
-import GemTeam from "@/pages/gemteam";
-import GemTeamMe from "@/pages/gemteam-me";
-import Payments from "@/pages/payments";
-import AccessControl from "@/pages/access-control";
-import Reports from "@/pages/reports";
-import ImportData from "@/pages/import-data";
-import UtentiPermessi from "@/pages/utenti-permessi";
-import ResetStagione from "@/pages/reset-stagione";
-import AuditLogs from "@/pages/audit-logs";
+const NotFound = React.lazy(() => import("@/pages/not-found"));
+const Landing = React.lazy(() => import("@/pages/landing"));
+const AuthPage = React.lazy(() => import("@/pages/auth-page"));
+const FirstLogin = React.lazy(() => import("@/pages/first-login"));
+const ForgotPassword = React.lazy(() => import("@/pages/forgot-password"));
+const Dashboard = React.lazy(() => import("@/pages/dashboard"));
+const Members = React.lazy(() => import("@/pages/members"));
+const Courses = React.lazy(() => import("@/pages/courses"));
+const Workshops = React.lazy(() => import("@/pages/workshops"));
+const Categories = React.lazy(() => import("@/pages/categories"));
+const Studios = React.lazy(() => import("@/pages/studios"));
+const Memberships = React.lazy(() => import("@/pages/memberships"));
+const GemTeam = React.lazy(() => import("@/pages/gemteam"));
+const GemTeamMe = React.lazy(() => import("@/pages/gemteam-me"));
+const Payments = React.lazy(() => import("@/pages/payments"));
+const AccessControl = React.lazy(() => import("@/pages/access-control"));
+const Reports = React.lazy(() => import("@/pages/reports"));
+const ImportData = React.lazy(() => import("@/pages/import-data"));
+const UtentiPermessi = React.lazy(() => import("@/pages/utenti-permessi"));
+const ResetStagione = React.lazy(() => import("@/pages/reset-stagione"));
+const AuditLogs = React.lazy(() => import("@/pages/audit-logs"));
 
-import AnagraficaHome from "@/pages/anagrafica-home";
-import CardGenerator from "@/pages/card-generator";
-import AdminPanel from "@/pages/admin-panel";
-import CalendarPage from "@/pages/calendar";
-import BookingServiceCategories from "@/pages/booking-service-categories";
-import BookingServices from "@/pages/booking-services";
-import StudioBookings from "@/pages/studio-bookings";
-import AccountingSheet from "@/pages/accounting-sheet";
-import MascheraInputGenerale from "@/pages/maschera-input-generale";
-import GestioneAttivitaStub from "@/pages/gestione-attivita-stub";
-import IscrizioniPagamenti from "@/pages/iscrizioni-pagamenti";
-import PriceLists from "@/pages/listini";
-import ListiniHome from "@/pages/listini-home";
-import QuoteListini from "@/pages/quote-listini";
-import QuotePromo from "@/pages/quote-promo";
-import WebhookStatus from "@/pages/webhook-status";
-import WcMapping from "@/pages/wc-mapping";
-import Attivita from "@/pages/attivita";
-import IscrittiPerAttivita from "@/pages/iscritti_per_attivita";
-import TodoList from "@/pages/todo-list";
-import Commenti from "@/pages/commenti";
-import SchedaCorso from "@/pages/scheda-corso";
-import SchedaWorkshop from "@/pages/scheda-workshop";
-import SchedaDomenica from "@/pages/scheda-domenica";
-import SchedaAllenamento from "@/pages/scheda-allenamento";
-import SchedaLezioneIndividuale from "@/pages/scheda-lezione-individuale";
-import SchedaCampus from "@/pages/scheda-campus";
-import SchedaSaggio from "@/pages/scheda-saggio";
-import SchedaVacanzaStudio from "@/pages/scheda-vacanza-studio";
-import Planning from "@/pages/planning";
-import GemPass from "@/pages/gempass";
-import GemStaff from "@/pages/gemstaff";
-import GemStaffMe from "@/pages/gemstaff-me";
-import AreaTesserati from "@/pages/area-tesserati";
-import StrategicProgrammingTable from "@/pages/StrategicProgrammingTable";
-import KnowledgeBase from "@/pages/knowledge-base";
-import GestioneNote from "@/pages/gestione-note";
+const AnagraficaHome = React.lazy(() => import("@/pages/anagrafica-home"));
+const CardGenerator = React.lazy(() => import("@/pages/card-generator"));
+const AdminPanel = React.lazy(() => import("@/pages/admin-panel"));
+const CalendarPage = React.lazy(() => import("@/pages/calendar"));
+const BookingServiceCategories = React.lazy(() => import("@/pages/booking-service-categories"));
+const BookingServices = React.lazy(() => import("@/pages/booking-services"));
+const StudioBookings = React.lazy(() => import("@/pages/studio-bookings"));
+const AccountingSheet = React.lazy(() => import("@/pages/accounting-sheet"));
+const MascheraInputGenerale = React.lazy(() => import("@/pages/maschera-input-generale"));
+const GestioneAttivitaStub = React.lazy(() => import("@/pages/gestione-attivita-stub"));
+const IscrizioniPagamenti = React.lazy(() => import("@/pages/iscrizioni-pagamenti"));
+const PriceLists = React.lazy(() => import("@/pages/listini"));
+const ListiniHome = React.lazy(() => import("@/pages/listini-home"));
+const QuoteListini = React.lazy(() => import("@/pages/quote-listini"));
+const QuotePromo = React.lazy(() => import("@/pages/quote-promo"));
+const WebhookStatus = React.lazy(() => import("@/pages/webhook-status"));
+const WcMapping = React.lazy(() => import("@/pages/wc-mapping"));
+const Attivita = React.lazy(() => import("@/pages/attivita"));
+const IscrittiPerAttivita = React.lazy(() => import("@/pages/iscritti_per_attivita"));
+const TodoList = React.lazy(() => import("@/pages/todo-list"));
+const Commenti = React.lazy(() => import("@/pages/commenti"));
+const SchedaCorso = React.lazy(() => import("@/pages/scheda-corso"));
+const SchedaWorkshop = React.lazy(() => import("@/pages/scheda-workshop"));
+const SchedaDomenica = React.lazy(() => import("@/pages/scheda-domenica"));
+const SchedaAllenamento = React.lazy(() => import("@/pages/scheda-allenamento"));
+const SchedaLezioneIndividuale = React.lazy(() => import("@/pages/scheda-lezione-individuale"));
+const SchedaCampus = React.lazy(() => import("@/pages/scheda-campus"));
+const SchedaSaggio = React.lazy(() => import("@/pages/scheda-saggio"));
+const SchedaVacanzaStudio = React.lazy(() => import("@/pages/scheda-vacanza-studio"));
+const Planning = React.lazy(() => import("@/pages/planning"));
+const GemPass = React.lazy(() => import("@/pages/gempass"));
+const GemStaff = React.lazy(() => import("@/pages/gemstaff"));
+const GemStaffMe = React.lazy(() => import("@/pages/gemstaff-me"));
+const AreaTesserati = React.lazy(() => import("@/pages/area-tesserati"));
+const StrategicProgrammingTable = React.lazy(() => import("@/pages/StrategicProgrammingTable"));
+const KnowledgeBase = React.lazy(() => import("@/pages/knowledge-base"));
+const GestioneNote = React.lazy(() => import("@/pages/gestione-note"));
 
-import SundayActivities from "@/pages/sunday-activities";
-import Trainings from "@/pages/trainings";
-import IndividualLessons from "@/pages/individual-lessons";
-import CampusActivities from "@/pages/campus-activities";
-import Recitals from "@/pages/recitals";
-import VacationStudies from "@/pages/vacation-studies";
+const SundayActivities = React.lazy(() => import("@/pages/sunday-activities"));
+const Trainings = React.lazy(() => import("@/pages/trainings"));
+const IndividualLessons = React.lazy(() => import("@/pages/individual-lessons"));
+const CampusActivities = React.lazy(() => import("@/pages/campus-activities"));
+const Recitals = React.lazy(() => import("@/pages/recitals"));
+const VacationStudies = React.lazy(() => import("@/pages/vacation-studies"));
 
-import CampusCategories from "@/pages/campus-categories";
-import VacationCategories from "@/pages/vacation-categories";
-import RentalsCategories from "@/pages/rentals-categories";
-import MerchandisingCategories from "@/pages/merchandising-categories";
+const CampusCategories = React.lazy(() => import("@/pages/campus-categories"));
+const VacationCategories = React.lazy(() => import("@/pages/vacation-categories"));
+const RentalsCategories = React.lazy(() => import("@/pages/rentals-categories"));
+const MerchandisingCategories = React.lazy(() => import("@/pages/merchandising-categories"));
 
 import { NotificationCenter } from "@/components/notification-center";
 import { GemChatBadge } from "@/components/gem-chat-badge";
@@ -171,7 +172,8 @@ const StubCategorieMerchandising = () => <GestioneAttivitaStub title="Categorie 
 
 function Router() {
   return (
-    <Switch>
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen w-full"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+      <Switch>
       <ProtectedRoute path="/" component={Dashboard} />
       <ProtectedRoute path="/dashboard" component={Dashboard} />
       <ProtectedRoute path="/maschera-input" component={MascheraInputGenerale} />
@@ -273,6 +275,7 @@ function Router() {
       <ProtectedRoute path="/commenti" component={Commenti} />
       <Route component={NotFound} />
     </Switch>
+      </Suspense>
   );
 }
 

@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
@@ -67,12 +68,24 @@ export default function AccessControl() {
   const [, setLocation] = useLocation();
   const [barcodeInput, setBarcodeInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedMember, setSelectedMember] = useState<MemberSearchResult | null>(null);
+  const [selectedMemberData, setSelectedMemberData] = useState<Member | null>(null);
   const [activeTab, setActiveTab] = useState("search");
 
-  const { data: recentAccesses, isLoading: accessesLoading } = useQuery<AccessLog[]>({
-    queryKey: ["/api/access-logs"],
+  const [page, setPage] = useState(1);
+  const pageSize = 50;
+
+  const { data: recentAccessesData, isLoading: accessesLoading } = useQuery<{data: AccessLog[], total: number}>({
+    queryKey: ["/api/access-logs", { page, pageSize }],
+    queryFn: async () => {
+      const res = await fetch(`/api/access-logs?page=${page}&pageSize=${pageSize}`);
+      if (!res.ok) throw new Error("Errore fetch accessi");
+      return res.json();
+    }
   });
+
+  const recentAccesses = recentAccessesData?.data || [];
+  const totalAccesses = recentAccessesData?.total || 0;
+  const totalPages = Math.ceil(totalAccesses / pageSize);
 
   const { data: searchMembersData, isLoading: searchLoading } = useQuery<{ members: Member[], total: number }>({
     queryKey: ["/api/members", "search", searchQuery],
@@ -86,25 +99,37 @@ export default function AccessControl() {
     enabled: searchQuery.length >= 3,
   });
   const filteredMembers = searchMembersData?.members?.slice(0, 10) || [];
+  
+  const selectedMemberId = selectedMemberData?.id;
 
   const { data: enrollments } = useQuery<Enrollment[]>({
-    queryKey: ["/api/enrollments?type=corsi"],
+    queryKey: ["/api/enrollments?type=corsi", { memberId: selectedMemberId }],
+    enabled: !!selectedMemberId,
+    queryFn: async () => { const res = await fetch(`/api/enrollments?type=corsi&memberId=${selectedMemberId}`); return res.json(); }
   });
 
   const { data: workshopEnrollments } = useQuery<any[]>({
-    queryKey: ["/api/workshop-enrollments"],
+    queryKey: ["/api/workshop-enrollments", { memberId: selectedMemberId }],
+    enabled: !!selectedMemberId,
+    queryFn: async () => { const res = await fetch(`/api/workshop-enrollments?memberId=${selectedMemberId}`); return res.json(); }
   });
 
   const { data: payments } = useQuery<Payment[]>({
-    queryKey: ["/api/payments"],
+    queryKey: ["/api/payments", { memberId: selectedMemberId }],
+    enabled: !!selectedMemberId,
+    queryFn: async () => { const res = await fetch(`/api/payments?memberId=${selectedMemberId}`); return res.json(); }
   });
 
   const { data: membershipsData } = useQuery<Membership[]>({
-    queryKey: ["/api/memberships"],
+    queryKey: ["/api/memberships", { memberId: selectedMemberId }],
+    enabled: !!selectedMemberId,
+    queryFn: async () => { const res = await fetch(`/api/memberships?memberId=${selectedMemberId}`); return res.json(); }
   });
 
   const { data: medicalCerts } = useQuery<MedicalCertificate[]>({
-    queryKey: ["/api/medical-certificates"],
+    queryKey: ["/api/medical-certificates", { memberId: selectedMemberId }],
+    enabled: !!selectedMemberId,
+    queryFn: async () => { const res = await fetch(`/api/medical-certificates?memberId=${selectedMemberId}`); return res.json(); }
   });
 
   const { data: courses } = useQuery<Course[]>({
@@ -211,9 +236,13 @@ export default function AccessControl() {
     };
   };
 
+  const selectedMember = useMemo(() => {
+    if (!selectedMemberData) return null;
+    return getMemberDetails(selectedMemberData);
+  }, [selectedMemberData, enrollments, workshopEnrollments, payments, membershipsData, medicalCerts]);
+
   const handleSelectMember = (member: Member) => {
-    const details = getMemberDetails(member);
-    setSelectedMember(details);
+    setSelectedMemberData(member);
     setSearchQuery("");
   };
 
@@ -346,14 +375,11 @@ export default function AccessControl() {
                   <ScrollArea className="h-[400px] border rounded-md">
                     <div className="p-2 space-y-1">
                       {filteredMembers.map((member) => {
-                        const details = getMemberDetails(member);
-                        const hasIssues = details.anomalies.some(a => a.type === 'error');
-
                         return (
                           <button
                             key={member.id}
                             onClick={() => handleSelectMember(member)}
-                            className={`w-full text-left p-3 rounded-md hover-elevate ${selectedMember?.member.id === member.id
+                            className={`w-full text-left p-3 rounded-md hover-elevate ${selectedMemberData?.id === member.id
                               ? 'bg-primary/10 border border-primary/20'
                               : ''
                               }`}
@@ -370,9 +396,6 @@ export default function AccessControl() {
                                   </p>
                                 )}
                               </div>
-                              {hasIssues && (
-                                <AlertTriangle className="w-4 h-4 text-destructive flex-shrink-0" />
-                              )}
                             </div>
                           </button>
                         );
@@ -821,6 +844,30 @@ export default function AccessControl() {
                 ))}
               </TableBody>
             </Table>
+          )}
+
+          {totalPages > 1 && (
+            <div className="mt-4 flex justify-end">
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious 
+                      onClick={() => setPage(p => Math.max(1, p - 1))}
+                      className={page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                    />
+                  </PaginationItem>
+                  <PaginationItem>
+                    <span className="text-sm px-4">Pagina {page} di {totalPages}</span>
+                  </PaginationItem>
+                  <PaginationItem>
+                    <PaginationNext 
+                      onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                      className={page === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
           )}
         </CardContent>
       </Card>

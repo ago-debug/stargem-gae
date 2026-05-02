@@ -19,6 +19,8 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
 import { cn } from "@/lib/utils";
 import type { Payment, InsertPayment, Member, PaymentMethod, Course } from "@shared/schema";
+import { useDebounce } from "@/hooks/use-debounce";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 
 import { useLocation, Link } from "wouter";
 import { NuovoPagamentoModal } from "@/components/nuovo-pagamento-modal";
@@ -34,9 +36,23 @@ export default function Payments() {
   const [showPendingOnly, setShowPendingOnly] = useState(false);
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
 
-  const { data: payments, isLoading } = useQuery<Payment[]>({
-    queryKey: ["/api/payments"],
+  const [page, setPage] = useState(1);
+  const pageSize = 50;
+  const debouncedSearch = useDebounce(searchQuery, 500);
+
+  const { data: paymentsResponse, isLoading } = useQuery<{data: Payment[], total: number}>({
+    queryKey: ["/api/payments", { page, pageSize, search: debouncedSearch }],
+    queryFn: async () => {
+      const params = new URLSearchParams({ page: String(page), pageSize: String(pageSize) });
+      if (debouncedSearch) params.set('search', debouncedSearch);
+      const res = await fetch(`/api/payments?${params}`);
+      if (!res.ok) throw new Error("Errore fetch pagamenti");
+      return res.json();
+    }
   });
+
+  const payments = paymentsResponse?.data || [];
+  const totalPages = Math.ceil((paymentsResponse?.total || 0) / pageSize);
 
   const { data: membersData } = useQuery<{ members: Member[], total: number }>({
     queryKey: ["/api/members"],
@@ -49,34 +65,6 @@ export default function Payments() {
     enabled: memberSearchQuery.length >= 3,
   });
   const searchedMembers = searchedMembersData?.members || [];
-
-  const { data: enrollments } = useQuery<any[]>({
-    queryKey: ["/api/enrollments"],
-  });
-
-  const { data: courses } = useQuery<any[]>({
-    queryKey: ["/api/courses"],
-  });
-
-  const { data: paymentMethods } = useQuery<PaymentMethod[]>({
-    queryKey: ["/api/payment-methods"],
-  });
-
-  const { data: workshopEnrollments } = useQuery<any[]>({
-    queryKey: ["/api/workshop-enrollments"],
-  });
-
-  const { data: workshops } = useQuery<any[]>({
-    queryKey: ["/api/workshops"],
-  });
-
-  const { data: studioBookings } = useQuery<any[]>({
-    queryKey: ["/api/studio-bookings"],
-  });
-
-  const { data: membershipsDataList } = useQuery<any[]>({
-    queryKey: ["/api/memberships"],
-  });
 
   const createMutation = useMutation({
     mutationFn: async (data: InsertPayment) => {
@@ -197,14 +185,10 @@ export default function Payments() {
     toast({ title: "Esportazione completata" });
   };
 
-  const filteredPaymentsRaw = payments?.filter(p => {
-    const matchesSearch = !searchQuery ||
-      getMemberName(p).toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (p.description || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (p.type || '').toLowerCase().includes(searchQuery.toLowerCase());
+  const filteredPaymentsRaw = payments.filter(p => {
     const matchesPending = !showPendingOnly || p.status === 'pending';
-    return matchesSearch && matchesPending;
-  }) || [];
+    return matchesPending;
+  });
 
   const { sortConfig, handleSort, sortItems, isSortedColumn } = useSortableTable<Payment>("dueDate");
 
@@ -320,9 +304,12 @@ export default function Payments() {
           <div className="relative max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
-              placeholder="Cerca pagamento..."
+              placeholder="Cerca pagamento per nome utente o descrizione..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setPage(1);
+              }}
               className="pl-10"
               data-testid="input-search-payments"
             />
@@ -406,6 +393,30 @@ export default function Payments() {
                 ))}
               </TableBody>
             </Table>
+          )}
+          
+          {totalPages > 1 && (
+            <div className="mt-4 flex justify-end">
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious 
+                      onClick={() => setPage(p => Math.max(1, p - 1))}
+                      className={page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                    />
+                  </PaginationItem>
+                  <PaginationItem>
+                    <span className="text-sm px-4">Pagina {page} di {totalPages}</span>
+                  </PaginationItem>
+                  <PaginationItem>
+                    <PaginationNext 
+                      onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                      className={page === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
           )}
         </CardContent>
       </Card>

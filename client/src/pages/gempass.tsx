@@ -12,8 +12,10 @@ import { differenceInDays, parseISO, format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useDebounce } from "@/hooks/use-debounce";
 
 interface MembershipRecord {
   id: number;
@@ -34,8 +36,11 @@ export default function GemPass() {
   const queryClient = useQueryClient();
 
   const [search, setSearch] = useState('');
+  const debouncedSearch = useDebounce(search, 500);
   const [filterTipo, setFilterTipo] = useState('all');
   const [filterStato, setFilterStato] = useState('all');
+  const [page, setPage] = useState(1);
+  const pageSize = 50;
 
   // --- TAB 2 STATES ---
   const [cfSearch, setCfSearch] = useState('');
@@ -119,9 +124,26 @@ export default function GemPass() {
   const [firmaTutore2, setFirmaTutore2] = useState(false);
 
   // Queries
-  const { data: memberships = [], isLoading } = useQuery<MembershipRecord[]>({
-    queryKey: ['/api/memberships'],
+  const queryParams = new URLSearchParams({
+    page: String(page),
+    pageSize: String(pageSize),
   });
+  if (debouncedSearch) queryParams.set('search', debouncedSearch);
+  if (filterTipo !== 'all') queryParams.set('membership_type', filterTipo);
+  if (filterStato !== 'all') queryParams.set('status', filterStato);
+
+  const { data: tessereResponse, isLoading } = useQuery<{data: MembershipRecord[], total: number}>({
+    queryKey: ['/api/gempass/tessere', page, pageSize, debouncedSearch, filterTipo, filterStato],
+    queryFn: async () => {
+      const res = await fetch(`/api/gempass/tessere?${queryParams.toString()}`);
+      if (!res.ok) throw new Error('Failed to fetch tessere');
+      return res.json();
+    }
+  });
+  
+  const memberships = tessereResponse?.data || [];
+  const totalItems = tessereResponse?.total || 0;
+  const totalPages = Math.ceil(totalItems / pageSize);
 
 
   const { data: activeSeasonRaw } = useQuery<any>({
@@ -200,32 +222,7 @@ export default function GemPass() {
     return { label: '—', className: 'bg-slate-300 text-foreground/80 hover:bg-slate-400' };
   };
 
-  const filtered = memberships.filter(m => {
-    const memberFullName = `${m.memberLastName || ''} ${m.memberFirstName || ''}`.trim();
-    
-    const matchSearch = !search ||
-      m.membershipNumber?.toLowerCase().includes(search.toLowerCase()) ||
-      memberFullName.toLowerCase().includes(search.toLowerCase());
-      
-    const computedStato = getComputedStatus(m);
-    const typeLabel = getTypeBadgeInfo(m.membershipType).label;
-    
-    let matchTipo = true;
-    if (filterTipo !== 'all') {
-      if (filterTipo === 'adulto' && typeLabel !== 'ADU') matchTipo = false;
-      if (filterTipo === 'minore' && typeLabel !== 'MIN') matchTipo = false;
-      if (filterTipo === 'b2b' && typeLabel !== 'B2B') matchTipo = false;
-    }
-
-    let matchStato = true;
-    if (filterStato !== 'all') {
-      if (filterStato === 'attiva' && computedStato !== 'ATTIVA') matchStato = false;
-      if (filterStato === 'in-scadenza' && computedStato !== 'IN SCADENZA') matchStato = false;
-      if (filterStato === 'scaduta' && computedStato !== 'SCADUTA') matchStato = false;
-    }
-
-    return matchSearch && matchTipo && matchStato;
-  });
+  const filtered = memberships; // Ora il filtro è tutto lato server
 
   // Tab 2 Functions
   const handleSearchCF = async () => {
@@ -377,12 +374,15 @@ export default function GemPass() {
               <Input
                 placeholder="Cerca numero o nome utente..."
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setPage(1);
+                }}
                 className="pl-9 bg-background"
               />
             </div>
             <div className="w-full sm:w-[160px]">
-              <Select value={filterTipo} onValueChange={setFilterTipo}>
+              <Select value={filterTipo} onValueChange={(val) => { setFilterTipo(val); setPage(1); }}>
                 <SelectTrigger className="bg-background">
                   <SelectValue placeholder="Tipo tessera" />
                 </SelectTrigger>
@@ -395,7 +395,7 @@ export default function GemPass() {
               </Select>
             </div>
             <div className="w-full sm:w-[160px]">
-              <Select value={filterStato} onValueChange={setFilterStato}>
+              <Select value={filterStato} onValueChange={(val) => { setFilterStato(val); setPage(1); }}>
                 <SelectTrigger className="bg-background">
                   <SelectValue placeholder="Stato" />
                 </SelectTrigger>
@@ -408,7 +408,7 @@ export default function GemPass() {
               </Select>
             </div>
             <Badge variant="secondary" className="h-10 px-4 text-sm whitespace-nowrap">
-              {filtered.length} tessere
+              {totalItems} tessere
             </Badge>
           </div>
 
@@ -482,6 +482,30 @@ export default function GemPass() {
               </TableBody>
             </Table>
           </div>
+          
+          {totalPages > 1 && (
+            <div className="mt-4 flex justify-end">
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious 
+                      onClick={() => setPage(p => Math.max(1, p - 1))}
+                      className={page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                    />
+                  </PaginationItem>
+                  <PaginationItem>
+                    <span className="text-sm px-4">Pagina {page} di {totalPages}</span>
+                  </PaginationItem>
+                  <PaginationItem>
+                    <PaginationNext 
+                      onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                      className={page === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value="nuova-domanda" className="mt-4">
