@@ -3319,10 +3319,33 @@ Regole:
   app.get("/api/memberships", isAuthenticated, async (req, res) => {
     try {
       const memberId = req.query.memberId ? parseInt(req.query.memberId as string) : null;
-      const memberships = memberId
+      let memberships = memberId
         ? await storage.getMembershipsByMemberId(memberId)
         : await storage.getMembershipsWithMembers();
-      res.json(memberships);
+
+      const { search, page, pageSize } = req.query;
+      if (search) {
+        const s = String(search).toLowerCase();
+        memberships = memberships.filter((m: any) =>
+          m.membershipNumber?.toLowerCase().includes(s) ||
+          m.lastName?.toLowerCase().includes(s) ||
+          m.firstName?.toLowerCase().includes(s) ||
+          m.fiscalCode?.toLowerCase().includes(s) ||
+          m.memberLastName?.toLowerCase().includes(s) ||
+          m.memberFirstName?.toLowerCase().includes(s)
+        );
+      }
+
+      const total = memberships.length;
+      let paginatedData = memberships;
+      const p = parseInt(String(page || '1'));
+      const s = parseInt(String(pageSize || '50'));
+      if (!isNaN(p) && !isNaN(s)) {
+        const start = (p - 1) * s;
+        paginatedData = memberships.slice(start, start + s);
+      }
+
+      res.json({ data: paginatedData, total });
     } catch (error) {
       console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to fetch memberships" });
@@ -5872,10 +5895,33 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
   app.get("/api/medical-certificates", isAuthenticated, async (req, res) => {
     try {
       const memberId = req.query.memberId ? parseInt(req.query.memberId as string) : null;
-      const certificates = memberId
+      let certificates = memberId
         ? await storage.getMedicalCertificatesByMemberId(memberId)
         : await storage.getMedicalCertificatesWithMembers();
-      res.json(certificates);
+
+      const { search, page, pageSize } = req.query;
+      if (search) {
+        const s = String(search).toLowerCase();
+        certificates = certificates.filter((c: any) =>
+          c.doctorName?.toLowerCase().includes(s) ||
+          c.lastName?.toLowerCase().includes(s) ||
+          c.firstName?.toLowerCase().includes(s) ||
+          c.fiscalCode?.toLowerCase().includes(s) ||
+          c.memberLastName?.toLowerCase().includes(s) ||
+          c.memberFirstName?.toLowerCase().includes(s)
+        );
+      }
+
+      const total = certificates.length;
+      let paginatedData = certificates;
+      const p = parseInt(String(page || '1'));
+      const s = parseInt(String(pageSize || '50'));
+      if (!isNaN(p) && !isNaN(s)) {
+        const start = (p - 1) * s;
+        paginatedData = certificates.slice(start, start + s);
+      }
+
+      res.json({ data: paginatedData, total });
     } catch (error) {
       console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to fetch medical certificates" });
