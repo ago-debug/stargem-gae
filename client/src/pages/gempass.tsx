@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -19,6 +20,7 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { TabTessereEnte } from "@/components/gempass/TabTessereEnte";
 import { TabCertificati } from "@/components/gempass/TabCertificati";
 import { TabStampaTessere } from "@/components/gempass/TabStampaTessere";
+import { NuovoPagamentoModal } from "@/components/nuovo-pagamento-modal";
 
 interface MembershipRecord {
   id: number;
@@ -34,9 +36,14 @@ interface MembershipRecord {
   memberFiscalCode?: string;
 }
 
-export default function GemPass() {
+export default function GemPassTesseramenti() {
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // --- STATO RINNOVO RAPIDO MODALE ---
+  const [renewalModalOpen, setRenewalModalOpen] = useState(false);
+  const [renewalMemberId, setRenewalMemberId] = useState<number | null>(null);
 
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebounce(search, 500);
@@ -83,40 +90,7 @@ export default function GemPass() {
     return matchSearch && matchTipo && matchSeason;
   });
 
-  // --- STATI TAB RINNOVO TESSERA ---
-  const [isRinnovoOpen, setIsRinnovoOpen] = useState(false);
-  const [selectedTessera, setSelectedTessera] = useState<any>(null);
-
-  const rinnovaTesseraMutation = useMutation({
-    mutationFn: async (payload: any) => {
-      const res = await fetch(`/api/gempass/tessere/${selectedTessera.id}/rinnova`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      if (!res.ok) throw new Error(await res.text());
-      return res.json();
-    },
-    onSuccess: () => {
-      toast({ title: 'Successo', description: 'Tessera rinnovata correttamente per la nuova stagione.' });
-      queryClient.invalidateQueries({ queryKey: ['/api/memberships'] });
-      setIsRinnovoOpen(false);
-      setSelectedTessera(null);
-    },
-    onError: (err: any) => {
-      toast({ title: 'Errore', description: err.message || 'Impossibile rinnovare la tessera', variant: 'destructive' });
-    }
-  });
-
-  const handleRinnovaClick = (tessera: any) => {
-    setSelectedTessera(tessera);
-    setIsRinnovoOpen(true);
-  };
-
-
-
-
-  // Parent States
+  // Queries
   const [tutore1, setTutore1] = useState({
     cognome: '', nome: '', codiceFiscale: '', cellulare: '', email: ''
   });
@@ -472,11 +446,14 @@ export default function GemPass() {
                           <Badge className={statoClass}>{computedStato}</Badge>
                         </TableCell>
                         <TableCell className="text-right space-x-2">
-                          <Button variant="outline" size="sm" onClick={() => console.log('Dettaglio', m.id)}>
+                          <Button variant="outline" size="sm" onClick={() => setLocation(`/maschera-input?memberId=${m.memberId}`)}>
                             Dettaglio
                           </Button>
                           {(computedStato === 'SCADUTA' || computedStato === 'IN SCADENZA') && (
-                            <Button variant="default" size="sm" className="bg-amber-600 hover:bg-amber-700 text-white" onClick={() => handleRinnovaClick(m)}>
+                            <Button variant="default" size="sm" className="bg-amber-600 hover:bg-amber-700 text-white" onClick={() => {
+                              setRenewalMemberId(m.memberId);
+                              setRenewalModalOpen(true);
+                            }}>
                               Rinnova
                             </Button>
                           )}
@@ -1011,46 +988,15 @@ export default function GemPass() {
         </TabsContent>
       </Tabs>
 
-      {/* Dialog Rinnovo Tessera */}
-      <Dialog open={isRinnovoOpen} onOpenChange={setIsRinnovoOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Rinnova Tessera</DialogTitle>
-            <DialogDescription>
-              Stai per rinnovare la tessera per la prossima stagione.
-            </DialogDescription>
-          </DialogHeader>
-          
-          {selectedTessera && (
-            <div className="space-y-4 py-4 text-sm">
-              <div className="grid grid-cols-2 gap-2">
-                <span className="font-semibold text-muted-foreground">Socio:</span>
-                <span>{selectedTessera.memberLastName} {selectedTessera.memberFirstName}</span>
-                <span className="font-semibold text-muted-foreground">Tessera Attuale:</span>
-                <span>{selectedTessera.membershipNumber} (Scadenza: {selectedTessera.expiryDate ? format(parseISO(selectedTessera.expiryDate), 'dd/MM/yyyy') : '—'})</span>
-                <span className="font-semibold text-muted-foreground">Stagione Rinnovo:</span>
-                <span className="font-medium">2026-2027 (2627)</span>
-              </div>
-            </div>
-          )}
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsRinnovoOpen(false)}>Annulla</Button>
-            <Button 
-              onClick={() => {
-                rinnovaTesseraMutation.mutate({
-                  season_competence: '2627',
-                  season_start_year: 2026,
-                  season_end_year: 2027
-                });
-              }}
-              disabled={rinnovaTesseraMutation.isPending}
-            >
-              {rinnovaTesseraMutation.isPending ? 'Elaborazione...' : 'Conferma Rinnovo'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <NuovoPagamentoModal
+        isOpen={renewalModalOpen}
+        onClose={() => {
+          setRenewalModalOpen(false);
+          setRenewalMemberId(null);
+        }}
+        defaultMemberId={renewalMemberId}
+        defaultIncludeTessera={true}
+      />
     </div>
   );
 }

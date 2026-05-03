@@ -21,6 +21,7 @@ import {
   getGoogleAuthUrl,
   getGoogleOAuth2Client
 } from "./google-calendar";
+import { registerPaymentRoutes } from "./routes/payments";
 import { log } from "./vite";
 import { db, pool } from "./db";
 import { sendSMS, sendEmail } from "./notifications";
@@ -583,6 +584,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     };
   };
 
+
   // ==========================================
   // AGENTE AI (TEO COPILOT E MAGIC BUTTONS)
   // ==========================================
@@ -888,6 +890,8 @@ Regole:
       }
     }
   };
+  // Register modularized routes
+  registerPaymentRoutes(app, { checkPermission, logUserActivity });
 
   // ==== Google Auth Routes ====
   app.get("/api/auth/google/url", isAuthenticated, isAdmin, async (req, res) => {
@@ -2840,6 +2844,48 @@ Regole:
     } catch (error) {
       console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to delete subscription type" });
+    }
+  });
+
+  // ==== Admin DB Monitor Route ====
+  app.get("/api/admin/db-monitor", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      if (!user || (user.role?.toLowerCase() !== 'master' && user.role?.toLowerCase() !== 'admin' && user.role?.toLowerCase() !== 'super admin' && user.role?.toLowerCase() !== 'amministratore totale')) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      const results = [];
+      const { getTableColumns } = await import("drizzle-orm");
+      for (const key in schema) {
+        const item = (schema as any)[key];
+        if (item && typeof item === 'object') {
+          try {
+            const cols = getTableColumns(item);
+            if (cols && Object.keys(cols).length > 0) {
+              const colNames = Object.keys(cols);
+              let rowCount = 0;
+              try {
+                const countResult = await db.select({ count: sql<number>`count(*)` }).from(item);
+                rowCount = Number(countResult[0]?.count || 0);
+              } catch (e) {
+                // Table might not exist in db yet or not a valid table
+              }
+              results.push({
+                table: key,
+                columnCount: colNames.length,
+                rowCount,
+                columns: colNames
+              });
+            }
+          } catch(e) {}
+        }
+      }
+      results.sort((a, b) => b.columnCount - a.columnCount);
+      res.json(results);
+    } catch (error) {
+      console.error("[API Error] DB Monitor:", error);
+      res.status(500).json({ message: "Error reading db stats" });
     }
   });
 
@@ -5950,50 +5996,6 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
     }
   });
 
-  // ==== Payment Methods Routes ====
-  app.get("/api/payment-methods", isAuthenticated, async (req, res) => {
-    try {
-      const methods = await storage.getPaymentMethods();
-      res.json(methods);
-    } catch (error) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(500).json({ message: "Failed to fetch payment methods" });
-    }
-  });
-
-  app.post("/api/payment-methods", isAuthenticated, async (req, res) => {
-    try {
-      const validatedData = insertPaymentMethodSchema.parse(req.body);
-      const method = await storage.createPaymentMethod(validatedData);
-      res.status(201).json(method);
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(400).json({ message: error.message || "Failed to create payment method" });
-    }
-  });
-
-  app.patch("/api/payment-methods/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const method = await storage.updatePaymentMethod(id, req.body);
-      res.json(method);
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(400).json({ message: error.message || "Failed to update payment method" });
-    }
-  });
-
-  app.delete("/api/payment-methods/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      await storage.deletePaymentMethod(id);
-      res.status(204).send();
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(400).json({ message: error.message || "Failed to delete payment method" });
-    }
-  });
-
   // ==== Payments Routes ====
   app.get("/api/payments", isAuthenticated, checkPermission("/pagamenti", "read"), async (req, res) => {
     try {
@@ -7016,56 +7018,6 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
     } catch (error) {
       console.error("[API Error] Caught explicitly:", error);
       res.status(500).json({ message: "Failed to delete attendance" });
-    }
-  });
-
-  // ==== Payment Notes Routes ====
-  app.get("/api/payment-notes", isAuthenticated, async (req, res) => {
-    try {
-      const notes = await storage.getPaymentNotes();
-      res.json(notes);
-    } catch (error) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(500).json({ message: "Failed to fetch payment notes" });
-    }
-  });
-
-  app.post("/api/payment-notes", isAuthenticated, async (req, res) => {
-    try {
-      const validatedData = insertPaymentNoteSchema.parse(req.body);
-      const note = await storage.createPaymentNote(validatedData);
-      await logUserActivity(req, "CREATE", "payment_notes", note.id.toString(), { name: note.name });
-      res.status(201).json(note);
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(400).json({ message: error.message || "Failed to create payment note" });
-    }
-  });
-
-  app.patch("/api/payment-notes/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const note = await storage.updatePaymentNote(id, req.body);
-      await logUserActivity(req, "UPDATE", "payment_notes", id.toString(), { name: note.name });
-      res.json(note);
-    } catch (error: any) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(400).json({ message: error.message || "Failed to update payment note" });
-    }
-  });
-
-  app.delete("/api/payment-notes/:id", isAuthenticated, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const noteToDelete = await storage.getPaymentNote(id);
-      if (noteToDelete) {
-        await logUserActivity(req, "DELETE", "payment_notes", id.toString(), { name: noteToDelete.name });
-      }
-      await storage.deletePaymentNote(id);
-      res.status(204).send();
-    } catch (error) {
-      console.error("[API Error] Caught explicitly:", error);
-      res.status(500).json({ message: "Failed to delete payment note" });
     }
   });
 

@@ -1,0 +1,1744 @@
+[
+  {
+    "tableExportName": "members",
+    "columnCount": 188,
+    "columns": [
+      "id",
+      "userId",
+      "firstName",
+      "lastName",
+      "fiscalCode",
+      "dateOfBirth",
+      "placeOfBirth",
+      "birthProvince",
+      "gender",
+      "email",
+      "phone",
+      "mobile",
+      "categoryId",
+      "subscriptionTypeId",
+      "cardNumber",
+      "cardIssueDate",
+      "cardExpiryDate",
+      "entityCardType",
+      "entityCardNumber",
+      "entityCardIssueDate",
+      "entityCardExpiryDate",
+      "hasMedicalCertificate",
+      "medicalCertificateExpiry",
+      "isMinor",
+      "motherFirstName",
+      "motherLastName",
+      "motherFiscalCode",
+      "motherEmail",
+      "motherPhone",
+      "motherMobile",
+      "motherBirthDate",
+      "motherBirthPlace",
+      "motherBirthProvince",
+      "motherStreetAddress",
+      "motherCity",
+      "motherProvince",
+      "motherPostalCode",
+      "fatherFirstName",
+      "fatherLastName",
+      "fatherFiscalCode",
+      "fatherEmail",
+      "fatherPhone",
+      "fatherMobile",
+      "fatherBirthDate",
+      "fatherBirthPlace",
+      "fatherBirthProvince",
+      "fatherStreetAddress",
+      "fatherCity",
+      "fatherProvince",
+      "fatherPostalCode",
+      "photoUrl",
+      "season",
+      "internalId",
+      "athenaId",
+      "insertionDate",
+      "participantType",
+      "fromWhere",
+      "teamSegreteria",
+      "detractionModelRequested",
+      "detractionModelYear",
+      "schoolCreditsRequested",
+      "schoolCreditsYear",
+      "tesserinoTecnicoNumber",
+      "tesserinoTecnicoIssueDate",
+      "privacyAccepted",
+      "regulationsAccepted",
+      "membershipApplicationSigned",
+      "attachmentMetadata",
+      "giftMetadata",
+      "tessereMetadata",
+      "certificatoMedicoMetadata",
+      "city",
+      "province",
+      "postalCode",
+      "country",
+      "address",
+      "notes",
+      "previousMembershipNumber",
+      "dataQualityFlag",
+      "title",
+      "whatsapp",
+      "consentSms",
+      "fatturaFatta",
+      "emailPec",
+      "familyCode",
+      "athenaGroup",
+      "alias",
+      "cancellationDate",
+      "companyName",
+      "companyFiscalCode",
+      "companyAddress",
+      "companyCap",
+      "companyCity",
+      "companyProvince",
+      "companyPhone",
+      "companyEmail",
+      "pIva",
+      "alboTipo",
+      "alboSezione",
+      "alboNumero",
+      "alboDataIscrizione",
+      "patenteTipo",
+      "patenteRilasciataDa",
+      "patenteScadenza",
+      "carPlate",
+      "tutor2FirstName",
+      "tutor2LastName",
+      "tutor2BirthDate",
+      "tutor2BirthPlace",
+      "documentIssuedBy",
+      "documentIssueDate",
+      "bankName",
+      "iban",
+      "sizeShirt",
+      "sizePants",
+      "sizeShoes",
+      "height",
+      "weight",
+      "socialFacebook",
+      "socialInstagram",
+      "socialTiktok",
+      "socialYoutube",
+      "website",
+      "driveFolderUrl",
+      "educationTitle",
+      "educationInstitute",
+      "educationDate",
+      "emergencyContact1Name",
+      "emergencyContact1Phone",
+      "emergencyContact1Email",
+      "emergencyContact2Name",
+      "emergencyContact2Phone",
+      "emergencyContact2Email",
+      "emergencyContact3Name",
+      "emergencyContact3Phone",
+      "emergencyContact3Email",
+      "sedeRiferimento",
+      "athenaMemberType",
+      "firstEnrollmentDate",
+      "consentCertificate",
+      "consentModule",
+      "codiceCatastale",
+      "mastroC",
+      "mastroCol",
+      "codiceFe",
+      "tutor1FiscalCode",
+      "tutor1BirthDate",
+      "tutor1BirthPlace",
+      "tutor1Phone",
+      "tutor1Email",
+      "tutor2FiscalCode",
+      "tutor2Phone",
+      "tutor2Email",
+      "nationality",
+      "region",
+      "consentImage",
+      "consentMarketing",
+      "specialization",
+      "bio",
+      "hourlyRate",
+      "crmProfileLevel",
+      "crmProfileScore",
+      "crmProfileOverride",
+      "crmProfileReason",
+      "staffStatus",
+      "lezioniPrivateAutorizzate",
+      "lezioniPrivateAutorizzateAt",
+      "lezioniPrivateAutorizzateBy",
+      "lezioniPrivateNote",
+      "active",
+      "enrollmentStatus",
+      "createdBy",
+      "updatedBy",
+      "createdAt",
+      "updatedAt",
+      "birthNation",
+      "secondaryEmail",
+      "profession",
+      "documentType",
+      "documentExpiry",
+      "privacyDate",
+      "consentNewsletter",
+      "adminNotes",
+      "healthNotes",
+      "foodAlerts",
+      "tags",
+      "residencePermit",
+      "residencePermitExpiry"
+    ]
+  },
+  {
+    "tableExportName": "payments",
+    "columnCount": 46,
+    "columns": [
+      "id",
+      "memberId",
+      "enrollmentId",
+      "globalEnrollmentId",
+      "amount",
+      "type",
+      "description",
+      "status",
+      "dueDate",
+      "paidDate",
+      "paymentMethodId",
+      "paymentMethod",
+      "notes",
+      "accountingCode",
+      "vatCode",
+      "costCenterCode",
+      "source",
+      "seasonId",
+      "createdById",
+      "operatorName",
+      "gbrhNumero",
+      "gbrhDataEmissione",
+      "gbrhDataScadenza",
+      "gbrhDataUtilizzo",
+      "gbrhIban",
+      "updatedById",
+      "bookingId",
+      "membershipId",
+      "quantity",
+      "quotaDescription",
+      "period",
+      "totalQuota",
+      "discountCode",
+      "discountValue",
+      "discountPercentage",
+      "promoCode",
+      "promoValue",
+      "promoPercentage",
+      "deposit",
+      "annualBalance",
+      "receiptsCount",
+      "transferConfirmationDate",
+      "paymentNoteLabels",
+      "enrollmentDetailLabels",
+      "createdAt",
+      "updatedAt"
+    ]
+  },
+  {
+    "tableExportName": "courses",
+    "columnCount": 33,
+    "columns": [
+      "id",
+      "sku",
+      "name",
+      "activityType",
+      "description",
+      "categoryId",
+      "studioId",
+      "instructorId",
+      "secondaryInstructor1Id",
+      "price",
+      "maxCapacity",
+      "currentEnrollment",
+      "dayOfWeek",
+      "startTime",
+      "endTime",
+      "recurrenceType",
+      "schedule",
+      "startDate",
+      "endDate",
+      "totalOccurrences",
+      "activeOnHolidays",
+      "level",
+      "ageGroup",
+      "lessonType",
+      "numberOfPeople",
+      "statusTags",
+      "internalTags",
+      "active",
+      "googleEventId",
+      "seasonId",
+      "quoteId",
+      "createdAt",
+      "updatedAt"
+    ]
+  },
+  {
+    "tableExportName": "memberships",
+    "columnCount": 24,
+    "columns": [
+      "id",
+      "memberId",
+      "membershipNumber",
+      "previousMembershipNumber",
+      "barcode",
+      "issueDate",
+      "expiryDate",
+      "status",
+      "type",
+      "fee",
+      "membershipType",
+      "seasonCompetence",
+      "seasonStartYear",
+      "seasonEndYear",
+      "seasonId",
+      "renewalType",
+      "isRenewal",
+      "renewedFromId",
+      "notes",
+      "dataQualityFlag",
+      "entityCardNumber",
+      "entityCardExpiryDate",
+      "createdAt",
+      "updatedAt"
+    ]
+  },
+  {
+    "tableExportName": "companyAgreements",
+    "columnCount": 22,
+    "columns": [
+      "id",
+      "tenantId",
+      "companyName",
+      "companyType",
+      "discountCourses",
+      "discountMerch",
+      "discountOther",
+      "excludeOpen",
+      "excludeOtherPromos",
+      "eligibleWho",
+      "specialRules",
+      "promoRuleId",
+      "validFrom",
+      "validTo",
+      "isActive",
+      "approvedBy",
+      "requiresVerification",
+      "verificationNotes",
+      "metadata",
+      "notes",
+      "createdAt",
+      "updatedAt"
+    ]
+  },
+  {
+    "tableExportName": "memberDiscounts",
+    "columnCount": 22,
+    "columns": [
+      "id",
+      "tenantId",
+      "memberId",
+      "promoRuleId",
+      "discountType",
+      "discountValue",
+      "discountPercent",
+      "approvedBy",
+      "approvedAt",
+      "validForSeasonId",
+      "validFrom",
+      "validTo",
+      "isUsed",
+      "usedAt",
+      "paymentId",
+      "bonusNote",
+      "internalNotes",
+      "companyAgreementId",
+      "metadata",
+      "createdAt",
+      "updatedAt",
+      "createdById"
+    ]
+  },
+  {
+    "tableExportName": "teamMonthlyReports",
+    "columnCount": 22,
+    "columns": [
+      "id",
+      "employeeId",
+      "anno",
+      "mese",
+      "oreTotali",
+      "giorniLavorati",
+      "stipendioFisso",
+      "oreExtraPos",
+      "oreExtraNeg",
+      "importoExtra",
+      "cntFE",
+      "cntPE",
+      "cntML",
+      "cntF",
+      "cntAI",
+      "cntAG",
+      "cntMT",
+      "cntIN",
+      "exportAt",
+      "locked",
+      "createdAt",
+      "updatedAt"
+    ]
+  },
+  {
+    "tableExportName": "promoRules",
+    "columnCount": 20,
+    "columns": [
+      "id",
+      "tenantId",
+      "code",
+      "label",
+      "ruleType",
+      "value",
+      "validFrom",
+      "validTo",
+      "maxUses",
+      "usedCount",
+      "excludeOpen",
+      "notCumulative",
+      "targetType",
+      "companyName",
+      "memberId",
+      "approvedBy",
+      "internalNotes",
+      "metadata",
+      "createdAt",
+      "updatedAt"
+    ]
+  },
+  {
+    "tableExportName": "carnetWallets",
+    "columnCount": 19,
+    "columns": [
+      "id",
+      "memberId",
+      "walletTypeId",
+      "totalUnits",
+      "usedUnits",
+      "expiryDays",
+      "paymentId",
+      "trialDate",
+      "purchasedAt",
+      "expiresAt",
+      "isActive",
+      "notes",
+      "groupSize",
+      "locationType",
+      "pricePerUnit",
+      "totalPaid",
+      "bonusUnits",
+      "createdAt",
+      "updatedAt"
+    ]
+  },
+  {
+    "tableExportName": "pricingRules",
+    "columnCount": 18,
+    "columns": [
+      "id",
+      "tenantId",
+      "ruleCode",
+      "ruleLabel",
+      "appliesTo",
+      "ruleType",
+      "triggerCondition",
+      "triggerValue",
+      "effectType",
+      "effectValue",
+      "requiresAuthorization",
+      "authorizedBy",
+      "priority",
+      "isActive",
+      "notes",
+      "metadata",
+      "createdAt",
+      "updatedAt"
+    ]
+  },
+  {
+    "tableExportName": "instructorAgreements",
+    "columnCount": 17,
+    "columns": [
+      "id",
+      "tenantId",
+      "memberId",
+      "seasonId",
+      "agreementType",
+      "baseMonthlyAmount",
+      "packHours",
+      "speseMensili",
+      "billingDay",
+      "paymentMode",
+      "studioId",
+      "scheduleNotes",
+      "notes",
+      "isActive",
+      "metadata",
+      "createdAt",
+      "updatedAt"
+    ]
+  },
+  {
+    "tableExportName": "strategicEvents",
+    "columnCount": 17,
+    "columns": [
+      "id",
+      "title",
+      "description",
+      "eventType",
+      "startDate",
+      "endDate",
+      "allDay",
+      "seasonId",
+      "status",
+      "affectsCalendar",
+      "affectsPlanning",
+      "affectsPayments",
+      "studioId",
+      "color",
+      "isPublicHoliday",
+      "createdAt",
+      "updatedAt"
+    ]
+  },
+  {
+    "tableExportName": "studioBookings",
+    "columnCount": 17,
+    "columns": [
+      "id",
+      "memberId",
+      "studioId",
+      "serviceId",
+      "title",
+      "description",
+      "bookingDate",
+      "startTime",
+      "endTime",
+      "status",
+      "paid",
+      "amount",
+      "googleEventId",
+      "instructorId",
+      "seasonId",
+      "createdAt",
+      "updatedAt"
+    ]
+  },
+  {
+    "tableExportName": "users",
+    "columnCount": 17,
+    "columns": [
+      "id",
+      "username",
+      "password",
+      "email",
+      "phone",
+      "firstName",
+      "lastName",
+      "role",
+      "profileImageUrl",
+      "lastSeenAt",
+      "currentSessionStart",
+      "lastSessionDuration",
+      "emailVerified",
+      "otpToken",
+      "otpExpiresAt",
+      "createdAt",
+      "updatedAt"
+    ]
+  },
+  {
+    "tableExportName": "enrollments",
+    "columnCount": 16,
+    "columns": [
+      "id",
+      "memberId",
+      "courseId",
+      "participationType",
+      "sourceFile",
+      "targetDate",
+      "status",
+      "enrollmentDate",
+      "notes",
+      "details",
+      "seasonId",
+      "onlineSource",
+      "pendingMedicalCert",
+      "pendingMembership",
+      "completionNotes",
+      "createdAt"
+    ]
+  },
+  {
+    "tableExportName": "journalEntries",
+    "columnCount": 16,
+    "columns": [
+      "id",
+      "tenantId",
+      "periodId",
+      "paymentId",
+      "entryDate",
+      "description",
+      "debitAccount",
+      "creditAccount",
+      "amount",
+      "vatAmount",
+      "vatCode",
+      "costCenterId",
+      "isAuto",
+      "notes",
+      "createdAt",
+      "createdById"
+    ]
+  },
+  {
+    "tableExportName": "staffRates",
+    "columnCount": 16,
+    "columns": [
+      "id",
+      "tenantId",
+      "serviceCode",
+      "serviceLabel",
+      "amount",
+      "rateType",
+      "applicableTo",
+      "studioRestriction",
+      "requiresMembership",
+      "requiresMedicalCert",
+      "maxSessionsPerWeek",
+      "isActive",
+      "notes",
+      "metadata",
+      "createdAt",
+      "updatedAt"
+    ]
+  },
+  {
+    "tableExportName": "activities",
+    "columnCount": 15,
+    "columns": [
+      "id",
+      "tenantId",
+      "categoryId",
+      "locationId",
+      "name",
+      "startTime",
+      "endTime",
+      "instructorId",
+      "maxCapacity",
+      "basePrice",
+      "isPunchCard",
+      "punchCardTotalAccesses",
+      "extraInfoOverrides",
+      "createdAt",
+      "updatedAt"
+    ]
+  },
+  {
+    "tableExportName": "priceMatrix",
+    "columnCount": 13,
+    "columns": [
+      "id",
+      "tenantId",
+      "seasonId",
+      "category",
+      "quantityType",
+      "courseCount",
+      "validFromMonth",
+      "validToMonth",
+      "basePrice",
+      "maxSlots",
+      "excludeFromPromo",
+      "notes",
+      "createdAt"
+    ]
+  },
+  {
+    "tableExportName": "staffSostituzioni",
+    "columnCount": 13,
+    "columns": [
+      "id",
+      "absentMemberId",
+      "substituteMemberId",
+      "courseId",
+      "absenceDate",
+      "lessonDescription",
+      "paymentTo",
+      "amountOverride",
+      "notes",
+      "vistoSegreteria",
+      "vistoElisa",
+      "createdBy",
+      "createdAt"
+    ]
+  },
+  {
+    "tableExportName": "teamLeaveRequests",
+    "columnCount": 13,
+    "columns": [
+      "id",
+      "employeeId",
+      "tipo",
+      "dataInizio",
+      "dataFine",
+      "oreTotali",
+      "status",
+      "approvedBy",
+      "approvedAt",
+      "noteDipendente",
+      "noteAdmin",
+      "createdAt",
+      "updatedAt"
+    ]
+  },
+  {
+    "tableExportName": "teamShiftDiaryEntries",
+    "columnCount": 13,
+    "columns": [
+      "id",
+      "employeeId",
+      "shiftId",
+      "data",
+      "oraSlot",
+      "postazione",
+      "activityTypeId",
+      "attivitaLibera",
+      "quantita",
+      "minuti",
+      "note",
+      "okFlag",
+      "createdAt"
+    ]
+  },
+  {
+    "tableExportName": "gemConversations",
+    "columnCount": 12,
+    "columns": [
+      "id",
+      "channel",
+      "participantId",
+      "participantUserId",
+      "status",
+      "assignedTo",
+      "botContext",
+      "lastMessageAt",
+      "unreadTeam",
+      "unreadParticipant",
+      "createdAt",
+      "updatedAt"
+    ]
+  },
+  {
+    "tableExportName": "gemMessages",
+    "columnCount": 12,
+    "columns": [
+      "id",
+      "conversationId",
+      "senderType",
+      "senderId",
+      "content",
+      "attachmentUrl",
+      "attachmentName",
+      "attachmentSize",
+      "quickLinkType",
+      "quickLinkId",
+      "isRead",
+      "createdAt"
+    ]
+  },
+  {
+    "tableExportName": "memberFormsSubmissions",
+    "columnCount": 12,
+    "columns": [
+      "id",
+      "memberId",
+      "formType",
+      "formVersion",
+      "seasonId",
+      "payloadData",
+      "signedAt",
+      "signedByIp",
+      "signatureHash",
+      "createdBy",
+      "createdAt",
+      "updatedAt"
+    ]
+  },
+  {
+    "tableExportName": "memberUploads",
+    "columnCount": 12,
+    "columns": [
+      "id",
+      "memberId",
+      "documentType",
+      "filename",
+      "fileUrl",
+      "fileSize",
+      "mimeType",
+      "uploadedAt",
+      "verifiedBy",
+      "verifiedAt",
+      "notes",
+      "seasonId"
+    ]
+  },
+  {
+    "tableExportName": "payslips",
+    "columnCount": 12,
+    "columns": [
+      "id",
+      "memberId",
+      "month",
+      "year",
+      "hoursTaught",
+      "rate",
+      "total",
+      "status",
+      "notes",
+      "confirmedBy",
+      "confirmedAt",
+      "createdAt"
+    ]
+  },
+  {
+    "tableExportName": "studios",
+    "columnCount": 12,
+    "columns": [
+      "id",
+      "name",
+      "floor",
+      "operatingHours",
+      "operatingDays",
+      "capacity",
+      "equipment",
+      "notes",
+      "active",
+      "googleCalendarId",
+      "createdAt",
+      "updatedAt"
+    ]
+  },
+  {
+    "tableExportName": "teamEmployees",
+    "columnCount": 12,
+    "columns": [
+      "id",
+      "memberId",
+      "userId",
+      "displayOrder",
+      "team",
+      "tariffaOraria",
+      "stipendioFissoMensile",
+      "dataAssunzione",
+      "attivo",
+      "noteHr",
+      "createdAt",
+      "updatedAt"
+    ]
+  },
+  {
+    "tableExportName": "teamNotes",
+    "columnCount": 12,
+    "columns": [
+      "id",
+      "authorId",
+      "authorName",
+      "title",
+      "content",
+      "category",
+      "isPinned",
+      "targetUrl",
+      "createdAt",
+      "updatedAt",
+      "deletedAt",
+      "deletedBy"
+    ]
+  },
+  {
+    "tableExportName": "customReports",
+    "columnCount": 11,
+    "columns": [
+      "id",
+      "name",
+      "description",
+      "entityType",
+      "selectedFields",
+      "filters",
+      "sortField",
+      "sortDirection",
+      "createdBy",
+      "createdAt",
+      "updatedAt"
+    ]
+  },
+  {
+    "tableExportName": "memberPackages",
+    "columnCount": 11,
+    "columns": [
+      "id",
+      "memberId",
+      "packageCode",
+      "packageType",
+      "totalUses",
+      "usedUses",
+      "pricePaid",
+      "notes",
+      "active",
+      "createdAt",
+      "updatedAt"
+    ]
+  },
+  {
+    "tableExportName": "staffDisciplinaryLog",
+    "columnCount": 11,
+    "columns": [
+      "id",
+      "memberId",
+      "eventType",
+      "eventDate",
+      "description",
+      "staffResponse",
+      "staffResponseAt",
+      "decision",
+      "resolvedAt",
+      "createdBy",
+      "createdAt"
+    ]
+  },
+  {
+    "tableExportName": "staffPresenze",
+    "columnCount": 11,
+    "columns": [
+      "id",
+      "memberId",
+      "courseId",
+      "date",
+      "hours",
+      "source",
+      "status",
+      "confirmedBy",
+      "confirmedAt",
+      "notes",
+      "createdAt"
+    ]
+  },
+  {
+    "tableExportName": "teamAttendanceLogs",
+    "columnCount": 11,
+    "columns": [
+      "id",
+      "employeeId",
+      "data",
+      "oreLavorate",
+      "tipoAssenza",
+      "checkIn",
+      "checkOut",
+      "note",
+      "modifiedByAdmin",
+      "modifiedAt",
+      "createdAt"
+    ]
+  },
+  {
+    "tableExportName": "teamDocumentVersions",
+    "columnCount": 11,
+    "columns": [
+      "id",
+      "documentId",
+      "versioneNumero",
+      "fileUrl",
+      "fileName",
+      "fileSize",
+      "mimeType",
+      "hashFile",
+      "uploadedBy",
+      "uploadedAt",
+      "noteVersione"
+    ]
+  },
+  {
+    "tableExportName": "teamScheduledShifts",
+    "columnCount": 11,
+    "columns": [
+      "id",
+      "employeeId",
+      "data",
+      "oraInizio",
+      "oraFine",
+      "postazione",
+      "note",
+      "createdByUserId",
+      "modifiedByUserId",
+      "createdAt",
+      "updatedAt"
+    ]
+  },
+  {
+    "tableExportName": "webhookLogs",
+    "columnCount": 11,
+    "columns": [
+      "id",
+      "tenantId",
+      "source",
+      "eventType",
+      "externalId",
+      "rawPayload",
+      "status",
+      "processedAt",
+      "errorMessage",
+      "paymentId",
+      "createdAt"
+    ]
+  },
+  {
+    "tableExportName": "welfareProviders",
+    "columnCount": 11,
+    "columns": [
+      "id",
+      "tenantId",
+      "name",
+      "requiresMembershipFee",
+      "requiresMedicalCert",
+      "extraFeePercent",
+      "availableCategories",
+      "operativeNotes",
+      "isActive",
+      "metadata",
+      "updatedAt"
+    ]
+  },
+  {
+    "tableExportName": "accountingPeriods",
+    "columnCount": 10,
+    "columns": [
+      "id",
+      "tenantId",
+      "seasonId",
+      "year",
+      "month",
+      "label",
+      "isClosed",
+      "closedAt",
+      "notes",
+      "createdAt"
+    ]
+  },
+  {
+    "tableExportName": "attendances",
+    "columnCount": 10,
+    "columns": [
+      "id",
+      "memberId",
+      "courseId",
+      "enrollmentId",
+      "attendanceDate",
+      "type",
+      "notes",
+      "seasonId",
+      "createdAt",
+      "updatedAt"
+    ]
+  },
+  {
+    "tableExportName": "carnetSessions",
+    "columnCount": 10,
+    "columns": [
+      "id",
+      "walletId",
+      "sessionNumber",
+      "sessionDate",
+      "sessionTimeStart",
+      "sessionTimeEnd",
+      "instructorId",
+      "isBonus",
+      "notes",
+      "createdAt"
+    ]
+  },
+  {
+    "tableExportName": "courseQuotesGrid",
+    "columnCount": 10,
+    "columns": [
+      "id",
+      "activityType",
+      "category",
+      "description",
+      "details",
+      "corsiWeek",
+      "monthsData",
+      "sortOrder",
+      "createdAt",
+      "updatedAt"
+    ]
+  },
+  {
+    "tableExportName": "globalEnrollments",
+    "columnCount": 10,
+    "columns": [
+      "id",
+      "tenantId",
+      "activityId",
+      "memberId",
+      "status",
+      "remainingPunchCards",
+      "walletCredit",
+      "extraInfoData",
+      "createdAt",
+      "updatedAt"
+    ]
+  },
+  {
+    "tableExportName": "teamComments",
+    "columnCount": 10,
+    "columns": [
+      "id",
+      "authorId",
+      "authorName",
+      "content",
+      "priority",
+      "isResolved",
+      "assignedTo",
+      "parentId",
+      "createdAt",
+      "updatedAt"
+    ]
+  },
+  {
+    "tableExportName": "teamEmployeeActivityLog",
+    "columnCount": 10,
+    "columns": [
+      "id",
+      "employeeId",
+      "eseguitaDa",
+      "azione",
+      "entitaModificata",
+      "entitaId",
+      "valorePrima",
+      "valoreDopo",
+      "ipAddress",
+      "createdAt"
+    ]
+  },
+  {
+    "tableExportName": "aiUsageLogs",
+    "columnCount": 9,
+    "columns": [
+      "id",
+      "userId",
+      "action",
+      "promptTokens",
+      "completionTokens",
+      "totalTokens",
+      "model",
+      "costUsd",
+      "createdAt"
+    ]
+  },
+  {
+    "tableExportName": "medicalCertificates",
+    "columnCount": 9,
+    "columns": [
+      "id",
+      "memberId",
+      "issueDate",
+      "expiryDate",
+      "doctorName",
+      "notes",
+      "status",
+      "createdAt",
+      "updatedAt"
+    ]
+  },
+  {
+    "tableExportName": "pagodilTiers",
+    "columnCount": 9,
+    "columns": [
+      "id",
+      "tenantId",
+      "providerName",
+      "rangeMin",
+      "rangeMax",
+      "feeAmount",
+      "feeType",
+      "installmentsMax",
+      "isActive"
+    ]
+  },
+  {
+    "tableExportName": "teamDocuments",
+    "columnCount": 9,
+    "columns": [
+      "id",
+      "memberId",
+      "tipo",
+      "titolo",
+      "caricatoDa",
+      "visibileDipendente",
+      "isCurrent",
+      "scadenza",
+      "createdAt"
+    ]
+  },
+  {
+    "tableExportName": "teamShiftTemplates",
+    "columnCount": 9,
+    "columns": [
+      "id",
+      "employeeId",
+      "settimanaTipo",
+      "giornoSettimana",
+      "oraInizio",
+      "oraFine",
+      "postazione",
+      "note",
+      "createdAt"
+    ]
+  },
+  {
+    "tableExportName": "teamShifts",
+    "columnCount": 9,
+    "columns": [
+      "id",
+      "tenantId",
+      "userId",
+      "locationId",
+      "shiftStart",
+      "shiftEnd",
+      "isAttendanceVerified",
+      "createdAt",
+      "updatedAt"
+    ]
+  },
+  {
+    "tableExportName": "bookingServices",
+    "columnCount": 8,
+    "columns": [
+      "id",
+      "name",
+      "description",
+      "categoryId",
+      "price",
+      "color",
+      "active",
+      "createdAt"
+    ]
+  },
+  {
+    "tableExportName": "priceLists",
+    "columnCount": 8,
+    "columns": [
+      "id",
+      "name",
+      "validFrom",
+      "validTo",
+      "active",
+      "notes",
+      "createdAt",
+      "updatedAt"
+    ]
+  },
+  {
+    "tableExportName": "quotes",
+    "columnCount": 8,
+    "columns": [
+      "id",
+      "name",
+      "amount",
+      "category",
+      "notes",
+      "active",
+      "createdAt",
+      "updatedAt"
+    ]
+  },
+  {
+    "tableExportName": "seasons",
+    "columnCount": 8,
+    "columns": [
+      "id",
+      "name",
+      "description",
+      "startDate",
+      "endDate",
+      "active",
+      "createdAt",
+      "updatedAt"
+    ]
+  },
+  {
+    "tableExportName": "staffContractsCompliance",
+    "columnCount": 8,
+    "columns": [
+      "id",
+      "memberId",
+      "docType",
+      "docValue",
+      "hasDoc",
+      "expiresAt",
+      "notes",
+      "updatedAt"
+    ]
+  },
+  {
+    "tableExportName": "staffDocumentSignatures",
+    "columnCount": 8,
+    "columns": [
+      "id",
+      "memberId",
+      "docType",
+      "docVersion",
+      "signedAt",
+      "signedBy",
+      "method",
+      "notes"
+    ]
+  },
+  {
+    "tableExportName": "teamCheckinEvents",
+    "columnCount": 8,
+    "columns": [
+      "id",
+      "employeeId",
+      "timestamp",
+      "tipo",
+      "postazione",
+      "device",
+      "overrideAdmin",
+      "note"
+    ]
+  },
+  {
+    "tableExportName": "teamDocumentAlerts",
+    "columnCount": 8,
+    "columns": [
+      "id",
+      "documentId",
+      "employeeId",
+      "tipo",
+      "dataAlert",
+      "inviatoAt",
+      "risolto",
+      "createdAt"
+    ]
+  },
+  {
+    "tableExportName": "teamNotifications",
+    "columnCount": 8,
+    "columns": [
+      "id",
+      "employeeId",
+      "tipo",
+      "titolo",
+      "messaggio",
+      "dataRiferimento",
+      "letta",
+      "createdAt"
+    ]
+  },
+  {
+    "tableExportName": "userActivityLogs",
+    "columnCount": 8,
+    "columns": [
+      "id",
+      "userId",
+      "action",
+      "entityType",
+      "entityId",
+      "details",
+      "ipAddress",
+      "createdAt"
+    ]
+  },
+  {
+    "tableExportName": "userSessionSegments",
+    "columnCount": 8,
+    "columns": [
+      "id",
+      "userId",
+      "startedAt",
+      "lastHeartbeatAt",
+      "endedAt",
+      "tipo",
+      "durataMinuti",
+      "createdAt"
+    ]
+  },
+  {
+    "tableExportName": "accessLogs",
+    "columnCount": 7,
+    "columns": [
+      "id",
+      "memberId",
+      "barcode",
+      "accessTime",
+      "accessType",
+      "membershipStatus",
+      "notes"
+    ]
+  },
+  {
+    "tableExportName": "auditLogs",
+    "columnCount": 7,
+    "columns": [
+      "id",
+      "action",
+      "entityType",
+      "entityId",
+      "performedBy",
+      "details",
+      "createdAt"
+    ]
+  },
+  {
+    "tableExportName": "costCenters",
+    "columnCount": 7,
+    "columns": [
+      "id",
+      "tenantId",
+      "code",
+      "label",
+      "description",
+      "isActive",
+      "createdAt"
+    ]
+  },
+  {
+    "tableExportName": "customLists",
+    "columnCount": 7,
+    "columns": [
+      "id",
+      "name",
+      "systemName",
+      "systemCode",
+      "description",
+      "linkedActivities",
+      "createdAt"
+    ]
+  },
+  {
+    "tableExportName": "importConfigs",
+    "columnCount": 7,
+    "columns": [
+      "id",
+      "name",
+      "entityType",
+      "sourceType",
+      "fieldMapping",
+      "importKey",
+      "createdAt"
+    ]
+  },
+  {
+    "tableExportName": "notifications",
+    "columnCount": 7,
+    "columns": [
+      "id",
+      "userId",
+      "title",
+      "message",
+      "type",
+      "isRead",
+      "createdAt"
+    ]
+  },
+  {
+    "tableExportName": "priceListItems",
+    "columnCount": 7,
+    "columns": [
+      "id",
+      "priceListId",
+      "quoteId",
+      "entityType",
+      "entityId",
+      "price",
+      "createdAt"
+    ]
+  },
+  {
+    "tableExportName": "teamActivityTypes",
+    "columnCount": 7,
+    "columns": [
+      "id",
+      "team",
+      "label",
+      "categoria",
+      "attivo",
+      "sortOrder",
+      "createdAt"
+    ]
+  },
+  {
+    "tableExportName": "teamPostazioni",
+    "columnCount": 7,
+    "columns": [
+      "id",
+      "nome",
+      "contaOre",
+      "colore",
+      "attiva",
+      "ordine",
+      "createdAt"
+    ]
+  },
+  {
+    "tableExportName": "teamWeekAssignments",
+    "columnCount": 7,
+    "columns": [
+      "id",
+      "weekStart",
+      "settimana",
+      "isManualOverride",
+      "note",
+      "createdAt",
+      "updatedAt"
+    ]
+  },
+  {
+    "tableExportName": "tenants",
+    "columnCount": 7,
+    "columns": [
+      "id",
+      "name",
+      "logoUrl",
+      "primaryColor",
+      "customMenuConfig",
+      "createdAt",
+      "updatedAt"
+    ]
+  },
+  {
+    "tableExportName": "todos",
+    "columnCount": 7,
+    "columns": [
+      "id",
+      "text",
+      "completed",
+      "createdBy",
+      "createdAt",
+      "completedBy",
+      "completedAt"
+    ]
+  },
+  {
+    "tableExportName": "activityStatuses",
+    "columnCount": 6,
+    "columns": [
+      "id",
+      "name",
+      "color",
+      "sortOrder",
+      "active",
+      "createdAt"
+    ]
+  },
+  {
+    "tableExportName": "agreementMonthlyOverrides",
+    "columnCount": 6,
+    "columns": [
+      "id",
+      "agreementId",
+      "seasonId",
+      "month",
+      "overrideAmount",
+      "notes"
+    ]
+  },
+  {
+    "tableExportName": "customListItems",
+    "columnCount": 6,
+    "columns": [
+      "id",
+      "listId",
+      "value",
+      "sortOrder",
+      "active",
+      "color"
+    ]
+  },
+  {
+    "tableExportName": "enrollmentDetails",
+    "columnCount": 6,
+    "columns": [
+      "id",
+      "name",
+      "color",
+      "sortOrder",
+      "active",
+      "createdAt"
+    ]
+  },
+  {
+    "tableExportName": "knowledge",
+    "columnCount": 6,
+    "columns": [
+      "id",
+      "sezione",
+      "titolo",
+      "descrizione",
+      "createdAt",
+      "updatedAt"
+    ]
+  },
+  {
+    "tableExportName": "messages",
+    "columnCount": 6,
+    "columns": [
+      "id",
+      "senderId",
+      "receiverId",
+      "content",
+      "isRead",
+      "timestamp"
+    ]
+  },
+  {
+    "tableExportName": "participantTypes",
+    "columnCount": 6,
+    "columns": [
+      "id",
+      "name",
+      "color",
+      "sortOrder",
+      "active",
+      "createdAt"
+    ]
+  },
+  {
+    "tableExportName": "paymentMethods",
+    "columnCount": 6,
+    "columns": [
+      "id",
+      "name",
+      "description",
+      "active",
+      "createdAt",
+      "updatedAt"
+    ]
+  },
+  {
+    "tableExportName": "paymentNotes",
+    "columnCount": 6,
+    "columns": [
+      "id",
+      "name",
+      "color",
+      "sortOrder",
+      "active",
+      "createdAt"
+    ]
+  },
+  {
+    "tableExportName": "userRoles",
+    "columnCount": 6,
+    "columns": [
+      "id",
+      "name",
+      "description",
+      "permissions",
+      "createdAt",
+      "updatedAt"
+    ]
+  },
+  {
+    "tableExportName": "cities",
+    "columnCount": 5,
+    "columns": [
+      "id",
+      "name",
+      "provinceId",
+      "postalCode",
+      "istatCode"
+    ]
+  },
+  {
+    "tableExportName": "memberDuplicateExclusions",
+    "columnCount": 5,
+    "columns": [
+      "id",
+      "memberId1",
+      "memberId2",
+      "excludedBy",
+      "excludedAt"
+    ]
+  },
+  {
+    "tableExportName": "memberRelationships",
+    "columnCount": 5,
+    "columns": [
+      "id",
+      "memberId",
+      "relatedMemberId",
+      "relationshipType",
+      "createdAt"
+    ]
+  },
+  {
+    "tableExportName": "provinces",
+    "columnCount": 5,
+    "columns": [
+      "id",
+      "code",
+      "name",
+      "region",
+      "countryId"
+    ]
+  },
+  {
+    "tableExportName": "subscriptionTypes",
+    "columnCount": 5,
+    "columns": [
+      "id",
+      "name",
+      "description",
+      "active",
+      "createdAt"
+    ]
+  },
+  {
+    "tableExportName": "countries",
+    "columnCount": 4,
+    "columns": [
+      "id",
+      "code",
+      "name",
+      "isDefault"
+    ]
+  },
+  {
+    "tableExportName": "systemConfigs",
+    "columnCount": 4,
+    "columns": [
+      "id",
+      "keyName",
+      "value",
+      "updatedAt"
+    ]
+  },
+  {
+    "tableExportName": "sessions",
+    "columnCount": 3,
+    "columns": [
+      "sid",
+      "sess",
+      "expire"
+    ]
+  }
+]

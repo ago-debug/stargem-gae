@@ -3,7 +3,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, AlertCircle, AlertTriangle, Users } from "lucide-react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { useCrmForm } from "./CrmFormContext";
 
 interface TabTutoriProps {
@@ -28,19 +28,14 @@ export function TabTutori({ renderMancaDato, getInputClassName }: TabTutoriProps
   const isGen2Active = formData.cognomeGen2 || formData.nomeGen2 || formData.cfGen2;
 
   return (
-    <Card className="flex-1 mt-4">
-      <CardHeader className="pb-4">
-        <CardTitle className="flex items-center justify-between text-lg">
-          <div className="flex items-center gap-2">
-            <Users className="w-5 h-5 sidebar-icon-gold" />
-            Genitori / Tutori
-          </div>
-          <span className="text-sm font-medium px-3 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-400 rounded-full border border-amber-200">
-            Minorenni e Contatti
-          </span>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
+    <AccordionItem value="tutori" className="border-b-0 border-amber-100 dark:border-amber-900/30 mb-2 bg-amber-50/50 dark:bg-amber-900/10 rounded-lg px-4">
+      <AccordionTrigger className="text-sm font-semibold hover:no-underline py-3">
+        <div className="flex items-center gap-2 text-amber-700 dark:text-amber-500">
+          <Users className="w-4 h-4" />
+          Genitori / Tutori (Minorenni e Contatti)
+        </div>
+      </AccordionTrigger>
+      <AccordionContent className="space-y-6 pt-2 pb-4">
         {/* Genitore 1 */}
         <div>
           <h3 className="inline-block text-sm font-medium px-3 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-400 rounded-full border border-amber-200 mb-4">Genitore 1</h3>
@@ -334,7 +329,7 @@ export function TabTutori({ renderMancaDato, getInputClassName }: TabTutoriProps
             </div>
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </AccordionContent>
+    </AccordionItem>
   );
 }

@@ -11,10 +11,12 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Check, ChevronsUpDown, X, Plus, Trash2, Calculator, ShoppingCart, User as UserIcon, CreditCard, Banknote, Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Checkbox } from "@/components/ui/checkbox";
 import { MultiSelectPaymentNotes } from "@/components/multi-select-payment-notes";
 import { MultiSelectEnrollmentDetails } from "@/components/multi-select-enrollment-details";
 import { PaymentModuleConnector } from "@/components/PaymentModuleConnector";
+import { PaymentInvoiceDetails } from "@/components/payments/PaymentInvoiceDetails";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
@@ -22,16 +24,19 @@ import { useAuth } from "@/hooks/use-auth";
 import { getActiveActivities } from "@/config/activities";
 import type { Member, PriceList, Course, Quote, PriceListItem } from "@shared/schema";
 import { PriceTag } from "@/components/price-tag";
+import { CartTableRow } from "@/components/payments/CartTableRow";
 
 export function NuovoPagamentoModal({
     isOpen,
     onClose,
     defaultMemberId,
+    defaultIncludeTessera = false,
     editingPayment
 }: {
     isOpen: boolean;
     onClose: () => void;
     defaultMemberId?: number | null;
+    defaultIncludeTessera?: boolean;
     editingPayment?: any;
 }) {
     const { toast } = useToast();
@@ -72,7 +77,14 @@ export function NuovoPagamentoModal({
 
     // === STATO CARRELLO (GRIGLIA) ===
     const [cartRows, setCartRows] = useState<any[]>([{ id: Date.now().toString(), activityType: "", skus: [], periodId: "", basePrice: 0, participationType: "STANDARD_COURSE", targetDate: "", discountCode: "", discountPercent1: 0, discountPercent2: 0, subtotal: 0, paymentNotes: [], enrollmentDetails: [] }]);
-    const [includeTessera, setIncludeTessera] = useState(false);
+    const [includeTessera, setIncludeTessera] = useState(defaultIncludeTessera);
+
+    // Sync includeTessera with default when modal opens
+    useEffect(() => {
+        if (isOpen) {
+            setIncludeTessera(defaultIncludeTessera);
+        }
+    }, [isOpen, defaultIncludeTessera]);
     const [includeProva, setIncludeProva] = useState(false);
 
     // === STATO MODALE CHECKOUT INFERIORE ===
@@ -110,11 +122,12 @@ export function NuovoPagamentoModal({
     const { data: studioBookings } = useQuery<any[]>({ queryKey: ["/api/studio-bookings", { memberId: selectedMemberId }], enabled: !!selectedMemberId, queryFn: async () => { const res = await fetch(`/api/studio-bookings?memberId=${selectedMemberId}`); return res.ok ? res.json() : []; } });
     const { data: membershipsDataList } = useQuery<any[]>({ queryKey: ["/api/memberships", { memberId: selectedMemberId }], enabled: !!selectedMemberId, queryFn: async () => { const res = await fetch(`/api/memberships?memberId=${selectedMemberId}`); return res.ok ? res.json() : []; } });
 
-    const memberPayments = payments?.filter((p: any) => p.memberId === Number(selectedMemberId)) || [];
-    const memberEnrollments = enrollments?.filter((e: any) => e.memberId === Number(selectedMemberId)) || [];
-    const memberWorkshopEnrollments = workshopEnrollments?.filter((e: any) => e.memberId === Number(selectedMemberId)) || [];
-    const memberStudioBookings = studioBookings?.filter((b: any) => b.memberId === Number(selectedMemberId)) || [];
-    const memberMemberships = membershipsDataList?.filter((m: any) => m.memberId === Number(selectedMemberId)) || [];
+    const safeArray = (d: any) => Array.isArray(d) ? d : (d?.data || []);
+    const memberPayments = safeArray(payments).filter((p: any) => p.memberId === Number(selectedMemberId));
+    const memberEnrollments = safeArray(enrollments).filter((e: any) => e.memberId === Number(selectedMemberId));
+    const memberWorkshopEnrollments = safeArray(workshopEnrollments).filter((e: any) => e.memberId === Number(selectedMemberId));
+    const memberStudioBookings = safeArray(studioBookings).filter((b: any) => b.memberId === Number(selectedMemberId));
+    const memberMemberships = safeArray(membershipsDataList).filter((m: any) => m.memberId === Number(selectedMemberId));
 
     const calculatedDebts = !selectedMemberId ? [] : [
         ...memberEnrollments.map((e: any) => {
@@ -138,7 +151,7 @@ export function NuovoPagamentoModal({
             const total = parseFloat(m.fee || "0");
             const paid = memberPayments.filter((p: any) => p.membershipId === m.id && (p.status === 'paid' || p.status === 'completed')).reduce((s: number, p: any) => s + parseFloat(p.amount), 0);
             return { id: `membership-${m.id}`, description: `Quota Tessera (${m.membershipNumber || 'N/A'})`, date: m.createdAt, type: 'membership', total, paid, remaining: Math.max(0, total - paid) };
-        })
+        }).filter(item => !(item.description.includes('-temp') && item.remaining === 0))
     ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     const isLoadingDebts = !payments || !enrollments || !courses;
@@ -344,16 +357,28 @@ export function NuovoPagamentoModal({
             if (includeTessera) {
                 // Determine season and new/renewal
                 const paymentDate = new Date();
-                const nextYear = paymentDate.getFullYear() + 1;
-                const paymentMonthStr = String(paymentDate.getMonth() + 1).padStart(2, '0');
-                const expiryDateStr = `${nextYear}-${paymentMonthStr}-01`;
+                
+                // Logic based on Phase 2 Standard: Expiration is ALWAYS August 31st of the season.
+                // Se siamo tra Gennaio e Luglio, la tessera scade il 31/08 dell'anno corrente.
+                // Se siamo tra Agosto e Dicembre, la tessera scade il 31/08 dell'anno successivo.
+                const currentMonth = paymentDate.getMonth(); // 0-indexed (0=Jan, 7=Aug)
+                const currentYear = paymentDate.getFullYear();
+                
+                // Calcolo Competenza Corrente (di default). Se siamo in "Early Bird" (Maggio/Giugno), 
+                // in un sistema più complesso ci sarebbe il toggle. Per ora, il default sicuro è l'anno sportivo attuale.
+                const expiryYear = currentMonth >= 7 ? currentYear + 1 : currentYear;
+                const expiryDateStr = `${expiryYear}-08-31T23:59:59.000Z`;
+                
+                const seasonStartYear = expiryYear - 1;
+                const seasonEndYear = expiryYear;
+                const seasonCompetence = `${seasonStartYear}-${seasonEndYear}`; // e.g. 2025-2026
 
                 // Try to find if user already has an old active membership (for renewal vs nuovo)
                 const hasExistingMembership = memberMemberships && memberMemberships.length > 0;
                 
-                // Construct logic for season prefix (e.g., 2025 -> 2526 if before Aug, etc. Approximating with current year + 1)
-                const currentYearShort = paymentDate.getFullYear().toString().slice(2);
-                const nextYearShort = (paymentDate.getFullYear() + 1).toString().slice(2);
+                // Construct logic for season prefix (e.g., 2025 -> 2526)
+                const currentYearShort = seasonStartYear.toString().slice(2);
+                const nextYearShort = seasonEndYear.toString().slice(2);
                 const seasonPrefix = `${currentYearShort}${nextYearShort}`;
                 const memberIdPrefix = String(selectedMemberId || "0000001").padStart(6, '0');
                 const generatedMembershipNumber = `${seasonPrefix}-${memberIdPrefix}`;
@@ -364,10 +389,11 @@ export function NuovoPagamentoModal({
                     membershipNumber: generatedMembershipNumber,
                     barcode: generatedMembershipNumber,
                     issueDate: paymentDate.toISOString(),
-                    expiryDate: new Date(expiryDateStr).toISOString(),
+                    expiryDate: expiryDateStr,
                     type: "annual",
                     fee: "25.00",
                     status: "active",
+                    seasonCompetence: seasonCompetence,
                     nuovoRinnovo: hasExistingMembership ? "rinnovo" : "nuovo"
                 };
 
@@ -533,7 +559,11 @@ export function NuovoPagamentoModal({
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="max-w-[1400px] w-[95vw] h-[95vh] overflow-y-auto bg-slate-100 dark:bg-slate-800/50 p-0 border-0">
+            <DialogContent 
+                className="max-w-[1400px] w-[95vw] h-[95vh] overflow-y-auto bg-slate-100 dark:bg-slate-800/50 p-0 border-0"
+                onInteractOutside={(e) => e.preventDefault()}
+                onPointerDownOutside={(e) => e.preventDefault()}
+            >
                 <div className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b px-6 py-4 flex items-center justify-between shadow-sm">
                     <div className="flex items-center gap-3">
                         <div className="p-2 bg-primary/10 rounded-full">
@@ -688,9 +718,9 @@ export function NuovoPagamentoModal({
 
                         {/* COLONNA DESTRA: TAVOLO CARRELLO E EXTRA */}
                         <div className="lg:col-span-8 xl:col-span-9 space-y-6">
-                            <div className="border border-border shadow-sm bg-background p-4 rounded-lg">
-                                {selectedMemberId && (
-                                    <div className="flex gap-4 mb-6">
+                            {selectedMemberId && (
+                                <div className="border border-border shadow-sm bg-background p-4 rounded-lg">
+                                    <div className="flex gap-4">
                                         <div className="flex-1 bg-green-50 border border-green-200 rounded-xl p-3 flex items-center justify-center gap-3 shadow-sm">
                                             <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-700">
                                                 <Check className="w-5 h-5" />
@@ -711,61 +741,8 @@ export function NuovoPagamentoModal({
                                             </div>
                                         </div>
                                     </div>
-                                )}
-                                <span className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-4 block">Cosa desideri pagare?</span>
-                                {!selectedMemberId ? (
-                                    <div className="p-4 rounded-md bg-muted text-center text-sm text-muted-foreground italic">
-                                        Nessun debito pendente per questo cliente. Procedi inserendo i dati manualmente.
-                                    </div>
-                                ) : isLoadingDebts ? (
-                                    <div className="h-20 bg-slate-100 dark:bg-slate-800 animate-pulse rounded-md w-full border border-border"></div>
-                                ) : calculatedDebts && calculatedDebts.length > 0 ? (
-                                    <div className="border rounded-md divide-y overflow-hidden shadow-sm bg-background">
-                                        {calculatedDebts.map((debt: any, idx: number) => (
-                                            <div key={debt.id || idx} onClick={() => {
-                                                if (debt.remaining > 0.01) {
-                                                    addCartRow(debt);
-                                                }
-                                            }} className={cn("p-4 transition-colors relative flex justify-between items-center group", debt.remaining > 0.01 ? "hover:bg-muted cursor-pointer" : "opacity-75")}>
-                                                <div className="flex flex-col">
-                                                    <span className="font-bold text-foreground text-sm">{debt.description}</span>
-                                                    <span className="text-xxs text-muted-foreground uppercase">{debt.date ? new Date(debt.date).toLocaleDateString('it-IT') : ""} - {debt.type}</span>
-                                                </div>
-                                                <div className="flex items-center gap-2">
-                                                    <div>
-                                                        {debt.remaining <= 0.01 ? (
-                                                            <div className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xxs font-bold tracking-wide uppercase border border-green-200">PAGATO</div>
-                                                        ) : debt.paid > 0.01 ? (
-                                                            <div className="bg-black text-white px-3 py-1 rounded-full text-xxs font-bold tracking-wide uppercase text-center flex flex-col leading-none">
-                                                                <span>Da pagare: €{debt.remaining.toFixed(2)}</span>
-                                                                <span className="text-xxxs text-orange-300">Parziale</span>
-                                                            </div>
-                                                        ) : (
-                                                            <div className="bg-black text-white px-3 py-1 rounded-full text-xxs font-bold tracking-wide uppercase">Da pagare: €{debt.remaining.toFixed(2)}</div>
-                                                        )}
-                                                    </div>
-                                                    {user?.role === 'admin' && debt.remaining > 0.01 && (
-                                                        <Button 
-                                                            variant="ghost" 
-                                                            size="icon" 
-                                                            onClick={(e) => handleDeleteDebt(e, debt.type, debt.id)}
-                                                            className="h-7 w-7 text-muted-foreground hover:text-red-600 hover:bg-red-50 dark:bg-red-950/20 -mr-2 opacity-0 group-hover:opacity-100 transition-opacity z-10"
-                                                            title="Annulla ed elimina voce pendente dal Database"
-                                                            disabled={deletePendingDebtMutation.isPending}
-                                                        >
-                                                            {deletePendingDebtMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-                                                        </Button>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <div className="p-4 rounded-md bg-muted text-center text-sm text-muted-foreground italic">
-                                        Tutti i pagamenti risultano saldati.
-                                    </div>
-                                )}
-                            </div>
+                                </div>
+                            )}
 
                             <Card className="shadow-sm">
                                 <CardHeader className="flex flex-row items-center justify-between bg-muted/20 border-b">
@@ -841,43 +818,69 @@ export function NuovoPagamentoModal({
                                 </Card>
                             </div>
 
-                            <div className="space-y-4 bg-muted/50 p-5 rounded-lg border border-border/60 shadow-inner mt-6">
-                                <div className="flex flex-col space-y-4">
-                                    <div className="flex items-center justify-between border p-3 rounded-md bg-background shadow-sm">
-                                        <div className="flex items-center gap-2">
-                                            <Checkbox id="gratuita" disabled />
-                                            <Label htmlFor="gratuita" className="font-bold uppercase tracking-wider text-muted-foreground cursor-not-allowed">
-                                                Gratuità (Richiede Codice Admin) - Seleziona attività
-                                            </Label>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <Checkbox id="integrazione" disabled />
-                                            <Label htmlFor="integrazione" className="font-bold text-blue-700 cursor-not-allowed">
-                                                Modalità Integrazione
-                                            </Label>
-                                        </div>
-                                    </div>
-                                </div>
+                            <PaymentInvoiceDetails />
 
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
-                                    <div className="space-y-2">
-                                        <Label>Data Pagamento (Z) *</Label>
-                                        <Input type="date" value={new Date().toISOString().split('T')[0]} readOnly className="bg-muted" />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label>Acconto/Credito (Y)</Label>
-                                        <Input type="number" placeholder="" readOnly className="bg-muted" />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label>Saldo Annuale (AA)</Label>
-                                        <Input type="number" placeholder="" readOnly className="bg-muted" />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label>N. Ricevute</Label>
-                                        <Input type="number" placeholder="" readOnly className="bg-muted" />
-                                    </div>
-                                </div>
-                            </div>
+                            <Accordion type="single" collapsible className="w-full bg-background border border-border shadow-sm rounded-lg px-4 mt-8">
+                                <AccordionItem value="storico-debiti" className="border-b-0">
+                                    <AccordionTrigger className="hover:no-underline text-sm font-bold text-muted-foreground uppercase tracking-widest py-4">
+                                        Cosa desideri pagare? (Storico)
+                                    </AccordionTrigger>
+                                    <AccordionContent className="pb-4">
+                                        {!selectedMemberId ? (
+                                            <div className="p-4 rounded-md bg-muted text-center text-sm text-muted-foreground italic">
+                                                Nessun debito pendente per questo cliente. Procedi inserendo i dati manualmente.
+                                            </div>
+                                        ) : isLoadingDebts ? (
+                                            <div className="h-20 bg-slate-100 dark:bg-slate-800 animate-pulse rounded-md w-full border border-border"></div>
+                                        ) : calculatedDebts && calculatedDebts.length > 0 ? (
+                                            <div className="border rounded-md divide-y overflow-hidden shadow-sm bg-background">
+                                                {calculatedDebts.map((debt: any, idx: number) => (
+                                                    <div key={debt.id || idx} onClick={() => {
+                                                        if (debt.remaining > 0.01) {
+                                                            addCartRow(debt);
+                                                        }
+                                                    }} className={cn("p-4 transition-colors relative flex justify-between items-center group", debt.remaining > 0.01 ? "hover:bg-muted cursor-pointer" : "opacity-75")}>
+                                                        <div className="flex flex-col">
+                                                            <span className="font-bold text-foreground text-sm">{debt.description}</span>
+                                                            <span className="text-xxs text-muted-foreground uppercase">{debt.date ? new Date(debt.date).toLocaleDateString('it-IT') : ""} - {debt.type}</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            <div>
+                                                                {debt.remaining <= 0.01 ? (
+                                                                    <div className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xxs font-bold tracking-wide uppercase border border-green-200">PAGATO</div>
+                                                                ) : debt.paid > 0.01 ? (
+                                                                    <div className="bg-black text-white px-3 py-1 rounded-full text-xxs font-bold tracking-wide uppercase text-center flex flex-col leading-none">
+                                                                        <span>Da pagare: €{debt.remaining.toFixed(2)}</span>
+                                                                        <span className="text-xxxs text-orange-300">Parziale</span>
+                                                                    </div>
+                                                                ) : (
+                                                                    <div className="bg-black text-white px-3 py-1 rounded-full text-xxs font-bold tracking-wide uppercase">Da pagare: €{debt.remaining.toFixed(2)}</div>
+                                                                )}
+                                                            </div>
+                                                            {user?.role === 'admin' && debt.remaining > 0.01 && (
+                                                                <Button 
+                                                                    variant="ghost" 
+                                                                    size="icon" 
+                                                                    onClick={(e) => handleDeleteDebt(e, debt.type, debt.id)}
+                                                                    className="h-7 w-7 text-muted-foreground hover:text-red-600 hover:bg-red-50 dark:bg-red-950/20 -mr-2 opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                                                                    title="Annulla ed elimina voce pendente dal Database"
+                                                                    disabled={deletePendingDebtMutation.isPending}
+                                                                >
+                                                                    {deletePendingDebtMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                                                                </Button>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div className="p-4 rounded-md bg-muted text-center text-sm text-muted-foreground italic">
+                                                Tutti i pagamenti risultano saldati.
+                                            </div>
+                                        )}
+                                    </AccordionContent>
+                                </AccordionItem>
+                            </Accordion>
 
                         </div>
                     </div>
@@ -909,369 +912,3 @@ export function NuovoPagamentoModal({
     );
 }
 
-// === SUBCOMPONENTE RIGA CARRELLO (Per gestire l'auto-fetch del Listino Selezionato) ===
-function CartTableRow({
-    row, courses, workshops, paidTrials, freeTrials, singleLessons,
-    sundayActivities, trainings, individualLessons, campusActivities,
-    recitals, vacationStudies, studios, bookingServices, priceLists, quotes,
-    updateRow, updateRowBatch, removeCartRow, index, validatePromoCode
-}: {
-    row: any, courses: Course[], workshops: any[], paidTrials: any[],
-    freeTrials: any[], singleLessons: any[], sundayActivities: any[],
-    trainings: any[], individualLessons: any[], campusActivities: any[],
-    recitals: any[], vacationStudies: any[], studios: any[], bookingServices: any[],
-    priceLists: PriceList[], quotes: Quote[], updateRow: any,
-    updateRowBatch: any, removeCartRow: any, index: number, validatePromoCode: any
-}) {
-    const { data: listinoItems } = useQuery<PriceListItem[]>({
-        queryKey: [`/api/price-lists/${row.periodId}/items`],
-        enabled: !!row.periodId,
-    });
-
-    // Tracking the last combo to prevent overriding manual user edits on basePrice
-    const [lastAutoPricedCombo, setLastAutoPricedCombo] = useState<string>("");
-
-    useEffect(() => {
-        if (row.periodId && row.skus && row.skus.length > 0 && Array.isArray(listinoItems)) {
-            const entityId = parseInt(row.skus[0]);
-            let entityType = "course";
-            switch (row.activityType) {
-                case "corsi": 
-                    if (row.participationType === 'SINGLE_LESSON') entityType = "single_lesson";
-                    else if (row.participationType === 'PAID_TRIAL') entityType = "paid_trial";
-                    else entityType = "course";
-                    break;
-                case "workshop": entityType = "workshop"; break;
-                case "prove-pagamento": entityType = "paid_trial"; break;
-                case "prove-gratuite": entityType = "free_trial"; break;
-                case "lezioni-singole": entityType = "single_lesson"; break;
-                case "domeniche-movimento": entityType = "sunday_activity"; break;
-                case "allenamenti": entityType = "training"; break;
-                case "lezioni-individuali": entityType = "individual_lesson"; break;
-                case "campus": entityType = "campus_activity"; break;
-                case "saggi": entityType = "recital"; break;
-                case "vacanze-studio": entityType = "vacation_study"; break;
-                case "affitti": entityType = "booking_service"; break; // Sale mapping old system
-                case "servizi": entityType = "booking_service"; break; // Eventi esterni
-            }
-
-            const item = listinoItems.find(i => i.entityType === entityType && i.entityId === entityId);
-
-            const currentCombo = `${row.periodId}-${row.activityType}-${entityId}-${row.participationType || 'STANDARD_COURSE'}`;
-
-            if (row.activityType === "corsi" && row.participationType === 'FREE_TRIAL') {
-                 if (lastAutoPricedCombo !== currentCombo) {
-                     updateRow(row.id, 'basePrice', 0);
-                     setLastAutoPricedCombo(currentCombo);
-                 }
-            } else if (item && lastAutoPricedCombo !== currentCombo) {
-                let finalPrice = parseFloat((item.price as string) || "0");
-                if (item.quoteId && quotes.length) {
-                    const q = quotes.find(qt => qt.id === item.quoteId);
-                    if (q) finalPrice = parseFloat((q.amount as string) || "0");
-                }
-                if (!isNaN(finalPrice)) {
-                    updateRow(row.id, 'basePrice', finalPrice);
-                    setLastAutoPricedCombo(currentCombo);
-                }
-            } else if (!item && row.activityType === "corsi" && lastAutoPricedCombo !== currentCombo) {
-                // FALLBACK: If not found in price list, try fallback to master DB course price
-                const courseMaster = courses.find(c => c.id === entityId);
-                if (courseMaster && courseMaster.price !== null) {
-                     let finalPrice = parseFloat(courseMaster.price as string);
-                     if (!isNaN(finalPrice)) {
-                         updateRow(row.id, 'basePrice', finalPrice);
-                         setLastAutoPricedCombo(currentCombo);
-                     }
-                }
-            }
-        }
-    }, [row.skus, row.periodId, listinoItems, row.activityType, row.participationType, courses, quotes.length, row.id, lastAutoPricedCombo]);
-
-    const currentCatalog = useMemo(() => {
-        let catalog: any[] = [];
-        let entityType = "course";
-
-        switch (row.activityType) {
-            case "corsi": 
-                catalog = courses || []; 
-                if (row.participationType === 'SINGLE_LESSON') entityType = "single_lesson";
-                else if (row.participationType === 'PAID_TRIAL') entityType = "paid_trial";
-                else entityType = "course";
-                break;
-            case "workshop": catalog = workshops || []; entityType = "workshop"; break;
-            case "prove-pagamento": catalog = paidTrials || []; entityType = "paid_trial"; break;
-            case "prove-gratuite": catalog = freeTrials || []; entityType = "free_trial"; break;
-            case "lezioni-singole": catalog = singleLessons || []; entityType = "single_lesson"; break;
-            case "domeniche-movimento": catalog = sundayActivities || []; entityType = "sunday_activity"; break;
-            case "allenamenti": catalog = trainings || []; entityType = "training"; break;
-            case "lezioni-individuali": catalog = individualLessons || []; entityType = "individual_lesson"; break;
-            case "campus": catalog = campusActivities || []; entityType = "campus_activity"; break;
-            case "saggi": catalog = recitals || []; entityType = "recital"; break;
-            case "vacanze-studio": catalog = vacationStudies || []; entityType = "vacation_study"; break;
-            case "affitti": catalog = studios || []; entityType = "booking_service"; break; // "Affitti" maps to the rooms catalog
-            case "servizi": catalog = bookingServices || []; entityType = "booking_service"; break; // "Eventi Esterni" maps to specific external services
-            case "merchandising": catalog = []; break; // Placeholder manuale 
-            default: catalog = courses || []; break;
-        }
-
-        // Filtro Logica di Dipendenza: Applica incrocio stretto con Listino Selezionato
-        if (listinoItems && listinoItems.length > 0 && row.periodId) {
-            const validIdsForThisType = listinoItems
-                .filter(li => li.entityType === entityType)
-                .map(li => li.entityId);
-            
-            catalog = catalog.filter(c => validIdsForThisType.includes(c.id));
-        }
-
-        // Filtro Sicurezza: Nascondi esplicitamente voci inattive o di "test"
-        catalog = catalog.filter(c => c.active !== false && !(c.name || c.title || "").toLowerCase().includes("test"));
-
-        return catalog;
-    }, [row.activityType, row.periodId, row.participationType, listinoItems, courses, workshops, paidTrials, freeTrials, singleLessons, sundayActivities, trainings, individualLessons, campusActivities, recitals, vacationStudies, studios, bookingServices]);
-
-    if (row.isDebt) {
-        return (
-            <div className="bg-muted p-4 rounded-lg border shadow-sm relative flex gap-4 pr-14">
-                <Button variant="ghost" size="icon" className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-destructive hover:bg-red-50 dark:bg-red-950/20" onClick={() => { if (confirm("Rimuovere questa riga dal carrello?")) removeCartRow(row.id); }}>
-                    <Trash2 className="w-5 h-5" />
-                </Button>
-                <div className="flex-1 space-y-4">
-                    <div className="flex items-center gap-4 border-b pb-3 mb-2">
-                        <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-full text-blue-700">
-                            <ShoppingCart className="w-5 h-5" />
-                        </div>
-                        <div>
-                            <h4 className="font-bold text-foreground text-lg">Saldo Debito Pregresso</h4>
-                            <p className="text-sm text-muted-foreground">{row.debtDescription}</p>
-                        </div>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
-                        <div className="space-y-1">
-                            <Label className="text-xs text-foreground/80 font-bold">Importo da Saldare *</Label>
-                            <Input
-                                type="number"
-                                step="0.01"
-                                className="h-10 text-lg font-bold bg-background"
-                                value={row.basePrice || ""}
-                                onChange={(e) => {
-                                    updateRow(row.id, 'basePrice', e.target.value);
-                                    updateRow(row.id, 'subtotal', e.target.value); // Sync subtotal directly for debts
-                                }}
-                            />
-                        </div>
-                        <div className="text-right">
-                            <span className="text-xs font-bold text-muted-foreground mr-3 uppercase">Subtotale Riga:</span>
-                            <span className="text-2xl font-black text-green-700">€ {(parseFloat(row.subtotal) || 0).toFixed(2)}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
-    return (
-        <div className="bg-background p-4 rounded-lg border shadow-sm relative flex gap-4 pr-14">
-            <Button
-                variant="ghost"
-                size="icon"
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-destructive hover:bg-red-50 dark:bg-red-950/20"
-                onClick={() => { if (confirm("Rimuovere questa riga dal carrello?")) removeCartRow(row.id); }}
-            >
-                <Trash2 className="w-5 h-5" />
-            </Button>
-
-            <div className="flex-1 space-y-4">
-                <div className="grid grid-cols-1 xl:grid-cols-[1fr_1.5fr_2fr_0.8fr_2fr_1fr] gap-4">
-                    <div className="space-y-1">
-                        <Label className="text-xs text-foreground/80 truncate font-bold">Listino *</Label>
-                        <Select value={row.periodId} onValueChange={(val) => {
-                            updateRowBatch(row.id, { periodId: val, activityType: '', skus: [], basePrice: 0 });
-                        }}>
-                            <SelectTrigger className="h-9 bg-yellow-50/50 border-yellow-200">
-                                <SelectValue placeholder="Periodo..." />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {priceLists?.map(pl => (
-                                    <SelectItem key={pl.id} value={pl.id.toString()}>{pl.name}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-
-                    <div className="space-y-1">
-                        <Label className={cn("text-xs truncate font-bold", !row.periodId ? "text-slate-400" : "text-foreground/80")}>Attività *</Label>
-                        <Select disabled={!row.periodId} value={row.activityType || ""} onValueChange={(val) => {
-                            updateRowBatch(row.id, { activityType: val, skus: [], basePrice: 0 });
-                        }}>
-                            <SelectTrigger className={cn("h-9 border-border", !row.periodId ? "bg-slate-100 dark:bg-slate-800 opacity-50" : "bg-muted")}>
-                                <SelectValue placeholder="Seleziona..." />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {getActiveActivities().map((act) => (
-                                    <SelectItem key={act.id} value={act.id}>
-                                        {act.labelUI}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-
-                    <div className="space-y-1">
-                        <Label className={cn("text-xs truncate font-bold", !row.activityType ? "text-slate-400" : "text-foreground/80")}>SKU / Dettaglio Attività *</Label>
-                        <Select disabled={!row.activityType} value={(row.skus && row.skus[0]) || ""} onValueChange={(val) => {
-                            updateRow(row.id, 'skus', [val]);
-                        }}>
-                            <SelectTrigger className={cn("h-9 border-border", !row.activityType ? "bg-slate-100 dark:bg-slate-800 opacity-50" : "bg-background")}>
-                                <SelectValue placeholder="Seleziona..." />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {currentCatalog?.map(c => (
-                                    <SelectItem key={c.id} value={c.id.toString()}>
-                                        <span className="font-semibold text-foreground">{c.name || c.title}</span>
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-
-                    <div className="space-y-1">
-                        <Label className="text-xs text-foreground/80 truncate font-bold">Q.tà</Label>
-                        <Input type="number" className="h-9 bg-muted text-center" value="1" readOnly />
-                    </div>
-
-                    <div className="space-y-1">
-                        <Label className="text-xs text-foreground/80 truncate font-bold">Descrizione Quota</Label>
-                        <Input className="h-9 bg-muted" placeholder="Manuale..." />
-                    </div>
-
-                    <div className="space-y-1">
-                        <Label className="text-xs text-foreground/80 truncate font-bold">Totale Quota *</Label>
-                        <div className="flex items-center gap-2">
-                          <Input
-                              type="number"
-                              step="0.01"
-                              className="h-9 bg-muted font-bold w-1/2"
-                              value={row.basePrice || ""}
-                              onChange={(e) => updateRow(row.id, 'basePrice', e.target.value)}
-                              placeholder="0"
-                          />
-                          {row.activityType && (
-                            <div className="flex items-center gap-1 text-xxs text-muted-foreground whitespace-nowrap w-1/2">
-                              Suggerimento:
-                              <PriceTag
-                                category={row.activityType === 'corsi' ? 'adulti' : row.activityType}
-                                courseCount={1}
-                              />
-                            </div>
-                          )}
-                        </div>
-                    </div>
-                </div>
-
-                {row.activityType === 'corsi' && (
-                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 mt-4 mb-4 p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-100 dark:border-blue-900/50">
-                        <div className="space-y-1">
-                            <Label className="text-xs text-blue-800 dark:text-blue-300 truncate font-bold">Modalità Partecipazione</Label>
-                            <Select value={row.participationType || "STANDARD_COURSE"} onValueChange={(val) => {
-                                updateRowBatch(row.id, { 
-                                    participationType: val,
-                                    basePrice: val === 'FREE_TRIAL' ? 0 : row.basePrice 
-                                });
-                            }}>
-                                <SelectTrigger className="h-9 bg-background border-blue-200">
-                                    <SelectValue placeholder="Standard" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="STANDARD_COURSE">Iscrizione Standard</SelectItem>
-                                    <SelectItem value="FREE_TRIAL">Prova Gratuita</SelectItem>
-                                    <SelectItem value="PAID_TRIAL">Prova a Pagamento</SelectItem>
-                                    <SelectItem value="SINGLE_LESSON">Lezione Singola</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        {['FREE_TRIAL', 'PAID_TRIAL', 'SINGLE_LESSON'].includes(row.participationType) && (
-                            <div className="space-y-1">
-                                <Label className="text-xs text-blue-800 dark:text-blue-300 truncate font-bold">Data Lezione/Prova *</Label>
-                                <Input
-                                    type="date"
-                                    className="h-9 bg-background border-blue-200"
-                                    value={row.targetDate || ""}
-                                    onChange={(e) => updateRow(row.id, 'targetDate', e.target.value)}
-                                />
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                <div className="grid grid-cols-1 xl:grid-cols-6 gap-4">
-                    <div className="space-y-1">
-                        <Label className="text-xs text-emerald-700 truncate">Cod. Promo</Label>
-                        <Input className="h-9 bg-emerald-50 dark:bg-emerald-950/20 font-mono text-xs uppercase" placeholder="COD. PERSONALE" />
-                    </div>
-                    <div className="space-y-1">
-                        <Label className="text-xs text-emerald-700 truncate">Valore</Label>
-                        <Input type="number" className="h-9 bg-emerald-50 dark:bg-emerald-950/20 text-right" placeholder="€ 0.00" />
-                    </div>
-                    <div className="space-y-1">
-                        <Label className="text-xs text-emerald-700 truncate">% Promo</Label>
-                        <Input type="number" step="0.01" className="h-9 bg-emerald-50 dark:bg-emerald-950/20 text-right" placeholder="%" value={row.discountPercent2 || ""} onChange={(e) => updateRow(row.id, 'discountPercent2', e.target.value)} />
-                    </div>
-
-                    <div className="space-y-1">
-                        <div className="flex justify-between items-center">
-                           <Label className="text-xs text-blue-700 truncate">Cod. Sconto</Label>
-                           {row.promoCodeStatus === 'valid' && <Badge variant="outline" className="h-4 text-xxxs px-1 bg-green-50 text-green-700 border-green-200" title={row.promoCodeMessage}>VALIDO</Badge>}
-                           {row.promoCodeStatus === 'invalid' && <Badge variant="destructive" className="h-4 text-xxxs px-1" title={row.promoCodeMessage}>NON VALIDO</Badge>}
-                           {row.promoCodeStatus === 'error' && <Badge variant="outline" className="h-4 text-xxxs px-1 bg-amber-50 dark:bg-amber-950/20 text-amber-700 border-amber-200 dark:border-amber-900/50" title={row.promoCodeMessage}>ERRORE</Badge>}
-                           {row.promoCodeStatus === 'validating' && <Loader2 className="w-3 h-3 animate-spin text-blue-500" />}
-                        </div>
-                        <Input 
-                           className="h-9 bg-blue-50 dark:bg-blue-950/20 font-mono text-xs uppercase" 
-                           placeholder="COD. CAMPAGNA" 
-                           value={row.discountCode || ""} 
-                           onChange={(e) => updateRow(row.id, 'discountCode', e.target.value)} 
-                           onBlur={() => validatePromoCode(row.id, row.discountCode, row.basePrice, row.activityType)}
-                           onKeyDown={(e) => {
-                               if (e.key === 'Enter') {
-                                   e.preventDefault();
-                                   validatePromoCode(row.id, row.discountCode, row.basePrice, row.activityType);
-                               }
-                           }}
-                        />
-                    </div>
-                    <div className="space-y-1">
-                        <Label className="text-xs text-blue-700 truncate">Valore</Label>
-                        <Input type="number" className="h-9 bg-blue-50 dark:bg-blue-950/20 text-right text-green-700 font-bold" placeholder="€ 0.00" value={row.discountAmount || ""} readOnly />
-                    </div>
-                    <div className="space-y-1">
-                        <Label className="text-xs text-blue-700 truncate">% Sconto</Label>
-                        <Input type="number" step="0.01" className="h-9 bg-blue-50 dark:bg-blue-950/20 text-right" placeholder="%" value={row.discountPercent1 || ""} onChange={(e) => updateRow(row.id, 'discountPercent1', e.target.value)} />
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-                    <div className="space-y-1">
-                        <MultiSelectEnrollmentDetails
-                            selectedDetails={row.enrollmentDetails || []}
-                            onChange={(vals) => updateRow(row.id, 'enrollmentDetails', vals)}
-                        />
-                    </div>
-                    <div className="space-y-1 mt-1">
-                        <MultiSelectPaymentNotes
-                            selectedNotes={row.paymentNotes || []}
-                            onChange={(vals) => updateRow(row.id, 'paymentNotes', vals)}
-                        />
-                    </div>
-                </div>
-
-                <div className="flex justify-end pt-2 border-t border-slate-100 mt-2">
-                    <div className="text-right">
-                        <span className="text-xs font-bold text-muted-foreground mr-3 uppercase">Subtotale Riga:</span>
-                        <span className="text-lg font-black text-green-700">€ {(parseFloat(row.subtotal) || 0).toFixed(2)}</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-}

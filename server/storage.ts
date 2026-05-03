@@ -1645,7 +1645,23 @@ export class DatabaseStorage implements IStorage {
 
   async createMember(member: InsertMember): Promise<Member> {
     const [result] = await db.insert(members).values(member);
-    const [newMember] = await db.select().from(members).where(eq(members.id, result.insertId));
+    let [newMember] = await db.select().from(members).where(eq(members.id, result.insertId));
+
+    // Auto-generate the STAGIONE-XXXXXX ID for new members
+    // We do this immediately after insert because we need the auto-increment ID
+    const seasonPrefix = newMember.season ? 
+      newMember.season.split('-').map(p => p.slice(-2)).join('') : "2526";
+    const paddedId = newMember.id.toString().padStart(6, '0');
+    const generatedFormat = `${seasonPrefix}-${paddedId}`;
+    
+    // Always enforce the new format for new members
+    await db.update(members)
+      .set({ cardNumber: generatedFormat, internalId: generatedFormat })
+      .where(eq(members.id, newMember.id));
+      
+    // Refresh the member object
+    const [refreshed] = await db.select().from(members).where(eq(members.id, newMember.id));
+    newMember = refreshed;
 
     // Sync membership if card data exists
     if (newMember.cardNumber) {
@@ -2695,11 +2711,16 @@ export class DatabaseStorage implements IStorage {
         updatedById: payments.updatedById,
         createdBy: createdUser.username,
         updatedBy: updatedUser.username,
+        membershipNumber: memberships.membershipNumber,
+        courseName: courses.name,
       })
       .from(payments)
       .leftJoin(members, eq(payments.memberId, members.id))
       .leftJoin(createdUser, eq(payments.createdById, createdUser.id))
       .leftJoin(updatedUser, eq(payments.updatedById, updatedUser.id))
+      .leftJoin(memberships, eq(payments.membershipId, memberships.id))
+      .leftJoin(enrollments, eq(payments.enrollmentId, enrollments.id))
+      .leftJoin(courses, eq(enrollments.courseId, courses.id))
       .$dynamic();
 
     const conditions = [];
@@ -2784,11 +2805,16 @@ export class DatabaseStorage implements IStorage {
         updatedById: payments.updatedById,
         createdBy: createdUser.username,
         updatedBy: updatedUser.username,
+        membershipNumber: memberships.membershipNumber,
+        courseName: courses.name,
       })
       .from(payments)
       .leftJoin(members, eq(payments.memberId, members.id))
       .leftJoin(createdUser, eq(payments.createdById, createdUser.id))
       .leftJoin(updatedUser, eq(payments.updatedById, updatedUser.id))
+      .leftJoin(memberships, eq(payments.membershipId, memberships.id))
+      .leftJoin(enrollments, eq(payments.enrollmentId, enrollments.id))
+      .leftJoin(courses, eq(enrollments.courseId, courses.id))
       .orderBy(desc(payments.createdAt));
     return result as any;
   }
@@ -2822,11 +2848,16 @@ export class DatabaseStorage implements IStorage {
         updatedById: payments.updatedById,
         createdBy: createdUser.username,
         updatedBy: updatedUser.username,
+        membershipNumber: memberships.membershipNumber,
+        courseName: courses.name,
       })
       .from(payments)
       .leftJoin(members, eq(payments.memberId, members.id))
       .leftJoin(createdUser, eq(payments.createdById, createdUser.id))
       .leftJoin(updatedUser, eq(payments.updatedById, updatedUser.id))
+      .leftJoin(memberships, eq(payments.membershipId, memberships.id))
+      .leftJoin(enrollments, eq(payments.enrollmentId, enrollments.id))
+      .leftJoin(courses, eq(enrollments.courseId, courses.id))
       .where(eq(payments.memberId, memberId))
       .orderBy(desc(payments.createdAt));
     return result as any;
@@ -3126,20 +3157,47 @@ export class DatabaseStorage implements IStorage {
       return;
     }
 
+    // Extract tessereMetadata sent from the UI
+    let tessereMeta: any = {};
+    if (member.tessereMetadata) {
+      try {
+        tessereMeta = typeof member.tessereMetadata === 'string' ? JSON.parse(member.tessereMetadata) : member.tessereMetadata;
+      } catch (e) {
+        console.error("Failed to parse tessereMetadata in syncMembershipFromMember", e);
+      }
+    }
+
+    // Determine the season code from the generated ID (e.g., 2526-000042)
+    const seasonCode = member.cardNumber.split('-')[0] || "2526";
+    
+    // Dynamically import the expiry calculator
+    const { calculateMembershipExpiry } = await import('./utils/membership.js');
+    const expiryDate = calculateMembershipExpiry(seasonCode);
+
+    const feeAmount = tessereMeta.quota || "25.00";
+    const membershipType = (tessereMeta.membershipType || "NUOVO").toLowerCase();
+    
     // Check if membership already exists for this member
     const [existing] = await db
       .select()
       .from(memberships)
-      .where(eq(memberships.memberId, member.id));
+      .where(eq(memberships.memberId, member.id))
+      .orderBy(desc(memberships.createdAt))
+      .limit(1);
 
     const membershipData = {
       memberId: member.id,
       membershipNumber: member.cardNumber,
       barcode: member.cardNumber, // Use same as card number
+      membershipType: membershipType,
+      seasonCompetence: seasonCode,
+      fee: feeAmount.toString(),
       issueDate: member.cardIssueDate || new Date().toISOString().split('T')[0],
-      expiryDate: member.cardExpiryDate || new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
-      status: member.cardExpiryDate && new Date(member.cardExpiryDate) < new Date() ? 'expired' : 'active',
-      type: 'annual',
+      expiryDate: expiryDate.toISOString().split('T')[0],
+      status: new Date(expiryDate) < new Date() ? 'expired' : 'active',
+      entityCardType: tessereMeta.tesseraEnte || member.entityCardType || null,
+      entityCardNumber: tessereMeta.tesseraEnte || member.entityCardNumber || null,
+      entityCardExpiryDate: tessereMeta.scadenzaTesseraEnte || member.entityCardExpiryDate || null,
     };
 
     if (existing) {
@@ -3149,16 +3207,18 @@ export class DatabaseStorage implements IStorage {
         .set({
           ...membershipData,
           updatedAt: new Date(),
-          issueDate: (membershipData.issueDate as any) instanceof Date ? membershipData.issueDate : new Date(membershipData.issueDate as any),
-          expiryDate: (membershipData.expiryDate as any) instanceof Date ? membershipData.expiryDate : new Date(membershipData.expiryDate as any),
+          issueDate: new Date(membershipData.issueDate as any),
+          expiryDate: new Date(membershipData.expiryDate as any),
+          entityCardExpiryDate: membershipData.entityCardExpiryDate ? new Date(membershipData.entityCardExpiryDate) : null,
         } as any)
         .where(eq(memberships.id, existing.id));
     } else {
       // Create new membership
       await db.insert(memberships).values({
         ...membershipData,
-        issueDate: (membershipData.issueDate as any) instanceof Date ? membershipData.issueDate : new Date(membershipData.issueDate as any),
-        expiryDate: (membershipData.expiryDate as any) instanceof Date ? membershipData.expiryDate : new Date(membershipData.expiryDate as any),
+        issueDate: new Date(membershipData.issueDate as any),
+        expiryDate: new Date(membershipData.expiryDate as any),
+        entityCardExpiryDate: membershipData.entityCardExpiryDate ? new Date(membershipData.entityCardExpiryDate) : null,
       } as any);
     }
   }
@@ -3170,17 +3230,34 @@ export class DatabaseStorage implements IStorage {
       return;
     }
 
+    let certMeta: any = {};
+    if (member.certificatoMedicoMetadata) {
+      try {
+        certMeta = typeof member.certificatoMedicoMetadata === 'string' ? JSON.parse(member.certificatoMedicoMetadata) : member.certificatoMedicoMetadata;
+      } catch (e) {
+        console.error("Failed to parse certificatoMedicoMetadata", e);
+      }
+    }
+
+    const expiryDate = certMeta.dataScadenza || member.medicalCertificateExpiry || new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0];
+    const issueDate = certMeta.dataRinnovo || new Date().toISOString().split('T')[0];
+    const doctorName = certMeta.rilasciatoDa || "Non specificato";
+
     // Check if medical certificate already exists for this member
     const [existing] = await db
       .select()
       .from(medicalCertificates)
-      .where(eq(medicalCertificates.memberId, member.id));
+      .where(eq(medicalCertificates.memberId, member.id))
+      .orderBy(desc(medicalCertificates.createdAt))
+      .limit(1);
 
     const certData = {
       memberId: member.id,
-      issueDate: new Date().toISOString().split('T')[0],
-      expiryDate: member.medicalCertificateExpiry || new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
-      status: member.medicalCertificateExpiry && new Date(member.medicalCertificateExpiry) < new Date() ? 'expired' : 'valid',
+      issueDate: issueDate,
+      expiryDate: expiryDate,
+      doctorName: doctorName,
+      status: new Date(expiryDate) < new Date() ? 'expired' : 'valid',
+      notes: `Pagamento: €${certMeta.pagamento || 0} | A Noi: €${certMeta.aNoi || 0} | Tipo: ${certMeta.tipo || 'Non specificato'}`
     };
 
     if (existing) {
@@ -3190,16 +3267,16 @@ export class DatabaseStorage implements IStorage {
         .set({
           ...certData,
           updatedAt: new Date(),
-          issueDate: (certData.issueDate as any) instanceof Date ? certData.issueDate : new Date(certData.issueDate as any),
-          expiryDate: (certData.expiryDate as any) instanceof Date ? certData.expiryDate : new Date(certData.expiryDate as any),
+          issueDate: new Date(certData.issueDate),
+          expiryDate: new Date(certData.expiryDate),
         } as any)
         .where(eq(medicalCertificates.id, existing.id));
     } else {
       // Create new certificate
       await db.insert(medicalCertificates).values({
         ...certData,
-        issueDate: (certData.issueDate as any) instanceof Date ? certData.issueDate : new Date(certData.issueDate as any),
-        expiryDate: (certData.expiryDate as any) instanceof Date ? certData.expiryDate : new Date(certData.expiryDate as any),
+        issueDate: new Date(certData.issueDate),
+        expiryDate: new Date(certData.expiryDate),
       } as any);
     }
   }

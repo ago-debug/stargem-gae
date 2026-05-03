@@ -137,6 +137,79 @@ export const defaultFormData = {
   noteInt: "",
   noteGen1: "",
   noteGen2: "",
+  
+  // Dati Azienda / B2B
+  companyName: "",
+  companyFiscalCode: "",
+  companyAddress: "",
+  companyCap: "",
+  companyCity: "",
+  companyProvince: "",
+  companyPhone: "",
+  companyEmail: "",
+  pIva: "",
+  
+  // Albo & Patente
+  alboTipo: "",
+  alboSezione: "",
+  alboNumero: "",
+  alboDataIscrizione: "",
+  patenteTipo: "",
+  patenteRilasciataDa: "",
+  patenteScadenza: "",
+  carPlate: "",
+  
+  // Emergenza
+  emergencyContact1Name: "",
+  emergencyContact1Phone: "",
+  emergencyContact1Email: "",
+  emergencyContact2Name: "",
+  emergencyContact2Phone: "",
+  emergencyContact2Email: "",
+  emergencyContact3Name: "",
+  emergencyContact3Phone: "",
+  emergencyContact3Email: "",
+  
+  // Dati Bancari
+  bankName: "",
+  iban: "",
+  
+  // Taglie
+  sizeShirt: "",
+  sizePants: "",
+  sizeShoes: "",
+  height: "",
+  weight: "",
+  
+  // Social
+  socialFacebook: "",
+  socialInstagram: "",
+  socialTiktok: "",
+  socialYoutube: "",
+  website: "",
+  driveFolderUrl: "",
+  
+  // Formazione
+  educationTitle: "",
+  educationInstitute: "",
+  educationDate: "",
+  
+  // Athena & Legacy
+  sedeRiferimento: "",
+  athenaMemberType: "",
+  codiceCatastale: "",
+  mastroC: "",
+  mastroCol: "",
+  codiceFe: "",
+  previousMembershipNumber: "",
+  athenaId: "",
+  
+  // Extra
+  title: "",
+  whatsapp: "",
+  emailPec: "",
+  familyCode: "",
+  alias: "",
 };
 
 export type FormDataState = typeof defaultFormData;
@@ -146,7 +219,7 @@ interface CrmFormContextType {
   setFormData: React.Dispatch<React.SetStateAction<FormDataState>>;
   dirtyFields: Record<string, boolean>;
   setDirtyFields: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
-  handleChange: (field: string, value: string) => void;
+  handleChange: (field: string, value: string, isQuiet?: boolean) => void;
   
   allegati: AllegatiState;
   setAllegati: React.Dispatch<React.SetStateAction<AllegatiState>>;
@@ -217,9 +290,11 @@ export function CrmFormProvider({
     return {};
   });
 
-  const handleChange = (field: string, value: string) => {
+  const handleChange = (field: string, value: string, isQuiet: boolean = false) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-    setDirtyFields((prev) => ({ ...prev, [field]: true }));
+    if (!isQuiet) {
+      setDirtyFields((prev) => ({ ...prev, [field]: true }));
+    }
   };
 
   const [allegati, setAllegati] = useState<AllegatiState>(() => {
