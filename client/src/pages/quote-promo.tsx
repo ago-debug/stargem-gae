@@ -6,6 +6,7 @@ import { PromoTab } from "@/components/quote-promo/promo-tab";
 import { CarnetTab } from "@/components/quote-promo/carnet-tab";
 import { ConvenzioniTab } from "@/components/quote-promo/convenzioni-tab";
 import { StaffRatesTab } from "@/components/quote-promo/staff-rates-tab";
+import { WelfareTab } from "@/components/quote-promo/welfare-tab";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { SeasonSelector } from "@/components/season-selector";
 import { useQuery } from "@tanstack/react-query";
