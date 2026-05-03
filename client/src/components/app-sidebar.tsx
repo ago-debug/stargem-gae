@@ -119,16 +119,14 @@ const accountingItems = [
     icon: BadgePercent,
   },
   {
-    title: "Webhook Status",
-    url: "/webhook-status",
-    icon: Radio,
-    adminOnly: true,
-  },
-  {
-    title: "WC Mapping",
-    url: "/wc-mapping",
-    icon: ArrowLeftRight,
-    adminOnly: true,
+    title: "Pagamenti Online",
+    url: "/pagamenti-online",
+    icon: ScanBarcode,
+    subItems: [
+      { title: "Transazioni", url: "/pagamenti-online" },
+      { title: "Webhook Status", url: "/webhook-status", adminOnly: true },
+      { title: "WC Mapping", url: "/wc-mapping", adminOnly: true },
+    ]
   },
   {
     title: "Lista Pagamenti",
@@ -345,7 +343,12 @@ export function AppSidebar() {
       subItems: item.subItems ? item.subItems.filter(sub => hasPermission(user, sub.url)) : undefined
     }));
   const filteredSecretariat = secretariatItems.filter(item => hasPermission(user, item.url));
-  const filteredAccounting = accountingItems.filter(item => hasPermission(user, item.url));
+  const filteredAccounting = accountingItems
+    .filter(item => hasPermission(user, item.url))
+    .map(item => ({
+      ...item,
+      subItems: item.subItems ? item.subItems.filter(sub => hasPermission(user, sub.url)) : undefined
+    }));
   const filteredConfig = configItems.filter(item => hasPermission(user, item.url));
   const filteredAdminItems = adminItems.filter(item => hasPermission(user, item.url));
 
@@ -439,17 +442,50 @@ export function AppSidebar() {
             <SidebarGroupContent>
               <SidebarMenu>
                 {filteredAccounting.map((item) => {
-                  const isActive = location === item.url;
+                  const isParentActive = location === item.url || (item.subItems && item.subItems.some(sub => location === sub.url));
+
+                  if (item.subItems && item.subItems.length > 0) {
+                    return (
+                      <Collapsible key={item.title} defaultOpen={isParentActive} className="group/collapsible">
+                        <SidebarMenuItem>
+                          <CollapsibleTrigger asChild>
+                            <SidebarMenuButton
+                              isActive={isParentActive}
+                              data-testid={`nav-${item.url.slice(1)}`}
+                            >
+                              <item.icon className="w-4 h-4" />
+                              <span className="font-semibold">{item.title}</span>
+                              <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 w-4 h-4" />
+                            </SidebarMenuButton>
+                          </CollapsibleTrigger>
+                          <CollapsibleContent>
+                            <SidebarMenuSub>
+                              {item.subItems.map((sub) => (
+                                <SidebarMenuSubItem key={sub.title}>
+                                  <SidebarMenuSubButton asChild isActive={location === sub.url} className={location === sub.url ? "font-bold" : ""}>
+                                    <Link href={sub.url}>
+                                      <span>{sub.title}</span>
+                                    </Link>
+                                  </SidebarMenuSubButton>
+                                </SidebarMenuSubItem>
+                              ))}
+                            </SidebarMenuSub>
+                          </CollapsibleContent>
+                        </SidebarMenuItem>
+                      </Collapsible>
+                    );
+                  }
+
                   return (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton
                         asChild
-                        isActive={isActive}
+                        isActive={isParentActive}
                         data-testid={`nav-${item.url.slice(1)}`}
                       >
                         <Link href={item.url}>
                           <item.icon className="w-4 h-4" />
-                          <span>{item.title}</span>
+                          <span className={item.subItems ? "font-semibold" : ""}>{item.title}</span>
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>

@@ -76,14 +76,25 @@ export function ListinoTab({ seasonId }: ListinoTabProps) {
   const [selectedType, setSelectedType] = useState("adulti");
   const [viewMode, setViewMode] = useState<"mensile" | "base">("mensile");
 
-  const activityTypes = [
-    { value: "adulti", label: "Corsi Adulti" },
-    { value: "bambini", label: "Bambini/Ragazzi" },
-    { value: "aerial", label: "Discipline Aeree" },
-    { value: "open", label: "Abbonamenti Open" },
-    { value: "privata", label: "Lezioni Private" },
-    { value: "affitto", label: "Affitti Sale" },
-  ];
+  const { data: activityTypesData } = useQuery({
+    queryKey: ["/api/custom-lists/activity_types"],
+    queryFn: async () => {
+      const res = await fetch("/api/custom-lists/activity_types");
+      if (!res.ok) return { items: [] };
+      return res.json();
+    }
+  });
+
+  const activityTypes = activityTypesData?.items?.length > 0 
+    ? activityTypesData.items.map((i: any) => ({ value: i.value, label: i.label }))
+    : [
+        { value: "adulti", label: "Corsi Adulti" },
+        { value: "bambini", label: "Bambini/Ragazzi" },
+        { value: "aerial", label: "Discipline Aeree" },
+        { value: "open", label: "Abbonamenti Open" },
+        { value: "privata", label: "Lezioni Private" },
+        { value: "affitto", label: "Affitti Sale" },
+      ];
 
   return (
     <div className="space-y-6">
@@ -123,7 +134,7 @@ export function ListinoTab({ seasonId }: ListinoTabProps) {
                      <SelectValue placeholder="Seleziona Categoria..." />
                   </SelectTrigger>
                   <SelectContent>
-                     {activityTypes.map(type => (
+                     {activityTypes.map((type: any) => (
                         <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
                      ))}
                   </SelectContent>

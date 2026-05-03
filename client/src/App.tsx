@@ -55,6 +55,7 @@ const PriceLists = React.lazy(() => import("@/pages/listini"));
 const ListiniHome = React.lazy(() => import("@/pages/listini-home"));
 const QuoteListini = React.lazy(() => import("@/pages/quote-listini"));
 const QuotePromo = React.lazy(() => import("@/pages/quote-promo"));
+const PagamentiOnline = React.lazy(() => import("@/pages/pagamenti-online"));
 const WebhookStatus = React.lazy(() => import("@/pages/webhook-status"));
 const WcMapping = React.lazy(() => import("@/pages/wc-mapping"));
 const Attivita = React.lazy(() => import("@/pages/attivita"));
@@ -245,6 +246,7 @@ function Router() {
       {/*       <ProtectedRoute path="/categorie-merchandising" component={MerchandisingCategories} /> */}
       <Route path="/promo-sconti"><Redirect to="/quote-promo" /></Route>
       <ProtectedRoute path="/quote-promo" component={QuotePromo} />
+      <ProtectedRoute path="/pagamenti-online" component={PagamentiOnline} />
       <ProtectedRoute path="/webhook-status" component={WebhookStatus} />
       <ProtectedRoute path="/wc-mapping" component={WcMapping} />
       <ProtectedRoute path="/scheda-corso" component={SchedaAttivita} />

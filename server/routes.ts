@@ -6015,6 +6015,9 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
           paymentsList = await storage.getPaymentsWithMembers();
         }
       }
+      if (req.query.source) {
+        paymentsList = paymentsList.filter((p: any) => p.payment?.source === req.query.source || p.source === req.query.source);
+      }
       res.json(paymentsList);
     } catch (error) {
       console.error("[API Error] Caught explicitly:", error);
@@ -7135,8 +7138,8 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
   // ==== Course Quotes Grid Q1C ====
   app.get("/api/course-quotes-grid", isAuthenticated, async (req, res) => {
     try {
-      const { activityType } = req.query;
-      const gridItems = await storage.getCourseQuotesGrid(activityType as string);
+      const q = { ...req.query, ...(await resolveSeason(req.query)) };
+      const gridItems = await storage.getCourseQuotesGrid(q);
       res.json(gridItems);
     } catch (error) {
       console.error("[API Error] Caught explicitly:", error);
@@ -7147,18 +7150,25 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
   app.post("/api/course-quotes-grid/bulk", isAuthenticated, isAdmin, async (req, res) => {
     try {
       const items = req.body;
-      const { activityType } = req.query;
+      const q: any = { ...req.query, ...(await resolveSeason(req.query)) };
+      const { activityType, seasonId } = q;
+      
       if (!Array.isArray(items)) {
         return res.status(400).json({ message: "Expected an array of grid items" });
       }
 
-      console.log(`[API Bulk Insert] ActivityType: ${activityType}, Items count: ${items.length}`);
-      console.log(`[API Bulk Insert] Items payload: ${JSON.stringify(items.map(i => i.category), null, 2)}`);
+      const sid = seasonId ? parseInt(seasonId as string) : undefined;
+      const actType = activityType as string;
 
-      await storage.upsertCourseQuotesGridBulk(items, activityType as string);
+      // Assign seasonId to all items
+      const itemsWithSeason = items.map(item => ({ ...item, seasonId: sid }));
 
-      const verification = await storage.getCourseQuotesGrid(activityType as string);
-      console.log(`[API Bulk Insert] Post-insert verification, DB has ${verification.length} rows for this activityType.`);
+      console.log(`[API Bulk Insert] ActivityType: ${actType}, SeasonId: ${sid}, Items count: ${items.length}`);
+
+      await storage.upsertCourseQuotesGridBulk(itemsWithSeason, actType, sid);
+
+      const verification = await storage.getCourseQuotesGrid(q);
+      console.log(`[API Bulk Insert] Post-insert verification, DB has ${verification.length} rows for this activityType and season.`);
 
       res.json({ success: true, message: "Grid updated successfully" });
     } catch (error: any) {
@@ -10350,9 +10360,20 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
   // ============================================
   app.get("/api/welfare-providers", isAuthenticated, async (req, res) => {
     try {
-      res.json(await storage.getWelfareProviders());
+      const q = { ...req.query, ...(await resolveSeason(req.query)) };
+      res.json(await storage.getWelfareProviders(q));
     } catch(err: any) {
       res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  app.post("/api/welfare-providers", isAuthenticated, async (req, res) => {
+    try {
+      const data = req.body;
+      const provider = await storage.createWelfareProvider(data);
+      res.json({ success: true, data: provider });
+    } catch(err: any) {
+      res.status(400).json({ success: false, error: err.message });
     }
   });
 
@@ -10472,7 +10493,8 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
   // COMPANY AGREEMENTS
   app.get("/api/company-agreements", isAuthenticated, async (req, res) => {
     try {
-      const data = await db.select().from(companyAgreements);
+      const q = { ...req.query, ...(await resolveSeason(req.query)) };
+      const data = await storage.getCompanyAgreements ? await storage.getCompanyAgreements(q) : await db.select().from(companyAgreements);
       res.json(data);
     } catch (err: any) {
       res.status(500).json({ error: err.message });
@@ -10515,7 +10537,8 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
   // STAFF RATES
   app.get("/api/staff-rates", isAuthenticated, async (req, res) => {
     try {
-      const data = await db.select().from(staffRates);
+      const q = { ...req.query, ...(await resolveSeason(req.query)) };
+      const data = await storage.getStaffRates(q);
       res.json(data);
     } catch (err: any) {
       res.status(500).json({ error: err.message });
@@ -10524,11 +10547,11 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
 
   app.post("/api/staff-rates", isAuthenticated, async (req, res) => {
     try {
-      const [result] = await db.insert(staffRates).values({
+      const data = await storage.createStaffRate({
         ...req.body,
         tenantId: (req.user as any)?.tenantId || 1
       });
-      res.json({ success: true, id: result.insertId });
+      res.json({ success: true, id: data.id, data });
     } catch (err: any) {
       res.status(500).json({ error: err.message });
     }

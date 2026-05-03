@@ -14,7 +14,7 @@ import { Globe, FileCheck, CheckCircle2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 
-export function OnlineTab() {
+export function OnlineTab({ seasonId }: { seasonId?: number | "active" }) {
   const [filter, setFilter] = useState("all");
   const [completingId, setCompletingId] = useState<number | null>(null);
   
@@ -27,9 +27,10 @@ export function OnlineTab() {
   const queryClient = useQueryClient();
 
   const { data: payments, isLoading } = useQuery<any[]>({
-    queryKey: ["/api/payments", { source: "online" }],
+    queryKey: ["/api/payments", { source: "online", seasonId }],
     queryFn: async () => {
-      const res = await fetch("/api/payments?source=online");
+      const qs = seasonId ? `&seasonId=${seasonId}` : "";
+      const res = await fetch(`/api/payments?source=online${qs}`);
       if (!res.ok) throw new Error("Failed");
       return res.json();
     },
