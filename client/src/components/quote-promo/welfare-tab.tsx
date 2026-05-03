@@ -21,12 +21,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { HeartHandshake, Save } from "lucide-react";
+import { HeartHandshake, Save, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
 import type { WelfareProvider } from "@shared/schema";
 import { Separator } from "@/components/ui/separator";
-import { HeartHandshake } from "lucide-react";
 
 function WelfareProviderCard({ provider }: { provider: WelfareProvider }) {
   const { toast } = useToast();
