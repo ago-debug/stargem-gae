@@ -97,7 +97,7 @@ export default function QuotePromo() {
                 value="staff"
                 className="gap-2 px-6 text-sm font-semibold data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm"
               >
-                Tariffe Staff e Insegnanti
+                Tariffe Staff
               </TabsTrigger>
             </TabsList>
           </div>
