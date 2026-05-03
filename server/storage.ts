@@ -19,6 +19,8 @@ import {
   costCenters,
   accountingPeriods,
   journalEntries,
+  staffRates,
+  companyAgreements,
   customListItems,
   memberships,
   medicalCertificates,

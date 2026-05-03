@@ -2007,6 +2007,7 @@ export const carnetWallets = mysqlTable("carnet_wallets", {
   expiresAt: date("expires_at").notNull(),
   isActive: boolean("is_active").default(true),
   notes: text("notes"),
+  seasonId: int("season_id").references(() => seasons.id, { onDelete: "set null" }),
   groupSize: tinyint("group_size").default(1),
   locationType: varchar("location_type", {length:30}).default("in_sede"),
   pricePerUnit: decimal("price_per_unit", {precision:8,scale:2}),
