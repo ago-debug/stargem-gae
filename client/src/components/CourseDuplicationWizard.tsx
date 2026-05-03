@@ -162,14 +162,16 @@ export function CourseDuplicationWizard({
   );
 
   React.useEffect(() => {
-    if (isOpen && preSelectedCourseIds && preSelectedCourseIds.size > 0) {
-      setSelectedCourseIds(new Set(preSelectedCourseIds));
-      if (!tableSourceSeasonId) {
-        const fallbackId = currentSeasonId === "active" ? "" : currentSeasonId;
-        if (fallbackId) setTableSourceSeasonId(fallbackId);
+    if (isOpen) {
+      if (preSelectedCourseIds && preSelectedCourseIds.size > 0) {
+        setSelectedCourseIds(new Set(preSelectedCourseIds));
+      }
+      const fallbackId = currentSeasonId === "active" ? "" : currentSeasonId;
+      if (fallbackId && fallbackId !== tableSourceSeasonId) {
+        setTableSourceSeasonId(fallbackId);
       }
     }
-  }, [isOpen, preSelectedCourseIds, currentSeasonId, tableSourceSeasonId]);
+  }, [isOpen, preSelectedCourseIds, currentSeasonId]);
 
   const [courseOverrides, setCourseOverrides] = useState<Record<number, any>>(
     {},
@@ -987,25 +989,21 @@ export function CourseDuplicationWizard({
                             >
                               {course.name}
                             </div>
+                            {(() => {
+                              const instructor = instructors?.find(
+                                (i) => i.id === course.instructorId,
+                              );
+                              if (instructor) {
+                                return (
+                                  <div className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">
+                                    {instructor.lastName} {instructor.firstName}
+                                  </div>
+                                );
+                              }
+                              return null;
+                            })()}
                             <div className="mt-1 inline-block w-fit rounded bg-slate-100 p-0.5 px-1.5 font-mono text-xxs text-muted-foreground dark:bg-slate-800">
-                              {generateSKUForCourse(
-                                {
-                                  ...course,
-                                  name:
-                                    courseOverrides[course.id]?.name ??
-                                    course.name,
-                                  dayOfWeek:
-                                    courseOverrides[course.id]?.dayOfWeek ??
-                                    course.dayOfWeek,
-                                  startTime:
-                                    courseOverrides[course.id]?.startTime ??
-                                    course.startTime,
-                                  instructorId:
-                                    courseOverrides[course.id]?.instructorId ??
-                                    course.instructorId,
-                                },
-                                targetSeasonId,
-                              )}
+                              {course.sku || "N/A"}
                             </div>
                           </TableCell>
                           <TableCell className="pt-3 align-top">
