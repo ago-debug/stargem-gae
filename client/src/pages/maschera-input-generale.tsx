@@ -16,7 +16,7 @@ import { ConflictBadge } from "@/components/conflict-badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   FileText, Users, CreditCard, Gift, IdCard, Stethoscope, Activity,
-  User, BookOpen, ShoppingBag, Calendar, Sparkles, Sun, Dumbbell, UserCheck, Award, Music, Database, Building2, Globe
+  User, BookOpen, ShoppingBag, Calendar, Sparkles, Sun, Dumbbell, UserCheck, Award, Music, Database, Building2, Globe, Receipt
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { Link, useSearch, useLocation } from "wouter";
@@ -42,7 +42,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useMemberStore } from "@/store/useMemberStore";
 import { CrmFormProvider, useCrmForm } from "@/components/crm/CrmFormContext";
 import { TabAnagrafica } from "@/components/crm/TabAnagrafica";
-import { TabTutori } from "@/components/crm/TabTutori";
+import { TabIscrizioni } from "@/components/crm/TabIscrizioni";
+import { TabRicevute } from "@/components/crm/TabRicevute";
+import { TabMarketing } from "@/components/crm/TabMarketing";
+import { TabAllegati } from "@/components/crm/TabAllegati";
+import { TabGift } from "@/components/crm/TabGift";
+import { TabTessere } from "@/components/crm/TabTessere";
 import { getActiveActivities } from "@/config/activities";
 function useBarcodeScanner(onScan: (barcode: string) => void) {
   useEffect(() => {
@@ -161,10 +166,7 @@ function MascheraInputGeneraleContent(props?: any) {
   } = useCrmForm();
 
   
-  const canaliAcquisizione = useCustomListValues("provenienza_marketing");
-  const quickAddCanale = useQuickAddCustomList("provenienza_marketing");
-  const livelliCrm = useCustomListValues("livello_crm");
-  const quickAddLivello = useQuickAddCustomList("livello_crm");
+
 
   useBarcodeScanner((barcode) => {
     if (/^[A-Z0-9]{16}$/i.test(barcode)) {
@@ -208,151 +210,6 @@ function MascheraInputGeneraleContent(props?: any) {
 
   
 
-  const compressImage = (file: File, maxWidth = 1200, quality = 0.7): Promise<string> => {
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          let width = img.width;
-          let height = img.height;
-
-          if (width > maxWidth) {
-            height = Math.round((height * maxWidth) / width);
-            width = maxWidth;
-          }
-
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          if (ctx) {
-            ctx.drawImage(img, 0, 0, width, height);
-            resolve(canvas.toDataURL('image/jpeg', quality));
-          } else {
-            resolve(event.target?.result as string);
-          }
-        };
-        img.src = event.target?.result as string;
-      };
-      reader.readAsDataURL(file);
-    });
-  };
-
-  const handlePhotoUpload = async (file: File | null) => {
-    if (!file) return;
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/heic', 'image/heif', 'image/webp', 'image/avif', 'image/tiff'];
-    if (!allowedTypes.includes(file.type) && !file.name.match(/\.(jpg|jpeg|png|heic|heif|webp|avif|tiff?)$/i)) {
-      alert('Formato foto non supportato. Usa JPG, PNG, HEIC, HEIF o WebP.');
-      return;
-    }
-
-    try {
-      const compressedBase64 = await compressImage(file, 800, 0.7); // Photos can be smaller
-      setPhotoFile({ file, preview: compressedBase64 });
-      setDirtyFields((prev: Record<string, boolean>) => ({ ...prev, photo: true }));
-    } catch (e) {
-      console.error("Compression failed", e);
-      // Fallback to uncompressed if canvas fails
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setPhotoFile({ file, preview: e.target?.result as string });
-        setDirtyFields((prev: Record<string, boolean>) => ({ ...prev, photo: true }));
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const removePhoto = () => {
-    setPhotoFile({ file: null, preview: null });
-    setDirtyFields((prev: Record<string, boolean>) => ({ ...prev, photo: true }));
-  };
-
-  /* openAllegatoSections moved */
-
-  const toggleAllegatoSection = (key: string) => {
-    setOpenAllegatoSections(prev => ({ ...prev, [key]: !prev[key] }));
-  };
-
-  const handleFileUpload = async (key: keyof AllegatiState, file: File | null) => {
-    if (!file) return;
-    const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
-    if (!allowedTypes.includes(file.type)) {
-      alert('Formato file non supportato. Usa PDF, JPG o PNG.');
-      return;
-    }
-    const today = new Date().toISOString().split('T')[0];
-
-    // Compress images before saving to Base64 State to prevent MySQL packet size errors
-    if (file.type.startsWith('image/')) {
-      try {
-        const compressedBase64 = await compressImage(file, 1200, 0.6); // Higher compression for attachments
-        setAllegati(prev => ({
-          ...prev,
-          [key]: { ...prev[key], hasFile: true, fileName: file.name, data: today, previewUrl: compressedBase64 }
-        }));
-        setDirtyFields((prev: Record<string, boolean>) => ({ ...prev, allegati: true }));
-      } catch (e) {
-        console.error("Attachment compression failed", e);
-        // Fallback
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const base64Data = e.target?.result as string;
-          setAllegati(prev => ({
-            ...prev,
-            [key]: { ...prev[key], hasFile: true, fileName: file.name, data: today, previewUrl: base64Data }
-          }));
-          setDirtyFields((prev: Record<string, boolean>) => ({ ...prev, allegati: true }));
-        };
-        reader.readAsDataURL(file);
-      }
-    } else {
-      // PDFs shouldn't be compressed via Canvas
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const base64Data = e.target?.result as string;
-        setAllegati(prev => ({
-          ...prev,
-          [key]: { ...prev[key], hasFile: true, fileName: file.name, data: today, previewUrl: base64Data }
-        }));
-        setDirtyFields((prev: Record<string, boolean>) => ({ ...prev, allegati: true }));
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const removeAllegatoFile = (key: keyof AllegatiState) => {
-    if (confirm("Sei sicuro di voler rimuovere questo file?")) {
-      setAllegati(prev => ({
-        ...prev,
-        [key]: { ...prev[key], hasFile: false, fileName: '', data: '', previewUrl: '' }
-      }));
-      setDirtyFields((prev: Record<string, boolean>) => ({ ...prev, allegati: true }));
-    }
-  };
-
-  const openPreview = (previewUrl?: string) => {
-    if (!previewUrl) {
-      alert("Anteprima non disponibile per questo file. Se è stato caricato prima dell'aggiornamento, ricaricalo per abilitare l'anteprima.");
-      return;
-    }
-    const win = window.open();
-    if (win) {
-      if (previewUrl.startsWith('data:image/')) {
-        win.document.write('<body style="margin:0;display:flex;justify-content:center;align-items:center;background:#f0f0f0;height:100vh;"><img src="' + previewUrl + '" style="max-width:100%; max-height:100%; object-fit:contain; box-shadow:0 10px 25px rgba(0,0,0,0.1);" /></body>');
-      } else {
-        win.document.write('<iframe src="' + previewUrl + '" frameborder="0" style="border:0; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%;" allowfullscreen></iframe>');
-      }
-    }
-  };
-
-  const updateAllegato = (key: keyof AllegatiState, field: string, value: string | number) => {
-    setAllegati(prev => ({
-      ...prev,
-      [key]: { ...prev[key], [field]: value }
-    }));
-    setDirtyFields((prev: Record<string, boolean>) => ({ ...prev, allegati: true }));
-  };
 
   const defaultFormData = {
     // Intestazione
@@ -509,6 +366,7 @@ function MascheraInputGeneraleContent(props?: any) {
   }, [payments]);
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
   const [isNuovoPagamentoOpen, setIsNuovoPagamentoOpen] = useState(false);
+  const [initialAction, setInitialAction] = useState<string | null>(null);
   const [editingPaymentId, setEditingPaymentId] = useState<string | null>(null);
 
   // OLD: Single payment state (commented out or removed if not used elsewhere)
@@ -537,8 +395,7 @@ function MascheraInputGeneraleContent(props?: any) {
   // Active Member State for Enrollments from Zustand
   const selectedMemberId = useMemberStore((state) => state.selectedMemberId);
   const setSelectedMemberId = useMemberStore((state) => state.setSelectedMemberId);
-  const [selectedCourseToAdd, setSelectedCourseToAdd] = useState<string>("");
-  const [selectedWorkshopToAdd, setSelectedWorkshopToAdd] = useState<string>("");
+
   const [showGiftFields, setShowGiftFields] = useState<boolean>(false);
   const [showDuplicatesModal, setShowDuplicatesModal] = useState(false);
 
@@ -896,129 +753,6 @@ function MascheraInputGeneraleContent(props?: any) {
   const { data: instructors } = useQuery<Instructor[]>({ queryKey: ["/api/instructors"] });
   const { data: categories } = useQuery<Category[]>({ queryKey: ["/api/categories"] });
   const { data: studios } = useQuery<Studio[]>({ queryKey: ["/api/studios"] });
-  const { data: workshops } = useQuery<any[]>({ queryKey: ["/api/workshops"] });
-  const { data: enrollmentDetails } = useQuery<any[]>({ queryKey: ["/api/enrollment-details"] });
-
-  // Extra activities base fetch
-  const { data: paidTrials } = useQuery<any[]>({ queryKey: ["/api/paid-trials"] });
-  const { data: freeTrials } = useQuery<any[]>({ queryKey: ["/api/free-trials"] });
-  const { data: singleLessons } = useQuery<any[]>({ queryKey: ["/api/single-lessons"] });
-  const { data: sundayActivities } = useQuery<any[]>({ queryKey: ["/api/sunday-activities"] });
-  const { data: trainings } = useQuery<any[]>({ queryKey: ["/api/trainings"] });
-  const { data: individualLessons } = useQuery<any[]>({ queryKey: ["/api/individual-lessons"] });
-  const { data: campusActivities } = useQuery<any[]>({ queryKey: ["/api/campus-activities"] });
-  const { data: recitals } = useQuery<any[]>({ queryKey: ["/api/recitals"] });
-  const { data: vacationStudies } = useQuery<any[]>({ queryKey: ["/api/vacation-studies"] });
-  const { data: bookingServices } = useQuery<any[]>({ queryKey: ["/api/booking-services"] });
-
-  const SectionBadge = ({ count }: { count: number }) => {
-    if (!count || count === 0) return null;
-    return (
-      <span className="ml-auto bg-gradient-to-r from-yellow-400 to-yellow-600 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-[0_2px_4px_rgba(0,0,0,0.3)] border border-warning200" title={`${count} iscrizioni attive`}>
-        {count}
-      </span>
-    );
-  };
-
-  const renderGenericEnrollmentList = (
-    enrollments: any[] | undefined,
-    baseData: any[] | undefined,
-    mutation: any,
-    emptyMessage: string,
-    listTitle: string,
-    entityLabel: string,
-    foreignKey: string
-  ) => {
-    if (!selectedMemberId) {
-      return (
-        <div className="text-center p-4 text-muted-foreground bg-muted/20 rounded-lg border border-dashed">
-          Seleziona un utente per gestire {entityLabel}
-        </div>
-      );
-    }
-    if (!Array.isArray(enrollments) || enrollments.length === 0) {
-      return <p className="text-sm text-muted-foreground italic p-2">{emptyMessage}</p>;
-    }
-    return (
-      <div className="space-y-6">
-        <div className="space-y-2">
-          <Label className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">{listTitle}</Label>
-          {enrollments.map((e: any) => {
-            const assoc = baseData?.find((item: any) => item.id === e[foreignKey]);
-            const hasDetails = Array.isArray(e.details) && e.details.length > 0;
-            return (
-              <div key={e.id} className="grid grid-cols-[140px_180px_240px_1fr_auto] items-center p-2.5 bg-muted/20 border rounded-md group hover:bg-muted/40 transition-colors gap-3">
-                <div className="font-bold text-sm truncate" title={assoc?.name}>{assoc?.name || 'Attività non trovata'}</div>
-                <div className="font-medium text-xxs text-foreground truncate" title={assoc?.sku || undefined}>{assoc?.sku}</div>
-                <div className="text-xs text-muted-foreground flex items-center gap-2 truncate">
-                  <span>Registrata il: {new Date(e.enrollmentDate || e.createdAt || new Date()).toLocaleDateString('it-IT')}</span>
-                </div>
-                <div className="flex items-center gap-1 overflow-hidden flex-1">
-                  {hasDetails && e.details.map((detStr: string, idx: number) => {
-                    const color = enrollmentDetails?.find((d: any) => d.name === detStr)?.color;
-                    return <EnrollmentDetailBadge key={idx} name={detStr} color={color} className="h-5 py-0.5 px-2 text-xxs truncate max-w-[120px]" />;
-                  })}
-                </div>
-                <div className="flex items-center justify-end gap-3 pl-2">
-                  <Badge variant={e.status === 'active' ? 'default' : 'secondary'} className={e.status === 'active' ? 'bg-green-100 text-green-800 dark:text-green-400 hover:bg-green-200 border-green-300 text-xxs h-5' : 'text-xxs h-5'}>
-                    {e.status === 'active' ? 'Attiva' : e.status || '?'}
-                  </Badge>
-                  <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={() => { if (confirm("Rimuovere questa riga?")) mutation.mutate(e.id); }}>
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </Button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
-  };
-
-  // Member Enrollments Queries
-  const { data: memberEnrollments, isLoading: loadingEnrollments } = useQuery<any[]>({
-    queryKey: ["/api/enrollments?type=corsi", "member", selectedMemberId],
-    queryFn: async () => {
-      const res = await fetch(`/api/enrollments?type=corsi&memberId=${selectedMemberId}`);
-      if (!res.ok) {
-        if (res.status === 404) return [];
-        throw new Error("Errore caricamento iscrizioni");
-      }
-      return res.json();
-    },
-    enabled: !!selectedMemberId,
-  });
-
-  const { data: memberWorkshopEnrollments } = useQuery<any[]>({
-    queryKey: ["/api/workshop-enrollments", "member", selectedMemberId],
-    queryFn: async () => {
-      const res = await fetch(`/api/workshop-enrollments?memberId=${selectedMemberId}`);
-      if (!res.ok) return [];
-      return res.json();
-    },
-    enabled: !!selectedMemberId,
-  });
-
-  const { data: memberPtEnrollments } = useQuery<any[]>({ queryKey: ["/api/paid-trial-enrollments", "member", selectedMemberId], queryFn: async () => { const res = await fetch(`/api/paid-trial-enrollments?memberId=${selectedMemberId}`); if (!res.ok) return []; return res.json(); }, enabled: !!selectedMemberId });
-  const { data: memberFtEnrollments } = useQuery<any[]>({ queryKey: ["/api/free-trial-enrollments", "member", selectedMemberId], queryFn: async () => { const res = await fetch(`/api/free-trial-enrollments?memberId=${selectedMemberId}`); if (!res.ok) return []; return res.json(); }, enabled: !!selectedMemberId });
-  const { data: memberSlEnrollments } = useQuery<any[]>({ queryKey: ["/api/single-lesson-enrollments", "member", selectedMemberId], queryFn: async () => { const res = await fetch(`/api/single-lesson-enrollments?memberId=${selectedMemberId}`); if (!res.ok) return []; return res.json(); }, enabled: !!selectedMemberId });
-  const { data: memberSaEnrollments } = useQuery<any[]>({ queryKey: ["/api/sunday-activity-enrollments", "member", selectedMemberId], queryFn: async () => { const res = await fetch(`/api/sunday-activity-enrollments?memberId=${selectedMemberId}`); if (!res.ok) return []; return res.json(); }, enabled: !!selectedMemberId });
-  const { data: memberTrEnrollments } = useQuery<any[]>({ queryKey: ["/api/training-enrollments", "member", selectedMemberId], queryFn: async () => { const res = await fetch(`/api/training-enrollments?memberId=${selectedMemberId}`); if (!res.ok) return []; return res.json(); }, enabled: !!selectedMemberId });
-  const { data: memberIlEnrollments } = useQuery<any[]>({ queryKey: ["/api/individual-lesson-enrollments", "member", selectedMemberId], queryFn: async () => { const res = await fetch(`/api/individual-lesson-enrollments?memberId=${selectedMemberId}`); if (!res.ok) return []; return res.json(); }, enabled: !!selectedMemberId });
-  const { data: memberCaEnrollments } = useQuery<any[]>({ queryKey: ["/api/campus-enrollments", "member", selectedMemberId], queryFn: async () => { const res = await fetch(`/api/campus-enrollments?memberId=${selectedMemberId}`); if (!res.ok) return []; return res.json(); }, enabled: !!selectedMemberId });
-  const { data: memberReEnrollments } = useQuery<any[]>({ queryKey: ["/api/recital-enrollments", "member", selectedMemberId], queryFn: async () => { const res = await fetch(`/api/recital-enrollments?memberId=${selectedMemberId}`); if (!res.ok) return []; return res.json(); }, enabled: !!selectedMemberId });
-  const { data: memberVsEnrollments } = useQuery<any[]>({ queryKey: ["/api/vacation-study-enrollments", "member", selectedMemberId], queryFn: async () => { const res = await fetch(`/api/vacation-study-enrollments?memberId=${selectedMemberId}`); if (!res.ok) return []; return res.json(); }, enabled: !!selectedMemberId });
-  const { data: memberServEnrollments } = useQuery<any[]>({
-    queryKey: ["/api/booking-service-enrollments", "member", selectedMemberId],
-    queryFn: async () => {
-      const res = await fetch(`/api/booking-service-enrollments`);
-      if (!res.ok) return [];
-      const all = await res.json();
-      return all.filter((e: any) => e.memberId === selectedMemberId);
-    },
-    enabled: !!selectedMemberId
-  });
 
   const { data: memberMemberships, isLoading: loadingMemberships, error: errorMemberships } = useQuery<any[]>({
     queryKey: ["/api/memberships", "member", selectedMemberId],
@@ -1028,7 +762,8 @@ function MascheraInputGeneraleContent(props?: any) {
         if (res.status === 404) return [];
         throw new Error("Errore caricamento abbonamenti");
       }
-      return res.json();
+      const json = await res.json();
+      return Array.isArray(json) ? json : (json.data || []);
     },
     enabled: !!selectedMemberId,
   });
@@ -1070,40 +805,7 @@ function MascheraInputGeneraleContent(props?: any) {
     enabled: !!selectedMemberId
   });
 
-  const [isCrmOverrideOpen, setIsCrmOverrideOpen] = useState(false);
-  const [crmOverrideData, setCrmOverrideData] = useState({ level: "NONE", reason: "", override: false });
 
-  const recalculateCrmMutation = useMutation({
-    mutationFn: async () => {
-      return await apiRequest("POST", `/api/crm/profile/${selectedMemberId}/recalculate`);
-    },
-    onSuccess: () => {
-      refetchCurrentMember();
-      queryClient.invalidateQueries({ queryKey: ["/api/members"] });
-      toast({ title: "Profilo CRM ricalcolato con successo" });
-    }
-  });
-
-  const overrideCrmMutation = useMutation({
-    mutationFn: async (data: { level: string, reason: string, override: boolean }) => {
-      return await apiRequest("POST", `/api/crm/profile/${selectedMemberId}/override`, data);
-    },
-    onSuccess: () => {
-      refetchCurrentMember();
-      queryClient.invalidateQueries({ queryKey: ["/api/members"] });
-      toast({ title: "Forzatura CRM salvata" });
-      setIsCrmOverrideOpen(false);
-    }
-  });
-
-  const handleOpenCrmOverride = () => {
-    setCrmOverrideData({
-      level: currentMember?.crmProfileLevel || "NONE",
-      reason: currentMember?.crmProfileReason || "",
-      override: currentMember?.crmProfileOverride || false
-    });
-    setIsCrmOverrideOpen(true);
-  };
 
   const combinedPayments = [...(Array.isArray(memberPayments) ? memberPayments : []), ...payments];
 
@@ -1123,105 +825,6 @@ function MascheraInputGeneraleContent(props?: any) {
 
   const sortedPayments = sortItemsPayments(combinedPayments, getPaymentSortValue);
 
-  // Enrollment Mutations
-  const addEnrollmentMutation = useMutation({
-    mutationFn: async (data: { memberId?: string | number, courseId: number, participationType?: string, targetDate?: string | null, active?: boolean }) => {
-      await apiRequest("POST", "/api/enrollments", {
-        memberId: selectedMemberId,
-        courseId: data.courseId,
-        participationType: data.participationType || "STANDARD_COURSE",
-        targetDate: data.targetDate || null,
-        status: "active"
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/enrollments?type=corsi", "member", selectedMemberId] });
-      toast({ title: "Iscrizione corso aggiunta" });
-      setSelectedCourseToAdd("");
-    },
-    onError: (error: Error) => {
-      toast({ title: "Errore iscrizione corso", description: error.message, variant: "destructive" });
-    }
-  });
-
-  const updateEnrollmentMutation = useMutation({
-    mutationFn: async ({ enrollmentId, details }: { enrollmentId: number, details: string[] }) => {
-      await apiRequest("PATCH", `/api/enrollments/${enrollmentId}`, { details });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/enrollments?type=corsi", "member", selectedMemberId] });
-      toast({ title: "Dettagli iscrizione aggiornati" });
-    },
-    onError: (error: Error) => {
-      toast({ title: "Errore aggiornamento dettagli", description: error.message, variant: "destructive" });
-    }
-  });
-
-  const removeEnrollmentMutation = useMutation({
-    mutationFn: async (enrollmentId: number) => {
-      await apiRequest("DELETE", `/api/enrollments/${enrollmentId}`);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/enrollments?type=corsi", "member", selectedMemberId] });
-      toast({ title: "Iscrizione corso rimossa" });
-    },
-    onError: (error: Error) => {
-      toast({ title: "Errore rimozione corso", description: error.message, variant: "destructive" });
-    }
-  });
-
-  const addWorkshopEnrollmentMutation = useMutation({
-    mutationFn: async (workshopId: number) => {
-      await apiRequest("POST", "/api/workshop-enrollments", { memberId: selectedMemberId, workshopId });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/workshop-enrollments", "member", selectedMemberId] });
-      toast({ title: "Iscrizione workshop aggiunta" });
-      setSelectedWorkshopToAdd("");
-    },
-    onError: (error: Error) => {
-      toast({ title: "Errore iscrizione workshop", description: error.message, variant: "destructive" });
-    }
-  });
-
-  const removeWorkshopEnrollmentMutation = useMutation({
-    mutationFn: async (enrollmentId: number) => {
-      await apiRequest("DELETE", `/api/workshop-enrollments/${enrollmentId}`);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/workshop-enrollments", "member", selectedMemberId] });
-      toast({ title: "Iscrizione workshop rimossa" });
-    },
-    onError: (error: Error) => {
-      toast({ title: "Errore rimozione workshop", description: error.message, variant: "destructive" });
-    }
-  });
-
-  const createRemoveEnrollmentMutation = (endpoint: string, successMsg: string) => useMutation({
-    mutationFn: async (enrollmentId: number) => {
-      await apiRequest("DELETE", `/api/${endpoint}/${enrollmentId}`);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/${endpoint}`, "member", selectedMemberId] });
-      toast({ title: successMsg });
-    },
-    onError: (error: Error) => {
-      toast({ title: "Errore rimozione iscrizione", description: error.message, variant: "destructive" });
-    }
-  });
-
-  const removePtEnrollmentMutation = createRemoveEnrollmentMutation("paid-trial-enrollments", "Prova a pagamento rimossa");
-  const removeFtEnrollmentMutation = createRemoveEnrollmentMutation("free-trial-enrollments", "Prova gratuita rimossa");
-  const removeSlEnrollmentMutation = createRemoveEnrollmentMutation("single-lesson-enrollments", "Lezione singola rimossa");
-  const removeSaEnrollmentMutation = createRemoveEnrollmentMutation("sunday-activity-enrollments", "Domenica in movimento rimossa");
-  const removeTrEnrollmentMutation = createRemoveEnrollmentMutation("training-enrollments", "Allenamento rimosso");
-  const removeIlEnrollmentMutation = createRemoveEnrollmentMutation("individual-lesson-enrollments", "Lezione individuale rimossa");
-  const removeCaEnrollmentMutation = createRemoveEnrollmentMutation("campus-enrollments", "Campus rimosso");
-  const removeReEnrollmentMutation = createRemoveEnrollmentMutation("recital-enrollments", "Saggio rimosso");
-  const removeVsEnrollmentMutation = createRemoveEnrollmentMutation("vacation-study-enrollments", "Vacanza studio rimossa");
-  const removeServEnrollmentMutation = createRemoveEnrollmentMutation("booking-service-enrollments", "Servizio Extra rimosso");
-  const dummyMutation = { mutate: () => toast({ title: "Funzione non attiva", description: "Utilizzare la sezione dedicata per il merchandising." }) };
-
 
   // Intercept memberId from URL and auto-load Profile
   useEffect(() => {
@@ -1234,10 +837,10 @@ function MascheraInputGeneraleContent(props?: any) {
             throw new Error('Utente non trovato');
           })
           .then(member => {
-            handleSelectMember(member);
-            if (actionFromUrl === 'payment') {
-              setIsNuovoPagamentoOpen(true);
+            if (actionFromUrl === 'payment' || actionFromUrl === 'rinnova-tessera') {
+              setInitialAction(actionFromUrl);
             }
+            handleSelectMember(member);
             // Gestione scroll automatico post-caricamento anagrafica
             if (window.location.hash) {
               setTimeout(() => {
@@ -1253,6 +856,16 @@ function MascheraInputGeneraleContent(props?: any) {
       }
     }
   }, [memberIdFromUrl, actionFromUrl]);
+
+  // Effetto dedicato per aprire il modale in modo sicuro dopo il montaggio
+  useEffect(() => {
+    if (initialAction === 'payment' || initialAction === 'rinnova-tessera') {
+      const timer = setTimeout(() => {
+        setIsNuovoPagamentoOpen(true);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [initialAction]);
 
   // Debounced Search
   useEffect(() => {
@@ -1305,6 +918,7 @@ function MascheraInputGeneraleContent(props?: any) {
       dataNascita: member.dateOfBirth || "",
       luogoNascita: member.placeOfBirth || "",
       provinciaNascita: member.birthProvince || "",
+      codComune: member.fiscalCode?.length === 16 ? member.fiscalCode.substring(11, 15) : "",
       sesso: member.gender || "",
       eta: eta,
 
@@ -1312,19 +926,37 @@ function MascheraInputGeneraleContent(props?: any) {
       nomeGen1: member.motherFirstName || "",
       cognomeGen1: member.motherLastName || "",
       cfGen1: member.motherFiscalCode || "",
-      telGen1: member.motherPhone || "",
+      telGen1: member.motherMobile || member.motherPhone || "",
       emailGen1: member.motherEmail || "",
+      indirizzoGen1: member.motherStreetAddress || "",
+      cittaGen1: member.motherCity || "",
+      provinciaGen1: member.motherProvince || "",
+      codComuneGen1: member.motherFiscalCode?.length === 16 ? member.motherFiscalCode.substring(11, 15) : "",
+      capGen1: member.motherPostalCode || "",
+      dataNascitaGen1: member.motherBirthDate || "",
+      luogoNascitaGen1: member.motherBirthPlace || "",
+      provinciaNascitaGen1: member.motherBirthProvince || "",
 
       nomeGen2: member.fatherFirstName || "",
       cognomeGen2: member.fatherLastName || "",
       cfGen2: member.fatherFiscalCode || "",
-      fatherEmail: member.fatherEmail || "",
-      fatherPhone: member.fatherPhone || "",
+      telGen2: member.fatherMobile || member.fatherPhone || "",
+      emailGen2: member.fatherEmail || "",
+      indirizzoGen2: member.fatherStreetAddress || "",
+      cittaGen2: member.fatherCity || "",
+      provinciaGen2: member.fatherProvince || "",
+      codComuneGen2: member.fatherFiscalCode?.length === 16 ? member.fatherFiscalCode.substring(11, 15) : "",
+      capGen2: member.fatherPostalCode || "",
+      dataNascitaGen2: member.fatherBirthDate || "",
+      luogoNascitaGen2: member.fatherBirthPlace || "",
+      provinciaNascitaGen2: member.fatherBirthProvince || "",
 
       // Intestazione defaults
       status: member.status || "active",
       stagione: member.season || "2025-2026",
       codiceId: member.internalId || "2526-000001",
+      previousMembershipNumber: member.previousMembershipNumber || "",
+      athenaId: member.athenaId || "",
       dataInserimento: member.insertionDate || new Date().toLocaleDateString("it-IT"),
       teamInserito: member.createdAt ? `${member.createdBy || 'Sistema'}, ${formatAuditDate(member.createdAt)}` : "",
       teamAggiornato: member.updatedAt ? `${member.updatedBy || 'Sistema'}, ${formatAuditDate(member.updatedAt)}` : "",
@@ -1543,19 +1175,42 @@ function MascheraInputGeneraleContent(props?: any) {
       gender: formData.sesso,
       isMinor: parseInt(formData.eta) < 18,
       participantType: formData.tipoPartecipante,
+      
+      // Legacy / Storico
+      previousMembershipNumber: formData.previousMembershipNumber,
+      athenaId: formData.athenaId,
+
+      // Intestazione and defaults
+      season: formData.stagione,
+      internalId: formData.codiceId, // Will be overridden on the backend if new
+      cardNumber: formData.tessera, // Will be overridden on the backend if new
 
       // Genitori
       motherFirstName: formData.nomeGen1 || null,
       motherLastName: formData.cognomeGen1 || null,
       motherFiscalCode: formData.cfGen1 || null,
       motherEmail: formData.emailGen1 || null,
-      motherPhone: formData.telGen1 || null,
+      motherMobile: formData.telGen1 || null,
+      motherStreetAddress: formData.indirizzoGen1 || null,
+      motherCity: formData.cittaGen1 || null,
+      motherProvince: formData.provinciaGen1 || null,
+      motherPostalCode: formData.capGen1 || null,
+      motherBirthDate: formData.dataNascitaGen1 || null,
+      motherBirthPlace: formData.luogoNascitaGen1 || null,
+      motherBirthProvince: formData.provinciaNascitaGen1 || null,
 
       fatherFirstName: formData.nomeGen2 || null,
       fatherLastName: formData.cognomeGen2 || null,
       fatherFiscalCode: formData.cfGen2 || null,
       fatherEmail: formData.emailGen2 || null,
-      fatherPhone: formData.telGen2 || null,
+      fatherMobile: formData.telGen2 || null,
+      fatherStreetAddress: formData.indirizzoGen2 || null,
+      fatherCity: formData.cittaGen2 || null,
+      fatherProvince: formData.provinciaGen2 || null,
+      fatherPostalCode: formData.capGen2 || null,
+      fatherBirthDate: formData.dataNascitaGen2 || null,
+      fatherBirthPlace: formData.luogoNascitaGen2 || null,
+      fatherBirthProvince: formData.provinciaNascitaGen2 || null,
 
       // Allegati Flags (from allegati state)
       detractionModelRequested: allegati.modelloDetrazione.richiesto === "si",
@@ -1801,21 +1456,6 @@ function MascheraInputGeneraleContent(props?: any) {
     setLocation('/importa');
   };
 
-  const totalActivitiesCount =
-    (memberEnrollments?.length || 0) +
-    (memberPtEnrollments?.length || 0) +
-    (memberFtEnrollments?.length || 0) +
-    (memberSlEnrollments?.length || 0) +
-    (memberSaEnrollments?.length || 0) +
-    (memberTrEnrollments?.length || 0) +
-    (memberIlEnrollments?.length || 0) +
-    (memberCaEnrollments?.length || 0) +
-    (memberReEnrollments?.length || 0) +
-    (memberVsEnrollments?.length || 0) +
-    (memberServEnrollments?.length || 0) +
-    (memberServEnrollments?.length || 0) +
-    (memberWorkshopEnrollments?.length || 0);
-
   const isGen1Active = formData.nomeGen1.trim() !== "" || formData.cognomeGen1.trim() !== "";
   const isGen2Active = formData.nomeGen2.trim() !== "" || formData.cognomeGen2.trim() !== "";
 
@@ -1981,6 +1621,7 @@ function MascheraInputGeneraleContent(props?: any) {
               { id: "intestazione", label: "Intestazione", icon: FileText },
               { id: "anagrafica", label: "Anagrafica", icon: Users },
               { id: "pagamenti", label: "Pagamenti", icon: CreditCard },
+              { id: "ricevute", label: "Ricevute", icon: Receipt },
               { id: "gift", label: "Gift/Buono", icon: Gift },
               { id: "tessere", label: "Tessere", icon: IdCard },
               { id: "certificato", label: "Certificato Medico", icon: Stethoscope },
@@ -2126,856 +1767,17 @@ function MascheraInputGeneraleContent(props?: any) {
 
         {/* ANAGRAFICA con ALLEGATI */}
         <div id="anagrafica" className="scroll-mt-32 flex flex-col lg:flex-row gap-4">
-          {/* FOTO + ALLEGATI DA INSERIRE - Colonna sinistra */}
-          <div className="lg:w-40 shrink-0 space-y-4">
-            {/* FOTO PARTECIPANTE */}
-            <Card className={photoFile.preview ? "border-green-400 dark:border-green-700" : ""}>
-              <CardHeader className={`pb-2 rounded-t-lg ${photoFile.preview ? 'bg-green-100 dark:bg-green-900/40' : 'bg-amber-100 dark:bg-amber-900/30'}`}>
-                <CardTitle className={`flex items-center gap-2 text-sm font-bold ${photoFile.preview ? 'text-green-700 dark:text-green-300' : 'text-amber-800 dark:text-amber-400 dark:text-amber-200'}`}>
-                  <Camera className="w-4 h-4" />
-                  FOTO
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-3">
-                <input
-                  type="file"
-                  accept=".jpg,.jpeg,.png,.heic,.heif,.webp,.avif,.tiff,.tif"
-                  className="hidden"
-                  id="upload-photo"
-                  onChange={(e) => handlePhotoUpload(e.target.files?.[0] || null)}
-                  data-testid="input-upload-photo"
-                />
-                {photoFile.preview ? (
-                  <div className="relative">
-                    <img
-                      src={photoFile.preview}
-                      alt="Foto partecipante"
-                      className="w-full aspect-[3/4] object-cover rounded-md border border-input"
-                      data-testid="img-photo-preview"
-                    />
-                    <Button
-                      type="button"
-                      size="icon"
-                      variant="ghost"
-                      className="absolute top-1 right-1 bg-background/80 text-destructive"
-                      onClick={removePhoto}
-                      data-testid="button-remove-photo"
-                    >
-                      <X className="w-4 h-4" />
-                    </Button>
-                    <p className="text-xs text-muted-foreground mt-1 truncate text-center" data-testid="text-photo-filename">{photoFile.file?.name}</p>
-                  </div>
-                ) : (
-                  <label
-                    htmlFor="upload-photo"
-                    className="cursor-pointer flex flex-col items-center justify-center gap-2 border-2 border-dashed border-amber-300 dark:border-amber-800/50 dark:border-amber-700 rounded-md aspect-[3/4] transition-colors hover:bg-muted/50"
-                    data-testid="label-upload-photo"
-                  >
-                    <Camera className="w-10 h-10 text-amber-400" />
-                    <span className="text-xs text-muted-foreground text-center px-2">Carica foto<br />JPG, PNG, HEIC, WebP</span>
-                  </label>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* ALLEGATI DA INSERIRE */}
-            <Card>
-              <CardHeader className="p-3 bg-amber-100 dark:bg-amber-900/30 dark:bg-amber-900/40 relative">
-                <CardTitle className="text-[13px] font-bold text-amber-900 dark:text-amber-300 dark:text-amber-100 uppercase tracking-wider text-center">
-                  ALLEGATI DA INSERIRE
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-0 relative">
-                {!selectedMemberId && (
-                  <div className="absolute inset-0 z-10 bg-background/80 backdrop-blur-[1px] flex items-center justify-center p-4">
-                    <div className="bg-amber-100 dark:bg-amber-900/30 dark:bg-amber-900/90 text-amber-800 dark:text-amber-400 dark:text-amber-200 border border-amber-300 dark:border-amber-800/50 dark:border-amber-700 p-3 rounded-md text-xs font-medium text-center shadow-lg shadow-amber-900/10">
-                      I documenti si possono compilare solo quando è selezionato o salvato un partecipante.
-                    </div>
-                  </div>
-                )}
-                {/* DOMANDA DI TESSERAMENTO */}
-                <div className="border-b">
-                  <div
-                    className={`p-3 cursor-pointer transition-colors ${allegati.domandaTesseramento.hasFile ? 'bg-green-100 dark:bg-green-900/40' : 'hover:bg-muted/50'}`}
-                    onClick={() => toggleAllegatoSection('domandaTesseramento')}
-                    data-testid="button-toggle-domanda-tesseramento"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className={`text-sm font-medium ${allegati.domandaTesseramento.hasFile ? 'text-success700 dark:text-success300' : 'text-amber-700 dark:text-amber-300'}`}>DOMANDA DI TESSERAMENTO</span>
-                      {allegati.domandaTesseramento.hasFile ? (
-                        <Check className="w-4 h-4 text-success600" />
-                      ) : (
-                        <ArrowDown className="w-4 h-4 text-muted-foreground" />
-                      )}
-                    </div>
-                    {allegati.domandaTesseramento.hasFile && (
-                      <div className="flex items-center gap-2 mt-1 text-xs text-success600 dark:text-success400">
-                        <Check className="w-3 h-3" />
-                        <span
-                          className={`truncate max-w-[180px] ${allegati.domandaTesseramento.previewUrl ? 'cursor-pointer hover:underline' : ''}`}
-                          onClick={(e) => { e.stopPropagation(); openPreview(allegati.domandaTesseramento.previewUrl); }}
-                        >
-                          {allegati.domandaTesseramento.fileName || 'File caricato'}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                  {openAllegatoSections.domandaTesseramento && (
-                    <div className="p-3 pt-0 space-y-3">
-                      <div className={`border-2 border-dashed rounded-md p-3 text-center ${allegati.domandaTesseramento.hasFile ? 'border-green-400 dark:border-green-700 bg-green-50 dark:bg-green-900/20' : 'border-amber-300 dark:border-amber-800/50 dark:border-amber-700'}`}>
-                        <input
-                          type="file"
-                          accept=".pdf,.jpg,.jpeg,.png"
-                          className="hidden"
-                          id="upload-domanda-tesseramento"
-                          onChange={(e) => {
-                            handleFileUpload('domandaTesseramento', e.target.files?.[0] || null);
-                            e.target.value = '';
-                          }}
-                          data-testid="input-upload-domanda-tesseramento"
-                        />
-                        {allegati.domandaTesseramento.hasFile ? (
-                          <div className="flex items-center justify-between gap-2">
-                            <div className="flex items-center gap-2 text-sm text-success700 dark:text-success400">
-                              <Check className="w-4 h-4" />
-                              <span
-                                className={`truncate max-w-[150px] ${allegati.domandaTesseramento.previewUrl ? 'cursor-pointer hover:underline' : ''}`}
-                                onClick={(e) => { e.stopPropagation(); openPreview(allegati.domandaTesseramento.previewUrl); }}
-                              >
-                                {allegati.domandaTesseramento.fileName || 'File caricato'}
-                              </span>
-                            </div>
-                            <Button
-                              type="button"
-                              size="icon"
-                              variant="ghost"
-                              className="text-destructive"
-                              onClick={(e) => { e.stopPropagation(); removeAllegatoFile('domandaTesseramento'); }}
-                              data-testid="button-remove-domanda-tesseramento"
-                            >
-                              <X className="w-3 h-3" />
-                            </Button>
-                          </div>
-                        ) : (
-                          <label htmlFor="upload-domanda-tesseramento" className="cursor-pointer flex flex-col items-center gap-1" data-testid="label-upload-domanda-tesseramento">
-                            <FileUp className="w-6 h-6 text-amber-500" />
-                            <span className="text-xs text-muted-foreground">Carica PDF, JPG o PNG</span>
-                          </label>
-                        )}
-                      </div>
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="space-y-1">
-                          <Label className="text-xs">Data Inserimento</Label>
-                          <Input
-                            type="date"
-                            className={`h-7 text-xs ${allegati.domandaTesseramento.data ? 'bg-green-100 border-green-300 dark:bg-green-900/30 text-green-900' : ''}`}
-                            value={allegati.domandaTesseramento.data || ''}
-                            onChange={(e) => updateAllegato('domandaTesseramento', 'data', e.target.value)}
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <Label className="text-xs">Accettato</Label>
-                          <Select
-                            value={allegati.domandaTesseramento.accettato || ''}
-                            onValueChange={(v) => updateAllegato('domandaTesseramento', 'accettato', v)}
-                          >
-                            <SelectTrigger className={`h-7 text-xs ${allegati.domandaTesseramento.accettato === 'si' ? 'bg-green-100 border-green-400 text-green-800 dark:text-green-400' : allegati.domandaTesseramento.accettato === 'no' ? 'bg-orange-100 border-orange-400 text-orange-800' : ''}`}>
-                              <SelectValue placeholder="Seleziona" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="si">Si</SelectItem>
-                              <SelectItem value="no">No</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* REGOLAMENTO */}
-                <div className="border-b">
-                  <div
-                    className={`p-3 cursor-pointer transition-colors ${allegati.regolamento.hasFile ? 'bg-green-100 dark:bg-green-900/40' : 'hover:bg-muted/50'}`}
-                    onClick={() => toggleAllegatoSection('regolamento')}
-                    data-testid="button-toggle-regolamento"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className={`text-sm font-medium ${allegati.regolamento.hasFile ? 'text-green-700 dark:text-green-300' : 'text-amber-700 dark:text-amber-300'}`}>REGOLAMENTO</span>
-                      {allegati.regolamento.hasFile ? (
-                        <Check className="w-4 h-4 text-green-600" />
-                      ) : (
-                        <ArrowDown className="w-4 h-4 text-muted-foreground" />
-                      )}
-                    </div>
-                    {allegati.regolamento.hasFile && (
-                      <div className="flex items-center gap-2 mt-1 text-xs text-green-600 dark:text-green-400">
-                        <Check className="w-3 h-3" />
-                        <span
-                          className={`truncate max-w-[180px] ${allegati.regolamento.previewUrl ? 'cursor-pointer hover:underline' : ''}`}
-                          onClick={(e) => { e.stopPropagation(); openPreview(allegati.regolamento.previewUrl); }}
-                        >
-                          {allegati.regolamento.fileName || 'File caricato'}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                  {openAllegatoSections.regolamento && (
-                    <div className="p-3 pt-0 space-y-3">
-                      <div className={`border-2 border-dashed rounded-md p-3 text-center ${allegati.regolamento.hasFile ? 'border-green-400 dark:border-green-700 bg-green-50 dark:bg-green-900/20' : 'border-amber-300 dark:border-amber-800/50 dark:border-amber-700'}`}>
-                        <input
-                          type="file"
-                          accept=".pdf,.jpg,.jpeg,.png"
-                          className="hidden"
-                          id="upload-regolamento"
-                          onChange={(e) => {
-                            handleFileUpload('regolamento', e.target.files?.[0] || null);
-                            e.target.value = '';
-                          }}
-                          data-testid="input-upload-regolamento"
-                        />
-                        {allegati.regolamento.hasFile ? (
-                          <div className="flex items-center justify-between gap-2">
-                            <div className="flex items-center gap-2 text-sm text-green-700 dark:text-green-400">
-                              <Check className="w-4 h-4" />
-                              <span
-                                className={`truncate max-w-[150px] ${allegati.regolamento.previewUrl ? 'cursor-pointer hover:underline' : ''}`}
-                                onClick={(e) => { e.stopPropagation(); openPreview(allegati.regolamento.previewUrl); }}
-                              >
-                                {allegati.regolamento.fileName || 'File caricato'}
-                              </span>
-                            </div>
-                            <Button
-                              type="button"
-                              size="icon"
-                              variant="ghost"
-                              className="text-destructive"
-                              onClick={(e) => { e.stopPropagation(); removeAllegatoFile('regolamento'); }}
-                              data-testid="button-remove-regolamento"
-                            >
-                              <X className="w-3 h-3" />
-                            </Button>
-                          </div>
-                        ) : (
-                          <label htmlFor="upload-regolamento" className="cursor-pointer flex flex-col items-center gap-1" data-testid="label-upload-regolamento">
-                            <FileUp className="w-6 h-6 text-amber-500" />
-                            <span className="text-xs text-muted-foreground">Carica PDF, JPG o PNG</span>
-                          </label>
-                        )}
-                      </div>
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="space-y-1">
-                          <Label className="text-xs">Data Inserimento</Label>
-                          <Input
-                            type="date"
-                            className={`h-7 text-xs ${allegati.regolamento.data ? 'bg-green-100 border-green-300 dark:bg-green-900/30 text-green-900' : ''}`}
-                            value={allegati.regolamento.data || ''}
-                            onChange={(e) => updateAllegato('regolamento', 'data', e.target.value)}
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <Label className="text-xs">Accettato</Label>
-                          <Select
-                            value={allegati.regolamento.accettato || ''}
-                            onValueChange={(v) => updateAllegato('regolamento', 'accettato', v)}
-                          >
-                            <SelectTrigger className={`h-7 text-xs ${allegati.regolamento.accettato === 'si' ? 'bg-green-100 border-green-400 text-green-800 dark:text-green-400' : allegati.regolamento.accettato === 'no' ? 'bg-orange-100 border-orange-400 text-orange-800' : ''}`}>
-                              <SelectValue placeholder="Seleziona" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="si">Si</SelectItem>
-                              <SelectItem value="no">No</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* PRIVACY */}
-                <div className="border-b">
-                  <div
-                    className={`p-3 cursor-pointer transition-colors ${allegati.privacy.hasFile ? 'bg-green-100 dark:bg-green-900/40' : 'hover:bg-muted/50'}`}
-                    onClick={() => toggleAllegatoSection('privacy')}
-                    data-testid="button-toggle-privacy"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className={`text-sm font-medium ${allegati.privacy.hasFile ? 'text-green-700 dark:text-green-300' : 'text-amber-700 dark:text-amber-300'}`}>PRIVACY</span>
-                      {allegati.privacy.hasFile ? (
-                        <Check className="w-4 h-4 text-green-600" />
-                      ) : (
-                        <ArrowDown className="w-4 h-4 text-muted-foreground" />
-                      )}
-                    </div>
-                    {allegati.privacy.hasFile && (
-                      <div className="flex items-center gap-2 mt-1 text-xs text-green-600 dark:text-green-400">
-                        <Check className="w-3 h-3" />
-                        <span
-                          className={`truncate max-w-[180px] ${allegati.privacy.previewUrl ? 'cursor-pointer hover:underline' : ''}`}
-                          onClick={(e) => { e.stopPropagation(); openPreview(allegati.privacy.previewUrl); }}
-                        >
-                          {allegati.privacy.fileName || 'File caricato'}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                  {openAllegatoSections.privacy && (
-                    <div className="p-3 pt-0 space-y-3">
-                      <div className={`border-2 border-dashed rounded-md p-3 text-center ${allegati.privacy.hasFile ? 'border-green-400 dark:border-green-700 bg-green-50 dark:bg-green-900/20' : 'border-amber-300 dark:border-amber-800/50 dark:border-amber-700'}`}>
-                        <input
-                          type="file"
-                          accept=".pdf,.jpg,.jpeg,.png"
-                          className="hidden"
-                          id="upload-privacy"
-                          onChange={(e) => {
-                            handleFileUpload('privacy', e.target.files?.[0] || null);
-                            e.target.value = '';
-                          }}
-                          data-testid="input-upload-privacy"
-                        />
-                        {allegati.privacy.hasFile ? (
-                          <div className="flex items-center justify-between gap-2">
-                            <div className="flex items-center gap-2 text-sm text-green-700 dark:text-green-400">
-                              <Check className="w-4 h-4" />
-                              <span
-                                className={`truncate max-w-[150px] ${allegati.privacy.previewUrl ? 'cursor-pointer hover:underline' : ''}`}
-                                onClick={(e) => { e.stopPropagation(); openPreview(allegati.privacy.previewUrl); }}
-                              >
-                                {allegati.privacy.fileName || 'File caricato'}
-                              </span>
-                            </div>
-                            <Button
-                              type="button"
-                              size="icon"
-                              variant="ghost"
-                              className="text-destructive"
-                              onClick={(e) => { e.stopPropagation(); removeAllegatoFile('privacy'); }}
-                              data-testid="button-remove-privacy"
-                            >
-                              <X className="w-3 h-3" />
-                            </Button>
-                          </div>
-                        ) : (
-                          <label htmlFor="upload-privacy" className="cursor-pointer flex flex-col items-center gap-1" data-testid="label-upload-privacy">
-                            <FileUp className="w-6 h-6 text-amber-500" />
-                            <span className="text-xs text-muted-foreground">Carica PDF, JPG o PNG</span>
-                          </label>
-                        )}
-                      </div>
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="space-y-1">
-                          <Label className="text-xs">Data Inserimento</Label>
-                          <Input
-                            type="date"
-                            className={`h-7 text-xs ${allegati.privacy.data ? 'bg-green-100 border-green-300 dark:bg-green-900/30 text-green-900' : ''}`}
-                            value={allegati.privacy.data || ''}
-                            onChange={(e) => updateAllegato('privacy', 'data', e.target.value)}
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <Label className="text-xs">Accettata</Label>
-                          <Select
-                            value={allegati.privacy.accettata || ''}
-                            onValueChange={(v) => updateAllegato('privacy', 'accettata', v)}
-                          >
-                            <SelectTrigger className={`h-7 text-xs ${allegati.privacy.accettata === 'si' ? 'bg-green-100 border-green-400 text-green-800 dark:text-green-400' : allegati.privacy.accettata === 'no' ? 'bg-orange-100 border-orange-400 text-orange-800' : ''}`}>
-                              <SelectValue placeholder="Seleziona" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="si">Si</SelectItem>
-                              <SelectItem value="no">No</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* CERTIFICATO MEDICO */}
-                <div className="border-b">
-                  <div
-                    className={`p-3 cursor-pointer transition-colors ${allegati.certificatoMedico.hasFile ? 'bg-green-100 dark:bg-green-900/40' : 'hover:bg-muted/50'}`}
-                    onClick={() => toggleAllegatoSection('certificatoMedico')}
-                    data-testid="button-toggle-certificato-medico"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-amber-700 dark:text-amber-300">CERTIFICATO MEDICO</span>
-                      {allegati.certificatoMedico.hasFile ? (
-                        <Check className="w-4 h-4 text-green-600" />
-                      ) : (
-                        <ArrowDown className="w-4 h-4 text-muted-foreground" />
-                      )}
-                    </div>
-                    {allegati.certificatoMedico.hasFile && (
-                      <div className="flex items-center gap-2 mt-1 text-xs text-green-600 dark:text-green-400">
-                        <Check className="w-3 h-3" />
-                        <span
-                          className={`truncate max-w-[180px] ${allegati.certificatoMedico.previewUrl ? 'cursor-pointer hover:underline' : ''}`}
-                          onClick={(e) => { e.stopPropagation(); openPreview(allegati.certificatoMedico.previewUrl); }}
-                        >
-                          {allegati.certificatoMedico.fileName || 'File caricato'}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                  {openAllegatoSections.certificatoMedico && (
-                    <div className="p-3 pt-0 space-y-3">
-                      <div className={`border-2 border-dashed rounded-md p-3 text-center ${allegati.certificatoMedico.hasFile ? 'border-green-400 dark:border-green-700 bg-green-50 dark:bg-green-900/20' : 'border-amber-300 dark:border-amber-800/50 dark:border-amber-700'}`}>
-                        <input
-                          type="file"
-                          accept=".pdf,.jpg,.jpeg,.png"
-                          className="hidden"
-                          id="upload-certificato-medico"
-                          onChange={(e) => {
-                            handleFileUpload('certificatoMedico', e.target.files?.[0] || null);
-                            e.target.value = '';
-                          }}
-                          data-testid="input-upload-certificato-medico"
-                        />
-                        {allegati.certificatoMedico.hasFile ? (
-                          <div className="flex items-center justify-between gap-2">
-                            <div className="flex items-center gap-2 text-sm text-green-700 dark:text-green-400">
-                              <Check className="w-4 h-4" />
-                              <span
-                                className={`truncate max-w-[150px] ${allegati.certificatoMedico.previewUrl ? 'cursor-pointer hover:underline' : ''}`}
-                                onClick={(e) => { e.stopPropagation(); openPreview(allegati.certificatoMedico.previewUrl); }}
-                              >
-                                {allegati.certificatoMedico.fileName || 'File caricato'}
-                              </span>
-                            </div>
-                            <Button
-                              type="button"
-                              size="icon"
-                              variant="ghost"
-                              className="text-destructive"
-                              onClick={(e) => { e.stopPropagation(); removeAllegatoFile('certificatoMedico'); }}
-                              data-testid="button-remove-certificato-medico"
-                            >
-                              <X className="w-3 h-3" />
-                            </Button>
-                          </div>
-                        ) : (
-                          <label htmlFor="upload-certificato-medico" className="cursor-pointer flex flex-col items-center gap-1" data-testid="label-upload-certificato-medico">
-                            <FileUp className="w-6 h-6 text-amber-500" />
-                            <span className="text-xs text-muted-foreground">Carica PDF, JPG o PNG</span>
-                          </label>
-                        )}
-                      </div>
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="space-y-1">
-                          <Label className="text-xs">Data Rilascio</Label>
-                          <Input
-                            type="date"
-                            className={`h-7 text-xs ${allegati.certificatoMedico.dataRilascio ? 'bg-green-100 border-green-300 dark:bg-green-900/30 text-green-900' : ''}`}
-                            value={allegati.certificatoMedico.dataRilascio || ''}
-                            onChange={(e) => updateAllegato('certificatoMedico', 'dataRilascio', e.target.value)}
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <Label className="text-xs">Scadenza</Label>
-                          <Input
-                            type="date"
-                            className={`h-7 text-xs ${allegati.certificatoMedico.scadenza ? 'bg-green-100 border-green-300 dark:bg-green-900/30 text-green-900' : ''}`}
-                            value={allegati.certificatoMedico.scadenza || ''}
-                            onChange={(e) => updateAllegato('certificatoMedico', 'scadenza', e.target.value)}
-                          />
-                        </div>
-                      </div>
-                      <div className="space-y-1">
-                        <Label className="text-xs">Tipo</Label>
-                        <Select
-                          value={allegati.certificatoMedico.tipo || ''}
-                          onValueChange={(v) => updateAllegato('certificatoMedico', 'tipo', v)}
-                        >
-                          <SelectTrigger className={`h-7 text-xs ${allegati.certificatoMedico.tipo ? 'bg-green-100 border-green-300 text-green-900' : ''}`}>
-                            <SelectValue placeholder="Tipo" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="non_agonistico">Non Agonistico</SelectItem>
-                            <SelectItem value="agonistico">Agonistico</SelectItem>
-                            <SelectItem value="base">Base</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* RICEVUTE PAGAMENTI */}
-                <div className="border-b">
-                  <div
-                    className={`p-3 cursor-pointer transition-colors ${allegati.ricevutePagamenti.hasFile ? 'bg-green-100 dark:bg-green-900/40' : 'hover:bg-muted/50'}`}
-                    onClick={() => toggleAllegatoSection('ricevutePagamenti')}
-                    data-testid="button-toggle-ricevute-pagamenti"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-amber-700 dark:text-amber-300">RICEVUTE PAGAMENTI</span>
-                      {allegati.ricevutePagamenti.hasFile ? (
-                        <Check className="w-4 h-4 text-green-600" />
-                      ) : (
-                        <ArrowDown className="w-4 h-4 text-muted-foreground" />
-                      )}
-                    </div>
-                  </div>
-                  {openAllegatoSections.ricevutePagamenti && (
-                    <div className="p-3 pt-0">
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="space-y-1">
-                          <Label className="text-xs">N° Ricevute</Label>
-                          <Input
-                            type="number"
-                            className="h-7 text-xs"
-                            value={allegati.ricevutePagamenti.numeroRicevute || 0}
-                            onChange={(e) => updateAllegato('ricevutePagamenti', 'numeroRicevute', parseInt(e.target.value) || 0)}
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <Label className="text-xs">Note</Label>
-                          <Input
-                            className="h-7 text-xs"
-                            value={allegati.ricevutePagamenti.note || ''}
-                            onChange={(e) => updateAllegato('ricevutePagamenti', 'note', e.target.value)}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* MODELLO DETRAZIONE */}
-                <div className="border-b">
-                  <div
-                    className={`p-3 cursor-pointer transition-colors ${allegati.modelloDetrazione.hasFile ? 'bg-green-100 dark:bg-green-900/40' : 'hover:bg-muted/50'}`}
-                    onClick={() => toggleAllegatoSection('modelloDetrazione')}
-                    data-testid="button-toggle-modello-detrazione"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-amber-700 dark:text-amber-300">MODELLO DETRAZIONE</span>
-                      {allegati.modelloDetrazione.hasFile ? (
-                        <Check className="w-4 h-4 text-green-600" />
-                      ) : (
-                        <ArrowDown className="w-4 h-4 text-muted-foreground" />
-                      )}
-                    </div>
-                  </div>
-                  {openAllegatoSections.modelloDetrazione && (
-                    <div className="p-3 pt-0">
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="space-y-1">
-                          <Label className="text-xs">Anno</Label>
-                          <Input
-                            className="h-7 text-xs"
-                            value={allegati.modelloDetrazione.anno || ''}
-                            onChange={(e) => updateAllegato('modelloDetrazione', 'anno', e.target.value)}
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <Label className="text-xs">Richiesto</Label>
-                          <Select
-                            value={allegati.modelloDetrazione.richiesto || ''}
-                            onValueChange={(v) => updateAllegato('modelloDetrazione', 'richiesto', v)}
-                          >
-                            <SelectTrigger className="h-7 text-xs">
-                              <SelectValue placeholder="Seleziona" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="si">Sì</SelectItem>
-                              <SelectItem value="no">No</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* CREDITI SCOLASTICI */}
-                <div className="border-b">
-                  <div
-                    className={`p-3 cursor-pointer transition-colors ${allegati.creditiScolastici.hasFile ? 'bg-green-100 dark:bg-green-900/40' : 'hover:bg-muted/50'}`}
-                    onClick={() => toggleAllegatoSection('creditiScolastici')}
-                    data-testid="button-toggle-crediti-scolastici"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-amber-700 dark:text-amber-300">CREDITI SCOLASTICI</span>
-                      {allegati.creditiScolastici.hasFile ? (
-                        <Check className="w-4 h-4 text-green-600" />
-                      ) : (
-                        <ArrowDown className="w-4 h-4 text-muted-foreground" />
-                      )}
-                    </div>
-                  </div>
-                  {openAllegatoSections.creditiScolastici && (
-                    <div className="p-3 pt-0">
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="space-y-1">
-                          <Label className="text-xs">Anno Scolastico</Label>
-                          <Input
-                            className="h-7 text-xs"
-                            value={allegati.creditiScolastici.annoScolastico || ''}
-                            onChange={(e) => updateAllegato('creditiScolastici', 'annoScolastico', e.target.value)}
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <Label className="text-xs">Richiesto</Label>
-                          <Select
-                            value={allegati.creditiScolastici.richiesto || ''}
-                            onValueChange={(v) => updateAllegato('creditiScolastici', 'richiesto', v)}
-                          >
-                            <SelectTrigger className="h-7 text-xs">
-                              <SelectValue placeholder="Seleziona" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="si">Sì</SelectItem>
-                              <SelectItem value="no">No</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* TESSERINO TECNICO */}
-                <div className="border-b">
-                  <div
-                    className={`p-3 cursor-pointer transition-colors ${allegati.tesserinoTecnico.hasFile ? 'bg-green-100 dark:bg-green-900/40' : 'hover:bg-muted/50'}`}
-                    onClick={() => toggleAllegatoSection('tesserinoTecnico')}
-                    data-testid="button-toggle-tesserino-tecnico"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-amber-700 dark:text-amber-300">TESSERINO TECNICO</span>
-                      {allegati.tesserinoTecnico.hasFile ? (
-                        <Check className="w-4 h-4 text-green-600" />
-                      ) : (
-                        <ArrowDown className="w-4 h-4 text-muted-foreground" />
-                      )}
-                    </div>
-                  </div>
-                  {openAllegatoSections.tesserinoTecnico && (
-                    <div className="p-3 pt-0">
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="space-y-1">
-                          <Label className="text-xs">Numero</Label>
-                          <Input
-                            className="h-7 text-xs"
-                            placeholder="N° Tesserino"
-                            value={allegati.tesserinoTecnico.numero || ''}
-                            onChange={(e) => updateAllegato('tesserinoTecnico', 'numero', e.target.value)}
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <Label className="text-xs">Data Rilascio</Label>
-                          <Input
-                            type="date"
-                            className="h-7 text-xs"
-                            value={allegati.tesserinoTecnico.dataRilascio || ''}
-                            onChange={(e) => updateAllegato('tesserinoTecnico', 'dataRilascio', e.target.value)}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* TESSERA ENTE */}
-                <div>
-                  <div
-                    className={`p-3 cursor-pointer transition-colors ${allegati.tesseraEnte.hasFile ? 'bg-green-100 dark:bg-green-900/40' : 'hover:bg-muted/50'}`}
-                    onClick={() => toggleAllegatoSection('tesseraEnte')}
-                    data-testid="button-toggle-tessera-ente"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-amber-700 dark:text-amber-300">TESSERA ENTE</span>
-                      {allegati.tesseraEnte.hasFile ? (
-                        <Check className="w-4 h-4 text-success600" />
-                      ) : (
-                        <ArrowDown className="w-4 h-4 text-muted-foreground" />
-                      )}
-                    </div>
-                  </div>
-                  {openAllegatoSections.tesseraEnte && (
-                    <div className="p-3 pt-0">
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="space-y-1">
-                          <Label className="text-xs">Numero</Label>
-                          <Input
-                            className="h-7 text-xs"
-                            placeholder="N° Tessera"
-                            value={allegati.tesseraEnte.numero || ''}
-                            onChange={(e) => updateAllegato('tesseraEnte', 'numero', e.target.value)}
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <Label className="text-xs">Ente</Label>
-                          <Input
-                            className="h-7 text-xs"
-                            placeholder="Ente"
-                            value={allegati.tesseraEnte.ente || ''}
-                            onChange={(e) => updateAllegato('tesseraEnte', 'ente', e.target.value)}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-          </div>
+          <TabAllegati />
 
           <div className="flex-1 flex flex-col gap-4">
             <TabAnagrafica renderMancaDato={renderMancaDato} getInputClassName={getInputClassName} />
-            <TabTutori renderMancaDato={renderMancaDato} getInputClassName={getInputClassName} />
           </div>
         </div>
 
-                {/* ATTIVITÀ DI MARKETING (FULL WIDTH ROW) */}
-        <Card id="attivita-marketing" className="bg-amber-50 dark:bg-amber-950/20 dark:bg-amber-900/10 border-amber-200 dark:border-amber-900/50 scroll-mt-32">
-          <CardHeader className="pb-3 bg-amber-100 dark:bg-amber-900/30 rounded-t-lg border-b border-amber-200 dark:border-amber-900/50/50">
-            <CardTitle className="flex items-center justify-between text-lg font-bold text-amber-800 dark:text-amber-400 dark:text-amber-200">
-              <div className="flex items-center gap-2">
-                <span className="w-5 h-5 flex items-center justify-center">🎯</span>
-                Attività di marketing
-              </div>
-              {currentMember && (
-                <div className="flex items-center gap-3">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-8 bg-background dark:bg-transparent"
-                    onClick={(e) => { e.preventDefault(); recalculateCrmMutation.mutate(); }}
-                    disabled={recalculateCrmMutation.isPending}
-                    title="Ricalcola Scoring"
-                  >
-                    <RefreshCw className={cn("w-4 h-4 mr-2", recalculateCrmMutation.isPending && "animate-spin")} />
-                    Ricalcola
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-8 bg-background dark:bg-transparent border-amber-300 dark:border-amber-800/50 hover:bg-amber-100 dark:bg-amber-900/30"
-                    onClick={(e) => { e.preventDefault(); handleOpenCrmOverride(); }}
-                    title="Impostazioni Manuali"
-                  >
-                    <Settings2 className="w-4 h-4 mr-2 text-muted-foreground" />
-                    Forzatura
-                  </Button>
-                </div>
-              )}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-5">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-start">
-              
-              {/* Da Dove Arriva */}
-              <div className="space-y-2 col-span-1">
-                <div className="flex items-center gap-2">
-                  <Label className="uppercase text-xs font-semibold text-muted-foreground">Canale di Acquisizione</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button type="button" size="icon" variant="ghost" className="h-4 w-4">
-                        <Edit className="w-3 h-3 text-muted-foreground" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start" onInteractOutside={(e) => e.stopPropagation()}>
-                      <InlineListEditorDialog listCode="canale_acquisizione" listName="Canale Acquisizione" showColors={false} />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-                <Combobox
-                  name="daDoveArriva"
-                  value={formData.daDoveArriva || ""}
-                  onValueChange={(v) => handleChange("daDoveArriva", v)}
-                  options={canaliAcquisizione.map((c: string) => ({ value: c, label: c }))}
-                  placeholder="Seleziona o cerca..."
-                  emptyText="Nessun canale trovato"
-                  className={`bg-background dark:bg-transparent ${getInputClassName("daDoveArriva", false)}`}
-                  onQuickAdd={(v) => quickAddCanale.mutate(v)}
-                  isQuickAddPending={quickAddCanale.isPending}
-                />
-              </div>
-
-              {/* Dati CRM Real-Time */}
-              {currentMember ? (
-                <>
-                  <div className="space-y-2 col-span-1">
-                    <div className="flex flex-col gap-1 items-start">
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <div className="flex items-center gap-1 cursor-help hover:text-amber-600 transition-colors">
-                              <Label className="uppercase text-xs font-semibold text-muted-foreground cursor-help">Livello & Score</Label>
-                              <Info className="w-3.5 h-3.5 text-muted-foreground" />
-                            </div>
-                          </TooltipTrigger>
-                          <TooltipContent className="max-w-[280px] bg-background dark:bg-slate-900 border-amber-200 dark:border-amber-900/50">
-                            <p className="text-xs text-muted-foreground dark:text-slate-300">
-                              Il livello marketing viene assegnato automaticamente in base a spesa, continuità, numero di attività e recente partecipazione. Il modello può essere aggiornato nel tempo per migliorare la classificazione.
-                              <br/><br/>
-                              Fattori considerati (Score 0-100):
-                              <ul className="list-disc ml-4 my-1">
-                                <li>Spesa ultimi 12 mesi</li>
-                                <li>Continuità (Frequenza)</li>
-                                <li>Numero attività/servizi</li>
-                                <li>Recency (Attività recente)</li>
-                              </ul>
-                              <br/>
-                              I livelli previsti sono: <strong>Silver, Gold, Platinum, Diamond</strong>.
-                              <br/><br/>
-                              La forzatura manuale è solo eccezione amministrativa e riposizione questo calcolo automatico.
-                            </p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </div>
-                    <div className="flex items-center gap-3 h-10">
-                      {currentMember?.crmProfileLevel && currentMember.crmProfileLevel !== "NONE" ? (
-                        <Badge className={
-                          currentMember.crmProfileLevel === 'DIAMOND' ? 'bg-cyan-500 border-cyan-500 text-white w-[110px] h-7 text-sm flex justify-center shadow-sm shadow-cyan-200/50' :
-                          currentMember.crmProfileLevel === 'PLATINUM' ? 'bg-slate-900 border-slate-900 text-white w-[110px] h-7 text-sm flex justify-center' : 
-                          currentMember.crmProfileLevel === 'GOLD' ? 'bg-amber-500 border-amber-500 text-white w-[110px] h-7 text-sm flex justify-center' : 
-                          'bg-slate-200 border-border text-foreground/80 hover:bg-slate-300 w-[110px] h-7 text-sm flex justify-center'
-                        }>
-                          {currentMember.crmProfileLevel}
-                        </Badge>
-                      ) : (
-                        <span className="text-sm font-medium text-muted-foreground">-</span>
-                      )}
-
-                      {currentMember?.crmProfileLevel && currentMember.crmProfileLevel !== "NONE" && (
-                        <span className="text-lg font-bold text-amber-700 dark:text-amber-400">
-                          {currentMember.crmProfileScore || 0} <span className="text-sm font-normal">pts</span>
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="space-y-2 col-span-2">
-                    <Label className="uppercase text-xs font-semibold text-muted-foreground flex items-center gap-2">
-                      Dettagli Algoritmo
-                      {currentMember?.crmProfileOverride && (
-                        <Badge variant="outline" className="border-amber-500 text-amber-600 bg-amber-50 dark:bg-amber-950/20 h-5 text-xxs px-1.5 flex items-center gap-1 cursor-help leading-none" title="Forzatura manuale attiva">
-                          <ShieldAlert className="w-3 h-3" />
-                          Forzato
-                        </Badge>
-                      )}
-                    </Label>
-                    <div className="bg-background/50 dark:bg-black/20 p-2.5 rounded-md border border-amber-200 dark:border-amber-900/50/50 min-h-[40px] flex items-center text-sm text-muted-foreground break-words italic">
-                      {currentMember?.crmProfileReason || "Nessun ricalcolo effettuato di recente."}
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <div className="col-span-3 flex items-center justify-center p-4 border border-dashed border-amber-300 dark:border-amber-800/50 rounded-md bg-background/30 text-amber-800 dark:text-amber-400/60 text-sm">
-                  Salva o seleziona un partecipante per attivare il calcolo CRM.
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+        <TabMarketing
+          currentMember={currentMember}
+          getInputClassName={getInputClassName}
+        />
 
         {/* PAGAMENTI */}
         <Card id="pagamenti" className="scroll-mt-32">
@@ -3090,6 +1892,7 @@ function MascheraInputGeneraleContent(props?: any) {
               isOpen={isNuovoPagamentoOpen}
               onClose={() => setIsNuovoPagamentoOpen(false)}
               defaultMemberId={selectedMemberId ? Number(selectedMemberId) : undefined}
+              defaultIncludeTessera={initialAction === 'rinnova-tessera'}
             />
 
             <PaymentDialog
@@ -3107,620 +1910,30 @@ function MascheraInputGeneraleContent(props?: any) {
           </CardContent>
         </Card>
 
-        {/* GIFT - BUONO - RESO - HELLO GEM */}
-        <Card id="gift" className="scroll-mt-32">
-          <CardHeader className="pb-4">
-            <CardTitle className="flex items-center justify-between gap-2 text-lg">
-              <span className="flex items-center gap-2">
-                <Gift className="w-5 h-5 sidebar-icon-gold" />
-                Gift - Buono - Reso - Hello Gem
-              </span>
-              <Button
-                size="sm"
-                className="gold-3d-button"
-                data-testid="button-aggiungi-gift"
-                disabled={!selectedMemberId}
-                onClick={() => {
-                  setShowGiftFields(true);
-                  setBottomSectionsData(prev => ({
-                    ...prev,
-                    gift: [...prev.gift, { id: Date.now().toString(), tipo: "", valore: "", numero: "", dataEmissione: "", dataScadenza: "", motivazione: "", dataUtilizzo: "", iban: "" }]
-                  }));
-                  setDirtyFields(prev => ({ ...prev, gift_added: true }));
-                }}
-              >
-                <Plus className="w-4 h-4" />
-                Aggiungi
-              </Button>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {!selectedMemberId ? (
-              <div className="text-center p-6 text-muted-foreground bg-muted/10 rounded-lg border border-dashed my-4">
-                Salva o seleziona un partecipante per sbloccare questa sezione
-              </div>
-            ) : showGiftFields && bottomSectionsData.gift.length > 0 ? (
-              <div className="space-y-8">
-                {bottomSectionsData.gift.map((item, index) => (
-                  <div key={item.id || index} className="space-y-4 relative pt-4 border-t border-border/50 first:pt-0 first:border-t-0">
-                    {index > 0 && (
-                      <div className="absolute top-4 right-0">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-destructive hover:bg-destructive hover:text-destructive-foreground h-8 px-2"
-                          onClick={() => {
-                            if (confirm("Sei sicuro di voler rimuovere questo elemento?")) {
-                              setBottomSectionsData(prev => ({ ...prev, gift: prev.gift.filter((_, i) => i !== index) }));
-                              setDirtyFields(prev => ({ ...prev, gift_removed: true }));
-                            }
-                          }}
-                        >
-                          <Trash2 className="w-4 h-4 mr-1" /> Rimuovi
-                        </Button>
-                      </div>
-                    )}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                      <div className="space-y-2">
-                        <Label>Tipo</Label>
-                        <Select value={item.tipo} onValueChange={(v) => handleBottomSectionChange('gift', 'tipo', v, index)}>
-                          <SelectTrigger className={getBottomSectionClassName('gift', `tipo_${index}`)}>
-                            <SelectValue placeholder="Seleziona tipo" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="gift">Gift Card</SelectItem>
-                            <SelectItem value="buono">Buono</SelectItem>
-                            <SelectItem value="reso">Reso</SelectItem>
-                            <SelectItem value="hellogem">Hello Gem</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Valore/Importo</Label>
-                        <Input type="number" value={item.valore} onChange={(e) => handleBottomSectionChange('gift', 'valore', e.target.value, index)} className={getBottomSectionClassName('gift', `valore_${index}`)} />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Numero</Label>
-                        <Input value={item.numero} onChange={(e) => handleBottomSectionChange('gift', 'numero', e.target.value, index)} className={getBottomSectionClassName('gift', `numero_${index}`)} />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Data Emissione</Label>
-                        <Input type="date" value={item.dataEmissione} onChange={(e) => handleBottomSectionChange('gift', 'dataEmissione', e.target.value, index)} className={getBottomSectionClassName('gift', `dataEmissione_${index}`)} />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                      <div className="space-y-2">
-                        <Label>Data Scadenza</Label>
-                        <Input type="date" value={item.dataScadenza} onChange={(e) => handleBottomSectionChange('gift', 'dataScadenza', e.target.value, index)} className={getBottomSectionClassName('gift', `dataScadenza_${index}`)} />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Acquistato/Utilizzato per - Motivazione</Label>
-                        <Input value={item.motivazione} onChange={(e) => handleBottomSectionChange('gift', 'motivazione', e.target.value, index)} className={getBottomSectionClassName('gift', `motivazione_${index}`)} />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Data Utilizzo/Reso (Convalida)</Label>
-                        <Input type="date" value={item.dataUtilizzo} onChange={(e) => handleBottomSectionChange('gift', 'dataUtilizzo', e.target.value, index)} className={getBottomSectionClassName('gift', `dataUtilizzo_${index}`)} />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>IBAN</Label>
-                        <Input value={item.iban} onChange={(e) => handleBottomSectionChange('gift', 'iban', e.target.value, index)} className={getBottomSectionClassName('gift', `iban_${index}`)} />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : null}
-          </CardContent>
-        </Card>
+                <TabGift
+          selectedMemberId={selectedMemberId}
+          showGiftFields={showGiftFields}
+          setShowGiftFields={setShowGiftFields}
+          bottomSectionsData={bottomSectionsData}
+          setBottomSectionsData={setBottomSectionsData}
+          setDirtyFields={setDirtyFields}
+          handleBottomSectionChange={handleBottomSectionChange}
+          getBottomSectionClassName={getBottomSectionClassName}
+        />
 
-        {/* TESSERE */}
-        <Card id="tessere" className="scroll-mt-32">
-          <CardHeader className="pb-4">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <IdCard className="w-5 h-5 sidebar-icon-gold" />
-              Tessere
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {!selectedMemberId ? (
-              <div className="text-center p-6 text-muted-foreground bg-muted/10 rounded-lg border border-dashed my-4">
-                Salva o seleziona un partecipante per sbloccare questa sezione
-              </div>
-            ) : (
-              <div className="space-y-6 pt-2">
-                <div className="flex justify-end items-center mb-4">
-                  {selectedMemberId && (
-                    <Button 
-                      variant="default" 
-                      size="sm" 
-                      className="gap-2"
-                      onClick={() => setLocation(`/tessere-certificati?newTessera=true&memberId=${selectedMemberId}`)}
-                    >
-                      <Plus className="w-4 h-4" />
-                      Nuova Tessera
-                    </Button>
-                  )}
-                </div>
-                
-                <div className="space-y-4">
-                  {(() => {
-                    const isReadOnly = !!topTesseraMembership;
-                    const isEntityCardReadOnly = topTesseraMembership && !!topTesseraMembership.entityCardNumber;
-                    const hasEntityCard = !!(formData.tesseraEnte || formData.scadenzaTesseraEnte || topTesseraMembership?.entityCardNumber);
-                    
-                    return (
-                      <>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                          <div className="space-y-2">
-                            <Label>Quota Tessera</Label>
-                            <Input 
-                              type={isNaN(Number(
-                                (!topTesseraMembership?.fee || Number(topTesseraMembership.fee) === 0) && !isTesseraExpired && topTesseraMembership
-                                  ? "importa dati db" 
-                                  : (topTesseraMembership?.fee || bottomSectionsData.tessere.quota)
-                              )) ? "text" : "number"} 
-                              value={
-                                (!topTesseraMembership?.fee || Number(topTesseraMembership.fee) === 0) && !isTesseraExpired && topTesseraMembership
-                                  ? "importa dati db" 
-                                  : (topTesseraMembership?.fee || bottomSectionsData.tessere.quota)
-                              } 
-                              readOnly={isReadOnly} 
-                              disabled={isReadOnly} 
-                              onChange={(e) => handleBottomSectionChange('tessere', 'quota', e.target.value)} 
-                              className={getBottomSectionClassName('tessere', 'quota')} 
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label>Pagamento Tessera</Label>
-                            <Input type="date" value={topTesseraMembership?.issueDate ? new Date(topTesseraMembership.issueDate).toISOString().split('T')[0] : bottomSectionsData.tessere.pagamento} readOnly={true} disabled={true} onChange={(e) => handleBottomSectionChange('tessere', 'pagamento', e.target.value)} className="bg-muted text-muted-foreground opacity-100" />
-                          </div>
-                          <div className="space-y-2">
-                             <Label>Tipo</Label>
-                             <Select 
-                               value={topTesseraMembership?.renewalType ? topTesseraMembership.renewalType.toUpperCase() : bottomSectionsData.tessere.membershipType} 
-                               disabled={isReadOnly}
-                               onValueChange={(val) => handleBottomSectionChange('tessere', 'membershipType', val)}
-                             >
-                               <SelectTrigger className={getBottomSectionClassName('tessere', 'membershipType')}>
-                                 <SelectValue placeholder="Seleziona Tipo" />
-                               </SelectTrigger>
-                               <SelectContent>
-                                 <SelectItem value="NUOVO">Nuovo</SelectItem>
-                                 <SelectItem value="RINNOVO">Rinnovo</SelectItem>
-                               </SelectContent>
-                             </Select>
-                           </div>
-                           <div className="space-y-2">
-                             <Label>Competenza</Label>
-                             <Select 
-                               value={topTesseraMembership?.seasonCompetence || bottomSectionsData.tessere.seasonCompetence} 
-                               disabled={isReadOnly}
-                               onValueChange={(val) => handleBottomSectionChange('tessere', 'seasonCompetence', val)}
-                             >
-                               <SelectTrigger className={getBottomSectionClassName('tessere', 'seasonCompetence')}>
-                                 <SelectValue placeholder="Seleziona Competenza" />
-                               </SelectTrigger>
-                               <SelectContent>
-                                 <SelectItem value="CORRENTE">Corrente</SelectItem>
-                                 <SelectItem value="SUCCESSIVA">Successiva</SelectItem>
-                               </SelectContent>
-                             </Select>
-                           </div>
-                         </div>
-                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 pt-2">
-                           <div className="space-y-2">
-                             <Label>Data Scadenza (Auto)</Label>
-                             <Input 
-                               type="date" 
-                               value={
-                                 (topTesseraMembership?.expiryDate ? new Date(topTesseraMembership.expiryDate).toISOString().split('T')[0] : null) 
-                                 || topTesseraScad 
-                                 || bottomSectionsData.tessere.dataScad
-                               } 
-                               readOnly={true} 
-                               disabled={true} 
-                               onChange={(e) => handleBottomSectionChange('tessere', 'dataScad', e.target.value)} 
-                               className="bg-muted text-muted-foreground opacity-100 placeholder:italic" 
-                               placeholder="Calcolata da sistema"
-                             />
-                           </div>
-                           <div className="space-y-2">
-                             <Label>N. Tessera (Auto)</Label>
-                             <Input value={topTesseraNumero || bottomSectionsData.tessere.numero} placeholder="Assegnato post-salvataggio" readOnly={true} disabled={true} className="bg-muted text-muted-foreground opacity-100" />
-                           </div>
-                          <div className="space-y-2">
-                             <Label>Barcode</Label>
-                             <Input value={topTesseraMembership?.barcode || (topTesseraNumero ? `T${topTesseraNumero.replace('-', '')}` : '')} readOnly disabled className={`bg-transparent opacity-80 cursor-default`} />
-                          </div>
-                          <div className="space-y-2">
-                             <Label>Stato</Label>
-                             <div className="h-10 flex items-center">
-                               {topTesseraMembership ? (
-                                 <Badge variant={!isTesseraExpired ? 'default' : 'secondary'} className={isTesseraExpired ? "bg-red-50 dark:bg-red-950/20 text-red-600 border-red-300" : "shadow-sm"}>
-                                   {!isTesseraExpired ? 'Attiva' : 'Scaduta'}
-                                 </Badge>
-                               ) : (
-                                 <span className="text-sm text-muted-foreground italic">Nessuna</span>
-                               )}
-                             </div>
-                          </div>
-                          <div className="space-y-2">
-                            <Label>Tessera Ente</Label>
-                            <Input 
-                              value={
-                                topTesseraMembership?.entityCardNumber 
-                                || formData.tesseraEnte 
-                                || bottomSectionsData.tessere.tesseraEnte 
-                                || ((!topTesseraMembership?.entityCardNumber && !isTesseraExpired && topTesseraMembership) ? "Libertas" : "")
-                              } 
-                              readOnly={isEntityCardReadOnly} 
-                              disabled={isEntityCardReadOnly} 
-                              onChange={(e) => handleBottomSectionChange('tessere', 'tesseraEnte', e.target.value)} 
-                              className={getBottomSectionClassName('tessere', 'tesseraEnte')} 
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label>Scadenza Tessera Ente</Label>
-                            <Input type="date" value={hasEntityCard ? (topTesseraMembership?.entityCardExpiryDate ? new Date(topTesseraMembership.entityCardExpiryDate).toISOString().split('T')[0] : (formData.scadenzaTesseraEnte ? new Date(formData.scadenzaTesseraEnte).toISOString().split('T')[0] : '')) : bottomSectionsData.tessere.scadenzaTesseraEnte} readOnly={true} disabled={true} onChange={(e) => handleBottomSectionChange('tessere', 'scadenzaTesseraEnte', e.target.value)} className={getBottomSectionClassName('tessere', 'scadenzaTesseraEnte')} />
-                          </div>
-                        </div>
-                      </>
-                    );
-                  })()}
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        <TabTessere 
+          topTesseraMembership={topTesseraMembership}
+          topTesseraNumero={topTesseraNumero}
+          topTesseraScad={topTesseraScad}
+          isTesseraExpired={isTesseraExpired}
+        />
 
-        {/* CERTIFICATO MEDICO */}
-        <Card id="certificato" className="scroll-mt-32">
-          <CardHeader className="pb-4">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Stethoscope className="w-5 h-5 sidebar-icon-gold" />
-              Certificato Medico
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {!selectedMemberId ? (
-              <div className="text-center p-6 text-muted-foreground bg-muted/10 rounded-lg border border-dashed my-4">
-                Salva o seleziona un partecipante per sbloccare questa sezione
-              </div>
-            ) : (
-              <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
-                  <div className="space-y-2">
-                    <Label>Data Scadenza Certificato</Label>
-                    <Input type="date" value={bottomSectionsData.certificatoMedico.dataScadenza} onChange={(e) => handleBottomSectionChange('certificatoMedico', 'dataScadenza', e.target.value)} className={getBottomSectionClassName('certificatoMedico', 'dataScadenza')} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Data di Rinnovo</Label>
-                    <Input type="date" value={bottomSectionsData.certificatoMedico.dataRinnovo} onChange={(e) => handleBottomSectionChange('certificatoMedico', 'dataRinnovo', e.target.value)} className={getBottomSectionClassName('certificatoMedico', 'dataRinnovo')} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Rilasciato Da</Label>
-                    <Input 
-                      value={
-                        bottomSectionsData.certificatoMedico.rilasciatoDa
-                      } 
-                      onChange={(e) => handleBottomSectionChange('certificatoMedico', 'rilasciatoDa', e.target.value)} 
-                      className={getBottomSectionClassName('certificatoMedico', 'rilasciatoDa')} 
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Pagamento</Label>
-                    <Input 
-                      type="number" 
-                      placeholder="€ 40" 
-                      value={
-                        bottomSectionsData.certificatoMedico.pagamento
-                      } 
-                      onChange={(e) => handleBottomSectionChange('certificatoMedico', 'pagamento', e.target.value)} 
-                      className={getBottomSectionClassName('certificatoMedico', 'pagamento')} 
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>A Noi</Label>
-                    <Input 
-                      type="number" 
-                      placeholder="12,5" 
-                      value={
-                        bottomSectionsData.certificatoMedico.aNoi
-                      } 
-                      onChange={(e) => handleBottomSectionChange('certificatoMedico', 'aNoi', e.target.value)} 
-                      className={getBottomSectionClassName('certificatoMedico', 'aNoi')} 
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Tipo Certificato</Label>
-                    <Select 
-                      value={
-                        bottomSectionsData.certificatoMedico.tipo
-                      } 
-                      onValueChange={(v) => handleBottomSectionChange('certificatoMedico', 'tipo', v)}
-                    >
-                      <SelectTrigger className={getBottomSectionClassName('certificatoMedico', 'tipo')}>
-                        <SelectValue placeholder="Seleziona tipo" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="non_agonistico">Sportivo Non Agonistico</SelectItem>
-                        <SelectItem value="agonistico">Sportivo Agonistico</SelectItem>
-                        <SelectItem value="base">Base</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </>
-            )}
-          </CardContent>
-        </Card>
+        <TabIscrizioni />
+        <TabRicevute />
 
-        {/* ATTIVITÀ */}
-        <Card id="attivita" className="scroll-mt-32">
-          <CardHeader className="pb-4">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <BookOpen className="w-5 h-5 sidebar-icon-gold" />
-              Attività
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* CORSI */}
-            <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-warning/50 dark:bg-warning/900/20 px-2 py-1 rounded flex items-center gap-2">
-                <Calendar className="w-4 h-4 sidebar-icon-gold flex-shrink-0" />
-                <Link href="/attivita/corsi" className="rounded px-1 py-0.5 transition-colors hover:bg-accent/60 cursor-pointer no-underline" data-testid="link-attivita-corsi">Corsi</Link>
-                <KnowledgeInfo id="corsi" />
-                <SectionBadge count={memberEnrollments?.length || 0} />
-              </h3>
-
-              {!selectedMemberId ? (
-                <div className="text-center p-4 text-muted-foreground bg-muted/20 rounded-lg border border-dashed">
-                  Seleziona un utente per gestire le iscrizioni ai corsi
-                </div>
-              ) : (
-                <div className="space-y-6">
-                  {/* Active Enrollments List (Read-Only) */}
-                  {loadingEnrollments ? (
-                    <div className="space-y-2">
-                      <Skeleton className="h-12 w-full" />
-                      <Skeleton className="h-12 w-full" />
-                    </div>
-                  ) : Array.isArray(memberEnrollments) && memberEnrollments.length > 0 ? (
-                    <div className="space-y-2">
-                      <Label className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Iscrizioni Attive</Label>
-                      {memberEnrollments.map((e: any) => {
-                        const course = courses?.find((c: any) => c.id === e.courseId);
-                        const hasDetails = Array.isArray(e.details) && e.details.length > 0;
-                        return (
-                          <div key={e.id} className="grid grid-cols-[130px_160px_180px_160px_1fr_auto] items-center p-2.5 bg-muted/20 border rounded-md group hover:bg-muted/40 transition-colors gap-3">
-
-                            {/* Nome Corso */}
-                            <div className="font-bold text-sm truncate" title={course?.name}>
-                              {course?.name || 'Corso sconosciuto'}
-                            </div>
-
-                            {/* Codice Corso (SKU) */}
-                            <div className="font-medium text-xxs text-foreground truncate" title={course?.sku || undefined}>
-                              {course?.sku}
-                            </div>
-
-                            {/* Info Temporali */}
-                            <div className="text-xs text-muted-foreground flex flex-col gap-0.5 truncate">
-                              <span>Iscritto: {new Date(e.enrollmentDate).toLocaleDateString('it-IT')}</span>
-                              {course?.dayOfWeek && <span>• {course.dayOfWeek} {course.startTime}</span>}
-                            </div>
-                            
-                            {/* Dettagli Partecipazione (Modalità) */}
-                            <div className="flex flex-col items-start gap-1 overflow-hidden">
-                              {e.participationType === 'FREE_TRIAL' && <Badge variant="outline" className="text-xxs bg-green-50 text-green-700 border-green-200 font-medium">Prova Gratuita</Badge>}
-                              {e.participationType === 'PAID_TRIAL' && <Badge variant="outline" className="text-xxs bg-amber-50 dark:bg-amber-950/20 text-amber-700 border-amber-200 dark:border-amber-900/50 font-medium">Prova a Pagamento</Badge>}
-                              {e.participationType === 'SINGLE_LESSON' && <Badge variant="outline" className="text-xxs bg-purple-50 text-purple-700 border-purple-200 font-medium">Lezione Singola</Badge>}
-                              {(!e.participationType || e.participationType === 'STANDARD_COURSE') && <Badge variant="outline" className="text-xxs bg-blue-50 dark:bg-blue-950/20 text-blue-700 border-blue-200 font-medium">Iscrizione Standard</Badge>}
-                              
-                              {e.targetDate && (
-                                <span className="text-xxs text-muted-foreground flex items-center gap-1 font-medium mt-0.5">
-                                  <Calendar className="w-2.5 h-2.5"/>
-                                  {new Date(e.targetDate).toLocaleDateString('it-IT')}
-                                </span>
-                              )}
-                            </div>
-
-                            {/* Dettagli Opzionali (Note Extra) */}
-                            <div className="flex items-center gap-1 overflow-hidden flex-1">
-                              {hasDetails && e.details.map((detStr: string, idx: number) => {
-                                const color = enrollmentDetails?.find(d => d.name === detStr)?.color;
-                                return (
-                                  <EnrollmentDetailBadge
-                                    key={idx}
-                                    name={detStr}
-                                    color={color}
-                                    className="h-5 py-0.5 px-2 text-xxs truncate max-w-[120px]"
-                                  />
-                                );
-                              })}
-                            </div>
-
-                            {/* Stato e Azioni */}
-                            <div className="flex items-center justify-end gap-3 pl-2">
-                              <Badge variant={e.status === 'active' ? 'default' : 'secondary'} className={e.status === 'active' ? 'bg-green-100 text-green-800 dark:text-green-400 hover:bg-green-200 border-green-300 text-xxs h-5' : 'text-xxs h-5'}>
-                                {e.status === 'active' ? 'Attivo' : e.status}
-                              </Badge>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-6 w-6 text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity"
-                                onClick={() => {
-                                  if (confirm("Rimuovere l'iscrizione a questo corso?")) {
-                                    removeEnrollmentMutation.mutate(e.id);
-                                  }
-                                }}
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </Button>
-                            </div>
-
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <p className="text-sm text-muted-foreground italic p-2">Nessuna iscrizione attiva.</p>
-                  )}
-
-
-                </div>
-              )}
-            </div>
-
-            {/* PROVE A PAGAMENTO */}
-            <div className="opacity-75 grayscale-[20%]">
-              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-muted/30 px-2 py-1 rounded flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <CreditCard className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                  <span className="text-muted-foreground line-through decoration-muted-foreground/50">Prove a Pagamento</span>
-                </div>
-                <Badge variant="outline" className="text-xxs bg-amber-50 dark:bg-amber-950/20 text-amber-700 border-amber-200 dark:border-amber-900/50 font-normal">Sola Lettura (Usa modulo Corsi)</Badge>
-              </h3>
-              {renderGenericEnrollmentList(memberPtEnrollments, paidTrials, removePtEnrollmentMutation, "Nessuna prova a pagamento registrata.", "Storico Prove a Pagamento", "le prove a pagamento", "paidTrialId")}
-            </div>
-
-            {/* PROVE GRATUITE */}
-            <div className="opacity-75 grayscale-[20%]">
-              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-muted/30 px-2 py-1 rounded flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Gift className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                  <span className="text-muted-foreground line-through decoration-muted-foreground/50">Prove Gratuite</span>
-                </div>
-                <Badge variant="outline" className="text-xxs bg-amber-50 dark:bg-amber-950/20 text-amber-700 border-amber-200 dark:border-amber-900/50 font-normal">Sola Lettura (Usa modulo Corsi)</Badge>
-              </h3>
-              {renderGenericEnrollmentList(memberFtEnrollments, freeTrials, removeFtEnrollmentMutation, "Nessuna prova gratuita registrata.", "Storico Prove Gratuite", "le prove gratuite", "freeTrialId")}
-            </div>
-
-            {/* LEZIONI SINGOLE */}
-            <div className="opacity-75 grayscale-[20%]">
-              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-muted/30 px-2 py-1 rounded flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <BookOpen className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                  <span className="text-muted-foreground line-through decoration-muted-foreground/50">Lezioni Singole</span>
-                </div>
-                <Badge variant="outline" className="text-xxs bg-amber-50 dark:bg-amber-950/20 text-amber-700 border-amber-200 dark:border-amber-900/50 font-normal">Sola Lettura (Usa modulo Corsi)</Badge>
-              </h3>
-              {renderGenericEnrollmentList(memberSlEnrollments, singleLessons, removeSlEnrollmentMutation, "Nessuna lezione singola registrata.", "Storico Lezioni Singole", "le lezioni singole", "singleLessonId")}
-            </div>
-
-            {/* WORKSHOP */}
-            <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-warning/50 dark:bg-warning/900/20 px-2 py-1 rounded flex items-center gap-2">
-                <Calendar className="w-4 h-4 sidebar-icon-gold flex-shrink-0" />
-                <Link href="/attivita/workshop" className="rounded px-1 py-0.5 transition-colors hover:bg-accent/60 cursor-pointer no-underline" data-testid="link-attivita-workshop">Workshop</Link>
-                <KnowledgeInfo id="workshop" />
-                <SectionBadge count={memberWorkshopEnrollments?.length || 0} />
-              </h3>
-
-              {renderGenericEnrollmentList(memberWorkshopEnrollments, workshops, removeWorkshopEnrollmentMutation, "Nessun workshop registrato.", "Workshop Registrati", "i workshop", "workshopId")}
-            </div>
-
-            {/* DOMENICHE IN MOVIMENTO */}
-            <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-warning/50 dark:bg-warning/900/20 px-2 py-1 rounded flex items-center gap-2">
-                <Sun className="w-4 h-4 sidebar-icon-gold flex-shrink-0" />
-                <Link href="/attivita/domeniche-movimento" className="rounded px-1 py-0.5 transition-colors hover:bg-accent/60 cursor-pointer no-underline" data-testid="link-attivita-domeniche-movimento">Domeniche in Movimento</Link>
-                <KnowledgeInfo id="domeniche-in-movimento" />
-                <SectionBadge count={memberSaEnrollments?.length || 0} />
-              </h3>
-              {renderGenericEnrollmentList(memberSaEnrollments, sundayActivities, removeSaEnrollmentMutation, "Nessuna domenica in movimento registrata.", "Domeniche in Movimento Registrate", "le domeniche in movimento", "sundayActivityId")}
-            </div>
-
-            {/* ALLENAMENTI */}
-            <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-warning/50 dark:bg-warning/900/20 px-2 py-1 rounded flex items-center gap-2">
-                <Dumbbell className="w-4 h-4 sidebar-icon-gold flex-shrink-0" />
-                <Link href="/attivita/allenamenti" className="rounded px-1 py-0.5 transition-colors hover:bg-accent/60 cursor-pointer no-underline" data-testid="link-attivita-allenamenti">Allenamenti</Link>
-                <KnowledgeInfo id="allenamenti" />
-                <SectionBadge count={memberTrEnrollments?.length || 0} />
-              </h3>
-              {renderGenericEnrollmentList(memberTrEnrollments, trainings, removeTrEnrollmentMutation, "Nessun allenamento registrato.", "Allenamenti Registrati", "gli allenamenti", "trainingId")}
-            </div>
-
-            {/* AFFITTI */}
-            <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-warning/50 dark:bg-warning/900/20 px-2 py-1 rounded flex items-center gap-2">
-                <Building2 className="w-4 h-4 sidebar-icon-gold flex-shrink-0" />
-                <Link href="/prenotazioni-sale" className="rounded px-1 py-0.5 transition-colors hover:bg-accent/60 cursor-pointer no-underline" data-testid="link-attivita-affitti">Affitti</Link>
-                <KnowledgeInfo id="affitti" />
-              </h3>
-              {renderGenericEnrollmentList([], [], dummyMutation, "Nessun affitto sala registrato.", "Affitti Registrati", "gli affitti", "affittiId")}
-            </div>
-
-            {/* LEZIONI INDIVIDUALI */}
-            <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-warning/50 dark:bg-warning/900/20 px-2 py-1 rounded flex items-center gap-2">
-                <UserCheck className="w-4 h-4 sidebar-icon-gold flex-shrink-0" />
-                <Link href="/attivita/lezioni-individuali" className="rounded px-1 py-0.5 transition-colors hover:bg-accent/60 cursor-pointer no-underline" data-testid="link-attivita-lezioni-individuali">Lezioni Individuali</Link>
-                <KnowledgeInfo id="lezioni-individuali" />
-                <SectionBadge count={memberIlEnrollments?.length || 0} />
-              </h3>
-              {renderGenericEnrollmentList(memberIlEnrollments, individualLessons, removeIlEnrollmentMutation, "Nessuna lezione individuale registrata.", "Lezioni Individuali Registrate", "le lezioni individuali", "individualLessonId")}
-            </div>
-
-            {/* CAMPUS */}
-            <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-warning/50 dark:bg-warning/900/20 px-2 py-1 rounded flex items-center gap-2">
-                <Users className="w-4 h-4 sidebar-icon-gold flex-shrink-0" />
-                <Link href="/attivita/campus" className="rounded px-1 py-0.5 transition-colors hover:bg-accent/60 cursor-pointer no-underline" data-testid="link-attivita-campus">Campus</Link>
-                <KnowledgeInfo id="campus" />
-                <SectionBadge count={memberCaEnrollments?.length || 0} />
-              </h3>
-              {renderGenericEnrollmentList(memberCaEnrollments, campusActivities, removeCaEnrollmentMutation, "Nessun campus registrato.", "Campus Registrati", "i campus", "campusActivityId")}
-            </div>
-
-            {/* SAGGI */}
-            <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-warning/50 dark:bg-warning/900/20 px-2 py-1 rounded flex items-center gap-2">
-                <Award className="w-4 h-4 sidebar-icon-gold flex-shrink-0" />
-                <Link href="/attivita/saggi" className="rounded px-1 py-0.5 transition-colors hover:bg-accent/60 cursor-pointer no-underline" data-testid="link-attivita-saggi">Saggi</Link>
-                <KnowledgeInfo id="saggi" />
-                <SectionBadge count={memberReEnrollments?.length || 0} />
-              </h3>
-              {renderGenericEnrollmentList(memberReEnrollments, recitals, removeReEnrollmentMutation, "Nessun saggio registrato.", "Saggi Registrati", "i saggi", "recitalId")}
-            </div>
-
-            {/* VACANZA STUDIO */}
-            <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-warning/50 dark:bg-warning/900/20 px-2 py-1 rounded flex items-center gap-2">
-                <Music className="w-4 h-4 sidebar-icon-gold flex-shrink-0" />
-                <Link href="/attivita/vacanze-studio" className="rounded px-1 py-0.5 transition-colors hover:bg-accent/60 cursor-pointer no-underline" data-testid="link-attivita-vacanze-studio">Vacanze Studio</Link>
-                <KnowledgeInfo id="vacanze-studio" />
-                <SectionBadge count={memberVsEnrollments?.length || 0} />
-              </h3>
-              {renderGenericEnrollmentList(memberVsEnrollments, vacationStudies, removeVsEnrollmentMutation, "Nessuna vacanza studio registrata.", "Vacanze Studio Registrate", "le vacanze studio", "vacationStudyId")}
-            </div>
-
-            {/* MERCHANDISING */}
-            <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-warning/50 dark:bg-warning/900/20 px-2 py-1 rounded flex items-center gap-2">
-                <ShoppingBag className="w-4 h-4 sidebar-icon-gold flex-shrink-0" />
-                <Link href="/attivita/merchandising" className="rounded px-1 py-0.5 transition-colors hover:bg-accent/60 cursor-pointer no-underline" data-testid="link-attivita-merchandising">Merchandising</Link>
-                <KnowledgeInfo id="merchandising" />
-              </h3>
-              {renderGenericEnrollmentList([], [], dummyMutation, "Nessun articolo di merchandising registrato.", "Merchandising Registrato", "il merchandising", "merchandisingId")}
-            </div>
-
-            {/* EVENTI ESTERNI */}
-            <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-4 border-b pb-2 bg-warning/50 dark:bg-warning/900/20 px-2 py-1 rounded flex items-center gap-2">
-                <Globe className="w-4 h-4 sidebar-icon-gold flex-shrink-0" />
-                <Link href="/attivita/servizi" className="rounded px-1 py-0.5 transition-colors hover:bg-accent/60 cursor-pointer no-underline" data-testid="link-attivita-eventi-esterni">Eventi Esterni</Link>
-                <KnowledgeInfo id="eventi-esterni" />
-                <SectionBadge count={memberServEnrollments?.length || 0} />
-              </h3>
-              {renderGenericEnrollmentList(memberServEnrollments, bookingServices, removeServEnrollmentMutation, "Nessun evento esterno registrato.", "Eventi Esterni Registrati", "gli eventi esterni", "serviceId")}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Duplicate Fiscal Codes Modal */}
+        </div>
+        
+        {/* Duplicate Fiscal Codes Modal */}
       <Dialog open={showDuplicatesModal} onOpenChange={setShowDuplicatesModal}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-auto">
           <DialogHeader>
@@ -3761,75 +1974,6 @@ function MascheraInputGeneraleContent(props?: any) {
           </div>
         </DialogContent>
       </Dialog>
-      
-      {/* Modale Forzatura livello marketing */}
-      <Dialog open={isCrmOverrideOpen} onOpenChange={setIsCrmOverrideOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Forzatura livello marketing</DialogTitle>
-            <DialogDescription className="text-sm">
-              Modifica manualmente il livello assegnato a questo partecipante. Selezionando un livello, il calcolo automatico verrà disattivato finché la forzatura resta attiva.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="bg-amber-50 dark:bg-amber-950/20 dark:bg-amber-900/10 p-3 rounded-md border border-amber-200 dark:border-amber-900/50/50 flex flex-col sm:flex-row justify-between sm:items-center gap-2 mt-4 text-sm">
-            <span className="text-amber-800 dark:text-amber-400 dark:text-amber-200 font-medium whitespace-nowrap">Stato attuale a sistema:</span>
-            <div className="flex gap-4">
-              <span className="text-foreground/80 dark:text-slate-300"><span className="font-semibold">{currentMember?.crmProfileLevel && currentMember.crmProfileLevel !== "NONE" ? currentMember.crmProfileLevel : "Nessuno"}</span></span>
-              <span className="text-amber-700 dark:text-amber-400 font-bold">{currentMember?.crmProfileScore || 0} pts</span>
-            </div>
-          </div>
-
-          <div className="space-y-4 py-2">
-            <div className="flex items-center gap-2">
-              <Checkbox 
-                id="crm-override-toggle"
-                checked={crmOverrideData.override}
-                onCheckedChange={(val: boolean | string) => setCrmOverrideData(prev => ({ ...prev, override: !!val }))}
-              />
-              <Label htmlFor="crm-override-toggle" className="font-semibold cursor-pointer">Attiva forzatura manuale</Label>
-            </div>
-
-            {crmOverrideData.override && (
-              <div className="space-y-4 pt-4 border-t border-border">
-                <div className="space-y-2">
-                  <Label>Livello</Label>
-                  <Combobox
-                    name="livelloCrm"
-                    value={crmOverrideData.level || ""}
-                    onValueChange={(v) => setCrmOverrideData(prev => ({ ...prev, level: v }))}
-                    options={[{value: "NONE", label: "Nessun livello"}, ...livelliCrm.map((l: string) => ({ value: l.toUpperCase(), label: l }))]}
-                    placeholder="Seleziona livello..."
-                    emptyText="Nessun livello trovato"
-                    onQuickAdd={(v) => quickAddLivello.mutate(v)}
-                    isQuickAddPending={quickAddLivello.isPending}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Motivazione Forzatura <span className="text-red-500">*</span></Label>
-                  <Input 
-                    placeholder="Es: Cliente storico VIP inserito manualmente..."
-                    value={crmOverrideData.reason}
-                    onChange={(e) => setCrmOverrideData(prev => ({ ...prev, reason: e.target.value }))}
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsCrmOverrideOpen(false)}>Annulla</Button>
-            <Button 
-              onClick={() => overrideCrmMutation.mutate(crmOverrideData as any)}
-              disabled={overrideCrmMutation.isPending || (crmOverrideData.override && !crmOverrideData.reason.trim())}
-            >
-              <Save className="w-4 h-4 mr-2" />
-              Salva Impostazioni
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
@@ -3838,6 +1982,9 @@ export default function MascheraInputGenerale(props?: any) {
   const urlParams = new URLSearchParams(window.location.search);
   const memberIdStr = props?.params?.id || urlParams.get('memberId') || urlParams.get('editMemberId');
   const actionFromUrl = urlParams.get('action');
+  
+  const storeMemberId = useMemberStore((state) => state.selectedMemberId);
+  const finalMemberId = storeMemberId !== null ? storeMemberId : (memberIdStr ? Number(memberIdStr) : null);
   
   const [verificaStato, setVerificaStato] = useState({
     telefono: false,
@@ -3852,7 +1999,7 @@ export default function MascheraInputGenerale(props?: any) {
 
   return (
     <CrmFormProvider
-      selectedMemberId={memberIdStr ? Number(memberIdStr) : null}
+      selectedMemberId={finalMemberId}
       actionFromUrl={actionFromUrl}
       verificaStato={verificaStato}
       setVerificaStato={setVerificaStato}

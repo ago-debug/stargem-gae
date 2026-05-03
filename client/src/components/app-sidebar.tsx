@@ -241,6 +241,11 @@ const adminItems = [
     icon: Settings,
   },
   {
+    title: "DB Monitor",
+    url: "/db-monitor",
+    icon: Database,
+  },
+  {
     title: "Importazione Dati",
     url: "/importa",
     icon: Upload,

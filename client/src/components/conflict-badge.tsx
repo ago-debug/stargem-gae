@@ -45,7 +45,7 @@ export function ConflictBadge({ result, type }: ConflictBadgeProps) {
         <div className="ml-5 space-y-0.5 text-xxs opacity-90">
           <div>Scheda: {result.conflict.name} {result.conflict.email ? `· ${result.conflict.email}` : ''}</div>
           <a
-            href={`/members/${result.conflict.id}`}
+            href={`/maschera-input?editMemberId=${result.conflict.id}`}
             target="_blank"
             rel="noreferrer"
             className="inline-block mt-1 uppercase tracking-wider font-semibold underline underline-offset-2 hover:text-red-900 transition-colors"

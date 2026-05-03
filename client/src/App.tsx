@@ -42,6 +42,7 @@ const AuditLogs = React.lazy(() => import("@/pages/audit-logs"));
 const AnagraficaHome = React.lazy(() => import("@/pages/anagrafica-home"));
 
 const AdminPanel = React.lazy(() => import("@/pages/admin-panel"));
+const DbMonitor = React.lazy(() => import("@/pages/db-monitor"));
 const CalendarPage = React.lazy(() => import("@/pages/calendar"));
 const BookingServiceCategories = React.lazy(() => import("@/pages/booking-service-categories"));
 const BookingServices = React.lazy(() => import("@/pages/booking-services"));
@@ -216,6 +217,7 @@ function Router() {
       <ProtectedRoute path="/area-tesserati" component={AreaTesserati} />
 
       <ProtectedRoute path="/admin" component={AdminPanel} />
+      <ProtectedRoute path="/db-monitor" component={DbMonitor} />
       <ProtectedRoute path="/copilot" component={StubCopilot} />
       <ProtectedRoute path="/booking-services" component={BookingServices} />
       <ProtectedRoute path="/attivita/affitti" component={StudioBookings} />
