@@ -234,18 +234,27 @@ export function CourseDuplicationWizard({
     if (!courses || !effectiveSourceSeasonId) return [];
     return courses.filter((c) => {
       const cSeasonId = c.seasonId?.toString() || activeSeasonFallbackId;
-      // FILTRO DATI SPORCHI: Ignoriamo i corsi "fantasma" senza una programmazione valida
-      const hasSchedule = !!c.dayOfWeek && !!c.startTime;
-      return cSeasonId === effectiveSourceSeasonId && hasSchedule;
+      return cSeasonId === effectiveSourceSeasonId;
     });
   }, [courses, effectiveSourceSeasonId, activeSeasonFallbackId]);
 
   const filteredSourceCourses = useMemo(() => {
-    if (!searchFilter.trim()) return sourceCourses;
-    return sourceCourses.filter((c) =>
-      matchesFilter(c, searchFilter, instructors || []),
-    );
-  }, [sourceCourses, searchFilter, instructors]);
+    let result = sourceCourses;
+    if (searchFilter.trim()) {
+      result = sourceCourses.filter((c) =>
+        matchesFilter(c, searchFilter, instructors || []),
+      );
+    }
+    // Sort so that selected courses appear at the top
+    return result.sort((a, b) => {
+      const aSelected = selectedCourseIds.has(a.id) ? 1 : 0;
+      const bSelected = selectedCourseIds.has(b.id) ? 1 : 0;
+      if (aSelected !== bSelected) {
+        return bSelected - aSelected;
+      }
+      return (a.name || "").localeCompare(b.name || "");
+    });
+  }, [sourceCourses, searchFilter, instructors, selectedCourseIds]);
 
   const targetSeasons = useMemo(() => {
     if (!seasons || !seasons.length) return [];
