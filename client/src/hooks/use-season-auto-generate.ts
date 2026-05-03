@@ -23,9 +23,10 @@ export function useSeasonAutoGenerate(seasons: Season[] | undefined, selectedSea
                 const activeSeason = seasons.find(s => s.active) || seasons[0];
                 const activeIdx = seasons.findIndex(s => s.id === activeSeason.id);
                 
-                // activeIdx - 1 is the next season because order is DESC (newest first)
+                // Disabilitato: non forzare l'avanzamento automatico UI alla stagione futura.
+                // L'utente vuole restare sulla stagione corrente di default.
                 if (activeIdx > 0 && onSeasonChange) {
-                    onSeasonChange(seasons[activeIdx - 1].id);
+                    // onSeasonChange(seasons[activeIdx - 1].id);
                 } else if (activeIdx === 0) {
                     // Auto-generate next season
                     const yearMatch = activeSeason.name.match(/20(\d{2})\/20(\d{2})/);

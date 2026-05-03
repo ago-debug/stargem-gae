@@ -18,14 +18,14 @@ import type { PriceList, Course, Quote, PriceListItem } from "@shared/schema";
 export function CartTableRow({
     row, courses, workshops, paidTrials, freeTrials, singleLessons,
     sundayActivities, trainings, individualLessons, campusActivities,
-    recitals, vacationStudies, studios, bookingServices, priceLists, quotes,
+    recitals, vacationStudies, studios, bookingServices, priceLists, quotes, courseQuotesGrid,
     updateRow, updateRowBatch, removeCartRow, index, validatePromoCode
 }: {
     row: any, courses: Course[], workshops: any[], paidTrials: any[],
     freeTrials: any[], singleLessons: any[], sundayActivities: any[],
     trainings: any[], individualLessons: any[], campusActivities: any[],
     recitals: any[], vacationStudies: any[], studios: any[], bookingServices: any[],
-    priceLists: PriceList[], quotes: Quote[], updateRow: any,
+    priceLists: PriceList[], quotes: Quote[], courseQuotesGrid: any[], updateRow: any,
     updateRowBatch: any, removeCartRow: any, index: number, validatePromoCode: any
 }) {
     const { data: listinoItems } = useQuery<PriceListItem[]>({
@@ -189,27 +189,11 @@ export function CartTableRow({
             <div className="flex-1 space-y-4">
                 <div className="grid grid-cols-1 xl:grid-cols-[1fr_1.5fr_2fr_0.8fr_2fr_1fr] gap-4">
                     <div className="space-y-1">
-                        <Label className="text-xs text-foreground/80 truncate font-bold">Listino *</Label>
-                        <Select value={row.periodId} onValueChange={(val) => {
-                            updateRowBatch(row.id, { periodId: val, activityType: '', skus: [], basePrice: 0 });
+                        <Label className={cn("text-xs truncate font-bold", !row.activityType ? "text-slate-400" : "text-foreground/80")}>Attività *</Label>
+                        <Select value={row.activityType || ""} onValueChange={(val) => {
+                            updateRowBatch(row.id, { activityType: val, skus: [], basePrice: 0, quoteGridId: "" });
                         }}>
-                            <SelectTrigger className="h-9 bg-yellow-50/50 border-yellow-200">
-                                <SelectValue placeholder="Periodo..." />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {priceLists?.map(pl => (
-                                    <SelectItem key={pl.id} value={pl.id.toString()}>{pl.name}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-
-                    <div className="space-y-1">
-                        <Label className={cn("text-xs truncate font-bold", !row.periodId ? "text-slate-400" : "text-foreground/80")}>Attività *</Label>
-                        <Select disabled={!row.periodId} value={row.activityType || ""} onValueChange={(val) => {
-                            updateRowBatch(row.id, { activityType: val, skus: [], basePrice: 0 });
-                        }}>
-                            <SelectTrigger className={cn("h-9 border-border", !row.periodId ? "bg-slate-100 dark:bg-slate-800 opacity-50" : "bg-muted")}>
+                            <SelectTrigger className="h-9 border-border bg-muted">
                                 <SelectValue placeholder="Seleziona..." />
                             </SelectTrigger>
                             <SelectContent>
@@ -223,7 +207,7 @@ export function CartTableRow({
                     </div>
 
                     <div className="space-y-1">
-                        <Label className={cn("text-xs truncate font-bold", !row.activityType ? "text-slate-400" : "text-foreground/80")}>SKU / Dettaglio Attività *</Label>
+                        <Label className={cn("text-xs truncate font-bold", !row.activityType ? "text-slate-400" : "text-foreground/80")}>Corso / Dettaglio *</Label>
                         <Select disabled={!row.activityType} value={(row.skus && row.skus[0]) || ""} onValueChange={(val) => {
                             updateRow(row.id, 'skus', [val]);
                         }}>
@@ -236,6 +220,45 @@ export function CartTableRow({
                                         <span className="font-semibold text-foreground">{c.name || c.title}</span>
                                     </SelectItem>
                                 ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    <div className="space-y-1">
+                        <Label className="text-xs text-foreground/80 truncate font-bold">Listino Ufficiale *</Label>
+                        <Select disabled={!row.activityType} value={row.quoteGridId || ""} onValueChange={(val) => {
+                            const [gridIdStr, month] = val.split('_');
+                            const grid = courseQuotesGrid?.find(g => g.id.toString() === gridIdStr);
+                            if (grid && grid.monthsData && grid.monthsData[month]) {
+                                updateRowBatch(row.id, { 
+                                    quoteGridId: val, 
+                                    basePrice: parseFloat(grid.monthsData[month].quota) || 0 
+                                });
+                            }
+                        }}>
+                            <SelectTrigger className={cn("h-9 border-border", !row.activityType ? "bg-slate-100 dark:bg-slate-800 opacity-50" : "bg-yellow-50/50 border-yellow-200")}>
+                                <SelectValue placeholder="Seleziona Prezzo..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="manual">-- Inserimento Manuale --</SelectItem>
+                                {courseQuotesGrid?.map(grid => {
+                                    const months = ["sep","oct","nov","dec","jan","feb","mar","apr","may","jun","jul","aug"];
+                                    const monthNames = ["Settembre", "Ottobre", "Novembre", "Dicembre", "Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", "Luglio", "Agosto"];
+                                    
+                                    const options = months.map((m, idx) => {
+                                        const data = grid.monthsData[m];
+                                        if (data && data.quota > 0) {
+                                            return (
+                                                <SelectItem key={`${grid.id}_${m}`} value={`${grid.id}_${m}`}>
+                                                    [{grid.category}] {grid.description} - {monthNames[idx]} (€ {data.quota})
+                                                </SelectItem>
+                                            );
+                                        }
+                                        return null;
+                                    }).filter(Boolean);
+
+                                    return options;
+                                }).flat()}
                             </SelectContent>
                         </Select>
                     </div>
@@ -259,6 +282,7 @@ export function CartTableRow({
                               className="h-9 bg-muted font-bold w-1/2"
                               value={row.basePrice || ""}
                               onChange={(e) => updateRow(row.id, 'basePrice', e.target.value)}
+                              readOnly={row.quoteGridId && row.quoteGridId !== 'manual'}
                               placeholder="0"
                           />
                           {row.activityType && (

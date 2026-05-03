@@ -65,6 +65,10 @@ export default function QuoteListini(props: QuoteListiniProps) {
     const [isInitialized, setIsInitialized] = useState(false);
 
     useEffect(() => {
+        setIsInitialized(false);
+    }, [activityType, props.seasonId]);
+
+    useEffect(() => {
         if (!isLoading && !isInitialized) {
             if (gridData && gridData.length > 0) {
                 // Ensure monthsData is properly parsed if it comes as a string from DB
@@ -123,12 +127,12 @@ export default function QuoteListini(props: QuoteListiniProps) {
                     monthsData: typeof rest.monthsData === 'string' ? JSON.parse(rest.monthsData) : rest.monthsData
                 };
             });
-            await apiRequest("POST", `/api/course-quotes-grid/bulk?activityType=${activityType}`, cleaned);
+            await apiRequest("POST", `/api/course-quotes-grid/bulk?activityType=${activityType}&seasonId=${props.seasonId || "active"}`, cleaned);
         },
         onSuccess: () => {
             toast({ title: "Salvato", description: "Griglia aggiornata con successo." });
             setIsInitialized(false); // Force re-sync with DB on next fetch
-            queryClient.invalidateQueries({ queryKey: ["/api/course-quotes-grid", activityType] });
+            queryClient.invalidateQueries({ queryKey: ["/api/course-quotes-grid", activityType, props.seasonId || "active"] });
         },
         onError: (err) => {
             toast({ title: "Errore", description: "Impossibile salvare i dati.", variant: "destructive" });

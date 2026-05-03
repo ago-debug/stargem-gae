@@ -396,6 +396,7 @@ export const courses = mysqlTable("courses", {
   price: decimal("price", { precision: 10, scale: 2 }),
   maxCapacity: int("max_capacity"),
   currentEnrollment: int("current_enrollment").default(0),
+  calculatedLessons: int("calculated_lessons"),
   // Campi orario strutturati (nuovo sistema con dropdown)
   dayOfWeek: varchar("day_of_week", { length: 20 }), // lunedì, martedì, mercoledì, giovedì, venerdì, sabato, domenica
   startTime: varchar("start_time", { length: 10 }), // formato HH:MM (es: "15:00")
@@ -1606,6 +1607,7 @@ export type Quote = typeof quotes.$inferSelect;
 // ============================================================================
 export const courseQuotesGrid = mysqlTable("course_quotes_grid", {
   id: int("id").primaryKey().autoincrement(),
+  seasonId: int("season_id").references(() => seasons.id, { onDelete: "cascade" }),
   activityType: varchar("activity_type", { length: 50 }).notNull().default('corsi'), //corsi, workshop, domeniche...
   category: varchar("category", { length: 100 }).notNull(), // OPEN, ADULTI, AEREAL, BAMBINI, PROVE
   description: varchar("description", { length: 255 }).notNull(),
@@ -1956,6 +1958,7 @@ export const promoRules = mysqlTable("promo_rules", {
   memberId: int("member_id")
     .references(() => members.id, { onDelete: "set null" }),
   approvedBy: varchar("approved_by", { length: 50 }),
+  seasonId: int("season_id").references(() => seasons.id, { onDelete: "set null" }),
   internalNotes: text("internal_notes"),
   metadata: json("metadata"),
   createdAt: timestamp("created_at").defaultNow(),
@@ -1977,6 +1980,7 @@ export const welfareProviders = mysqlTable("welfare_providers", {
   extraFeePercent: decimal("extra_fee_percent",
     { precision: 5, scale: 2 }).default("0"),
   availableCategories: text("available_categories"),
+  seasonId: int("season_id").references(() => seasons.id, { onDelete: "set null" }),
   operativeNotes: text("operative_notes"),
   isActive: boolean("is_active").default(true),
   metadata: json("metadata"),
@@ -2167,6 +2171,7 @@ export const companyAgreements = mysqlTable(
   tenantId: int("tenant_id").notNull().default(1),
   companyName: varchar("company_name",{length:150}).notNull(),
   companyType: varchar("company_type",{length:50}),
+  seasonId: int("season_id").references(() => seasons.id, { onDelete: "set null" }),
   discountCourses: decimal("discount_courses",{precision:5,scale:2}).default("0"),
   discountMerch: decimal("discount_merch",{precision:5,scale:2}).default("0"),
   discountOther: decimal("discount_other",{precision:5,scale:2}).default("0"),
@@ -2228,6 +2233,7 @@ export const staffRates = mysqlTable("staff_rates",{
   amount: decimal("amount",{precision:8,scale:2}).notNull(),
   rateType: varchar("rate_type",{length:20}).notNull().default("annual"),
   applicableTo: varchar("applicable_to",{length:50}).default("all_staff"),
+  seasonId: int("season_id").references(() => seasons.id, { onDelete: "set null" }),
   studioRestriction: text("studio_restriction"),
   requiresMembership: boolean("requires_membership").default(true),
   requiresMedicalCert: boolean("requires_medical_cert").default(true),

@@ -6,13 +6,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Gift, Plus, Trash2 } from "lucide-react";
 
 export interface TabGiftProps {
-  selectedMemberId: number | undefined;
+  selectedMemberId: number | null | undefined;
   showGiftFields: boolean;
   setShowGiftFields: (v: boolean) => void;
   bottomSectionsData: { gift: any[] };
   setBottomSectionsData: React.Dispatch<React.SetStateAction<any>>;
   setDirtyFields: React.Dispatch<React.SetStateAction<any>>;
-  handleBottomSectionChange: (section: string, field: string, value: string, index: number) => void;
+  handleBottomSectionChange: (section: any, field: string, value: any, index?: number) => void;
   getBottomSectionClassName: (section: string, field: string) => string;
 }
 
@@ -73,8 +73,8 @@ export function TabGift({
                           className="text-destructive hover:bg-destructive hover:text-destructive-foreground h-8 px-2"
                           onClick={() => {
                             if (confirm("Sei sicuro di voler rimuovere questo elemento?")) {
-                              setBottomSectionsData(prev => ({ ...prev, gift: prev.gift.filter((_, i) => i !== index) }));
-                              setDirtyFields(prev => ({ ...prev, gift_removed: true }));
+                              setBottomSectionsData((prev: any) => ({ ...prev, gift: prev.gift.filter((_: any, i: number) => i !== index) }));
+                              setDirtyFields((prev: any) => ({ ...prev, gift_removed: true }));
                             }
                           }}
                         >

@@ -102,6 +102,7 @@ export function NuovoPagamentoModal({
     const { data: priceLists } = useQuery<PriceList[]>({ queryKey: ["/api/price-lists"] });
     const { data: courses } = useQuery<Course[]>({ queryKey: ["/api/courses"] });
     const { data: quotes } = useQuery<Quote[]>({ queryKey: ["/api/quotes"] });
+    const { data: courseQuotesGrid } = useQuery<any[]>({ queryKey: ["/api/course-quotes-grid", "active"], queryFn: async () => { const res = await fetch(`/api/course-quotes-grid?seasonId=active`); return res.ok ? res.json() : []; } });
 
     // API per Dettaglio Quote & Servizi e Dropdowns
     const { data: payments } = useQuery<any[]>({ queryKey: ["/api/payments", { memberId: selectedMemberId }], enabled: !!selectedMemberId, queryFn: async () => { const res = await fetch(`/api/payments?memberId=${selectedMemberId}`); return res.ok ? res.json() : []; } });
@@ -151,7 +152,7 @@ export function NuovoPagamentoModal({
             const total = parseFloat(m.fee || "0");
             const paid = memberPayments.filter((p: any) => p.membershipId === m.id && (p.status === 'paid' || p.status === 'completed')).reduce((s: number, p: any) => s + parseFloat(p.amount), 0);
             return { id: `membership-${m.id}`, description: `Quota Tessera (${m.membershipNumber || 'N/A'})`, date: m.createdAt, type: 'membership', total, paid, remaining: Math.max(0, total - paid) };
-        }).filter(item => !(item.description.includes('-temp') && item.remaining === 0))
+        }).filter((item: any) => !(item.description.includes('-temp') && item.remaining === 0))
     ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     const isLoadingDebts = !payments || !enrollments || !courses;
@@ -775,6 +776,7 @@ export function NuovoPagamentoModal({
                                                 bookingServices={bookingServices || []}
                                                 priceLists={priceLists || []}
                                                 quotes={quotes || []}
+                                                courseQuotesGrid={courseQuotesGrid || []}
                                                 updateRow={updateRow}
                                                 updateRowBatch={updateRowBatch}
                                                 removeCartRow={removeCartRow}

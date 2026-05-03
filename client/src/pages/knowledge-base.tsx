@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { BookOpen, ShieldAlert, FileText, CheckCircle2, Shield, Info, ArrowRight, IdCard, GitMerge } from "lucide-react";
+import { BookOpen, ShieldAlert, FileText, CheckCircle2, Shield, Info, ArrowRight, IdCard, GitMerge, Coins, Ticket } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
@@ -11,7 +11,8 @@ export default function KnowledgeBase() {
     { id: "sicurezza e permessi", name: "Sicurezza e Permessi", icon: ShieldAlert },
     { id: "generale", name: "Istruzioni Generali", icon: FileText },
     { id: "anagrafica", name: "Gestione Anagrafica", icon: BookOpen },
-    { id: "gempass", name: "Logica GemPass & CRM", icon: IdCard }
+    { id: "gempass", name: "Logica GemPass & CRM", icon: IdCard },
+    { id: "quote-promo", name: "Logica Quote e Promo", icon: Coins }
   ];
 
   return (
@@ -344,7 +345,105 @@ export default function KnowledgeBase() {
             </Card>
           )}
 
-          {activeCategory !== "sicurezza e permessi" && activeCategory !== "gempass" && (
+          {activeCategory === "quote-promo" && (
+            <Card className="border-t-4 border-t-emerald-500 shadow-md">
+              <CardHeader>
+                <div className="flex items-center gap-2 mb-2">
+                  <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200"><Coins className="w-3 h-3 mr-1" /> Architettura Prezzi</Badge>
+                  <span className="text-xs text-muted-foreground">Ultimo aggiornamento: Oggi</span>
+                </div>
+                <CardTitle className="text-2xl">Gestione Quote, Open e Promozioni</CardTitle>
+                <CardDescription>
+                  Hub centrale per Listini, Abbonamenti (Open) e Regole di Sconto.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="bg-emerald-50 dark:bg-emerald-950/20 p-4 flex items-start gap-3 rounded-lg border border-emerald-100 dark:border-emerald-900/50">
+                  <Info className="w-5 h-5 text-emerald-600 mt-0.5 shrink-0" />
+                  <div className="text-sm text-emerald-900 dark:text-emerald-300 leading-relaxed">
+                    <p className="font-semibold mb-1">Hub Centralizzato (Integrazione Globale)</p>
+                    <p>Qualsiasi quota, pacchetto Open o Promozione creata nel modulo "Quote e Promo" viene automaticamente distribuita in tutto il gestionale. Quando sei in Maschera Input per un pagamento, il carrello legge in tempo reale questi dati e applica le scadenze e le logiche di cumulabilità create qui.</p>
+                  </div>
+                </div>
+
+                <div className="space-y-4 pt-2">
+                  <Accordion type="single" collapsible className="w-full" defaultValue="item-1">
+                    <AccordionItem value="item-1">
+                      <AccordionTrigger className="hover:no-underline hover:bg-muted px-4 rounded-md">
+                        <div className="flex items-center gap-3 text-left">
+                          <span className="text-2xl">📦</span>
+                          <div>
+                            <p className="font-bold text-lg text-foreground">Pacchetti OPEN e Abbonamenti</p>
+                            <p className="text-xs text-muted-foreground font-normal mt-0.5">Gestione prodotti multi-accesso</p>
+                          </div>
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent className="px-4 pb-4 pt-2">
+                        <p className="text-sm text-foreground/80 leading-relaxed mt-2 font-semibold">I pacchetti "Open" NON sono Corsi e NON vanno inseriti nel modulo Corsi/Calendario.</p>
+                        <p className="text-sm text-foreground/80 leading-relaxed mt-2">
+                          I pacchetti (come "Open Danza", "Open Fitness") sono <strong>Prodotti Commerciali</strong>. Vanno creati nell'Hub Quote e Promo sotto la scheda "Carnet attivi" o "Listino Prezzi".
+                        </p>
+                        <div className="mt-4 p-3 bg-slate-50 dark:bg-slate-900/50 border rounded-md">
+                          <p className="font-bold text-sm">Flusso Corretto di Vendita:</p>
+                          <ol className="text-sm space-y-2 mt-2 list-decimal ml-4">
+                            <li><strong>Acquisto:</strong> In Maschera Input, vendi al cliente l'Abbonamento Open e incassi l'importo totale.</li>
+                            <li><strong>Iscrizione:</strong> Successivamente, iscrivi l'allievo ai singoli corsi reali a cui vuole partecipare. Dato che ha già il pacchetto Open, il costo dell'iscrizione al corso sarà 0€ (o coperto dall'Open).</li>
+                          </ol>
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+
+                    <AccordionItem value="item-1b">
+                      <AccordionTrigger className="hover:no-underline hover:bg-muted px-4 rounded-md">
+                        <div className="flex items-center gap-3 text-left">
+                          <span className="text-2xl">🔗</span>
+                          <div>
+                            <p className="font-bold text-lg text-foreground">Il Prezzo del Corso vs Il Prodotto Commerciale</p>
+                            <p className="text-xs text-muted-foreground font-normal mt-0.5">Come si parlano i database?</p>
+                          </div>
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent className="px-4 pb-4 pt-2">
+                        <p className="text-sm text-foreground/80 leading-relaxed mt-2">
+                          Esiste una chiara distinzione tra <strong>L'Infrastruttura Fisica</strong> (i Corsi) e i <strong>Prodotti Commerciali</strong> (Quote e Promo).
+                        </p>
+                        <ul className="text-sm text-foreground/80 space-y-3 mt-3 list-disc ml-4">
+                          <li><strong>Il Prezzo nel Modale Corso:</strong> Quando crei o duplichi un Corso e inserisci un "Prezzo" in quel modale, stai creando una vendita <em>stand-alone</em> (ad es. un Workshop singolo a 10€ slegato da tutto). Per i corsi normali (Danza, Fitness), <strong>quel campo deve restare vuoto</strong>.</li>
+                          <li><strong>Collegamento a Quota:</strong> Sempre nel modale del Corso, avrai la possibilità di collegarlo a una Quota fissa creata in `/quote-promo`. Questo indica al sistema che per iscriversi a quel corso bisogna acquistare quella precisa Quota.</li>
+                          <li><strong>Logica Open Danza:</strong> Se il cliente compra "Open Danza" a 1300€ (Prodotto in Quote e Promo), il sistema registra nel suo profilo un semaforo verde. Quando poi andrai a iscriverlo fisicamente al corso "Afro-Dancehall", il gestionale controllerà le categorie del corso e dell'Open, vedrà che c'è compatibilità, e valuterà l'iscrizione a 0€.</li>
+                        </ul>
+                      </AccordionContent>
+                    </AccordionItem>
+
+                    <AccordionItem value="item-2">
+                      <AccordionTrigger className="hover:no-underline hover:bg-muted px-4 rounded-md">
+                        <div className="flex items-center gap-3 text-left">
+                          <span className="text-2xl">🏷️</span>
+                          <div>
+                            <p className="font-bold text-lg text-foreground">Promozioni e Scadenze</p>
+                            <p className="text-xs text-muted-foreground font-normal mt-0.5">Sconti, validità e cumulabilità</p>
+                          </div>
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent className="px-4 pb-4 pt-2">
+                        <p className="text-sm text-foreground/80 leading-relaxed mt-2">
+                          La scheda "Promo e convenzioni" ti permette di creare codici sconto in % o a valore fisso. 
+                        </p>
+                        <ul className="text-sm text-foreground/80 space-y-2 mt-3 list-disc ml-4">
+                          <li><strong>Date Limite:</strong> Le promo possono avere un "Valido Da" e un "Valido A" (es. da domani a fine maggio). Dal giorno successivo alla scadenza, il sistema mostrerà la targhetta rossa <Badge variant="destructive" className="px-1 py-0 h-4 text-[10px]">SCADUTO</Badge> e bloccherà l'utilizzo del codice nei pagamenti.</li>
+                          <li><strong>Limiti di utilizzo:</strong> Puoi impostare "Usi Massimi" (es. "Sconto valido per i primi 100").</li>
+                          <li><strong>No Open:</strong> Se flaggato, il sistema impedirà di applicare lo sconto per l'acquisto di Pacchetti Open.</li>
+                          <li><strong>No Cumulabile:</strong> Se flaggato, lo sconto annulla altri sconti presenti nel carrello.</li>
+                        </ul>
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {activeCategory !== "sicurezza e permessi" && activeCategory !== "gempass" && activeCategory !== "quote-promo" && (
             <div className="flex flex-col h-64 items-center justify-center p-8 bg-muted border rounded-lg border-dashed">
               <BookOpen className="w-12 h-12 text-slate-300 mb-4" />
               <h3 className="text-lg font-medium text-muted-foreground">Nessun articolo per questa categoria</h3>

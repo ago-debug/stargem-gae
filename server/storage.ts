@@ -592,7 +592,8 @@ export interface IStorage {
   deletePromoRule(id: number): Promise<void>;
   incrementPromoRuleUse(id: number): Promise<void>;
   
-  getWelfareProviders(): Promise<any[]>;
+  getWelfareProviders(query: any): Promise<any[]>;
+  createWelfareProvider(data: any): Promise<any>;
   updateWelfareProvider(id: number, data: any): Promise<any>;
 
   getCarnetWallets(query: any): Promise<any[]>;
@@ -600,12 +601,16 @@ export interface IStorage {
   useCarnetWallet(id: number, sessionData: any): Promise<{ wallet: any, session: any }>;
   getCarnetSessions(walletId: number): Promise<any[]>;
 
+  getStaffRates(query: any): Promise<any[]>;
+  createStaffRate(data: any): Promise<any>;
+
   getInstructorAgreements(query: any): Promise<any[]>;
   createInstructorAgreement(data: any, overrides?: any[]): Promise<any>;
   updateInstructorAgreement(id: number, data: any, overrides?: any[]): Promise<any>;
   deleteInstructorAgreement(id: number): Promise<void>;
   createInstructorPayment(id: number, paymentData: any): Promise<any>;
 
+  getCompanyAgreements(query: any): Promise<any[]>;
   getPagodilTiers(): Promise<any[]>;
 
   // Base Accounting
@@ -800,18 +805,24 @@ export class DatabaseStorage implements IStorage {
   }
 
   // ==== Course Quotes Grid ====
-  async getCourseQuotesGrid(activityType?: string): Promise<CourseQuotesGrid[]> {
-    let query = db.select().from(courseQuotesGrid);
-    if (activityType) {
-      query = query.where(eq(courseQuotesGrid.activityType, activityType)) as any;
-    }
-    return await query.orderBy(courseQuotesGrid.sortOrder);
+  async getCourseQuotesGrid(query: any): Promise<CourseQuotesGrid[]> {
+    let conditions = [];
+    if (query.activityType) conditions.push(eq(courseQuotesGrid.activityType, query.activityType));
+    if (query.seasonId) conditions.push(eq(courseQuotesGrid.seasonId, parseInt(query.seasonId)));
+    
+    return await db.select().from(courseQuotesGrid)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(courseQuotesGrid.sortOrder);
   }
 
-  async upsertCourseQuotesGridBulk(gridItems: InsertCourseQuotesGrid[], activityType?: string): Promise<void> {
+  async upsertCourseQuotesGridBulk(gridItems: InsertCourseQuotesGrid[], activityType?: string, seasonId?: number): Promise<void> {
     await db.transaction(async (tx) => {
-      if (activityType) {
-        await tx.delete(courseQuotesGrid).where(eq(courseQuotesGrid.activityType, activityType));
+      let conditions = [];
+      if (activityType) conditions.push(eq(courseQuotesGrid.activityType, activityType));
+      if (seasonId) conditions.push(eq(courseQuotesGrid.seasonId, seasonId));
+      
+      if (conditions.length > 0) {
+        await tx.delete(courseQuotesGrid).where(and(...conditions));
       } else {
         await tx.delete(courseQuotesGrid);
       }
@@ -2241,17 +2252,67 @@ export class DatabaseStorage implements IStorage {
     const [course] = await db.select().from(courses).where(eq(courses.id, id));
     return course;
   }
+  async calculateCourseLessonsCount(startDate: string | Date | null, endDate: string | Date | null, dayOfWeek: string | null, seasonId: number | null): Promise<number | null> {
+    if (!startDate || !endDate || !dayOfWeek || !seasonId) return null;
+    
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) return null;
+    
+    const dayMap: Record<string, number> = {
+      'domenica': 0, 'lunedì': 1, 'martedì': 2, 'mercoledì': 3, 'giovedì': 4, 'venerdì': 5, 'sabato': 6,
+      'lunedi': 1, 'martedi': 2, 'mercoledi': 3, 'giovedi': 4, 'venerdi': 5
+    };
+    
+    const targetDay = dayMap[dayOfWeek.toLowerCase()];
+    if (targetDay === undefined) return null;
 
+    const events = await db.select().from(strategicEvents).where(eq(strategicEvents.seasonId, seasonId));
+    const holidays = events.filter(e => e.eventType === 'chiusura' || e.eventType === 'ferie');
+    
+    let count = 0;
+    let current = new Date(start);
+    current.setHours(12, 0, 0, 0);
+    end.setHours(12, 0, 0, 0);
+
+    while (current <= end) {
+      if (current.getDay() === targetDay) {
+        const isHoliday = holidays.some(h => {
+          if (!h.startDate) return false;
+          const hStart = new Date(h.startDate);
+          hStart.setHours(0,0,0,0);
+          const hEnd = h.endDate ? new Date(h.endDate) : hStart;
+          hEnd.setHours(23,59,59,999);
+          return current >= hStart && current <= hEnd;
+        });
+        if (!isHoliday) count++;
+      }
+      current.setDate(current.getDate() + 1);
+    }
+    return count;
+  }
 
   async createCourse(course: InsertCourse): Promise<Course> {
     const activeSeason = await this.getActiveSeason();
+    
+    let calculatedLessons = course.calculatedLessons;
+    if (course.startDate && course.endDate && course.dayOfWeek) {
+      calculatedLessons = await this.calculateCourseLessonsCount(
+        course.startDate, 
+        course.endDate, 
+        course.dayOfWeek, 
+        course.seasonId || activeSeason?.id || null
+      ) ?? undefined;
+    }
+
     const dataToSave = {
       ...course,
       startDate: course.startDate ? (course.startDate instanceof Date ? course.startDate.toISOString().split('T')[0] : course.startDate) : null,
       endDate: course.endDate ? (course.endDate instanceof Date ? course.endDate.toISOString().split('T')[0] : course.endDate) : null,
       seasonId: course.seasonId || activeSeason?.id || null,
       lessonType: course.lessonType ? course.lessonType : null,
-      statusTags: course.statusTags ? course.statusTags : null
+      statusTags: course.statusTags ? course.statusTags : null,
+      calculatedLessons: calculatedLessons
     };
     let result;
     try {
@@ -2294,13 +2355,27 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateCourse(id: number, course: Partial<InsertCourse>): Promise<Course> {
+    const existing = await this.getCourse(id);
+    let calculatedLessons = course.calculatedLessons;
+    
+    if (course.startDate !== undefined || course.endDate !== undefined || course.dayOfWeek !== undefined) {
+       const start = course.startDate !== undefined ? course.startDate : existing?.startDate;
+       const end = course.endDate !== undefined ? course.endDate : existing?.endDate;
+       const day = course.dayOfWeek !== undefined ? course.dayOfWeek : existing?.dayOfWeek;
+       const seasonId = course.seasonId !== undefined ? course.seasonId : existing?.seasonId;
+       if (start && end && day) {
+          calculatedLessons = await this.calculateCourseLessonsCount(start, end, day, seasonId ?? null) ?? undefined;
+       }
+    }
+
     const updateData = {
       ...course,
       updatedAt: new Date(),
       startDate: course.startDate ? (course.startDate instanceof Date ? course.startDate.toISOString().split('T')[0] : course.startDate) : course.startDate,
       endDate: course.endDate ? (course.endDate instanceof Date ? course.endDate.toISOString().split('T')[0] : course.endDate) : course.endDate,
       lessonType: course.lessonType ? course.lessonType : undefined,
-      statusTags: course.statusTags ? course.statusTags : undefined
+      statusTags: course.statusTags ? course.statusTags : undefined,
+      calculatedLessons: calculatedLessons !== undefined ? calculatedLessons : existing?.calculatedLessons
     };
 
     await db
@@ -4287,6 +4362,7 @@ export class DatabaseStorage implements IStorage {
     // date range filtering
     if (query.startDate) conditions.push(gte(promoRules.validFrom, query.startDate));
     if (query.endDate) conditions.push(lte(promoRules.validTo, query.endDate));
+    if (query.seasonId) conditions.push(eq(promoRules.seasonId, parseInt(query.seasonId)));
     
     const results = await db.select().from(promoRules)
       .where(conditions.length > 0 ? and(...conditions) : undefined)
@@ -4329,14 +4405,45 @@ export class DatabaseStorage implements IStorage {
   // ============================================
   // WELFARE PROVIDERS
   // ============================================
-  async getWelfareProviders() {
-    return await db.select().from(welfareProviders).orderBy(asc(welfareProviders.name));
+  async getWelfareProviders(query: any) {
+    let conditions = [];
+    if (query?.active !== undefined) conditions.push(eq(welfareProviders.isActive, query.active === 'true'));
+    if (query?.seasonId) conditions.push(eq(welfareProviders.seasonId, parseInt(query.seasonId)));
+    
+    return await db.select().from(welfareProviders)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(asc(welfareProviders.name));
+  }
+
+  async createWelfareProvider(data: any) {
+    const [inserted] = await db.insert(welfareProviders).values(data);
+    const [provider] = await db.select().from(welfareProviders).where(eq(welfareProviders.id, inserted.insertId));
+    return provider;
   }
 
   async updateWelfareProvider(id: number, data: any) {
     await db.update(welfareProviders).set(data).where(eq(welfareProviders.id, id));
     const [provider] = await db.select().from(welfareProviders).where(eq(welfareProviders.id, id));
     return provider;
+  }
+
+  // ============================================
+  // STAFF RATES
+  // ============================================
+  async getStaffRates(query: any) {
+    let conditions = [];
+    if (query?.active !== undefined) conditions.push(eq(staffRates.isActive, query.active === 'true'));
+    if (query?.seasonId) conditions.push(eq(staffRates.seasonId, parseInt(query.seasonId)));
+    
+    return await db.select().from(staffRates)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(asc(staffRates.serviceLabel));
+  }
+
+  async createStaffRate(data: any) {
+    const [inserted] = await db.insert(staffRates).values(data);
+    const [rate] = await db.select().from(staffRates).where(eq(staffRates.id, inserted.insertId));
+    return rate;
   }
 
   // ============================================
@@ -4347,11 +4454,12 @@ export class DatabaseStorage implements IStorage {
     if (query.active !== undefined) conditions.push(eq(carnetWallets.isActive, query.active === "true"));
     if (query.memberId) conditions.push(eq(carnetWallets.memberId, parseInt(query.memberId)));
     // @ts-ignore // TODO: STI-cleanup
-    if (query.type) conditions.push(eq(carnetWallets.walletType, query.type));
+    if (query.type) conditions.push(eq(carnetWallets.walletTypeId, query.type));
     
     // date range filtering
     if (query.startDate) conditions.push(gte(carnetWallets.purchasedAt, new Date(query.startDate)));
     if (query.endDate) conditions.push(lte(carnetWallets.purchasedAt, new Date(query.endDate)));
+    if (query.seasonId) conditions.push(eq(carnetWallets.seasonId, parseInt(query.seasonId)));
     
     if (query.expiring) {
       const targetDate = new Date();
@@ -4369,15 +4477,14 @@ export class DatabaseStorage implements IStorage {
       wallet: carnetWallets,
       member: members,
       // @ts-ignore // TODO: STI-cleanup
-      typeLabel: customListItems.label
+      typeLabel: customListItems.value
     })
     .from(carnetWallets)
     .leftJoin(members, eq(carnetWallets.memberId, members.id))
     .leftJoin(customListItems, and(
       // @ts-ignore // TODO: STI-cleanup
-      eq(customListItems.value, carnetWallets.walletType),
-      // we handle the system name indirectly by hoping values are unique, or just safely getting it
-      isNotNull(customListItems.id) // simplistic
+      eq(customListItems.id, carnetWallets.walletTypeId),
+      isNotNull(customListItems.id)
     ))
     .where(conditions.length > 0 ? and(...conditions) : undefined)
     .orderBy(desc(carnetWallets.createdAt));
@@ -4398,7 +4505,7 @@ export class DatabaseStorage implements IStorage {
                 ...r.wallet,
                 memberName: r.member ? `${r.member.firstName} ${r.member.lastName}` : null,
                 // @ts-ignore // TODO: STI-cleanup
-                typeLabel: r.typeLabel || r.wallet.walletType,
+                typeLabel: r.typeLabel || r.wallet.walletTypeId,
                 remainingUnits: r.wallet.totalUnits - r.wallet.usedUnits,
                 isExpired: diffDays < 0,
                 daysToExpiry: diffDays
@@ -4587,6 +4694,16 @@ export class DatabaseStorage implements IStorage {
 
   // ============================================
   // PAGODIL TIERS
+  async getCompanyAgreements(query: any) {
+    let conditions = [];
+    if (query.active !== undefined) conditions.push(eq(companyAgreements.isActive, query.active === 'true'));
+    if (query.startDate) conditions.push(gte(companyAgreements.validFrom, new Date(query.startDate)));
+    if (query.endDate) conditions.push(lte(companyAgreements.validTo, new Date(query.endDate)));
+    
+    return await db.select().from(companyAgreements)
+      .where(conditions.length > 0 ? and(...conditions) : undefined);
+  }
+
   // ============================================
   async getPagodilTiers() {
     return await db.select().from(pagodilTiers).where(eq(pagodilTiers.isActive, true)).orderBy(asc(pagodilTiers.rangeMin));

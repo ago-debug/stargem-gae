@@ -1,3 +1,5 @@
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -89,14 +91,70 @@ function WelfareProviderCard({ provider }: { provider: WelfareProvider }) {
   );
 }
 
-export function WelfareTab() {
+export function WelfareTab({ seasonId }: { seasonId?: number | "active" }) {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  const [isWelfareModalOpen, setIsWelfareModalOpen] = useState(false);
+  const [newWelfareName, setNewWelfareName] = useState("");
+
+  const createWelfareMutation = useMutation({
+    mutationFn: async (name: string) => {
+      await apiRequest("POST", "/api/welfare-providers", { 
+        name, seasonId: seasonId === "active" ? undefined : seasonId 
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/welfare-providers"] });
+      toast({ title: "Aggiunto", description: "Nuovo provider welfare creato con successo." });
+      setIsWelfareModalOpen(false);
+      setNewWelfareName("");
+    }
+  });
+
+  const [isStaffRateModalOpen, setIsStaffRateModalOpen] = useState(false);
+  const [newStaffRate, setNewStaffRate] = useState({
+    serviceLabel: "",
+    serviceCode: "",
+    amount: "",
+    rateType: "annual"
+  });
+
+  const createStaffRateMutation = useMutation({
+    mutationFn: async (data: any) => {
+      await apiRequest("POST", "/api/staff-rates", {
+        ...data,
+        amount: parseFloat(data.amount),
+        seasonId: seasonId === "active" ? undefined : seasonId
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/staff-rates"] });
+      toast({ title: "Aggiunta", description: "Nuova tariffa staff creata." });
+      setIsStaffRateModalOpen(false);
+      setNewStaffRate({ serviceLabel: "", serviceCode: "", amount: "", rateType: "annual" });
+    }
+  });
+
   const { data: providers, isLoading, error } = useQuery<WelfareProvider[]>({
-    queryKey: ["/api/welfare-providers"],
+    queryKey: ["/api/welfare-providers", { seasonId }],
+    queryFn: async () => {
+      const qs = seasonId ? `?seasonId=${seasonId}` : "";
+      const res = await fetch(`/api/welfare-providers${qs}`);
+      if (!res.ok) throw new Error("Failed");
+      return res.json();
+    },
     retry: 1
   });
 
   const { data: staffRates, isLoading: isLoadingRates } = useQuery<StaffRate[]>({
-    queryKey: ["/api/staff-rates"],
+    queryKey: ["/api/staff-rates", { seasonId }],
+    queryFn: async () => {
+      const qs = seasonId ? `?seasonId=${seasonId}` : "";
+      const res = await fetch(`/api/staff-rates${qs}`);
+      if (!res.ok) throw new Error("Failed");
+      return res.json();
+    },
   });
 
   const is404 = error?.message?.includes("404");
@@ -110,6 +168,9 @@ export function WelfareTab() {
           </h2>
           <p className="text-sm text-muted-foreground">Gestisci Edenred, TreCuori, EasyWelfare e gli accordi assicurativi</p>
         </div>
+        <Button onClick={() => setIsWelfareModalOpen(true)} className="bg-green-600 hover:bg-green-700">
+           <Plus className="w-4 h-4 mr-2" /> Nuovo Provider
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -146,7 +207,7 @@ export function WelfareTab() {
            </h3>
            <p className="text-sm text-muted-foreground mt-1">Listino prezzi interno riservato ai collaboratori e core-instructor</p>
         </div>
-        <Button variant="outline" className="text-indigo-700 border-indigo-200">
+        <Button onClick={() => setIsStaffRateModalOpen(true)} variant="outline" className="text-indigo-700 border-indigo-200">
            <Plus className="w-4 h-4 mr-2" /> Nuova Tariffa
         </Button>
       </div>
@@ -206,7 +267,65 @@ export function WelfareTab() {
                Nessuna tariffa staff configurata.
             </div>
          )}
-      </div>
+     </div>
+
+      {/* Welfare Modal */}
+      <Dialog open={isWelfareModalOpen} onOpenChange={setIsWelfareModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Nuovo Provider Welfare</DialogTitle>
+            <DialogDescription>Aggiungi un nuovo provider per i pagamenti tramite welfare aziendale.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Nome Provider</Label>
+              <Input value={newWelfareName} onChange={e => setNewWelfareName(e.target.value)} placeholder="es. Edenred, TreCuori..." />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setIsWelfareModalOpen(false)}>Annulla</Button>
+            <Button onClick={() => createWelfareMutation.mutate(newWelfareName)} disabled={!newWelfareName || createWelfareMutation.isPending}>
+              Crea Provider
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Staff Rate Modal */}
+      <Dialog open={isStaffRateModalOpen} onOpenChange={setIsStaffRateModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Nuova Tariffa Staff</DialogTitle>
+            <DialogDescription>Crea un prezzo agevolato per lo staff.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Etichetta Servizio</Label>
+              <Input value={newStaffRate.serviceLabel} onChange={e => setNewStaffRate({...newStaffRate, serviceLabel: e.target.value})} placeholder="es. Tesseramento Staff" />
+            </div>
+            <div className="space-y-2">
+              <Label>Codice Servizio (Univoco)</Label>
+              <Input value={newStaffRate.serviceCode} onChange={e => setNewStaffRate({...newStaffRate, serviceCode: e.target.value.toUpperCase().replace(/\s/g, '_')})} placeholder="es. QUOTA_STAFF_25" />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Importo (€)</Label>
+                <Input type="number" step="0.01" value={newStaffRate.amount} onChange={e => setNewStaffRate({...newStaffRate, amount: e.target.value})} />
+              </div>
+              <div className="space-y-2">
+                <Label>Tipo Tariffa</Label>
+                <Input value={newStaffRate.rateType} onChange={e => setNewStaffRate({...newStaffRate, rateType: e.target.value})} placeholder="es. annual, monthly" />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setIsStaffRateModalOpen(false)}>Annulla</Button>
+            <Button onClick={() => createStaffRateMutation.mutate(newStaffRate)} disabled={!newStaffRate.serviceLabel || !newStaffRate.amount || createStaffRateMutation.isPending}>
+              Crea Tariffa
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
