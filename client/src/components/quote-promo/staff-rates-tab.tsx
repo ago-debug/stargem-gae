@@ -68,8 +68,7 @@ export function StaffRatesTab({ seasonId }: { seasonId?: number | "active" }) {
       <div className="mb-4 flex items-center justify-between rounded-lg border bg-background p-4 shadow-sm">
         <div>
           <h3 className="flex items-center gap-2 text-lg font-bold text-foreground">
-            <UserCog className="size-5 text-indigo-600" /> Tariffe Staff e
-            Insegnanti
+            <UserCog className="size-5 text-indigo-600" /> Tariffe Staff
           </h3>
           <p className="mt-1 text-sm text-muted-foreground">
             Listino prezzi interno riservato ai collaboratori e core-instructor
