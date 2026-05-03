@@ -3,9 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ListinoTab } from "@/components/quote-promo/listino-tab";
 import { PromoTab } from "@/components/quote-promo/promo-tab";
-import { WelfareTab } from "@/components/quote-promo/welfare-tab";
 import { CarnetTab } from "@/components/quote-promo/carnet-tab";
-import { AccordiTab } from "@/components/quote-promo/accordi-tab";
 import { ConvenzioniTab } from "@/components/quote-promo/convenzioni-tab";
 import { StaffRatesTab } from "@/components/quote-promo/staff-rates-tab";
 import { ErrorBoundary } from "@/components/error-boundary";
@@ -100,12 +98,6 @@ export default function QuotePromo() {
               >
                 Tariffe Staff e Insegnanti
               </TabsTrigger>
-              <TabsTrigger
-                value="accordi"
-                className="gap-2 px-6 text-sm font-semibold data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm"
-              >
-                Accordi maestri
-              </TabsTrigger>
             </TabsList>
           </div>
 
@@ -150,9 +142,6 @@ export default function QuotePromo() {
           </TabsContent>
           <TabsContent value="staff" className="mt-0 outline-none">
             <StaffRatesTab seasonId={selectedSeasonId} />
-          </TabsContent>
-          <TabsContent value="accordi" className="mt-0 outline-none">
-            <AccordiTab seasonId={selectedSeasonId} />
           </TabsContent>
         </Tabs>
       </div>
