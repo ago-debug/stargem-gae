@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useLocation, Link } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -221,32 +221,54 @@ function AttendancesTab({ activityId, activityType }: AttendancesTabProps) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const canWrite = hasWritePermission(user, "/iscritti-corsi");
-  const [isAddingAttendance, setIsAddingAttendance] = useState(false);
-  const [selectedMemberId, setSelectedMemberId] = useState<number | null>(null);
+  
+  // States for Bulk Check-in
+  const [isBulkCheckinOpen, setIsBulkCheckinOpen] = useState(false);
   const [attendanceDate, setAttendanceDate] = useState(new Date().toISOString().split('T')[0]);
+  const [bulkSelections, setBulkSelections] = useState<Record<number, boolean>>({});
 
   const attendancesQueryKey = activityType === "workshop" ? "/api/workshop-attendances" : "/api/attendances";
-  const enrollmentsQueryKey = activityType === "workshop" ? "/api/workshop-enrollments" : "/api/enrollments?type=corsi";
-
   const { data: attendances } = useQuery<Attendance[]>({ queryKey: [attendancesQueryKey] });
-  const { data: membersData } = useQuery<{ members: Member[], total: number }>({ queryKey: ["/api/members"] });
-  const members = membersData?.members || [];
-  const { data: enrollments } = useQuery<any[]>({ queryKey: [enrollmentsQueryKey] });
 
-  const createAttendanceMutation = useMutation({
-    mutationFn: async (data: { memberId: number; activityId: number; attendanceDate: string }) => {
-      if (activityType === "workshop") {
-        await apiRequest("POST", "/api/workshop-attendances", { memberId: data.memberId, workshopId: data.activityId, attendanceDate: new Date(data.attendanceDate).toISOString(), type: 'manual' });
-      } else {
-        await apiRequest("POST", "/api/attendances", { memberId: data.memberId, courseId: data.activityId, attendanceDate: new Date(data.attendanceDate).toISOString(), type: 'manual' });
-      }
+  // Utilizza l'endpoint ottimizzato che fa già la JOIN con members sul backend (superando la paginazione di /api/members)
+  const { data: enrolledMembersRaw } = useQuery<any[]>({ 
+    queryKey: [`/api/courses/${activityId}/enrolled-members`] 
+  });
+
+  const enrolledMembers = useMemo(() => {
+    if (!Array.isArray(enrolledMembersRaw)) return [];
+    return enrolledMembersRaw
+      .filter((raw: any) => raw.enrollment_status === 'active' || !raw.enrollment_status)
+      .map((raw: any) => ({
+        id: raw.member_id,
+        firstName: raw.first_name,
+        lastName: raw.last_name,
+        email: raw.email,
+        phone: raw.phone,
+      }));
+  }, [enrolledMembersRaw]);
+
+  // Initialize Bulk Selections
+  useEffect(() => {
+    if (isBulkCheckinOpen) {
+      const initial: Record<number, boolean> = {};
+      enrolledMembers.forEach((m: any) => {
+        initial[m.id] = true; // Default tutti presenti
+      });
+      setBulkSelections(initial);
+      setAttendanceDate(new Date().toISOString().split('T')[0]);
+    }
+  }, [isBulkCheckinOpen, enrolledMembers.length]);
+
+  const bulkCreateMutation = useMutation({
+    mutationFn: async (payload: { attendances: any[] }) => {
+      // Usiamo sempre attendances/bulk perché il backend lo supporta globalmente
+      await apiRequest("POST", "/api/attendances/bulk", payload);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [attendancesQueryKey] });
-      toast({ title: "Presenza registrata con successo" });
-      setIsAddingAttendance(false);
-      setSelectedMemberId(null);
-      setAttendanceDate(new Date().toISOString().split('T')[0]);
+      toast({ title: "Appello salvato con successo" });
+      setIsBulkCheckinOpen(false);
     },
     onError: (error: Error) => toast({ title: "Errore", description: error.message, variant: "destructive" }),
   });
@@ -264,70 +286,169 @@ function AttendancesTab({ activityId, activityType }: AttendancesTabProps) {
   });
 
   const courseAttendances = attendances?.filter(a => (activityType === "workshop" ? (a as any).workshopId : a.courseId) === activityId).map(a => {
-      const member = members?.find(m => m.id === a.memberId);
-      return { ...a, memberName: member ? `${member.lastName} ${member.firstName}` : "Sconosciuto" };
-    }).sort((a, b) => new Date(b.attendanceDate).getTime() - new Date(a.attendanceDate).getTime()).slice(0, 50) || [];
+      const member = Array.isArray(enrolledMembersRaw) ? enrolledMembersRaw.find(m => m.member_id === a.memberId) : undefined;
+      return { ...a, memberName: member ? `${member.last_name} ${member.first_name}` : "Sconosciuto" };
+    }).sort((a, b) => new Date(b.attendanceDate).getTime() - new Date(a.attendanceDate).getTime()) || [];
 
-  const enrolledMembers = enrollments?.filter(e => (activityType === "workshop" ? e.workshopId : e.courseId) === activityId && (e.status === 'active' || !e.status)).map(e => members?.find(m => m.id === e.memberId)).filter((m): m is Member => m !== undefined) || [];
+  const handleBulkSubmit = () => {
+    const selectedAttendances = Object.entries(bulkSelections)
+      .filter(([_, isPresent]) => isPresent)
+      .map(([memberId, _]) => ({
+         memberId: parseInt(memberId),
+         courseId: activityId,
+         attendanceDate: new Date(attendanceDate).toISOString(),
+         type: 'manual'
+      }));
 
-  const { sortConfig, handleSort, sortItems, isSortedColumn } = useSortableTable<any>("attendanceDate");
-  const getSortValue = (attendance: any, key: string) => {
-    switch (key) { case "member": return attendance.memberName || ""; case "attendanceDate": return attendance.attendanceDate || ""; case "type": return attendance.type || ""; default: return null; }
+    if (selectedAttendances.length === 0) {
+      toast({ title: "Attenzione", description: "Nessun presente selezionato", variant: "default" });
+      setIsBulkCheckinOpen(false);
+      return;
+    }
+
+    bulkCreateMutation.mutate({ attendances: selectedAttendances });
   };
-  const sortedAttendances = sortItems(courseAttendances, getSortValue);
+
+  // Matrix Logic
+  const recentDates = Array.from(new Set(courseAttendances.map(a => new Date(a.attendanceDate).toISOString().split('T')[0])))
+    .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())
+    .slice(0, 5); // Mostra le ultime 5 lezioni
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-medium">Presenze Registrate</h3>
-        <Dialog open={isAddingAttendance} onOpenChange={setIsAddingAttendance}>
-          <Button variant="outline" size="sm" onClick={() => setIsAddingAttendance(true)} disabled={!canWrite}><CalendarPlus className="w-4 h-4 mr-2" />Registra Presenza</Button>
-          <DialogContent>
-            <DialogHeader><DialogTitle>Registra Presenza</DialogTitle><DialogDescription>Seleziona il utente e la data della presenza</DialogDescription></DialogHeader>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="member">Utente *</Label>
-                <Select value={selectedMemberId?.toString() || ""} onValueChange={(v) => setSelectedMemberId(parseInt(v))}>
-                  <SelectTrigger><SelectValue placeholder="Seleziona utente" /></SelectTrigger>
-                  <SelectContent>
-                    {enrolledMembers.map(member => <SelectItem key={member.id} value={member.id.toString()}>{member.lastName} {member.firstName}</SelectItem>)}
-                  </SelectContent>
-                </Select>
+        <h3 className="text-lg font-medium">Registro di Classe</h3>
+        <Dialog open={isBulkCheckinOpen} onOpenChange={setIsBulkCheckinOpen}>
+          <Button size="sm" onClick={() => setIsBulkCheckinOpen(true)} disabled={!canWrite} className="bg-green-600 hover:bg-green-700">
+            <CalendarPlus className="w-4 h-4 mr-2" /> Fai l'Appello
+          </Button>
+          <DialogContent className="max-w-md max-h-[80vh] flex flex-col">
+            <DialogHeader>
+              <DialogTitle>Appello Rapido</DialogTitle>
+              <DialogDescription>Segna chi è presente oggi</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4 overflow-y-auto flex-1">
+              <div className="space-y-2 mb-4">
+                <Label htmlFor="attendanceDate">Data Lezione</Label>
+                <Input id="attendanceDate" type="date" value={attendanceDate} onChange={(e) => setAttendanceDate(e.target.value)} />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="attendanceDate">Data e Ora *</Label>
-                <Input id="attendanceDate" type="datetime-local" value={attendanceDate} onChange={(e) => setAttendanceDate(e.target.value)} />
+              
+              <div className="space-y-3 border rounded-md p-4">
+                <div className="flex justify-between items-center pb-2 border-b">
+                  <span className="font-medium text-sm text-muted-foreground">ALLIEVI ISCRITTI ({enrolledMembers.length})</span>
+                  <span className="font-medium text-sm text-muted-foreground">PRESENTE?</span>
+                </div>
+                {enrolledMembers.length === 0 ? (
+                  <p className="text-sm text-center text-muted-foreground py-4">Nessun iscritto al corso</p>
+                ) : (
+                  enrolledMembers.map((member: any) => (
+                    <div key={member.id} className="flex items-center justify-between py-1">
+                      <Label htmlFor={`member-${member.id}`} className="cursor-pointer flex-1">
+                        {member.lastName} {member.firstName}
+                      </Label>
+                      <Checkbox 
+                        id={`member-${member.id}`}
+                        checked={bulkSelections[member.id] || false}
+                        onCheckedChange={(checked) => setBulkSelections(prev => ({ ...prev, [member.id]: !!checked }))}
+                      />
+                    </div>
+                  ))
+                )}
               </div>
             </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsAddingAttendance(false)}>Annulla</Button>
-              <Button onClick={() => { if (!selectedMemberId) { toast({ title: "Errore", description: "Seleziona un utente", variant: "destructive" }); return; } createAttendanceMutation.mutate({ memberId: selectedMemberId, activityId, attendanceDate }); }} disabled={!selectedMemberId || createAttendanceMutation.isPending}>Registra</Button>
+            <DialogFooter className="mt-4">
+              <Button variant="outline" onClick={() => setIsBulkCheckinOpen(false)}>Annulla</Button>
+              <Button onClick={handleBulkSubmit} disabled={bulkCreateMutation.isPending || enrolledMembers.length === 0}>
+                Salva Presenze
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>
-      {courseAttendances.length === 0 ? <p className="text-sm text-muted-foreground text-center py-8">Nessuna presenza registrata per questa attività</p> : (
-        <div className="border rounded-lg">
+
+      {recentDates.length === 0 ? (
+        <p className="text-sm text-muted-foreground text-center py-8 border rounded-lg bg-muted">Nessuna presenza registrata. Fai il primo appello!</p>
+      ) : (
+        <div className="border rounded-lg overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
-                <SortableTableHead sortKey="member" currentSort={sortConfig} onSort={handleSort}>Utente</SortableTableHead>
-                <SortableTableHead sortKey="attendanceDate" currentSort={sortConfig} onSort={handleSort}>Data e Ora</SortableTableHead>
-                <SortableTableHead sortKey="type" currentSort={sortConfig} onSort={handleSort}>Tipo</SortableTableHead>
-                <TableHead className="text-right">Azioni</TableHead>
+                <TableHead className="w-[250px] bg-muted sticky left-0 z-10">Utente</TableHead>
+                {recentDates.map(date => (
+                  <TableHead key={date} className="text-center font-semibold min-w-[100px]">
+                    {format(new Date(date), "dd/MM", { locale: it })}
+                  </TableHead>
+                ))}
               </TableRow>
             </TableHeader>
             <TableBody>
-              {sortedAttendances.map((attendance: any) => (
-                <TableRow key={attendance.id}>
-                  <TableCell className={cn("font-medium", isSortedColumn("member") && "sorted-column-cell")}>{attendance.memberName}</TableCell>
-                  <TableCell className={cn(isSortedColumn("attendanceDate") && "sorted-column-cell")}>{format(new Date(attendance.attendanceDate), "dd/MM/yyyy HH:mm", { locale: it })}</TableCell>
-                  <TableCell className={cn(isSortedColumn("type") && "sorted-column-cell")}><Badge variant="outline">{attendance.type === 'manual' ? 'Manuale' : attendance.type === 'barcode' ? 'Badge' : 'Auto'}</Badge></TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="ghost" size="icon" onClick={() => { if (confirm("Sei sicuro di voler eliminare questa presenza?")) { deleteAttendanceMutation.mutate(attendance.id); } }} disabled={!canWrite}><Trash2 className="w-4 h-4" /></Button>
+              {enrolledMembers.map((member: any) => (
+                <TableRow key={member.id}>
+                  <TableCell className="font-medium bg-background sticky left-0 z-10 border-r shadow-[1px_0_0_0_#e2e8f0] dark:shadow-[1px_0_0_0_#1e293b]">
+                    {member.lastName} {member.firstName}
                   </TableCell>
+                  {recentDates.map(date => {
+                    const record = courseAttendances.find(a => a.memberId === member.id && new Date(a.attendanceDate).toISOString().split('T')[0] === date);
+                    return (
+                      <TableCell key={`${member.id}-${date}`} className="text-center border-l">
+                        {record ? (
+                          <div className="flex flex-col items-center gap-1 group">
+                             <div className="w-6 h-6 rounded-full bg-green-100 text-green-700 flex items-center justify-center cursor-help" title={`Registrato: ${format(new Date(record.attendanceDate), "HH:mm")}`}>
+                               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                             </div>
+                             {canWrite && (
+                               <button 
+                                  onClick={() => { if (confirm("Eliminare questa presenza?")) deleteAttendanceMutation.mutate(record.id); }}
+                                  className="opacity-0 group-hover:opacity-100 text-[10px] text-red-500 hover:underline transition-opacity"
+                               >
+                                 Rimuovi
+                               </button>
+                             )}
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                    );
+                  })}
                 </TableRow>
               ))}
+              
+              {/* Extra row for members who attended but are no longer enrolled */}
+              {courseAttendances.filter(a => !enrolledMembers.some((m: any) => m.id === a.memberId)).map(a => a.memberId).filter((v, i, a) => a.indexOf(v) === i).map(formerMemberId => {
+                 const formerMemberName = courseAttendances.find(a => a.memberId === formerMemberId)?.memberName;
+                 return (
+                   <TableRow key={`former-${formerMemberId}`} className="bg-muted/50">
+                     <TableCell className="text-slate-500 italic sticky left-0 z-10 border-r bg-muted shadow-[1px_0_0_0_#e2e8f0] dark:shadow-[1px_0_0_0_#1e293b]">
+                       {formerMemberName} <span className="text-xs">(Disiscritto)</span>
+                     </TableCell>
+                     {recentDates.map(date => {
+                        const record = courseAttendances.find(a => a.memberId === formerMemberId && new Date(a.attendanceDate).toISOString().split('T')[0] === date);
+                        return (
+                          <TableCell key={`former-${formerMemberId}-${date}`} className="text-center border-l">
+                            {record ? (
+                               <div className="flex flex-col items-center gap-1 group">
+                                 <div className="w-6 h-6 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center">
+                                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                 </div>
+                                 {canWrite && (
+                                   <button 
+                                      onClick={() => { if (confirm("Eliminare questa presenza?")) deleteAttendanceMutation.mutate(record.id); }}
+                                      className="opacity-0 group-hover:opacity-100 text-[10px] text-red-500 hover:underline transition-opacity"
+                                   >
+                                     Rimuovi
+                                   </button>
+                                 )}
+                              </div>
+                            ) : (
+                              <span className="text-muted-foreground">-</span>
+                            )}
+                          </TableCell>
+                        );
+                     })}
+                   </TableRow>
+                 );
+              })}
             </TableBody>
           </Table>
         </div>
@@ -357,6 +478,7 @@ export interface CourseUnifiedModalProps {
   onOpenChange: (open: boolean) => void;
   course: any | null;
   defaultValues?: any;
+  defaultTab?: string;
   onSuccess?: () => void;
   onDelete?: (id: number) => void;
   /** Chiamato solo in caso di duplicazione: fornisce al parent il nuovo record già parsato */
@@ -373,14 +495,14 @@ export interface CourseUnifiedModalProps {
   | "affitti";
 }
 
-export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues, onSuccess, onDelete, onDuplicated, activityType = "course" }: CourseUnifiedModalProps) {
+export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues, defaultTab, onSuccess, onDelete, onDuplicated, activityType = "course" }: CourseUnifiedModalProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const [, setLocation] = useLocation();
   const canWrite = hasWritePermission(user, "/corsi");
 
-  const [activeTab, setActiveTab] = useState("details");
+  const [activeTab, setActiveTab] = useState(defaultTab || "details");
   const isDuplicatingRef = useRef(false);
   const isEdit = !!course?.id;
 
@@ -461,7 +583,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
           member2Id: null,   // verrà dalla fetch enrollments
           lessonType: parseJsonArray(course.lessonType)
         });
-        setActiveTab("details");
+        setActiveTab(defaultTab || "details");
 
         
         // Pre-popola allievi da enrollments (STI bridge) — con flag anti race condition
@@ -529,7 +651,7 @@ export function CourseUnifiedModal({ isOpen, onOpenChange, course, defaultValues
           defaultsToUse = { ...defaultsToUse, recurrenceType: "daily", startTime: "08:30", endTime: "17:00" };
         }
         setFormData(defaultsToUse);
-        setActiveTab("details");
+        setActiveTab(defaultTab || "details");
         setOpStates([]);
         setPromoFlags([]);
       }

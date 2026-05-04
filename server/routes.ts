@@ -7013,6 +7013,28 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
     }
   });
 
+  app.post("/api/attendances/bulk", isAuthenticated, checkPermission("/iscritti-corsi", "write"), async (req, res) => {
+    try {
+      const attendances = req.body.attendances;
+      if (!Array.isArray(attendances)) {
+        return res.status(400).json({ message: "Expected an array of attendances" });
+      }
+      
+      // Basic validation
+      for (const att of attendances) {
+        if (!att.memberId || !att.attendanceDate) {
+           return res.status(400).json({ message: "Invalid attendance data: memberId and attendanceDate are required" });
+        }
+      }
+
+      await storage.createAttendancesBulk(attendances);
+      res.status(201).json({ success: true, count: attendances.length });
+    } catch (error: any) {
+      console.error("[API Error] Bulk Attendances Failed:", error);
+      res.status(400).json({ message: error.message || "Failed to bulk create attendances" });
+    }
+  });
+
   app.delete("/api/attendances/:id", isAuthenticated, async (req, res) => {
     try {
       const id = parseInt(req.params.id);

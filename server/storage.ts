@@ -440,6 +440,7 @@ export interface IStorage {
   getAttendancesBySeason(seasonId: number): Promise<Attendance[]>;
   getAttendancesByMember(memberId: number): Promise<Attendance[]>;
   createAttendance(attendance: InsertAttendance): Promise<Attendance>;
+  createAttendancesBulk(attendancesData: InsertAttendance[]): Promise<void>;
   deleteAttendance(id: number): Promise<void>;
 
   // Workshop Enrollments
@@ -3463,6 +3464,21 @@ export class DatabaseStorage implements IStorage {
     } as any);
     const [attendance] = await db.select().from(attendances).where(eq(attendances.id, result.insertId));
     return attendance;
+  }
+
+  async createAttendancesBulk(attendancesData: InsertAttendance[]): Promise<void> {
+    const activeSeason = await this.getActiveSeason();
+    const seasonId = activeSeason?.id || null;
+    
+    if (attendancesData.length === 0) return;
+
+    const values = attendancesData.map(a => ({
+      ...a,
+      seasonId: a.seasonId || seasonId,
+      attendanceDate: a.attendanceDate ? (a.attendanceDate instanceof Date ? a.attendanceDate : new Date(a.attendanceDate)) : new Date(),
+    }));
+
+    await db.insert(attendances).values(values);
   }
 
   async deleteAttendance(id: number): Promise<void> {
