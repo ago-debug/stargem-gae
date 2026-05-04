@@ -421,8 +421,8 @@ export default function CalendarPage() {
     const [lastAddedMember, setLastAddedMember] = useState<any>(null);
     const [newServiceForm, setNewServiceForm] = useState({ name: "", price: "0", color: "#3b82f6" });
     const [location] = useLocation();
-
-    const [selectedSeasonId, setSelectedSeasonId] = useState<string>("active");
+    const initialSeasonId = params.get("seasonId") || "active";
+    const [selectedSeasonId, setSelectedSeasonId] = useState<string>(initialSeasonId);
 
     // Queries
     const coursesQueryKey = selectedSeasonId === "active" ? "/api/courses" : `/api/courses?seasonId=${selectedSeasonId}`;
@@ -591,23 +591,35 @@ export default function CalendarPage() {
     useEffect(() => {
         if (!seasons?.length) return;
         
-        // Auto-advance season se viene fornita una data via query params O siamo da febbraio in poi
-        if (prevSeasonId.current === null && selectedSeasonId === "active") {
-            const hasInitialDateParam = window.location.search.includes('date=');
-            
-            // 1. Se navighiamo direttamente da un link con data specifica (es. dal Planning)
-            if (hasInitialDateParam && initialDate) {
-                const targetSeason = seasons.find(s => {
-                    if (!s.startDate || !s.endDate) return false;
-                    return initialDate >= new Date(s.startDate) && initialDate <= new Date(s.endDate);
-                });
-                
-                if (targetSeason) {
-                    setSelectedSeasonId(targetSeason.id.toString());
-                    prevSeasonId.current = targetSeason.id.toString();
-                    return; // Usciamo perché abbiamo caricato la stagione target esatta
+        // Setup iniziale quando il componente viene montato
+        if (prevSeasonId.current === null) {
+            if (selectedSeasonId !== "active") {
+                // Se abbiamo un parametro seasonId nell'URL, assicuriamoci che viewDate sia coerente
+                const targetSeason = seasons.find(s => s.id.toString() === selectedSeasonId);
+                if (targetSeason && targetSeason.startDate && targetSeason.endDate) {
+                    const sDate = new Date(targetSeason.startDate);
+                    const eDate = new Date(targetSeason.endDate);
+                    if (viewDate < sDate || viewDate > eDate) {
+                        setViewDate(sDate);
+                    }
                 }
-            }
+            } else {
+                // Auto-advance season se viene fornita una data via query params O siamo da febbraio in poi
+                const hasInitialDateParam = window.location.search.includes('date=');
+                
+                // 1. Se navighiamo direttamente da un link con data specifica (es. dal Planning)
+                if (hasInitialDateParam && initialDate) {
+                    const targetSeason = seasons.find(s => {
+                        if (!s.startDate || !s.endDate) return false;
+                        return initialDate >= new Date(s.startDate) && initialDate <= new Date(s.endDate);
+                    });
+                    
+                    if (targetSeason) {
+                        setSelectedSeasonId(targetSeason.id.toString());
+                        prevSeasonId.current = targetSeason.id.toString();
+                        return; // Usciamo perché abbiamo caricato la stagione target esatta
+                    }
+                }
 
             // 2. Altrimenti, logica di Auto-advance basata sul mese attuale
             const now = new Date();
@@ -641,6 +653,7 @@ export default function CalendarPage() {
                         });
                     }
                 }
+            }
             }
         }
         // Imperative setup happens in handleSeasonChange now

@@ -21,12 +21,12 @@ export default function QuotePromo() {
     queryKey: ["/api/seasons"],
   });
 
-  const selectedSeason = seasons?.find((s) =>
-    selectedSeasonId === "active"
-      ? s.active || true
-      : s.id === selectedSeasonId,
-  );
   const activeSeason = seasons?.find((s) => s.active) || seasons?.[0];
+  const selectedSeason =
+    selectedSeasonId === "active"
+      ? activeSeason
+      : seasons?.find((s) => s.id === selectedSeasonId);
+
 
   let isPast = false;
   let isFuture = false;

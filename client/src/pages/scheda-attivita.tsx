@@ -173,7 +173,6 @@ export default function SchedaAttivita() {
 
   if (
     course &&
-    course.totalOccurrences &&
     course.startDate &&
     course.endDate &&
     course.dayOfWeek
@@ -358,7 +357,7 @@ export default function SchedaAttivita() {
                 onClick={() => {
                   if (course.sku)
                     setLocation(
-                      `/calendario-attivita?highlightCourseId=${course.id}`,
+                      `/calendario-attivita?highlightCourseId=${course.id}&seasonId=${course.seasonId || 'active'}`,
                     );
                 }}
               >
@@ -392,9 +391,7 @@ export default function SchedaAttivita() {
               >
                 ✅ {presenzeTotal} presenze
               </button>
-              {course.totalOccurrences &&
-                effettuate !== null &&
-                rimanenti !== null && (
+              {(effettuate !== null && rimanenti !== null) ? (
                   <>
                     <Badge
                       variant="outline"
@@ -402,11 +399,11 @@ export default function SchedaAttivita() {
                       onClick={() => {
                         if (course.sku)
                           setLocation(
-                            `/calendario-attivita?highlightCourseId=${course.id}`,
+                            `/calendario-attivita?highlightCourseId=${course.id}&seasonId=${course.seasonId || 'active'}`,
                           );
                       }}
                     >
-                      📅 {effettuate} / {course.totalOccurrences} lezioni
+                      📅 {effettuate} / {effettuate + rimanenti} lezioni
                     </Badge>
                     <Badge
                       variant="outline"
@@ -415,6 +412,10 @@ export default function SchedaAttivita() {
                       🔁 {rimanenti} rimanenti
                     </Badge>
                   </>
+                ) : (
+                  <Badge variant="destructive" className="px-3 py-1">
+                    DEBUG: eff={effettuate===null?'null':effettuate}, day={course.dayOfWeek}, start={course.startDate ? "yes" : "no"}
+                  </Badge>
                 )}
               <button
                 onClick={() =>
