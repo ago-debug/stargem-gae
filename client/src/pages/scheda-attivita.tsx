@@ -48,6 +48,7 @@ export default function SchedaAttivita() {
   const [location, setLocation] = useLocation();
   const [genderFilter, setGenderFilter] = useState<"all" | "M" | "F">("all");
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [modalInitialTab, setModalInitialTab] = useState<string>("details");
   const searchParams = new URLSearchParams(window.location.search);
   const courseIdRaw =
     searchParams.get("courseId") ||
@@ -100,7 +101,7 @@ export default function SchedaAttivita() {
 
   const formatActivityType = (type?: string | null) => {
     if (!type) return "Attività";
-    if (type === "corsi") return "Corso";
+    if (type === "corsi" || type === "course") return "Corso";
     if (type === "domeniche") return "Domenica in Movimento";
     if (type === "lezioni_individuali") return "Lezione Individuale";
     return type.charAt(0).toUpperCase() + type.slice(1).replace("_", " ");
@@ -342,7 +343,7 @@ export default function SchedaAttivita() {
               <Button
                 variant="outline"
                 className="shrink-0 gap-2 border-border text-muted-foreground hover:bg-muted"
-                onClick={() => setIsEditModalOpen(true)}
+                onClick={() => { setIsEditModalOpen(true); setModalInitialTab("details"); }}
               >
                 <Edit2 className="size-4" /> Modifica
               </Button>
@@ -384,9 +385,7 @@ export default function SchedaAttivita() {
                 </span>
               )}
               <button
-                onClick={() =>
-                  alert("Il Modulo Presenze sarà disponibile prossimamente.")
-                }
+                onClick={() => { setIsEditModalOpen(true); setModalInitialTab("attendances"); }}
                 className="flex items-center gap-1 rounded-md border border-border bg-muted px-2.5 py-1 text-sm text-muted-foreground transition-colors hover:border-border hover:bg-slate-100 dark:bg-slate-800"
               >
                 ✅ {presenzeTotal} presenze
@@ -739,6 +738,7 @@ export default function SchedaAttivita() {
           isOpen={isEditModalOpen}
           onOpenChange={setIsEditModalOpen}
           course={course}
+          defaultTab={modalInitialTab}
           activityType="course"
         />
       )}

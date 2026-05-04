@@ -38,7 +38,7 @@ import { useCustomList } from "@/hooks/use-custom-list";
 import { ActivityNavMenu } from "@/components/activity-nav-menu";
 import { ActivityColorLegend } from "@/components/ActivityColorLegend";
 import type {
-  Course, Category, Instructor, Studio
+  Course, Category, Instructor, Studio, Enrollment
 } from "@shared/schema";
 import { getActiveActivities } from "../config/activities";
 
@@ -312,11 +312,22 @@ export default function Attivita() {
   const { data: summary } = useQuery<Record<string, { total: number, active: number }>>({
     queryKey: ["/api/activities-summary"]
   });
+  const { data: enrollments } = useQuery<Enrollment[]>({ queryKey: ["/api/enrollments"] });
 
   const activeCourses = courses?.filter(c => c.active) || [];
   const inactiveCourses = courses?.filter(c => !c.active) || [];
   const activeWorkshops = workshops?.filter(w => w.active) || [];
   const inactiveWorkshops = workshops?.filter(w => !w.active) || [];
+
+  const activeEnrollmentsCount = enrollments?.filter(e => e.status === "active").length || 0;
+  const trialEnrollmentsCount = enrollments?.filter(e => e.status === "prova").length || 0;
+
+  const totalCapacity = activeCourses.reduce((acc, c) => acc + (c.maxCapacity || 0), 0);
+  const totalEnrolled = activeCourses.reduce((acc, c) => {
+    const count = enrollments?.filter(e => e.courseId === c.id && e.status === "active").length || 0;
+    return acc + count;
+  }, 0);
+  const fillRate = totalCapacity > 0 ? Math.round((totalEnrolled / totalCapacity) * 100) : 0;
 
   const coursesByCategory = categories?.map(cat => ({
     category: cat,
@@ -366,54 +377,60 @@ export default function Attivita() {
         }} className="w-full">
           <TabsContent value="panoramica" className="space-y-6 mt-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <Card data-testid="card-stats-corsi">
+              <Card data-testid="card-stats-offerta">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Corsi</CardTitle>
+                  <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <BookOpen className="w-4 h-4" /> Offerta Didattica
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-bold">{summary?.corsi?.total || 0}</span>
+                    <span className="text-3xl font-bold">{(summary?.corsi?.total || 0) + (summary?.workshop?.total || 0)}</span>
                     <span className="text-sm text-muted-foreground">totali</span>
                   </div>
                   <div className="flex items-center gap-3 mt-2">
-                    <Badge variant="outline" className="status-badge-gold">{summary?.corsi?.active || 0} attivi</Badge>
-                    {((summary?.corsi?.total || 0) - (summary?.corsi?.active || 0)) > 0 && (
-                      <Badge variant="outline" className="status-badge-gold">{((summary?.corsi?.total || 0) - (summary?.corsi?.active || 0))} inattivi</Badge>
-                    )}
+                    <Badge variant="outline" className="status-badge-gold">{summary?.corsi?.active || 0} corsi attivi</Badge>
+                    <Badge variant="outline" className="status-badge-gold">{summary?.workshop?.active || 0} workshop attivi</Badge>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card data-testid="card-stats-workshop">
+              <Card data-testid="card-stats-volumi">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Workshop</CardTitle>
+                  <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <Users className="w-4 h-4" /> Volumi & Iscritti
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-bold">{summary?.workshop?.total || 0}</span>
-                    <span className="text-sm text-muted-foreground">totali</span>
+                    <span className="text-3xl font-bold">{activeEnrollmentsCount}</span>
+                    <span className="text-sm text-muted-foreground">iscritti attivi</span>
                   </div>
                   <div className="flex items-center gap-3 mt-2">
-                    <Badge variant="outline" className="status-badge-gold">{summary?.workshop?.active || 0} attivi</Badge>
-                    {((summary?.workshop?.total || 0) - (summary?.workshop?.active || 0)) > 0 && (
-                      <Badge variant="outline" className="status-badge-gold">{((summary?.workshop?.total || 0) - (summary?.workshop?.active || 0))} inattivi</Badge>
-                    )}
+                    <Badge variant="outline" className={trialEnrollmentsCount > 0 ? "text-blue-600 border-blue-200 bg-blue-50" : ""}>
+                      {trialEnrollmentsCount} in prova
+                    </Badge>
+                    <Badge variant="outline" className={fillRate > 80 ? "text-green-600 border-green-200 bg-green-50" : "text-amber-600 border-amber-200 bg-amber-50"}>
+                      {fillRate}% riempimento medio
+                    </Badge>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card data-testid="card-stats-categorie">
+              <Card data-testid="card-stats-risorse">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Categorie</CardTitle>
+                  <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <Building2 className="w-4 h-4" /> Risorse Strutturali
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-bold">{categories?.length || 0}</span>
-                    <span className="text-sm text-muted-foreground">configurate</span>
+                    <span className="text-3xl font-bold">{instructors?.length || 0}</span>
+                    <span className="text-sm text-muted-foreground">staff/insegnanti</span>
                   </div>
                   <div className="flex items-center gap-3 mt-2">
-                    <Badge variant="outline">{instructors?.length || 0} staff/insegnanti</Badge>
-                    <Badge variant="outline">{studios?.length || 0} sale</Badge>
+                    <Badge variant="outline">{studios?.length || 0} sale attive</Badge>
+                    <Badge variant="outline">{categories?.length || 0} categorie configurate</Badge>
                   </div>
                 </CardContent>
               </Card>

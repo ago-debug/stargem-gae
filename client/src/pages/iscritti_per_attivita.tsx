@@ -37,6 +37,7 @@ import {
   Database,
   Building2,
   ShoppingBag,
+  AlertTriangle,
 } from "lucide-react";
 import type { Course, Member, BookingService } from "@shared/schema";
 import { getActiveActivities } from "@/config/activities";
@@ -482,45 +483,132 @@ export default function IscrittiPerAttivita() {
       <div className="flex-1 overflow-y-auto p-4 space-y-6">
         <Tabs value={activeTab} className="w-full">
           <TabsContent value="panoramica" className="space-y-6 mt-0">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {totalCourseEnrollments > 0 && (
-                <Card onClick={() => setActiveTab("corsi")} className="cursor-pointer hover:border-amber-500 transition-colors">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium text-muted-foreground">Corsi</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-3xl font-bold">{totalCourseEnrollments}</span>
-                      <span className="text-sm text-muted-foreground">iscrizioni attive</span>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
+            {(() => {
+              // --- Metriche Cruscotto Intelligente ---
+              let allActiveEnrollments: any[] = [];
+              if (Array.isArray(enrollments)) allActiveEnrollments = allActiveEnrollments.concat(enrollments.filter(e => e.status === 'active' || !e.status));
+              if (Array.isArray(wsEnrollments)) allActiveEnrollments = allActiveEnrollments.concat(wsEnrollments.filter(e => e.status === 'active' || !e.status));
+              Object.values(extraActivitiesMap).forEach(config => {
+                if (Array.isArray(config.enrollments)) {
+                  allActiveEnrollments = allActiveEnrollments.concat(config.enrollments.filter(e => e.status === 'active' || !e.status));
+                }
+              });
 
-              {totalWsEnrollments > 0 && (
-                <Card onClick={() => setActiveTab("workshop")} className="cursor-pointer hover:border-amber-500 transition-colors">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium text-muted-foreground">Workshop</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-3xl font-bold">{totalWsEnrollments}</span>
-                      <span className="text-sm text-muted-foreground">iscrizioni attive</span>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
+              const uniqueMembersMap = new Map<number, any>();
+              allActiveEnrollments.forEach(e => {
+                if (e.memberId && !uniqueMembersMap.has(e.memberId)) {
+                  uniqueMembersMap.set(e.memberId, e);
+                }
+              });
+              const uniqueActiveMembers = Array.from(uniqueMembersMap.values());
 
-              {totalActiveEnrollmentsCount === 0 && !isLoading && (
-                <Card className="md:col-span-2 lg:col-span-3">
-                  <CardContent className="py-12 text-center text-muted-foreground">
-                    <Users className="w-12 h-12 mx-auto mb-4 opacity-20" />
-                    <p className="text-lg font-medium">Nessuna iscrizione attiva trovata</p>
-                    <p className="text-sm">Inizia a iscrivere utenti ai corsi o workshop per vedere qui il riepilogo.</p>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
+              const expiredMedical = uniqueActiveMembers.filter(m => m.medical_status === 'expired' || !m.medical_expiry_date).length;
+              const expiredMembership = uniqueActiveMembers.filter(m => m.membership_status === 'expired' || !m.membership_expiry_date).length;
+
+              const totalAllActiveEnrollments = allActiveEnrollments.length;
+
+              const distributionData = [
+                { label: "Corsi", count: totalCourseEnrollments, color: "bg-blue-500" },
+                { label: "Workshop", count: totalWsEnrollments, color: "bg-purple-500" }
+              ];
+              Object.keys(extraActivitiesMap).forEach(key => {
+                const count = Array.isArray(extraActivitiesMap[key].enrollments) ? extraActivitiesMap[key].enrollments.filter(e => e.status === 'active' || !e.status).length : 0;
+                if (count > 0) {
+                  const safeLabel = key === 'prove-pagamento' ? 'P. Pagamento' : key === 'prove-gratuite' ? 'P. Gratuite' : key === 'domeniche-movimento' ? 'Domeniche' : key.charAt(0).toUpperCase() + key.slice(1).replace("-", " ");
+                  distributionData.push({ label: safeLabel, count, color: "bg-emerald-500" });
+                }
+              });
+              distributionData.sort((a, b) => b.count - a.count);
+              const topDistribution = distributionData.slice(0, 3);
+              const otherCount = distributionData.slice(3).reduce((acc, curr) => acc + curr.count, 0);
+              if (otherCount > 0) {
+                topDistribution.push({ label: "Altre", count: otherCount, color: "bg-slate-300 dark:bg-slate-700" });
+              }
+              // Array fisso di colori di fallback nel caso ci siano più di 3 voci con emerald
+              const colors = ["bg-blue-500", "bg-purple-500", "bg-emerald-500", "bg-amber-500"];
+              topDistribution.forEach((item, i) => { if (item.label !== "Altre" && item.color === "bg-emerald-500") item.color = colors[i % colors.length]; });
+
+              return (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {/* Card 1: KPI Totali */}
+                  <Card className="flex flex-col border-amber-200 dark:border-amber-900/50 shadow-sm bg-gradient-to-br from-amber-50 to-white dark:from-slate-900 dark:to-slate-950">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-medium text-amber-800 dark:text-amber-500 flex items-center gap-2">
+                        <Users className="w-4 h-4" />
+                        Iscrizioni Attive
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex-1 flex flex-col justify-center">
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-4xl font-bold text-amber-600 dark:text-amber-500">{totalAllActiveEnrollments}</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-2">Su {uniqueActiveMembers.length} tesserati unici</p>
+                    </CardContent>
+                  </Card>
+
+                  {/* Card 2: Distribuzione */}
+                  <Card className="flex flex-col shadow-sm">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                        <Activity className="w-4 h-4" />
+                        Distribuzione Attività
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex-1 flex flex-col justify-center gap-3">
+                      <div className="flex h-3 w-full rounded-full overflow-hidden bg-slate-100 dark:bg-slate-800">
+                        {totalAllActiveEnrollments === 0 ? (
+                          <div className="h-full w-full bg-slate-200 dark:bg-slate-700" />
+                        ) : topDistribution.map((item, idx) => (
+                          <div key={idx} className={`h-full ${item.color}`} style={{ width: `${(item.count / totalAllActiveEnrollments) * 100}%` }} title={`${item.label}: ${item.count}`} />
+                        ))}
+                      </div>
+                      <div className="flex flex-wrap gap-x-3 gap-y-1">
+                        {totalAllActiveEnrollments === 0 ? (
+                          <span className="text-xs text-muted-foreground">Nessun dato</span>
+                        ) : topDistribution.map((item, idx) => (
+                          <div key={idx} className="flex items-center gap-1.5 text-xs">
+                            <span className={`w-2 h-2 rounded-full ${item.color}`}></span>
+                            <span className="text-muted-foreground">{item.label}</span>
+                            <span className="font-medium">({Math.round((item.count / totalAllActiveEnrollments) * 100)}%)</span>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Card 3: Alert Operativi */}
+                  <Card className="flex flex-col shadow-sm border-l-4 border-l-red-500">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-medium text-red-600 dark:text-red-400 flex items-center gap-2">
+                        <AlertTriangle className="w-4 h-4" />
+                        Allarmi Segreteria
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex-1 flex flex-col gap-3 justify-center">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <div className="w-8 h-8 rounded bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-red-600 dark:text-red-400">
+                            <Activity className="w-4 h-4" />
+                          </div>
+                          Certificati Scaduti/Assenti
+                        </div>
+                        <span className="font-bold text-red-600 dark:text-red-400">{expiredMedical}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <div className="w-8 h-8 rounded bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-orange-600 dark:text-orange-400">
+                            <CreditCard className="w-4 h-4" />
+                          </div>
+                          Tessere Scadute/Assenti
+                        </div>
+                        <span className="font-bold text-orange-600 dark:text-orange-400">{expiredMembership}</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              );
+            })()}
+
 
             <Card>
               <CardHeader className="pb-3">
