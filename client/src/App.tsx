@@ -44,13 +44,21 @@ const AnagraficaHome = React.lazy(() => import("@/pages/anagrafica-home"));
 const AdminPanel = React.lazy(() => import("@/pages/admin-panel"));
 const DbMonitor = React.lazy(() => import("@/pages/db-monitor"));
 const CalendarPage = React.lazy(() => import("@/pages/calendar"));
-const BookingServiceCategories = React.lazy(() => import("@/pages/booking-service-categories"));
+const BookingServiceCategories = React.lazy(
+  () => import("@/pages/booking-service-categories"),
+);
 const BookingServices = React.lazy(() => import("@/pages/booking-services"));
 const StudioBookings = React.lazy(() => import("@/pages/studio-bookings"));
 const AccountingSheet = React.lazy(() => import("@/pages/accounting-sheet"));
-const MascheraInputGenerale = React.lazy(() => import("@/pages/maschera-input-generale"));
-const GestioneAttivitaStub = React.lazy(() => import("@/pages/gestione-attivita-stub"));
-const IscrizioniPagamenti = React.lazy(() => import("@/pages/iscrizioni-pagamenti"));
+const MascheraInputGenerale = React.lazy(
+  () => import("@/pages/maschera-input-generale"),
+);
+const GestioneAttivitaStub = React.lazy(
+  () => import("@/pages/gestione-attivita-stub"),
+);
+const IscrizioniPagamenti = React.lazy(
+  () => import("@/pages/iscrizioni-pagamenti"),
+);
 const PriceLists = React.lazy(() => import("@/pages/listini"));
 const ListiniHome = React.lazy(() => import("@/pages/listini-home"));
 const QuoteListini = React.lazy(() => import("@/pages/quote-listini"));
@@ -59,7 +67,9 @@ const PagamentiOnline = React.lazy(() => import("@/pages/pagamenti-online"));
 const WebhookStatus = React.lazy(() => import("@/pages/webhook-status"));
 const WcMapping = React.lazy(() => import("@/pages/wc-mapping"));
 const Attivita = React.lazy(() => import("@/pages/attivita"));
-const IscrittiPerAttivita = React.lazy(() => import("@/pages/iscritti_per_attivita"));
+const IscrittiPerAttivita = React.lazy(
+  () => import("@/pages/iscritti_per_attivita"),
+);
 const TodoList = React.lazy(() => import("@/pages/todo-list"));
 const Commenti = React.lazy(() => import("@/pages/commenti"));
 const SchedaAttivita = React.lazy(() => import("@/pages/scheda-attivita"));
@@ -68,21 +78,31 @@ const GemPass = React.lazy(() => import("@/pages/gempass"));
 const GemStaff = React.lazy(() => import("@/pages/gemstaff"));
 const GemStaffMe = React.lazy(() => import("@/pages/gemstaff-me"));
 const AreaTesserati = React.lazy(() => import("@/pages/area-tesserati"));
-const StrategicProgrammingTable = React.lazy(() => import("@/pages/StrategicProgrammingTable"));
+const StrategicProgrammingTable = React.lazy(
+  () => import("@/pages/StrategicProgrammingTable"),
+);
 const KnowledgeBase = React.lazy(() => import("@/pages/knowledge-base"));
 const GestioneNote = React.lazy(() => import("@/pages/gestione-note"));
 
 const SundayActivities = React.lazy(() => import("@/pages/sunday-activities"));
 const Trainings = React.lazy(() => import("@/pages/trainings"));
-const IndividualLessons = React.lazy(() => import("@/pages/individual-lessons"));
+const IndividualLessons = React.lazy(
+  () => import("@/pages/individual-lessons"),
+);
 const CampusActivities = React.lazy(() => import("@/pages/campus-activities"));
 const Recitals = React.lazy(() => import("@/pages/recitals"));
 const VacationStudies = React.lazy(() => import("@/pages/vacation-studies"));
 
 const CampusCategories = React.lazy(() => import("@/pages/campus-categories"));
-const VacationCategories = React.lazy(() => import("@/pages/vacation-categories"));
-const RentalsCategories = React.lazy(() => import("@/pages/rentals-categories"));
-const MerchandisingCategories = React.lazy(() => import("@/pages/merchandising-categories"));
+const VacationCategories = React.lazy(
+  () => import("@/pages/vacation-categories"),
+);
+const RentalsCategories = React.lazy(
+  () => import("@/pages/rentals-categories"),
+);
+const MerchandisingCategories = React.lazy(
+  () => import("@/pages/merchandising-categories"),
+);
 
 import { NotificationCenter } from "@/components/notification-center";
 import { GemChatBadge } from "@/components/gem-chat-badge";
@@ -95,20 +115,41 @@ const logoStarGem = "/logo_stargem.png";
 
 export function hasPermission(user: SelectUser | null, path: string) {
   if (!user) return false;
-  const roleNameLower = user.role?.toLowerCase() || '';
-  if (roleNameLower === 'admin' || roleNameLower === 'amministratore totale' || roleNameLower === 'super admin' || roleNameLower === 'master') return true;
-  
+  const roleNameLower = user.role?.toLowerCase() || "";
+  if (
+    roleNameLower === "admin" ||
+    roleNameLower === "amministratore totale" ||
+    roleNameLower === "super admin" ||
+    roleNameLower === "master"
+  )
+    return true;
+
   if (path === "/" || path === "/dashboard") return true;
 
-  if (roleNameLower === 'insegnante' && (path === "/gemstaff/me" || path === "/first-login" || path === "/forgot-password")) {
+  if (
+    roleNameLower === "insegnante" &&
+    (path === "/gemstaff/me" ||
+      path === "/first-login" ||
+      path === "/forgot-password")
+  ) {
     return true;
   }
 
-  if (roleNameLower === 'dipendente' && (path === "/gemteam/me" || path === "/first-login" || path === "/forgot-password")) {
+  if (
+    roleNameLower === "dipendente" &&
+    (path === "/gemteam/me" ||
+      path === "/first-login" ||
+      path === "/forgot-password")
+  ) {
     return true;
   }
 
-  if (roleNameLower === 'client' && (path === '/area-tesserati' || path === '/first-login' || path === '/forgot-password')) {
+  if (
+    roleNameLower === "client" &&
+    (path === "/area-tesserati" ||
+      path === "/first-login" ||
+      path === "/forgot-password")
+  ) {
     return true;
   }
 
@@ -119,10 +160,11 @@ export function hasPermission(user: SelectUser | null, path: string) {
   if (perms[path] === "read" || perms[path] === "write") return true;
 
   // Check parent path match (e.g. /utente/1 matches /utente)
-  const segments = path.split('/').filter(Boolean);
+  const segments = path.split("/").filter(Boolean);
   if (segments.length > 0) {
     const parentPath = `/${segments[0]}`;
-    if (perms[parentPath] === "read" || perms[parentPath] === "write") return true;
+    if (perms[parentPath] === "read" || perms[parentPath] === "write")
+      return true;
   }
 
   return false;
@@ -130,15 +172,21 @@ export function hasPermission(user: SelectUser | null, path: string) {
 
 export function hasWritePermission(user: SelectUser | null, path: string) {
   if (!user) return false;
-  const roleNameLower = user.role?.toLowerCase() || '';
-  if (roleNameLower === 'admin' || roleNameLower === 'amministratore totale' || roleNameLower === 'super admin' || roleNameLower === 'master') return true;
-  
+  const roleNameLower = user.role?.toLowerCase() || "";
+  if (
+    roleNameLower === "admin" ||
+    roleNameLower === "amministratore totale" ||
+    roleNameLower === "super admin" ||
+    roleNameLower === "master"
+  )
+    return true;
+
   const perms = (user as any).permissions || {};
   if (perms["*"] === "write") return true;
 
   if (perms[path] === "write") return true;
 
-  const segments = path.split('/').filter(Boolean);
+  const segments = path.split("/").filter(Boolean);
   if (segments.length > 0) {
     const parentPath = `/${segments[0]}`;
     if (perms[parentPath] === "write") return true;
@@ -147,145 +195,240 @@ export function hasWritePermission(user: SelectUser | null, path: string) {
   return false;
 }
 
-function ProtectedRoute({ path, component: Component }: { path: string, component: any }) {
+function ProtectedRoute({
+  path,
+  component: Component,
+}: {
+  path: string;
+  component: any;
+}) {
   const { user } = useAuth();
 
   return (
     <Route path={path}>
-      {(params) => hasPermission(user, path) ? <Component params={params} /> : <NotFound />}
+      {(params) =>
+        hasPermission(user, path) ? <Component params={params} /> : <NotFound />
+      }
     </Route>
   );
 }
 
-const StubPlanning = () => <GestioneAttivitaStub title="Planning" description="La sezione Planning è in fase di realizzazione o manutenzione." />;
-const StubAttivitaLista = () => <GestioneAttivitaStub title="Attività a Lista" description="Visualizzazione alternativa delle attività in fase di sviluppo." />;
-const StubAffittoStudio = () => <GestioneAttivitaStub title="Affitto Studio Medico" description="Modulo di gestione affitto studi medici in arrivo." />;
-const StubCopilot = () => <GestioneAttivitaStub title="TeoCopilot" description="Pannello di controllo dell'assistente AI in costruzione." />;
-const StubPromoSconti = () => <GestioneAttivitaStub title="Promo e Sconti" description="Motore di gestione regole promozionali in sviluppo." />;
-const StubMerchandising = () => <GestioneAttivitaStub title="Merchandising" description="Modulo di gestione e vendita merchandising in arrivo." />;
-const StubCategorieMerchandising = () => <GestioneAttivitaStub title="Categorie Merchandising" description="Gestione categorie per articoli di merchandising in sviluppo." />;
+const StubPlanning = () => (
+  <GestioneAttivitaStub
+    title="Planning"
+    description="La sezione Planning è in fase di realizzazione o manutenzione."
+  />
+);
+const StubAttivitaLista = () => (
+  <GestioneAttivitaStub
+    title="Attività a Lista"
+    description="Visualizzazione alternativa delle attività in fase di sviluppo."
+  />
+);
+const StubAffittoStudio = () => (
+  <GestioneAttivitaStub
+    title="Affitto Studio Medico"
+    description="Modulo di gestione affitto studi medici in arrivo."
+  />
+);
+const StubCopilot = () => (
+  <GestioneAttivitaStub
+    title="TeoCopilot"
+    description="Pannello di controllo dell'assistente AI in costruzione."
+  />
+);
+const StubPromoSconti = () => (
+  <GestioneAttivitaStub
+    title="Promo e Sconti"
+    description="Motore di gestione regole promozionali in sviluppo."
+  />
+);
+const StubMerchandising = () => (
+  <GestioneAttivitaStub
+    title="Merchandising"
+    description="Modulo di gestione e vendita merchandising in arrivo."
+  />
+);
+const StubCategorieMerchandising = () => (
+  <GestioneAttivitaStub
+    title="Categorie Merchandising"
+    description="Gestione categorie per articoli di merchandising in sviluppo."
+  />
+);
 
 function Router() {
   return (
-    <Suspense fallback={<div className="flex items-center justify-center min-h-screen w-full"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen w-full items-center justify-center">
+          <div className="size-8 animate-spin rounded-full border-b-2 border-primary"></div>
+        </div>
+      }
+    >
       <Switch>
-      <ProtectedRoute path="/" component={Dashboard} />
-      <ProtectedRoute path="/dashboard" component={Dashboard} />
-      <ProtectedRoute path="/maschera-input" component={MascheraInputGenerale} />
-      <Route path="/maschera-input-generale">
-        <Redirect to="/maschera-input" />
-      </Route>
-      <ProtectedRoute path="/anagrafica-generale" component={Members} />
-      <ProtectedRoute path="/inserisci-nota" component={GestioneNote} />
-      <Route path="/corsi">
-        <Redirect to="/attivita/corsi" />
-      </Route>
-      <Route path="/workshops">
-        <Redirect to="/attivita/workshops" />
-      </Route>
-      <Route path="/tessere">
-        <Redirect to="/gempass" />
-      </Route>
-      <Route path="/tessere-certificati">
-        <Redirect to="/gempass" />
-      </Route>
-      <Route path="/generazione-tessere">
-        <Redirect to="/gempass" />
-      </Route>
-      <ProtectedRoute path="/calendario-attivita" component={CalendarPage} />
-      <ProtectedRoute path="/planning" component={Planning} />
-      <ProtectedRoute path="/programmazione-date" component={StrategicProgrammingTable} />
-      <ProtectedRoute path="/attivita-a-lista" component={StubAttivitaLista} />
-      <Route path="/staff">
-        <Redirect to="/gemstaff" />
-      </Route>
-      <ProtectedRoute path="/studios" component={Studios} />
-      <ProtectedRoute path="/affitto-studio" component={StubAffittoStudio} />
+        <ProtectedRoute path="/" component={Dashboard} />
+        <ProtectedRoute path="/dashboard" component={Dashboard} />
+        <ProtectedRoute
+          path="/maschera-input"
+          component={MascheraInputGenerale}
+        />
+        <Route path="/maschera-input-generale">
+          <Redirect to="/maschera-input" />
+        </Route>
+        <ProtectedRoute path="/anagrafica-generale" component={Members} />
+        <ProtectedRoute path="/inserisci-nota" component={GestioneNote} />
+        <Route path="/corsi">
+          <Redirect to="/attivita/corsi" />
+        </Route>
+        <Route path="/workshops">
+          <Redirect to="/attivita/workshops" />
+        </Route>
+        <Route path="/tessere">
+          <Redirect to="/gempass" />
+        </Route>
+        <Route path="/tessere-certificati">
+          <Redirect to="/gempass" />
+        </Route>
+        <Route path="/generazione-tessere">
+          <Redirect to="/gempass" />
+        </Route>
+        <ProtectedRoute path="/calendario-attivita" component={CalendarPage} />
+        <ProtectedRoute path="/planning" component={Planning} />
+        <ProtectedRoute
+          path="/programmazione-date"
+          component={StrategicProgrammingTable}
+        />
+        <ProtectedRoute
+          path="/attivita-a-lista"
+          component={StubAttivitaLista}
+        />
+        <Route path="/staff">
+          <Redirect to="/gemstaff" />
+        </Route>
+        <ProtectedRoute path="/studios" component={Studios} />
+        <ProtectedRoute path="/affitto-studio" component={StubAffittoStudio} />
 
-      <ProtectedRoute path="/pagamenti" component={Payments} />
-      <ProtectedRoute path="/accessi" component={AccessControl} />
-      <ProtectedRoute path="/report" component={Reports} />
-      <ProtectedRoute path="/importa" component={ImportData} />
-      <ProtectedRoute path="/utenti-permessi" component={UtentiPermessi} />
-      <ProtectedRoute path="/reset-stagione" component={ResetStagione} />
-      <ProtectedRoute path="/audit-logs" component={AuditLogs} />
-      <ProtectedRoute path="/utente/:id" component={MascheraInputGenerale} />
-      <ProtectedRoute path="/gempass" component={GemPass} />
-      <ProtectedRoute path="/gemstaff" component={GemStaff} />
-      <ProtectedRoute path="/gemstaff/me" component={GemStaffMe} />
-      <ProtectedRoute path="/gemteam" component={GemTeam} />
-      <ProtectedRoute path="/gemteam/me" component={GemTeamMe} />
-      <ProtectedRoute path="/area-tesserati" component={AreaTesserati} />
+        <ProtectedRoute path="/pagamenti" component={Payments} />
+        <ProtectedRoute path="/accessi" component={AccessControl} />
+        <ProtectedRoute path="/report" component={Reports} />
+        <ProtectedRoute path="/importa" component={ImportData} />
+        <ProtectedRoute path="/utenti-permessi" component={UtentiPermessi} />
+        <ProtectedRoute path="/reset-stagione" component={ResetStagione} />
+        <ProtectedRoute path="/audit-logs" component={AuditLogs} />
+        <ProtectedRoute path="/utente/:id" component={MascheraInputGenerale} />
+        <ProtectedRoute path="/gempass" component={GemPass} />
+        <ProtectedRoute path="/gemstaff" component={GemStaff} />
+        <ProtectedRoute path="/gemstaff/me" component={GemStaffMe} />
+        <ProtectedRoute path="/gemteam" component={GemTeam} />
+        <ProtectedRoute path="/gemteam/me" component={GemTeamMe} />
+        <ProtectedRoute path="/area-tesserati" component={AreaTesserati} />
 
-      <ProtectedRoute path="/admin" component={AdminPanel} />
-      <ProtectedRoute path="/db-monitor" component={DbMonitor} />
-      <ProtectedRoute path="/copilot" component={StubCopilot} />
-      <ProtectedRoute path="/booking-services" component={BookingServices} />
-      <ProtectedRoute path="/attivita/affitti" component={StudioBookings} />
-      <ProtectedRoute path="/scheda-contabile" component={AccountingSheet} />
-      <ProtectedRoute path="/iscrizioni-pagamenti" component={IscrizioniPagamenti} />
-      <ProtectedRoute path="/iscritti_per_attivita" component={IscrittiPerAttivita} />
-      <ProtectedRoute path="/attivita" component={Attivita} />
-      {/* TODO: pagine categorie legacy
+        <ProtectedRoute path="/admin" component={AdminPanel} />
+        <ProtectedRoute path="/db-monitor" component={DbMonitor} />
+        <ProtectedRoute path="/copilot" component={StubCopilot} />
+        <ProtectedRoute path="/booking-services" component={BookingServices} />
+        <ProtectedRoute path="/attivita/affitti" component={StudioBookings} />
+        <ProtectedRoute path="/scheda-contabile" component={AccountingSheet} />
+        <ProtectedRoute
+          path="/iscrizioni-pagamenti"
+          component={IscrizioniPagamenti}
+        />
+        <ProtectedRoute
+          path="/iscritti_per_attivita"
+          component={IscrittiPerAttivita}
+        />
+        <ProtectedRoute path="/attivita" component={Attivita} />
+        {/* TODO: pagine categorie legacy
           commentata in F1-015b (Chat_22) */}
-      {/*       <ProtectedRoute path="/categorie-corsi" component={Categories} /> */}
-      {/* TODO: pagine categorie legacy
+        {/*       <ProtectedRoute path="/categorie-corsi" component={Categories} /> */}
+        {/* TODO: pagine categorie legacy
           commentata in F1-015b (Chat_22) */}
-      {/*       <ProtectedRoute path="/categorie-affitti" component={RentalsCategories} /> */}
-      {/* TODO: pagine categorie legacy
+        {/*       <ProtectedRoute path="/categorie-affitti" component={RentalsCategories} /> */}
+        {/* TODO: pagine categorie legacy
           commentata in F1-015b (Chat_22) */}
-      {/*       <ProtectedRoute path="/categorie-campus" component={CampusCategories} /> */}
-      {/* TODO: pagine categorie legacy
+        {/*       <ProtectedRoute path="/categorie-campus" component={CampusCategories} /> */}
+        {/* TODO: pagine categorie legacy
           commentata in F1-015b (Chat_22) */}
-      {/*       <ProtectedRoute path="/categorie-vacanze-studio" component={VacationCategories} /> */}
-      {/* TODO: pagine categorie legacy
+        {/*       <ProtectedRoute path="/categorie-vacanze-studio" component={VacationCategories} /> */}
+        {/* TODO: pagine categorie legacy
           commentata in F1-015b (Chat_22) */}
-      {/*       <ProtectedRoute path="/categorie-eventi-esterni" component={BookingServiceCategories} /> */}
-      {/* TODO: pagine categorie legacy
+        {/*       <ProtectedRoute path="/categorie-eventi-esterni" component={BookingServiceCategories} /> */}
+        {/* TODO: pagine categorie legacy
           commentata in F1-015b (Chat_22) */}
-      {/*       <ProtectedRoute path="/categorie-merchandising" component={MerchandisingCategories} /> */}
-      <Route path="/promo-sconti"><Redirect to="/quote-promo" /></Route>
-      <ProtectedRoute path="/quote-promo" component={QuotePromo} />
-      <ProtectedRoute path="/pagamenti-online" component={PagamentiOnline} />
-      <ProtectedRoute path="/webhook-status" component={WebhookStatus} />
-      <ProtectedRoute path="/wc-mapping" component={WcMapping} />
-      <ProtectedRoute path="/scheda-corso" component={SchedaAttivita} />
-      <ProtectedRoute path="/scheda-workshop" component={SchedaAttivita} />
-      <ProtectedRoute path="/scheda-domenica" component={SchedaAttivita} />
-      <ProtectedRoute path="/scheda-allenamento" component={SchedaAttivita} />
-      <ProtectedRoute path="/scheda-lezione-individuale" component={SchedaAttivita} />
-      <ProtectedRoute path="/scheda-campus" component={SchedaAttivita} />
-      <ProtectedRoute path="/scheda-saggio" component={SchedaAttivita} />
-      <ProtectedRoute path="/scheda-vacanza-studio" component={SchedaAttivita} />
-      <ProtectedRoute path="/attivita/corsi" component={Courses} />
-      <ProtectedRoute path="/attivita/workshops" component={Workshops} />
-      <ProtectedRoute path="/attivita/domeniche-movimento" component={SundayActivities} />
-      <ProtectedRoute path="/attivita/allenamenti" component={Trainings} />
-      <ProtectedRoute path="/attivita/lezioni-individuali" component={IndividualLessons} />
-      <ProtectedRoute path="/attivita/campus" component={CampusActivities} />
-      <ProtectedRoute path="/attivita/saggi" component={Recitals} />
-      <ProtectedRoute path="/attivita/vacanze-studio" component={VacationStudies} />
-      <ProtectedRoute path="/attivita/servizi" component={BookingServices} />
-      <ProtectedRoute path="/attivita/merchandising" component={StubMerchandising} />
+        {/*       <ProtectedRoute path="/categorie-merchandising" component={MerchandisingCategories} /> */}
+        <Route path="/promo-sconti">
+          <Redirect to="/quote-promo" />
+        </Route>
+        <ProtectedRoute path="/quote-promo" component={QuotePromo} />
+        <ProtectedRoute path="/pagamenti-online" component={PagamentiOnline} />
+        <ProtectedRoute path="/webhook-status" component={WebhookStatus} />
+        <ProtectedRoute path="/wc-mapping" component={WcMapping} />
+        <ProtectedRoute path="/scheda-corso" component={SchedaAttivita} />
+        <ProtectedRoute path="/scheda-workshop" component={SchedaAttivita} />
+        <ProtectedRoute path="/scheda-domenica" component={SchedaAttivita} />
+        <ProtectedRoute path="/scheda-allenamento" component={SchedaAttivita} />
+        <ProtectedRoute
+          path="/scheda-lezione-individuale"
+          component={SchedaAttivita}
+        />
+        <ProtectedRoute path="/scheda-campus" component={SchedaAttivita} />
+        <ProtectedRoute path="/scheda-saggio" component={SchedaAttivita} />
+        <ProtectedRoute
+          path="/scheda-vacanza-studio"
+          component={SchedaAttivita}
+        />
+        <ProtectedRoute path="/attivita/corsi" component={Courses} />
+        <ProtectedRoute path="/attivita/workshops" component={Workshops} />
+        <ProtectedRoute
+          path="/attivita/domeniche-movimento"
+          component={SundayActivities}
+        />
+        <ProtectedRoute path="/attivita/allenamenti" component={Trainings} />
+        <ProtectedRoute
+          path="/attivita/lezioni-individuali"
+          component={IndividualLessons}
+        />
+        <ProtectedRoute path="/attivita/campus" component={CampusActivities} />
+        <ProtectedRoute path="/attivita/saggi" component={Recitals} />
+        <ProtectedRoute
+          path="/attivita/vacanze-studio"
+          component={VacationStudies}
+        />
+        <ProtectedRoute path="/attivita/servizi" component={BookingServices} />
+        <ProtectedRoute
+          path="/attivita/merchandising"
+          component={StubMerchandising}
+        />
 
-      <ProtectedRoute path="/quote-listini/:activityType" component={QuoteListini} />
-      <Route path="/listini-old"><Redirect to="/quote-promo" /></Route>
-      <Route path="/listini-home"><Redirect to="/quote-promo" /></Route>
-      <Route path="/listini"><Redirect to="/quote-promo" /></Route>
-      <Route path="/listini-base/:activityType"><Redirect to="/quote-promo" /></Route>
-            <ProtectedRoute path="/todo-list" component={TodoList} />
-      <ProtectedRoute path="/knowledge-base" component={KnowledgeBase} />
-      <ProtectedRoute path="/commenti" component={Commenti} />
-      <Route component={NotFound} />
-    </Switch>
-      </Suspense>
+        <ProtectedRoute
+          path="/quote-listini/:activityType"
+          component={QuoteListini}
+        />
+        <Route path="/listini-old">
+          <Redirect to="/quote-promo" />
+        </Route>
+        <Route path="/listini-home">
+          <Redirect to="/quote-promo" />
+        </Route>
+        <Route path="/listini">
+          <Redirect to="/quote-promo" />
+        </Route>
+        <Route path="/listini-base/:activityType">
+          <Redirect to="/quote-promo" />
+        </Route>
+        <ProtectedRoute path="/todo-list" component={TodoList} />
+        <ProtectedRoute path="/knowledge-base" component={KnowledgeBase} />
+        <ProtectedRoute path="/commenti" component={Commenti} />
+        <Route component={NotFound} />
+      </Switch>
+    </Suspense>
   );
 }
 
 function AppContent() {
   const { user, isLoading, logoutMutation } = useAuth();
   const isMobile = useIsMobile();
-  const isInsegnante = (user as any)?.role === 'insegnante';
+  const isInsegnante = (user as any)?.role === "insegnante";
 
   // Custom sidebar width
   const style = {
@@ -298,36 +441,58 @@ function AppContent() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="size-8 animate-spin rounded-full border-b-2 border-primary"></div>
       </div>
     );
   }
 
+  const fallback = (
+    <div className="flex min-h-screen items-center justify-center">
+      <div className="size-8 animate-spin rounded-full border-b-2 border-primary"></div>
+    </div>
+  );
+
   if (matchFirstLogin) {
-    return <FirstLogin />;
+    return (
+      <Suspense fallback={fallback}>
+        <FirstLogin />
+      </Suspense>
+    );
   }
 
   if (matchForgotPassword) {
-    return <ForgotPassword />;
+    return (
+      <Suspense fallback={fallback}>
+        <ForgotPassword />
+      </Suspense>
+    );
   }
 
   if (!user) {
-    return <AuthPage />;
+    return (
+      <Suspense fallback={fallback}>
+        <AuthPage />
+      </Suspense>
+    );
   }
 
-  const isClient = user?.role?.toLowerCase() === 'client';
+  const isClient = user?.role?.toLowerCase() === "client";
 
   if (isClient) {
     return (
-      <div className="flex flex-col min-h-screen bg-background">
-        <header className="flex items-center justify-between h-14 px-6 border-b bg-background shadow-sm">
+      <div className="flex min-h-screen flex-col bg-background">
+        <header className="flex h-14 items-center justify-between border-b bg-background px-6 shadow-sm">
           <img src={logoStarGem} alt="Studio Gem" className="h-8" />
           <div className="flex items-center gap-3">
             <span className="text-sm font-semibold text-muted-foreground">
               {user.firstName || user.username}
             </span>
-            <Button variant="ghost" size="sm" onClick={() => logoutMutation.mutate()}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => logoutMutation.mutate()}
+            >
               Esci
             </Button>
           </div>
@@ -340,24 +505,36 @@ function AppContent() {
   }
 
   return (
-    <SidebarProvider style={style as React.CSSProperties} defaultOpen={!isMobile}>
+    <SidebarProvider
+      style={style as React.CSSProperties}
+      defaultOpen={!isMobile}
+    >
       <div className="flex h-screen w-full">
         <AppSidebar />
-        <div className="flex flex-col flex-1 overflow-hidden">
-          <header className="flex items-center justify-between h-10 px-4 border-b border-border bg-background flex-shrink-0 z-20">
-            <div className="flex items-center"><SidebarTrigger data-testid="button-sidebar-toggle" /><LiveClock /></div>
-            <div className="flex items-center gap-6 h-full">
+        <div className="flex flex-1 flex-col overflow-hidden">
+          <header className="z-20 flex h-10 flex-shrink-0 items-center justify-between border-b border-border bg-background px-4">
+            <div className="flex items-center">
+              <SidebarTrigger data-testid="button-sidebar-toggle" />
+              <LiveClock />
+            </div>
+            <div className="flex h-full items-center gap-6">
               {!isInsegnante && <ActiveUserAvatars />}
               <div className="flex items-center gap-4">
-                <div 
-                   title="Apri TeoCopilot (Ctrl+Space)" 
-                   onClick={() => useCopilot.getState().openCopilot()} 
-                   className="relative cursor-pointer hover:opacity-80 transition-opacity active:scale-95"
+                <div
+                  title="Apri TeoCopilot (Ctrl+Space)"
+                  onClick={() => useCopilot.getState().openCopilot()}
+                  className="relative cursor-pointer transition-opacity hover:opacity-80 active:scale-95"
                 >
-                   <Avatar className="h-9 w-9 border-2 border-primary/20 shadow-sm">
-                      <AvatarImage src="/assets/teo-head-new.png" alt="Teo Copilot" className="object-cover bg-background" />
-                      <AvatarFallback className="bg-primary text-white"><Bot className="w-4 h-4" /></AvatarFallback>
-                   </Avatar>
+                  <Avatar className="size-9 border-2 border-primary/20 shadow-sm">
+                    <AvatarImage
+                      src="/assets/teo-head-new.png"
+                      alt="Teo Copilot"
+                      className="bg-background object-cover"
+                    />
+                    <AvatarFallback className="bg-primary text-white">
+                      <Bot className="size-4" />
+                    </AvatarFallback>
+                  </Avatar>
                 </div>
                 {!isInsegnante && (
                   <>
@@ -370,7 +547,7 @@ function AppContent() {
               </div>
             </div>
           </header>
-          <main className="flex-1 overflow-auto bg-background relative">
+          <main className="relative flex-1 overflow-auto bg-background">
             <UserPresenceTracker />
             <PageNotesOverlay />
             <Router />
@@ -386,7 +563,12 @@ function AppContent() {
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="system"
+        enableSystem
+        disableTransitionOnChange
+      >
         <AuthProvider>
           <TooltipProvider>
             <AppContent />
