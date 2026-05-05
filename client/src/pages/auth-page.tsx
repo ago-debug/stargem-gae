@@ -135,7 +135,7 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="dark relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-background pb-16 pt-10 text-foreground">
+    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-background pb-16 pt-10 text-foreground transition-colors duration-300">
       <style
         dangerouslySetInnerHTML={{
           __html: `
@@ -265,19 +265,11 @@ export default function AuthPage() {
           </div>
 
           {/* COLONNA DESTRA: TEO COPILOT (Visibile anche da Mobile) */}
-          <div className="relative flex size-full min-h-[320px] flex-1 items-center justify-center rounded-b-xl border-t border-border/60 bg-gradient-to-b from-white/10 to-slate-100 dark:border-transparent dark:from-transparent dark:to-transparent lg:min-h-[400px] lg:rounded-b-none lg:rounded-r-xl lg:border-l lg:border-t-0 lg:bg-gradient-to-r">
+          <div className="relative flex size-full min-h-[320px] flex-1 items-center justify-center rounded-b-xl border-t border-border/60 bg-gradient-to-b from-white/10 to-slate-100 dark:from-white/10 dark:to-slate-200 lg:min-h-[400px] lg:rounded-b-none lg:rounded-r-xl lg:border-l lg:border-t-0 lg:bg-gradient-to-r">
             <div
               className="group absolute inset-0 flex size-full cursor-pointer items-center justify-center"
               onClick={handleVideoClick}
             >
-              {/* Immagine statica per Dark Mode */}
-              <img
-                src="/assets/teo-full-new.png"
-                alt="Teo Copilot"
-                className="hidden size-4/5 object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.05)] transition-transform duration-500 group-hover:scale-105 dark:block"
-              />
-
-              {/* Video per Light Mode */}
               <video
                 key={
                   teoVideo
@@ -287,12 +279,12 @@ export default function AuthPage() {
                 loop
                 muted={isMuted}
                 playsInline
-                className="block size-full object-contain opacity-[0.98] mix-blend-multiply transition-transform duration-500 group-hover:scale-105 dark:hidden"
+                className="size-full object-contain opacity-[0.98] mix-blend-multiply transition-transform duration-500 group-hover:scale-105"
               />
               {/* Audio Toggle Button */}
               <button
                 onClick={toggleAudio}
-                className="absolute bottom-4 right-4 z-50 rounded-full border border-border bg-slate-100 p-2.5 text-muted-foreground shadow-md transition-colors hover:bg-slate-200 hover:text-foreground/80 dark:hidden"
+                className="absolute bottom-4 right-4 z-50 rounded-full border border-border bg-slate-100 p-2.5 text-muted-foreground shadow-md transition-colors hover:bg-slate-200 hover:text-foreground/80 dark:bg-slate-800"
                 title={isMuted ? "Attiva audio" : "Disattiva audio"}
               >
                 {isMuted ? (
