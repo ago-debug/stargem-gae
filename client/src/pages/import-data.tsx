@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Table,
   TableBody,
@@ -32,39 +33,97 @@ import {
 
 // All available member fields for mapping
 const MEMBER_FIELDS = [
+  // Anagrafica Base
+  { key: "id", label: "ID StarGem (Sistema)" },
   { key: "fiscalCode", label: "Codice Fiscale", required: true },
   { key: "firstName", label: "Nome", required: true },
   { key: "lastName", label: "Cognome", required: true },
-  { key: "email", label: "Email" },
-  { key: "phone", label: "Telefono" },
-  { key: "mobile", label: "Cellulare" },
+  { key: "gender", label: "Sesso" },
   { key: "dateOfBirth", label: "Data Nascita" },
   { key: "placeOfBirth", label: "Luogo Nascita" },
   { key: "birthProvince", label: "Provincia Nascita" },
+  { key: "birthCountry", label: "Nazione Nascita" },
+  { key: "nationality", label: "Nazionalità" },
+  
+  // Contatti e Residenza
+  { key: "email", label: "Email" },
+  { key: "secondaryEmail", label: "Email Secondaria" },
+  { key: "phone", label: "Telefono Fisso" },
+  { key: "mobile", label: "Cellulare" },
+  { key: "whatsapp", label: "WhatsApp" },
   { key: "address", label: "Indirizzo" },
   { key: "city", label: "Città" },
   { key: "postalCode", label: "CAP" },
   { key: "province", label: "Provincia" },
-  { key: "gender", label: "Sesso" },
-  { key: "nationality", label: "Nazionalità" },
   { key: "region", label: "Regione" },
-  { key: "birthCountry", label: "Nazione Nascita" },
-  { key: "secondaryEmail", label: "Email Secondaria" },
-  { key: "notes", label: "Note" },
-  { key: "adminNotes", label: "Note Admin" },
+  { key: "country", label: "Nazione Residenza" },
+  
+  // Classificazione
+  { key: "athenaId", label: "Athena ID (Provenienza)" },
+  { key: "participantType", label: "Tipo Partecipante" },
+  { key: "fromWhere", label: "Da Dove Viene" },
+  { key: "teamSegreteria", label: "Team Segreteria" },
+  { key: "season", label: "Stagione" },
+  { key: "insertionDate", label: "Data Inserimento" },
+  { key: "title", label: "Titolo" },
+  { key: "profession", label: "Professione" },
+  
+  // Tessere e Scadenze
+  { key: "cardNumber", label: "Numero Tessera" },
+  { key: "cardIssueDate", label: "Data Rilascio Tessera" },
+  { key: "cardExpiryDate", label: "Scadenza Tessera" },
+  { key: "entityCardType", label: "Tipo Ente (es. CSEN)" },
+  { key: "entityCardNumber", label: "Numero Tessera Ente" },
+  { key: "entityCardIssueDate", label: "Data Rilascio Ente" },
+  { key: "entityCardExpiryDate", label: "Scadenza Tessera Ente" },
+  
+  // Certificati Medici
+  { key: "hasMedicalCertificate", label: "Ha Certificato Medico" },
+  { key: "medicalCertificateExpiry", label: "Scadenza Certificato" },
+  
+  // Dati Minorenni e Tutori
+  { key: "isMinor", label: "È Minorenne" },
+  
+  { key: "motherFirstName", label: "Nome Madre (Tutore 1)" },
+  { key: "motherLastName", label: "Cognome Madre (Tutore 1)" },
+  { key: "motherFiscalCode", label: "CF Madre" },
+  { key: "motherEmail", label: "Email Madre" },
+  { key: "motherPhone", label: "Telefono Madre" },
+  { key: "motherMobile", label: "Cellulare Madre" },
+  { key: "motherBirthDate", label: "Data Nascita Madre" },
+  { key: "motherBirthPlace", label: "Luogo Nascita Madre" },
+  { key: "motherStreetAddress", label: "Indirizzo Madre" },
+  { key: "motherCity", label: "Città Madre" },
+  { key: "motherProvince", label: "Provincia Madre" },
+  { key: "motherPostalCode", label: "CAP Madre" },
+  
+  { key: "fatherFirstName", label: "Nome Padre (Tutore 2)" },
+  { key: "fatherLastName", label: "Cognome Padre (Tutore 2)" },
+  { key: "fatherFiscalCode", label: "CF Padre" },
+  { key: "fatherEmail", label: "Email Padre" },
+  { key: "fatherPhone", label: "Telefono Padre" },
+  { key: "fatherMobile", label: "Cellulare Padre" },
+  { key: "fatherBirthDate", label: "Data Nascita Padre" },
+  { key: "fatherBirthPlace", label: "Luogo Nascita Padre" },
+  { key: "fatherStreetAddress", label: "Indirizzo Padre" },
+  { key: "fatherCity", label: "Città Padre" },
+  { key: "fatherProvince", label: "Provincia Padre" },
+  { key: "fatherPostalCode", label: "CAP Padre" },
+  
+  // Privacy e Varie
+  { key: "privacyAccepted", label: "Privacy Accettata" },
   { key: "privacyDate", label: "Data Privacy" },
   { key: "newsletterConsent", label: "Consenso Newsletter" },
   { key: "marketingConsent", label: "Consenso Marketing" },
   { key: "imageConsent", label: "Consenso Immagine" },
   { key: "documentType", label: "Tipo Documento" },
   { key: "documentExpiry", label: "Scadenza Documento" },
-  { key: "profession", label: "Professione" },
+  { key: "notes", label: "Note Generali" },
+  { key: "adminNotes", label: "Note Amministrative" },
+  { key: "dataQualityFlag", label: "Flag Qualità Dati" },
   { key: "tags", label: "Tags" },
-  { key: "parent1LastName", label: "Cognome Genitore 1" },
-  { key: "parent1FirstName", label: "Nome Genitore 1" },
-  { key: "parent1FiscalCode", label: "CF Tutore 1" },
-  { key: "parent1Phone", label: "Tel Tutore 1" },
-  { key: "parent1Email", label: "Email Tutore 1" }
+  { key: "tesserinoTecnicoNumber", label: "Numero Tesserino Tecnico" },
+  { key: "tesserinoTecnicoIssueDate", label: "Scadenza Tesserino Tecnico" }
 ];
 
 const PAYMENTS_FIELDS = [
@@ -242,9 +301,30 @@ export default function ImportData() {
         try { savedMap = JSON.parse(savedMapStr); } catch(e){}
       }
 
+      const headers = data.headers || [];
       currentFields.forEach(field => {
-        initialMapping[field.key] = savedMap[field.key] !== undefined ? savedMap[field.key] : null;
+        if (savedMap[field.key] !== undefined) {
+          initialMapping[field.key] = savedMap[field.key];
+        } else {
+          // Auto-mappatura intelligente: SOLO corrispondenze esatte per evitare disastri
+          const match = headers.find((h: any) => {
+            const hName = h.name.toLowerCase().trim();
+            const fLabel = field.label.toLowerCase().trim();
+            const fKey = field.key.toLowerCase().trim();
+            return hName === fLabel || hName === fKey;
+          });
+          initialMapping[field.key] = match ? match.index : null;
+        }
       });
+      
+      // Rimuoviamo eventuali duplicati nell'auto-mappatura
+      const usedIndexes = new Set<number>();
+      for (const k of Object.keys(initialMapping)) {
+        if (initialMapping[k] !== null) {
+          if (usedIndexes.has(initialMapping[k]!)) initialMapping[k] = null;
+          else usedIndexes.add(initialMapping[k]!);
+        }
+      }
       setFieldMapping(initialMapping);
 
       // Set default import key
@@ -291,9 +371,29 @@ export default function ImportData() {
         try { savedMap = JSON.parse(savedMapStr); } catch(e){}
       }
 
+      const headers = data.headers || [];
       currentFields.forEach(field => {
-        initialMapping[field.key] = savedMap[field.key] !== undefined ? savedMap[field.key] : null;
+        if (savedMap[field.key] !== undefined) {
+          initialMapping[field.key] = savedMap[field.key];
+        } else {
+          // Auto-mappatura intelligente: SOLO corrispondenze esatte
+          const match = headers.find((h: any) => {
+            const hName = h.name.toLowerCase().trim();
+            const fLabel = field.label.toLowerCase().trim();
+            const fKey = field.key.toLowerCase().trim();
+            return hName === fLabel || hName === fKey;
+          });
+          initialMapping[field.key] = match ? match.index : null;
+        }
       });
+      
+      const usedIndexes = new Set<number>();
+      for (const k of Object.keys(initialMapping)) {
+        if (initialMapping[k] !== null) {
+          if (usedIndexes.has(initialMapping[k]!)) initialMapping[k] = null;
+          else usedIndexes.add(initialMapping[k]!);
+        }
+      }
       setFieldMapping(initialMapping);
 
       // Set default import key
@@ -618,6 +718,18 @@ export default function ImportData() {
     toast({ title: "Mappatura salvata", description: "Verrà precaricata al prossimo import simile." });
   };
 
+  const handleResetMapping = () => {
+    localStorage.removeItem(`mappatura_${entityType}`);
+    setFieldMapping({});
+    toast({ title: "Mappatura azzerata", description: "Le impostazioni salvate sono state eliminate." });
+    // Ricarica l'anteprima per ri-applicare solo l'automapping puro
+    if (sourceType === "file" && selectedFile) {
+        filePreviewMutation.mutate({ file: selectedFile, delimiter: csvDelimiter });
+    } else if (sourceType === "google_sheets" && spreadsheetId) {
+        previewHeadersMutation.mutate({ spreadsheetId, range: sheetRange || "A1:Z1000" });
+    }
+  };
+
   const handleAutoMap = () => {
     // Already populated by preview response matching keys, but this forces a re-evaluation
     // based on typical columns
@@ -638,6 +750,52 @@ export default function ImportData() {
   // Render variables
   const isImporting = mappedImportMutation.isPending || fileMappedImportMutation.isPending;
   const filteredConfigs = savedConfigs.filter(c => c.entityType === entityType);
+  
+  // Calcolo colonne mappate e non mappate
+  const unmappedHeaders = sheetHeaders.filter(h => !Object.values(fieldMapping).includes(h.index));
+  const mappedHeaders = sheetHeaders.filter(h => Object.values(fieldMapping).includes(h.index));
+  const unmappedText = unmappedHeaders.map(h => `- ${h.name}`).join('\n');
+
+  const renderMappingRow = (header: SheetHeader, isMapped: boolean) => {
+    const mappedDbFieldKey = Object.keys(fieldMapping).find(k => fieldMapping[k] === header.index);
+    const usedFieldKeys = Object.keys(fieldMapping).filter(k => fieldMapping[k] !== null);
+    
+    return (
+      <div key={header.index} className={`grid grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 py-3 transition-colors ${isMapped ? 'bg-background' : 'bg-muted/30'}`}>
+        <div className="font-medium truncate" title={header.name}>{header.index + 1}. {header.name}</div>
+        <div className="w-24 flex justify-center">
+            {isMapped ? (
+              <Badge className="bg-green-600/10 text-green-700 hover:bg-green-600/20 border-green-600/20 shadow-none"><CheckCircle className="w-3 h-3 mr-1" /> Mappato</Badge>
+            ) : (
+              <Badge variant="outline" className="text-muted-foreground"><AlertCircle className="w-3 h-3 mr-1" /> Da Mappare</Badge>
+            )}
+        </div>
+        <div>
+          <Select 
+            value={mappedDbFieldKey || "__none__"}
+            onValueChange={(val) => {
+                const newMap = {...fieldMapping};
+                if (mappedDbFieldKey) newMap[mappedDbFieldKey] = null;
+                if (val !== "__none__") newMap[val] = header.index;
+                setFieldMapping(newMap);
+            }}
+          >
+            <SelectTrigger className={`h-8 font-medium ${!isMapped && 'opacity-70'}`}>
+              <SelectValue placeholder="Seleziona campo..." />
+            </SelectTrigger>
+            <SelectContent className="max-h-64">
+              <SelectItem value="__none__" className="text-muted-foreground italic">— Ignora questa colonna —</SelectItem>
+              {currentFields.filter(cf => !usedFieldKeys.includes(cf.key) || mappedDbFieldKey === cf.key).map(cf => (
+                <SelectItem key={cf.key} value={cf.key}>
+                  {cf.label} {cf.required ? <span className="text-destructive">*</span> : ''}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+    );
+  };
 
   const executeDryRun = (overrideSeasonId?: number) => {
     if (sourceType === "file" && selectedFile) {
@@ -811,68 +969,68 @@ export default function ImportData() {
           <div className="flex gap-4 flex-wrap">
             <Button variant="outline" onClick={handleBackToInput}>Indietro</Button>
             <Button variant="outline" onClick={handleSaveMapping}><Save className="w-4 h-4 mr-2" /> Salva questa mappatura</Button>
-            <Button variant="outline" onClick={handleAutoMap}><Settings2 className="w-4 h-4 mr-2"/> Auto-Mappa tutto</Button>
+            <Button variant="outline" className="text-destructive border-destructive/30 hover:bg-destructive/10" onClick={handleResetMapping}><Trash2 className="w-4 h-4 mr-2" /> Azzera Mappatura</Button>
             <Button className="ml-auto" onClick={() => {
               setWizardStep(3);
               executeDryRun();
             }}><ArrowRight className="w-4 h-4 mr-2"/> Continua allo Step 3</Button>
           </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Mappa le colonne</CardTitle>
+          <Card className="border-amber-500/20 shadow-sm">
+            <CardHeader className="bg-amber-50/50 dark:bg-amber-950/20 border-b pb-4">
+              <CardTitle className="text-amber-800 flex items-center">
+                <AlertCircle className="w-5 h-5 mr-2" />
+                Da Mappare ({unmappedHeaders.length} colonne)
+              </CardTitle>
               <CardDescription>
-                  Il sistema ha riconosciuto automaticamente alcune colonne (✅). Per le altre, scegli il campo corrispondente oppure seleziona 'Ignora'.
+                  Queste colonne non sono state riconosciute automaticamente. Assegna un campo o lasciale ignorate. Man mano che le assegni, si sposteranno nel pannello in basso.
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-0">
               <div className="space-y-0 text-sm">
-                <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 py-2 bg-muted rounded-t-md font-semibold font-mono text-xs uppercase tracking-wider text-muted-foreground">
+                <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 py-2 bg-muted/50 border-b font-semibold font-mono text-xs uppercase tracking-wider text-muted-foreground">
                   <div>Colonna Excel / CSV</div>
                   <div className="w-24 text-center">Stato</div>
-                  <div>Campo DB</div>
+                  <div>Campo DB Destinazione</div>
                 </div>
-                <div className="border border-t-0 rounded-b-md divide-y overflow-hidden">
-                  {sheetHeaders.map(header => {
-                    const mappedDbFieldKey = Object.keys(fieldMapping).find(k => fieldMapping[k] === header.index);
-                    const isMapped = !!mappedDbFieldKey;
-                    
-                    return (
-                      <div key={header.index} className={`grid grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 py-3 transition-colors ${isMapped ? 'bg-background' : 'bg-muted/30'}`}>
-                        <div className="font-medium truncate" title={header.name}>{header.index + 1}. {header.name}</div>
-                        <div className="w-24 flex justify-center">
-                            {isMapped ? (
-                              <Badge className="bg-green-600/10 text-green-700 hover:bg-green-600/20 border-green-600/20 shadow-none"><CheckCircle className="w-3 h-3 mr-1" /> Mappato</Badge>
-                            ) : (
-                              <Badge variant="outline" className="text-muted-foreground"><AlertCircle className="w-3 h-3 mr-1" /> Ignorato</Badge>
-                            )}
-                        </div>
-                        <div>
-                          <Select 
-                            value={mappedDbFieldKey || "__none__"}
-                            onValueChange={(val) => {
-                                const newMap = {...fieldMapping};
-                                if (mappedDbFieldKey) newMap[mappedDbFieldKey] = null;
-                                if (val !== "__none__") newMap[val] = header.index;
-                                setFieldMapping(newMap);
-                            }}
-                          >
-                            <SelectTrigger className={`h-8 font-medium ${!isMapped && 'opacity-70'}`}>
-                              <SelectValue placeholder="Seleziona campo..." />
-                            </SelectTrigger>
-                            <SelectContent className="max-h-64">
-                              <SelectItem value="__none__" className="text-muted-foreground italic">— Ignora questa colonna —</SelectItem>
-                              {currentFields.map(cf => (
-                                <SelectItem key={cf.key} value={cf.key}>
-                                  {cf.label} {cf.required ? <span className="text-destructive">*</span> : ''}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-                    )
-                  })}
+                <div className="divide-y overflow-hidden max-h-[400px] overflow-y-auto">
+                  {unmappedHeaders.length === 0 ? (
+                    <div className="p-8 text-center text-muted-foreground italic">
+                      Perfetto! Tutte le colonne sono state mappate o ignorate.
+                    </div>
+                  ) : (
+                    unmappedHeaders.map(header => renderMappingRow(header, false))
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-green-500/20 shadow-sm">
+            <CardHeader className="bg-green-50/50 dark:bg-green-950/10 border-b pb-4">
+              <CardTitle className="text-green-700 flex items-center">
+                <CheckCircle className="w-5 h-5 mr-2" />
+                Colonne Già Mappate ({mappedHeaders.length})
+              </CardTitle>
+              <CardDescription>
+                  Queste colonne sono già state associate e sono pronte per l'importazione.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="space-y-0 text-sm">
+                <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 py-2 bg-muted/50 border-b font-semibold font-mono text-xs uppercase tracking-wider text-muted-foreground">
+                  <div>Colonna Excel / CSV</div>
+                  <div className="w-24 text-center">Stato</div>
+                  <div>Campo DB Destinazione</div>
+                </div>
+                <div className="divide-y overflow-hidden max-h-[400px] overflow-y-auto">
+                  {mappedHeaders.length === 0 ? (
+                    <div className="p-8 text-center text-muted-foreground italic">
+                      Nessuna colonna mappata al momento.
+                    </div>
+                  ) : (
+                    mappedHeaders.map(header => renderMappingRow(header, true))
+                  )}
                 </div>
               </div>
             </CardContent>
@@ -920,6 +1078,37 @@ export default function ImportData() {
               </div>
             </CardContent>
           </Card>
+
+          {unmappedHeaders.length > 0 && (
+            <Card className="border-orange-500/30 bg-orange-50/50 dark:bg-orange-950/10">
+              <CardHeader>
+                <CardTitle className="text-orange-700 flex items-center">
+                  <AlertCircle className="w-5 h-5 mr-2" />
+                  Richiedi Nuove Colonne ad Antigravity
+                </CardTitle>
+                <CardDescription className="text-orange-800/80">
+                  Hai {unmappedHeaders.length} colonne ignorate perché non esistono nel sistema. Se ti servono davvero, copia l'elenco e invialo ad Antigravity per farle creare.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Textarea 
+                  readOnly 
+                  value={unmappedText} 
+                  className="min-h-[100px] font-mono text-xs bg-background/50 border-orange-200"
+                />
+                <Button 
+                  variant="outline" 
+                  className="w-full text-orange-700 border-orange-300 hover:bg-orange-100 dark:hover:bg-orange-900/30"
+                  onClick={() => {
+                    navigator.clipboard.writeText(`Ciao Antigravity, puoi creare nel database queste nuove colonne per il modulo ${entityType}?\n\n${unmappedText}`);
+                    toast({ title: "Copiato negli appunti!", description: "Ora puoi incollare il testo nella chat con Antigravity." });
+                  }}
+                >
+                  <Download className="w-4 h-4 mr-2" /> Copia testo per Antigravity
+                </Button>
+              </CardContent>
+            </Card>
+          )}
         </div>
       )}
 

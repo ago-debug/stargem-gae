@@ -683,7 +683,6 @@ export const members = mysqlTable("members", {
   mastroCol: varchar("mastro_col", { length: 30 }),
   codiceFe: varchar("codice_fe", { length: 50 }),
 
-
   // Campi Tutori (GDPR e minori)
   tutor1FiscalCode: varchar("tutor1_fiscal_code", { length: 16 }),
   tutor1BirthDate: date("tutor1_birth_date"),
@@ -930,7 +929,17 @@ export const enrollments = mysqlTable("enrollments", {
   pendingMedicalCert: boolean("pending_medical_cert").default(false),
   pendingMembership: boolean("pending_membership").default(false),
   completionNotes: text("completion_notes"),
+  
+  // STORICO IMPORTAZIONI
+  athenaStatoIscrizione: varchar("athena_stato_iscrizione", { length: 100 }),
+  athenaNote: text("athena_note"),
+  gsheetDescrizioneQuota: varchar("gsheet_descrizione_quota", { length: 255 }),
+  gsheetNotePagamenti: text("gsheet_note_pagamenti"),
+  gsheetChiScrive: varchar("gsheet_chi_scrive", { length: 255 }),
+  gsheetVendita: varchar("gsheet_vendita", { length: 255 }),
+  
   createdAt: timestamp("created_at").defaultNow(),
+
 });
 
 export const enrollmentsRelations = relations(enrollments, ({ one, many }) => ({
@@ -949,6 +958,13 @@ export const insertEnrollmentSchema = createInsertSchema(enrollments).omit({
   id: true,
   enrollmentDate: true,
   createdAt: true,
+}).extend({
+  athenaStatoIscrizione: z.string().optional().nullable(),
+  athenaNote: z.string().optional().nullable(),
+  gsheetDescrizioneQuota: z.string().optional().nullable(),
+  gsheetNotePagamenti: z.string().optional().nullable(),
+  gsheetChiScrive: z.string().optional().nullable(),
+  gsheetVendita: z.string().optional().nullable(),
 });
 export type InsertEnrollment = z.infer<typeof insertEnrollmentSchema>;
 export type Enrollment = typeof enrollments.$inferSelect;
