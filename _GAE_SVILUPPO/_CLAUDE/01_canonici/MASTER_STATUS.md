@@ -1,13 +1,117 @@
 # MASTER_STATUS — StarGem Suite
-# Aggiornato: 2026_04_26_1800
-# File di scambio centrale tra tutte le chat.
-# Fonte: file GAE_SVILUPPO A→G + audit DB 25/04/2026
+# Aggiornato: 2026_05_05_0858 (da Cowork/Claude — sessione di sincronizzazione)
+# File di scambio centrale tra tutte le chat / sessioni.
+# Fonte: file GAE_SVILUPPO A→G+Z (stato AG al 04/05) + MASTER_STATUS precedente (26/04) + audit DB 25/04
+# Versione precedente archiviata: 99_archivio/2026_05_05_0858_MASTER_STATUS.md
+
+---
+
+## CHANGELOG 28/04 → 04/05 (NOVITÀ DA RECEPIRE)
+
+> Ogni chat che apre una sessione DEVE leggere questa sezione prima di procedere.
+> Le novità sotto sono già IMPLEMENTATE in produzione o in collaudo.
+
+### 28/04 — Chat_24_DB_Monitor (chiusura F1-001 / F2-001)
+- Monitoraggio DB e UI in tempo reale operativo
+- Decisioni architetturali approvate:
+  - Cattura modifiche AG → strategia IBRIDA (wrapper DB Pool + lettura binary log)
+  - Mappa Frontend↔DB → strategia IBRIDA (`db-map-config.ts` statico in RAM + verifica notturna)
+- DB Monitor genera ora segnalazioni che AG raccoglie in `_ANTIGRAVITY/01_status_continui/E_Segnalazioni_DB.md`
+
+### 29-30/04 — Chat_08_Corsi (chiusura massiva)
+- **18 protocolli F1 chiusi**:
+  - F1-013-LIGHT: bonifica DT → visita_medica (2 record DT + 1.011 enrollments)
+  - F1-015: magic strings DB-coerenti, riallineamento endpoints, fix filtro stagione
+  - F1-017: 3 fix mirati su query calcolo numeri
+  - F1-019: nuovo endpoint `/api/dashboard/attivita-panoramica`
+  - F1-021: audit + mapping campi schede dominio (Domenica, Lezione Individuale, Campus)
+  - Eliminato `/api/workshops` → sostituito da pattern flat
+  - Aggiornato `/api/activities-summary` con filtro `seasonId`
+- **23 protocolli F2 chiusi**:
+  - F2-022 → F2-028
+  - 6 tab accordion canoniche in `/iscritti_per_attivita`
+  - Panoramica `/attivita` con tile alti
+  - 6 pagine wrapper unificate
+  - 5 schede dettaglio pattern `scheda-corso.tsx`
+  - Fix anti-crash su contenitori generici (`2526ALLENAMENTO`)
+- **Centralizzazione UI Liste**: `/elenchi` è ora hub di verità con 5 Aree Funzionali
+  - Sync etichette tra maschera modifica e pannello gestione
+  - Pagina `/elenchi` rimossa dal menu (rotta ancora attiva)
+
+### 01/05 — Pruning Chirurgico (Knip + Graphviz)
+- **270+ script test** spostati in `99_archivio/script_temporanei_root`
+- **Cartelle orfane archiviate**: `temp_import`, `temp_project_complete`
+- **7 tabelle orfane droppate** da `shared/schema.ts`:
+  - `crmLeads`, `crmCampaigns`, ticket manutenzione (4 tabelle)
+- **14 route fantasma rimosse** da `server/routes.ts`:
+  - es. `pagodil-tiers`, `member-discounts`, relazioni varie
+- **2 file inutilizzati** eliminati in `client/src/pages/`
+- `npm run check` passato senza regressioni
+- Dettaglio completo in `_ANTIGRAVITY/01_status_continui/Z_02_05_26_1130_Architettura_Pruned.md`
+
+### 01/05 — Integrazione AI Enterprise (Fasi 1-4)
+- **Fase 1 Osservabilità**: Sentry + PostHog live con API keys connesse (telemetria remota)
+- **Fase 1 Backend AI**: Vercel AI SDK installato (`gpt-4o-mini`), tool configurati `searchMembers`, `searchCourses`
+- **Fase 2 Frontend AI/UX**: Command Palette UX affinata, Magic Promo Button, Assistente Teo online, 404 unificate
+- **Fase 3 Hard-RBAC**: i tool dell'assistente ereditano FISICAMENTE i permessi utente dal DB → blocco fughe dati sensibili (accesso bloccato ai client)
+- **Fase 4 Logging Centralizzato**: `server/logger.ts` con winston, rotazione log JSON giornaliera in `/logs`
+- **Fase 4 Disaster Recovery**: `scripts/backup-db.sh` notturno `.tar.gz`, retention 30 giorni
+- **Fase 4 Anti-Bruteforce**: rate limiting operativo in `server/auth.ts`
+
+### 02/05 — Operazioni Notturne (performance + sicurezza)
+- **Performance**: `/api/stats/dashboard` e `/api/stats/alerts` riscritti con SQL Aggregation diretta → prevenzione OOM su dataset >5000 righe
+- **Build TS**: 18 errori bonificati in `server/storage.ts` (join/alias) e `workshops.tsx` → `npx tsc --noEmit` ora **ZERO ERRORI**
+- **Sospesi per sicurezza**: smantellamento `routes.ts` (12k righe) e `maschera-input-generale.tsx` (4.5k righe). Rischio corruzione dipendenze incrociate troppo alto. I file restano integri, si procederà modulo per modulo con supervisione manuale
+- **Sicurezza Pagamenti**: blocco backend+frontend contro importi negativi, coerenza obbligatoria `Metodo/Data` quando stato è `Paid`
+
+### 04/05 — Registro di Classe + Appello Veloce
+- **API Bulk**: `POST /api/attendances/bulk` + `createAttendancesBulk` (inserimento massivo in singola transazione)
+- **Vista Pivot**: refactor totale tab Presenze in `CourseUnifiedModal.tsx` — righe = allievi, colonne = ultime 5 date di lezione, eliminazione hover istantanea
+- **Dialog "Fai l'Appello"**: registra classe intera con 1 click
+- **Trigger Routing Rapido**: badge "0 presenze" in `scheda-attivita.tsx` apre modale con `defaultTab="attendances"` popolando subset iscritti attivi
+
+### 04/05 — Listini Multi-Stagione + Checkout Bloccato
+- **`courseQuotesGrid`**: aggiunta `season_id` (default 1) per isolare tariffari fiscalmente
+- **`activity_types`**: sganciate dal frontend, collegate a `customLists` nel DB
+- **`NuovoPagamentoModal`**: importo precompilato dal listino ufficiale e blindato in sola lettura (`readOnly`). Sconti applicabili SOLO via codici promozionali
+- **Quote e Promo hub**: ora esclusivo per Listino, Promo, Welfare, Carnet, Convenzioni, Accordi. Prop drilling `seasonId` dal Root alle Tab figlie. `seasonId` introdotto anche in `promoRules`, `staffRates`, `welfareProviders`, `companyAgreements`
+
+### 04/05 — Pagamenti Online estratti
+- `OnlineTab` estratta in rotta indipendente `/pagamenti-online`
+- AppSidebar: menu espandibile "Pagamenti Online" (Transazioni, Webhook Status, WC Mapping) sotto "Amministrazione & Cassa"
+
+### 04/05 — Generazione PDF Ricevute/Fatture
+- **jsPDF integrato client-side** in `TabRicevute`
+- **Prefissi PDF**:
+  - `2526-Rxxxxxx` → Ricevuta Istituzionale (Tessere, Quote Sociali)
+  - `2526-Sxxxxxx` → Ricevuta Semplice (Corsi Commerciali, Servizi)
+  - `2526-Fxxxxxx` → Fatture (Richieste esplicite / Aziende)
+- Intestazione ufficiale Studio Gem (GEOS ssdrl, SDI, P.IVA) + Logo via DOM elements
+
+### 04/05 — Calculated Lessons + Pacchetti Open
+- `courses`: nuova colonna `calculated_lessons` (numero netto incontri didattici, esclude vacanze/ferie da `strategicEvents`)
+- **25 record fantasma** rimossi da `courses` (privi di coordinate temporali) → `CourseDuplicationWizard` legge solo dati puliti
+- **Pacchetti Open**: spostati a livello Prodotti Commerciali (`promoRules` + Liste `Quote`). L'iscrizione alle aule fisiche è disaccoppiata dall'incasso (carrello calcola 0€ se Pacchetto Open valido)
+
+---
+
+## DOMANDE APERTE DI GAETANO (DB Monitor — 04/05)
+
+Da `_ANTIGRAVITY/01_status_continui/E_Segnalazioni_DB.md`. Antigravity deve rispondere a queste prima di procedere con altre cose:
+
+1. **Dati tessere in tabella `members`** (intervallo colonne O-U) — perché non sono nella tabella preposta `memberships`?
+2. **Certificati medici in tabella `members`** (intervallo V-W) — perché non sono nella tabella preposta `medical_certificates`?
+3. **Colonna A** in `members` — a cosa serve? Numeri presi da dove?
+4. **Colonna BA** in `members` — serve? "Eliminiamo id vecchi non servono"
+
+Queste sono domande architetturali, non bug. Vanno indirizzate prima di toccare la tabella `members` (ricordo: regola DB → solo ADD COLUMN, mai modificare esistenti senza ordine esplicito).
 
 ---
 
 ## PROTOCOLLO AGGIORNAMENTO
 
-Inizio sessione: leggi questo file + ANALISI_MASTER + tutti i file GAE_SVILUPPO (A→G)
+Inizio sessione: leggi questo file + ANALISI_MASTER + tutti i file GAE_SVILUPPO (A→G+Z) + il `RECAP_NN_NomeChat.md` proprio (se esiste).
+
 Fine sessione — template 4 campi obbligatori:
 
   ## [N]_[NomeChat] — aggiornato YYYY_MM_DD_HHMM
@@ -19,180 +123,210 @@ Fine sessione — template 4 campi obbligatori:
 ---
 
 ## CONVENZIONE NOMI FILE
-Formato: YYYY_MM_DD_HHMM_nomefile.ext
-Il file piu recente = data piu alta nel nome.
+
+Formato: `YYYY_MM_DD_HHMM_nomefile.ext`
+Il file più recente = data più alta nel nome.
 Claude e Antigravity usano questo formato per TUTTI i file prodotti.
+File "vivi" (MASTER_STATUS, A→Z, RECAP) hanno nome fisso senza timestamp; il timestamp lo metti solo quando archivi in `99_archivio/`.
 
 ---
 
 ## DEPLOY — REGOLA ASSOLUTA
-1. Antigravity: git commit + git push origin main → STOP
-2. Gaetano: git pull manualmente su Plesk → pubblica
-Antigravity NON esegue mai deploy-vps.sh, ssh VPS, npm build VPS, pm2 restart.
+
+1. Antigravity: `git commit` + `git push origin main` → STOP
+2. Gaetano: `git pull` manualmente su Plesk → pubblica
+Antigravity NON esegue mai `deploy-vps.sh`, ssh VPS, npm build VPS, pm2 restart.
 
 ---
 
 ## CLASSIFICAZIONE UTENTI (fonte: 2026_04_20_classificazione_stargem_v2.pdf)
 
+```
 UTENTE → members (tesserato / non tesserato / partecipante)
 STAFF  → participantType INSEGNANTE | PERSONAL | PERSONAL_TRAINER (tessera obbligatoria)
 TEAM   → team_employees con ruolo + mansione (tessera obbligatoria)
 Sovrapposizione Staff+Team = 2 account separati (policy due cappelli)
+```
 
 ---
 
-## 14 ATTIVITA UFFICIALI
+## 14 ATTIVITÀ UFFICIALI
 
+```
 1.Corsi  2.Workshop  3.Prove a pagamento  4.Prove gratuite
 5.Lezioni singole  6.Lezioni individuali  7.Domenica in movimento
 8.Allenamenti  9.Affitti  10.Campus  11.Saggi
 12.Vacanze studio  13.Eventi esterni  14.Merchandising
 
-Calendario → attivita con orario/spazio puntuale
-Planning   → attivita strategiche stagionali
+Calendario → attività con orario/spazio puntuale
+Planning   → attività strategiche stagionali
 Merchandising → escluso da calendari
+```
 
 ---
 
-## STATO DB — Audit 25/04/2026
-## (post import storico DEFINITIVO — Chat_22 chiusa)
+## STATO DB — aggiornato 2026_05_05 (post-Pruning + Bonifica Chat_08)
 
 Tabelle principali con record reali:
   members: 4.489 (import completo ✅)
-    · 174 colonne totali
+    · 174 colonne totali (resta da chiarire utilità di intervalli O-U, V-W e colonne A, BA)
     · +13 nuove (albo, patente, tutor2, p_iva)
     · +52 campi Athena (P2)
     · +fattura_fatta, athena_id
-  memberships: 3.281 (tessere StarGem pulite ✅)
+  memberships: 3.305 (3.281 + 24 da bonifica) ✅
     · Tessere Athena duplicate rimosse (342)
     · Tessere Athena spostate in previous_membership_number (77)
     · Vincolo unicità: member_id + season_id
   enrollments: 13.584 ✅
-    · athena_iscrizioni: 9.616
-    · gsheets_master_p6: 3.109 (corsi + prove)
-    · workshop: 859
-    · participation_type: corso / prova / STANDARD_COURSE
+    · 929 prove con season_id=1 assegnato
+    · 1.011 record DT bonificati → visita_medica (Chat_08 F1-013-LIGHT)
+    · 285 SKU riclassificati da storico
+    · participation_type da uniformare (`corso` vs `STANDARD_COURSE`)
   payments: 3.775 ✅
-    · gsheets_master: 3.257 (sz1→sz4 + gbrh)
-    · workshop: 518
-    · Metodi: bonifico_poste 1.299 · bonifico_bpm 1.220
-              cash 616 · contanti 518 · welcomekit 35
-              online 32 · gbrh 55
-    · Campi: operator_name, quota_description, period,
-             transfer_confirmation_date, total_quota,
-             deposit, receipts_count, discount_value,
-             gbrh_numero, gbrh_data_emissione,
-             gbrh_data_scadenza, gbrh_data_utilizzo, gbrh_iban
-  medical_certificates: 2.770 ✅
-  courses: 586 (296 reali + 285 storici + 5 P6)
+    · Metodi: bonifico_poste 1.299 · bonifico_bpm 1.220 · cash 616 · contanti 518 · welcomekit 35 · online 32 · gbrh 55
+    · Sicurezza pagamenti rinforzata 02/05: blocco importi negativi + coerenza Metodo/Data
+  medical_certificates: 2.770 (+97 da bonifica) ✅
+  courses: **561** (era 586, -25 record fantasma rimossi 04/05)
+    · +calculated_lessons (esclude vacanze da strategicEvents)
+  courseQuotesGrid: ✅ aggiunta season_id (default 1)
   users: 19 (account staff)
   seasons: 3 (24/25 · 25/26 · 26/27)
   team_employees: 16
   team_attendance_logs: 2.078
-  team_scheduled_shifts: 17 (ATTENZIONE: wipe test — reimportare)
-  team_shift_templates: 1 (ATTENZIONE: stesso problema)
-  strategic_events: 74
-  custom_list_items: 235
+  team_scheduled_shifts: 17 (⚠️ wipe test — reimportare)
+  team_shift_templates: 1 (⚠️ stesso problema)
+  strategic_events: 74 (+ marcatura is_public_holiday)
+  custom_list_items: 235 (post-Hard Wipe categorie)
   cities: 8.062 | provinces: 107
-  promo_rules: 50 | price_matrix: 22 | company_agreements: 11
+  promo_rules: 50 (+ seasonId) | price_matrix: 22 | company_agreements: 11 (+ seasonId)
   instructor_agreements: 8 | user_roles: 7
   studios: 13 | booking_services: 3
-  audit_logs · access_logs · user_activity_logs: attive ✅
+  audit_logs · access_logs · user_activity_logs (2.084 record): attive ✅
+
+Tabelle DROPPED (Pruning chirurgico 01/05):
+  crmLeads, crmCampaigns, ticket-related (4 tabelle) — totale 7 tabelle orfane
 
 Tabelle a zero da tenere (moduli in sviluppo):
-  studio_bookings · staff_presenze · staff_sostituzioni
-  payslips · gem_conversations · gem_messages
+  studio_bookings · staff_presenze · staff_sostituzioni · payslips
+  gem_conversations · gem_messages
   staff_contracts_compliance · staff_document_signatures
 
 Flag qualità members da bonificare:
   tessera_mancante_da_assegnare: 1.322
   omonimo_da_verificare: 407
-  mancano_dati_obbligatori: 198
+  mancano_dati_obbligatori: 198 (di cui 8 con CF totalmente mancante)
   nome_match: 179
   incompleto: 20
+  CF mancante esplicito: BELLONI, BOCCHETTI, BURANI, CIONI, GIACOSA, GULIZIA, MONTANI, MOUTIQ
 
-Ultimo backup:
-  CHAT22_CHIUSURA_DEFINITIVA_20260425_1005.sql (13MB) ✅
-  Tutti i backup in /root/backups/ sul VPS
+Backup recenti:
+  CHAT22_CHIUSURA_DEFINITIVA_20260425_1005.sql (13MB)
+  CHAT22B_PRE_CAPITALIZZAZIONE_20260425.sql
+  CHAT22B_BONIFICA_OP1235_20260426.sql
+  scripts/backup-db.sh notturno attivo (retention 30 giorni)
 
-Criticita aperte:
-  1. team_scheduled_shifts = 17 → reimportare turni reali
+Criticità aperte:
+  1. team_scheduled_shifts = 17 → reimportare turni reali da team_TURNI.xlsx
   2. team_shift_templates = 1 → stesso problema
-  3. enrollmentId = null su ~3.200 pagamenti
-     (collegati a persona ma non al corso specifico)
-  4. participation_type non uniforme:
-     'corso' e 'STANDARD_COURSE' coesistono
-     → uniformare in Chat_08_Iscritti
-  5. courses = 586 (296 reali + 285 storico + 5 P6)
+  3. enrollmentId = null su ~3.200 pagamenti (collegati a persona ma non al corso specifico)
+  4. participation_type non uniforme: 'corso' e 'STANDARD_COURSE' coesistono → uniformare in Chat_08
+  5. routes.ts (12k righe) e maschera-input-generale.tsx (4.5k righe) — smantellamento sospeso per sicurezza
+
+---
+
+## OSSERVABILITÀ E SICUREZZA (NEW — 01/05/2026)
+
+- **Sentry** + **PostHog**: telemetria remota live
+- **Vercel AI SDK** (gpt-4o-mini): tool `searchMembers`, `searchCourses` operativi
+- **Hard-RBAC** sui tool AI: ereditano permessi utente dal DB
+- **winston logger** in `server/logger.ts`: log JSON giornalieri in `/logs`
+- **Rate Limiting** in `server/auth.ts` (anti-bruteforce)
+- **Backup notturno** automatico via `scripts/backup-db.sh` (retention 30 giorni)
+- **TypeScript**: `npx tsc --noEmit` ZERO ERRORI
+
+---
 
 ## EXPORT WIZARD — implementato 25/04/2026
-  Componente: client/src/components/ExportWizard.tsx
-  Formati: CSV + Excel XLSX (streaming ExcelJS)
-  PDF: da implementare in futuro
+
+  Componente: `client/src/components/ExportWizard.tsx`
+  Formati: CSV + Excel XLSX (streaming ExcelJS, chunk 500 record)
+  Strong typing colonne attivo (5 file)
+  PDF: implementato 04/05 via jsPDF (TabRicevute) per ricevute/fatture
   Route backend: POST /api/export (streaming)
   Sezioni con ExportWizard: 10/10
-    members · payments · accounting-sheet
-    courses · workshops · studio-bookings
-    reports · gemteam · maschera-input
-    anagrafica-home
-  REGOLA FUTURA: ogni nuova sezione deve
-    includere ExportWizard dall'inizio
+    members · payments · accounting-sheet · courses · workshops · studio-bookings
+    reports · gemteam · maschera-input · anagrafica-home
+  REGOLA: ogni nuova sezione deve includere ExportWizard dall'inizio
 
-## IMPORT UNIFICATO — aggiornato 25/04/2026
-  Pagina: /importa
+---
+
+## IMPORT UNIFICATO — aggiornato 26/04/2026
+
+  Pagina: `/importa`
   Logica: file aggiornato vince sul DB per anagrafica
   Dry-run: ✅ anteprima prima di eseguire
-  Report CSV: ✅ scaricabile post-import
-  Bottoni collegati: tutti → /importa
-  Route legacy deprecate: ✅
-	
+  Report CSV: ✅ scaricabile post-import (con colonna Modifiche Applicate)
+  Banner avviso normalizzazione step finale
+  Smart Routing attivo:
+    - QUOTATESSERA → memberships automatico
+    - DTYURI / DTNELLA → medical_certificates auto
+    - altri → enrollments con season_id forzato
+  CF validator italiano (algoritmo checksum) attivo:
+    - CF obbligatorio: blocco import se mancante
+    - CF invalido: blocco import + warning dry-run
+    - CF valido ma incongruente: warning
+  Banner UI:
+    - rosso: CF mancante/invalido
+    - arancio: stagione mancante (+ pulsante assegna 25/26)
+    - blu: Smart Routing stats
+  Sanitizer attivo (`server/utils/sanitizer.ts`) su 5 route + webhook WC
+  TZ=Europe/Rome su VPS
 
 ---
 
 ## STATO COMPLETO DI TUTTE LE CHAT
 
-=== COMPLETATE ===
+=== COMPLETATE / STABILI ===
 
 00_errori — CHIUSA
   Protocolli: F1-099 / F2-113
   Lavori: STI completo, 0 errori TypeScript, fix multipli calendario/modal
   Tabelle: courses (DROP 16 silos legacy), categories migrate
 
+00_DB_Cleanup — CHIUSA
+  Lavori: activities svuotata (F1-006), universal_enrollments svuotata (F1-007),
+          team_shift_templates_BAK_F1_030 rimossa (F1-032),
+          16 tabelle silos legacy droppate (F1-063 da chat 00_errori),
+          7 tabelle orfane droppate (Pruning 01/05)
+
 01_quote e promozioni — FASE 1 CHIUSA (Fase 2 da fare)
   Protocolli: F1-014 / F2-011
-  Lavori: 18 tabelle create, 50 promo, 9 accordi insegnanti, 11 convenzioni,
+  Lavori: 18 tabelle, 50 promo, 9 accordi insegnanti, 11 convenzioni,
           4 welfare provider, carnet_wallets, price_matrix (22), webhook WooCommerce
+  AGGIORNAMENTI 04/05:
+    - seasonId introdotto in promoRules, staffRates, welfareProviders, companyAgreements
+    - Listino Multi-Stagione (courseQuotesGrid + season_id)
+    - NuovoPagamentoModal: importo readOnly, sconti SOLO via codici promo
+    - Hub /quote-promo con prop drilling seasonId
   Pendenti: F1-015 — StarGem → WooCommerce (catalogo in uscita)
 
 02_GemStaff — COMPLETATA 13-14/04/2026
   Protocolli: F1-001→016 / F2-001→019
   Backup: gemstaff_DEFINITIVO
-  Lavori completati:
-    - 6 tabelle create: staff_presenze, staff_sostituzioni, payslips,
-      staff_contracts_compliance, staff_document_signatures, staff_disciplinary_log
-    - members: 5 colonne aggiunte (staff_status, lezioni_private_autorizzate, ecc.)
-    - users: 3 colonne auth (email_verified, otp_token, otp_expires_at)
-    - 65 insegnanti + 6 PERSONAL_TRAINER mappati con staff_status = attivo
-    - /gemstaff con 6 Tab complete (Anagrafica, PT, Compliance, Accordi, Presenze, Disciplinare)
-    - /gemstaff/me per insegnanti (dati, presenze, documenti, cedolino)
-    - Routing per ruolo insegnante → /gemstaff/me
-    - Email automatiche welcome + reset (in attesa config SMTP in .env)
-    - Deprecation warnings su /api/instructors (header + deprecation_logs)
-    - Guard ruoli: Tab 4 e 6 nascosti a operator/segreteria
-    - 0 errori TypeScript totali
-    - Deploy VPS verificato
+  Tabelle (6 create): staff_presenze, staff_sostituzioni, payslips,
+    staff_contracts_compliance, staff_document_signatures, staff_disciplinary_log
+  members: 5 colonne aggiunte (staff_status, lezioni_private_autorizzate, ecc.)
+  users: 3 colonne auth (email_verified, otp_token, otp_expires_at)
+  65 insegnanti + 6 PERSONAL_TRAINER mappati con staff_status = attivo
+  /gemstaff con 6 Tab + /gemstaff/me + Email automatiche (in attesa SMTP)
+  Deprecation warnings su /api/instructors
 
 03_GemTeam — COMPLETATA (turni da reimportare)
   Protocolli: F1-023→035 / F2-015→016
-  Lavori completati:
-    - Import turni da team_TURNI.xlsx e team_20252026_PRESENZE_TEAM.xlsx
-    - Dashboard 5 KPI (Presenti, Usciti, Assenti, Non Pervenuti, Online)
-    - Check-in/Check-out self-service da /gemteam
-    - Full-Width Shift Grid per monitor 4K
-    - Esclusione silente botAI e admin dalle presenze
-    - team_shift_templates_BAK_F1_030 rimossa (F1-032)
-  PENDENTE CRITICO: team_scheduled_shifts = 17 (erano 225), team_shift_templates = 1 (erano 550)
-    Questi dati sono stati cancellati durante i test E2E — i turni reali vanno reimportati
+  Lavori: Import turni, Dashboard 5 KPI, Check-in/Check-out, Full-Width Shift Grid,
+          Esclusione silente botAI/admin, team_shift_templates_BAK_F1_030 rimossa
+  PENDENTE CRITICO: team_scheduled_shifts = 17 (erano 225) e team_shift_templates = 1 (erano 550)
+    Cancellati durante test E2E — reimportare da team_TURNI.xlsx
 
 05_GemPass — COMPLETATA 12/04/2026
   Protocolli: F1-001→007 / F2-001→007 — 22/22 test superati
@@ -201,436 +335,235 @@ Criticita aperte:
           member_forms_submissions CREATE,
           API pubblica /api/public/membership-status/:code,
           formato tessera: 2526-000042 (con trattino)
-  Pendenti: firma kiosk tablet (Phase 2)
+  Pendenti: firma kiosk tablet (Phase 2), Fix UI campi nascosti (PRIORITA 1b)
+
+08_corsi — RIPARTITA E CHIUSURA MASSIVA 29-30/04/2026
+  Protocolli: F1-013-LIGHT → F1-021 (18 chiusi) + F2-022 → F2-028 (23 chiusi)
+  Lavori: bonifica DT, magic strings, /api/dashboard/attivita-panoramica,
+          6 tab accordion /iscritti_per_attivita, 6 wrapper pages,
+          5 schede pattern scheda-corso.tsx, 3 schede ad hoc (Domeniche/LI/Campus),
+          fix anti-crash 2526ALLENAMENTO, /elenchi hub di verità (5 Aree Funzionali)
+  Pendenti: uniformare participation_type 'corso' vs 'STANDARD_COURSE'
 
 10_Utenti / GemPortal — COMPLETATA 15/04/2026
-  Protocolli: F1-001→013 / F2-001→011 + F1-014 + F2-012
+  Protocolli: F1-001→014 / F2-001→012
   Backup: gemportal_COMPLETO_20260415_0759.sql (11MB)
-  Lavori completati:
-    AUTH:
-    - user_roles: 7 ruoli allineati (operator, admin, insegnante, client, ecc.)
-    - Login accetta email O username
-    - forgot-password anti user-enumeration
-    - first-login redirect per ruolo
-    - email_verified = 1 per 14 staff @studio-gem.it
-    - Deploy script: scripts/deploy-vps.sh creato
-    - VPS regola: /opt/plesk/node/24/bin/npm install prima del build
-    GEMPORTAL:
-    - 3 tabelle: gem_conversations, gem_messages, member_uploads
-    - TeoBot con Claude SDK @anthropic-ai/sdk attivo
-    - 7 route GemChat (A-G)
-    - badge navbar GemChatBadge
-    - /area-tesserati live in produzione
-    - Martina Ricci test verificato OK
-    ONBOARDING:
-    - F1-014: flussi onboarding (self-service, segreteria, WooCommerce)
-    - F2-012: pagina /registrati e flussi login B2C
-    - Tuning GDPR e Tutori Minori in schema.ts
-    - Age checking dinamico (TIMESTAMPDIFF server-side)
-    NOTA: l'import 9.400 membri e stato eseguito ma poi cancellato (dati sporchi)
-          Attualmente members = 92. Nessun utente reale importato.
-
-00_DB_Cleanup — COMPLETATA
-  Lavori: activities svuotata (F1-006), universal_enrollments svuotata (F1-007),
-          team_shift_templates_BAK_F1_030 rimossa (F1-032),
-          16 tabelle silos legacy droppate (F1-063 da chat 00_errori)
+  Lavori AUTH: 7 ruoli, login email|username, forgot-password anti user-enumeration,
+    first-login redirect per ruolo, 14 staff @studio-gem.it email_verified
+  Lavori GEMPORTAL: gem_conversations, gem_messages, member_uploads,
+    TeoBot Claude SDK attivo (potenziato 01/05 con Vercel AI SDK + Hard-RBAC),
+    7 route GemChat (A-G), badge GemChatBadge, /area-tesserati live
+  Lavori ONBOARDING: F1-014 + F2-012, /registrati, GDPR, Tutori Minori,
+    Age checking dinamico (TIMESTAMPDIFF server-side)
+  NOTA: members reali = 4.489 (post Chat_22). L'import 9.400 e cancellato (dati sporchi) appartiene al passato
 
 12_Gemdario — IN COLLAUDO (UI FREEZE)
-  Lavori completati:
-    - STI completo: 303 corsi migrati, bridge unifiedEvents
-    - Calendario con colori pieni, legenda, filtri dinamici
-    - Planning multi-stagione (Set-Ago), marker oggi, festività in rosso
-    - Modal unificato CourseUnifiedModal
-    - TimeSlotPicker.tsx creato
-    - PaymentModuleConnector.tsx creato (PIN segreteria per forzature)
-    - strategic_events in read/write/delete
-    - Modalità COPIA con campi rossi
-    - Conflitto anti-overlap rimosso intenzionalmente (F1-094)
-  PENDENTE: collaudo end-to-end Planning+Calendario+Programmazione Date
-  PENDENTE: raggruppamento corsi nel Planning sparito — da investigare
-  ATTENZIONE: UI FREEZE — non modificare estetica fino a collaudo completato
-
-## 12_Gemdario — aggiornato 2026_04_26_2100
-Stato: 🟡 In collaudo
-Ultimo protocollo: F1-016 / F2-031 (in corso)
-Tabelle DB toccate:
-  courses: +total_occurrences +active_on_holidays +internal_tags
-           SKU cleanup 294 record
-  strategic_events: +is_public_holiday +26 festività 25/26 e 26/27
-  custom_lists: stato_corso(13), tag_interni(6), tipo_partecipante(7),
-                metodi_pagamento(1), stato_iscrizione(vuota),
-                +10 liste create (dettaglio_iscrizione, note_pagamento,
-                tipi_carnet, categorie_anagrafica, canale_acquisizione,
-                tessera_ente, categorie_affitti, categorie_booking,
-                categorie_merchandising, campus)
-  custom_list_items: seed completo tutte le liste
-  enrollments: season_id aggiornato 929 prove
-Tabelle droppate:
-  participant_types (migrata in custom_lists)
-  payment_methods (migrata in custom_lists)
-Nuove route backend:
-  GET /api/courses/:id/enrolled-members
-  GET /api/strategic-events/closed-days
-Lavori completati:
-  - Fix timezone calendario e planning (setHours 12,0,0,0)
-  - Corsi nascosti su giorni festivi
-  - Badge Stato Corso e Interno Corso nella card
-  - Contatore N Lez decrescente
-  - InlineListEditor (Pennino A/B) — standard globale
-  - Refactoring completo /elenchi (sidebar aree funzionali)
-  - /elenchi rimossa dal menu (rotta ancora attiva)
-  - Pennini inline: stato_corso, interno_corso, categorie,
-    metodi_pagamento, canale_acquisizione
-  - Scheda corso: JOIN reali tessera + certificato
-  - Duplicazione massiva: doppio dropdown stagione + eliminazione
-  - 149 file temp rimossi + attached_assets 25MB svuotati
-Pendenti:
-  - F2-031 in corso: 8 pennini rimanenti + rimozione /elenchi sidebar
-  - Deploy Plesk + verifica visiva completa
-  - B3bis: Planning corsi su festivi (verifica dopo deploy)
-  - Stato Iscrizione: voci da popolare
-  - GemTeam turni reimport (17 → 225)
-  - Refactoring calendar.tsx (3.500 righe → sessione dedicata)
-  - Navigazione history + breadcrumb tutte le pagine
-  - Raggruppamento corsi Planning (bug MASTER)
-  - Ricorrenza bisettimanale/mensile → Chat_08
+  Protocolli ultimi: F1-016 / F2-031 (in corso)
+  Lavori completati: STI 303 corsi migrati, bridge unifiedEvents, Calendario colori pieni
+    Planning multi-stagione (Set-Ago), modal CourseUnifiedModal, TimeSlotPicker,
+    PaymentModuleConnector con PIN, COPIA con campi rossi, conflitto anti-overlap rimosso (F1-094)
+  AGGIORNAMENTI:
+    - courses: +total_occurrences +active_on_holidays +internal_tags +calculated_lessons (04/05)
+    - 25 record fantasma rimossi → courses ora 561
+    - strategic_events: +is_public_holiday, +26 festività 25/26 e 26/27
+    - custom_lists: stato_corso(13), tag_interni(6), tipo_partecipante(7), metodi_pagamento(1) + 10 nuove liste
+    - InlineListEditor (Pennino A/B) standard globale
+    - Pennini inline: stato_corso, interno_corso, categorie, metodi_pagamento, canale_acquisizione
+    - 04/05: API bulk attendances + vista pivot Registro di Classe + Dialog "Fai l'Appello"
+  Pendenti:
+    - F2-031: 8 pennini rimanenti + rimozione /elenchi sidebar
+    - Deploy Plesk + verifica visiva completa
+    - B3bis: Planning corsi su festivi (verifica dopo deploy)
+    - Stato Iscrizione: voci da popolare
+    - Refactoring calendar.tsx (3.500 righe → sessione dedicata)
+    - Navigazione history + breadcrumb tutte le pagine
+    - Raggruppamento corsi Planning (bug MASTER) — ANCORA APERTO
+    - Ricorrenza bisettimanale/mensile → Chat_08
   CONTINUARE IN: Chat_12B_Gemdario
+  ATTENZIONE UI FREEZE — non modificare estetica fino a collaudo completato
 
-
-22_Import_Export_dati — ✅ CHIUSA DEFINITIVAMENTE 25/04/2026
+22_Import_Export_dati — ✅ CHIUSA 25/04/2026
   Protocolli: F1-001→054
   Backup: CHAT22_CHIUSURA_DEFINITIVA_20260425_1005.sql (13MB)
   Logica import: MASTER > WORKSHOP > ATHENA > ElencoIscrizioni
   Lavori: import storico completo, ExportWizard 10 sezioni,
           /importa con dry-run, route legacy deprecate
 
-22b_Import_Export_dati — ✅ CHIUSA 25/04/2026 ore 17:30
-  Protocolli: F1-001→007 / F2-001→007
-  Ultimo commit: 028531a
-  Backup: CHAT22B_PRE_CAPITALIZZAZIONE_20260425.sql
-  Lavori completati:
-    EXPORT:
-    - Date formato italiano GG/MM/AAAA, Sì/No booleani
-    - Intestazione Excel coerente, anno 4 cifre
-    - TZ=Europe/Rome su VPS (.env + pm2)
-    - Strong typing colonne ExportWizard (5 file)
-    - Streaming chunk 500 record /api/export
-    - Route legacy export-csv rimosse
-    MASCHERA INPUT:
-    - Tessera, pagamento, certificato ora presenti
-    - Certificato letto da medical_certificates
-      (non dal campo legacy null in members)
-    - Verificato su 4 nominativi reali
-    SANITIZZAZIONE:
-    - server/utils/sanitizer.ts creato e attivo
-      UPPER: cognome, nome, CF, città, provincia,
-             regione, nazionalità, luogo nascita
-      LOWER: email, PEC, facebook, sito web
-      TITLE CASE: indirizzo, professione, tutori
-      Lettera maiuscola dopo cifra/slash (58A, 12/G)
-    - Integrato in 5 route + webhook WooCommerce
-    - Applicato a import /importa + tracking modifiche
-    NORMALIZZAZIONE RETROATTIVA:
-    - 3.949 record members normalizzati (BEGIN/COMMIT)
-    - street_address → address (12 file refactored)
-    - street_address ghost column DB (debito tecnico noto)
-    SEZIONE /importa:
-    - sanitizeMemberData pre-insert/update
-    - modifiche_casing nel dry-run
-    - colonna Modifiche Applicate nel report CSV
-    - banner avviso normalizzazione step finale
-  Tabelle DB toccate: members (3.949 record)
-  Debito tecnico: street_address ghost column
-  Pendenti per chat dedicate:
-    - Fix UI GemPass → Chat_05_GemPass (PROSSIMA)
-    - Validazione CF/tel/email → Chat_10_Utenti
-    - Rollback import pagamenti → Chat_06
-    - Badge status + participation_type → Chat_08
-    - Delta import metà maggio → sessione futura
-    - P5 STAFF insegnanti → sessione separata
-
 22b_Bonifica_Dati — ✅ CHIUSA 26/04/2026 ore 18:00
   Protocolli: F1-001→010 / F2-001→007
-  Ultimo commit: feat(import) Smart Routing
   Backup: CHAT22B_BONIFICA_OP1235_20260426.sql
-  Lavori completati:
-    BONIFICA DB enrollments:
-    - Audit 7.351 record activity_type=storico
-    - 24 tessere create (orfani QUOTATESSERA con CF)
-    - 8 membri senza CF saltati + badge CRITICO in UI
-      (BELLONI, BOCCHETTI, BURANI, CIONI, GIACOSA,
-       GULIZIA, MONTANI, MOUTIQ)
-    - 97 certificati medici creati (orfani DTYURI/DTNELLA)
-    - 929 prove: season_id=1 assegnato
-    - 285 SKU riclassificati da storico:
-        27 workshop (WS*, NATALE)
-        19 domenica_movimento (KUQI*, RUSSO, DOSSANTO)
-        14 corso (OPEN*, CUGGEGIO, storici)
-        4 campus (CAMPUSS1/S2)
-        1 lezione_individuale
-        1 prova_gratuita
-        1 merchandising
-        1 allenamenti (2526ALLENAMENTO)
-        1 buono_regalo (GIFT)
-        3 lasciati storico (contenitori import:
-          QUOTATESSERA, DTYURI, DTNELLA)
-    SMART ROUTING IMPORT (anti-recidiva):
-    - shared/utils/cf-validator.ts creato
-      (algoritmo italiano checksum + estrazione
-       data nascita, sesso, codici nome/cognome)
-    - CF obbligatorio: blocco import se mancante
-    - CF invalido: blocco import + warning dry-run
-    - CF valido ma incongruente con dati: warning
-    - Smart Routing in /api/import/mapped:
-        QUOTATESSERA → memberships automatico
-        DTYURI/DTNELLA → medical_certificates auto
-        altri → enrollments con season_id forzato
-    - Blocco season_id NULL con conferma operatore
-    - Payload dryRun arricchito:
-        missingCfRecords, invalidCfRecords,
-        cfWarnings, routingStats, missingSeasonRecords
-    UI IMPORT:
-    - Banner rosso CF mancante/invalido
-    - Banner arancio stagione mancante
-      (con pulsante assegna stagione 25/26)
-    - Banner blu Smart Routing stats
-    UI ANAGRAFICA/GEMPASS:
-    - Badge CF MANCANTE in members.tsx
-    - Alert rosso in anagrafica-home.tsx
-    - Bottone disabilitato in gempass.tsx
-      con tooltip esplicativo
-  Tabelle DB toccate:
-    members (8 flag), memberships (+24),
-    medical_certificates (+97), enrollments (+929),
-    courses (285 activity_type aggiornati)
-  Debito tecnico:
-    street_address ghost column (invariato)
-  Da comunicare alle altre chat: vedi sezione
-  INFO SPECIFICHE PER CHAT DEDICATE
+  Lavori: Audit 7.351 enrollments, 24 tessere create, 97 medical_certificates creati,
+    285 SKU riclassificati, Smart Routing import (CF validator, season_id forzato),
+    UI: Banner CF/stagione/Smart Routing, Badge CF MANCANTE in UI
+
+24_DB_Monitor — ✅ AVVIATA E CHIUSURA F1/F2-001 — 28/04/2026
+  Protocolli: F1-001 / F2-001
+  Lavori: monitoraggio DB e UI in tempo reale
+  Decisioni: cattura modifiche AG → IBRIDA (wrapper Pool + binary log),
+             mappa Frontend↔DB → IBRIDA (db-map-config.ts + verifica notturna)
+  Genera segnalazioni che AG raccoglie in E_Segnalazioni_DB.md
 
 23_Log_Verifiche — 🟡 APERTA 24/04/2026
-  Obiettivo: collegare audit_log UI,
-  tracciamento azioni in tempo reale
-  Tabelle esistenti nel DB:
-    audit_logs · access_logs · user_activity_logs
-    team_employee_activity_log · webhook_logs
-  Pendenti: analisi struttura log, UI visualizzazione,
-    popolamento automatico da routes
+  Obiettivo: collegare audit_log UI, tracciamento azioni in tempo reale
+  Tabelle esistenti: audit_logs · access_logs · user_activity_logs (2.084) · team_employee_activity_log · webhook_logs
+  Pendenti: analisi struttura log, UI visualizzazione, popolamento automatico
 
-=== DA AVVIARE — ORDINE PRIORITA ===
+INFRASTRUTTURA AI/OBSERVABILITY — ✅ ATTIVA 01/05/2026
+  Sentry + PostHog · Vercel AI SDK (gpt-4o-mini) · Hard-RBAC tool · winston logger
+  Rate Limiting auth · Backup-db.sh notturno
+  Cross-cutting su Chat_21_TeoCopilot e tutti i tool AI
 
-PRIORITA 1 — ✅ COMPLETATA — Import anagrafica reale
-  Chat_22_ImportExport — F1-001→054 — CHIUSA 25/04/2026
-  members: 4.489 · memberships: 3.281
-  enrollments: 13.584 · payments: 3.775
-  medical_certificates: 2.770 · courses: 586
-  Vedi D_2026_04_25_1205_Stato_DB_Reale.md
-  Vedi D2_2026_04_24_1200_Stato_Mappa_Frontend.md
+=== DA COMPLETARE / DA AVVIARE ===
 
 PRIORITA 1b — Fix UI campi nascosti (chat dedicate)
-  DATI IMPORTATI MA NON VISIBILI IN UI:
-
-  → Chat_05_GemPass:
-    memberships.membership_type → Tipo ente (ENDAS/OPES/LIBERTAS)
-    memberships.issue_date → Data emissione tessera
-    memberships.season_id → Stagione (1=25/26, 3=24/25)
-    memberships.fee → Quota tessera pagata
-    members.data_quality_flag → Badge segnalazione problemi
-    DA CREARE: tabella membership_events (storico azioni tessera)
-    DA CREARE: bottone "Dati da verificare" (1.322 tessere mancanti)
-    DA CREARE: funzione "Assegna Tessera" rapida
-    DA CREARE: bottone "Assegna Tessera" per flag tessera_mancante
-
-  → Chat_10_Utenti (Anagrafica):
-    54+ campi Athena importati ma non mostrati in UI:
-    mobile, secondary_email, email_pec
-    address, city, province, postal_code, region
-    nationality, birth_nation
-    tutor1_fiscal_code, tutor1_phone, tutor1_email
-    tutor1_birth_date, tutor1_birth_place
-    consent_sms, consent_image, consent_newsletter
-    privacy_accepted, privacy_date
-    company_name, company_fiscal_code, company_city
-    document_type, document_expiry
-    bank_name, iban
-    size_shirt, size_pants, size_shoes, height, weight
-    emergency_contact_1/2/3 name/phone/email
-    education_title, education_institute
-    fattura_fatta, athena_id, from_where
-    p_iva, albo_*, patente_*, car_plate
-    tutor2_first_name/last_name/birth_date/birth_place
-    Badge flag qualità colorati:
-      tessera_mancante → 🟡
-      omonimo_da_verificare → 🔴
-      mancano_dati_obbligatori → 🟠
-      incompleto → ⚪
-
-  → Chat_06_Contabilità:
-    payments.operator_name → Chi ha inserito il pagamento
-    payments.source → Canale/sede di vendita
-    payments.transfer_confirmation_date → Data entrata sul conto
-    payments.quota_description → Descrizione quota
-      (es. "2 CORSI ADULTI, 1 QUOTA TESSERA")
-    payments.period → Periodo (es. "SETTEMBRE - OTTOBRE 2025")
-    payments.total_quota → Totale quota lorda
-    payments.deposit → Acconto versato
-    payments.receipts_count → Numero ricevute fatte
-    payments.discount_code → Codice sconto applicato
-    payments.discount_value → Valore sconto
-    payments.gbrh_numero/date/iban → Dati buoni gift
-
-  → Chat_08_Corsi/Iscritti:
-    enrollments.status → Badge colorato per stato
-      (active=verde, pending=giallo, cancelled=rosso)
-    enrollments.participation_type → corso/prova
-      ATTENZIONE: uniformare 'corso' e 'STANDARD_COURSE'
-    enrollments.source_file → Fonte import
-    enrollments.notes → Note interne iscrizione
-    enrollments.season_id → Stagione iscrizione
-    Filtri da aggiungere: per stagione, per status,
-      per tipo partecipazione
+  Vedi sezione "INFO SPECIFICHE PER CHAT DEDICATE" sotto
 
 PRIORITA 2 — Reimportare turni GemTeam
   team_scheduled_shifts e team_shift_templates cancellati durante test
-  Vanno reimportati da team_TURNI.xlsx prima dell'uso reale
+  Da reimportare da team_TURNI.xlsx prima dell'uso reale
 
 PRIORITA 3 — 06_Contabilita_Cassa
   payments = 3.775 (storico importato ✅)
-  Da fare: collegare UI cassa operativa,
-  cash_registers, bank_deposits
+  Da fare: collegare UI cassa operativa, cash_registers, bank_deposits
+  Sicurezza pagamenti rinforzata 02/05 ma UI cassa ancora da fare
 
-PRIORITA 4 — 08_Corsi, 09_Workshop, 14_BookGem
-  Stagione in apertura — schede corso e WS urgenti
+PRIORITA 4 — 09_Workshop, 14_BookGem
+  Stagione in apertura — schede WS urgenti (08_Corsi appena chiuso)
 
 PRIORITA 5 — 04_MedGem, 07_Gemory
-PRIORITA 6 — 11_Campus, 13_Domeniche, 15_Saggi, 16_Vacanze
-PRIORITA 7 — 17_Clarissa, 18_GemEvent, 19_GemNight, 20_MerchSG
+PRIORITA 6 — 11_Campus, 13_Domeniche, 15_Saggi, 16_VacanzeStudio
+PRIORITA 7 — 17_Clarissa, 18_GemEvent, 19_GemNight, 20_MerchSG, 25_KB, 26_Dashboard, 27_TV
 
 ---
 
 ## ARCHITETTURA AUTH DEFINITIVA
 
+```
 members.user_id → FK → users.id (onDelete: set null)
 user_id NULL = nessun account / user_id pieno = login attiva
 Flusso: INSERT users → PATCH members.user_id = UUID
 Ruoli (users.role testo libero): operator, admin, client, medico, insegnante, dipendente
-user_roles: colonna si chiama 'name' (NON roleName)
+user_roles: colonna si chiama 'name' (NON 'roleName')
 Login: email O username + password
 Policy due cappelli: doppio ruolo = 2 account separati
+Hard-RBAC sui tool AI: ereditano permessi dal DB
+```
 
 ---
 
 ## REGOLE DB INVIOLABILI
 
+```
 payments / PaymentModuleConnector → SENSIBILE — non toccare (14 route collegate)
 members → solo ADD COLUMN (mai modificare esistenti)
 courses → non toccare struttura STI
-enrollments → tabella iscrizioni UFFICIALE (universal_enrollments da droppare)
+enrollments → tabella iscrizioni UFFICIALE (universal_enrollments droppata)
 Categorie → custom_lists + custom_list_items (no nuove tabelle *_cats)
 Backup → obbligatorio dopo ogni F1 che modifica il DB
+3 SKU storico INTOCCABILI: 2526QUOTATESSERA, 2526DTYURI, 2526DTNELLA (contenitori import)
+```
 
 ---
 
 ## AREE SENSIBILI — NON TOCCARE
 
+```
 PaymentModuleConnector — impatta 14 route
 Tessere / parser barcode — non modificare
 Calendario — UI FREEZE — non abbellire fino a collaudo completato
+routes.ts (12k righe) — smantellamento SOSPESO 02/05 per dipendenze incrociate
+maschera-input-generale.tsx (4.5k righe) — stesso motivo
+```
 
 ---
 
 ## INFRASTRUTTURA
 
+```
 VPS: IONOS 82.165.35.145
-DB: stargem_v2 su MariaDB port 3306 (VPS) / 3307 (SSH tunnel locale)
+DB: stargem_v2 su MariaDB 11.4 port 3306 (VPS) / 3307 (SSH tunnel locale)
 App: pm2 porta 5001, nome app: stargem
 Nginx: reverse proxy su stargem.studio-gem.it
 Deploy: git push → Plesk git pull manuale → npm run build → pm2 reload stargem
 Backup path: /root/backups/ sul VPS (via SSH mysqldump)
-Ultimo backup: CHAT22B_BONIFICA_OP1235_20260426.sql ✅
-Backup disponibili in /root/backups/:
-  CHAT22_CHIUSURA_DEFINITIVA_20260425_1005.sql (13MB)
-  CHAT22B_PRE_CAPITALIZZAZIONE_20260425.sql
+Backup notturno automatico: scripts/backup-db.sh (.tar.gz, retention 30 giorni)
+TZ=Europe/Rome su VPS (.env + pm2)
+Logging: winston in server/logger.ts → /logs (rotazione giornaliera JSON)
+Rate Limiting: server/auth.ts attivo
+Telemetria: Sentry + PostHog live
+```
+
+---
 
 ## INFO SPECIFICHE PER CHAT DEDICATE
 
-→ Chat_05_GemPass (PROSSIMA DA APRIRE):
-  Leggi: D_2026_04_25_1215_Stato_DB_Reale.md
-         D2_2026_04_25_1215_Stato_Mappa_Frontend.md
-  memberships ora ha 3.305 record (+24 da bonifica)
-    membership_type (ENDAS/OPES/LIBERTAS) · issue_date
-    season_id (1=25/26, 3=24/25) · fee
+→ **Chat_05_GemPass**:
+  Leggi: D_2026_04_25_1215_Stato_DB_Reale.md, D2_2026_04_25_1215_Stato_Mappa_Frontend.md
+  memberships ora ha 3.305 record
+    membership_type (ENDAS/OPES/LIBERTAS) · issue_date · season_id · fee
   DA CREARE: tabella membership_events
-  DA CREARE: bottone "Dati da verificare"
-  DA CREARE: funzione "Assegna Tessera"
+  DA CREARE: bottone "Dati da verificare" (1.322 tessere mancanti)
+  DA CREARE: funzione "Assegna Tessera" rapida
   season_id FK: seasons.id (1=25/26, 2=26/27, 3=24/25)
-  NOVITÀ DA CHAT_22b/BONIFICA:
-    - 24 tessere create (data_quality_flag=da_verificare)
-    - Badge CF MANCANTE attivo su 8 membri in UI
-      (members.tsx, anagrafica-home.tsx, gempass.tsx)
-    - 8 senza CF: BELLONI, BOCCHETTI, BURANI, CIONI,
-      GIACOSA, GULIZIA, MONTANI, MOUTIQ
-      → completare CF prima che possano avere tessera
-    - ExportWizard strong typing attivo
-    - sanitizer.ts su tutti i salvataggi
-    - TZ=Europe/Rome su VPS
+  Badge CF MANCANTE attivo (8 membri: BELLONI, BOCCHETTI, BURANI, CIONI, GIACOSA, GULIZIA, MONTANI, MOUTIQ)
 
-→ Chat_10_Utenti/Anagrafica (DOPO Chat_05):
-  NOVITÀ DA CHAT_22b/BONIFICA:
-    - CF validator algoritmo italiano in shared/utils/
-    - Validazione CF obbligatoria all'import
-    - 8 membri con CF mancante (flag mancano_dati_obbligatori)
-    - sanitizer.ts: UPPER/LOWER/TITLE CASE attivo su members
-  Leggi: D_2026_04_25_1205_Stato_DB_Reale.md
-         D2_2026_04_24_1200_Stato_Mappa_Frontend.md
-  members ha 174 colonne — 54+ non mostrate in UI
-  Vedi PRIORITA 1b per lista completa campi da aggiungere
+→ **Chat_10_Utenti/Anagrafica** (DOPO Chat_05):
+  CF validator algoritmo italiano in shared/utils/cf-validator.ts
+  Validazione CF obbligatoria all'import
+  sanitizer.ts: UPPER/LOWER/TITLE CASE attivo su members
+  members ha 174 colonne — 54+ non mostrate in UI (vedi PRIORITA 1b)
   Badge flag qualità da implementare per bonifica dati
+  ATTENZIONE: domande aperte di Gaetano sulla struttura tabella (intervalli O-U, V-W, colonne A, BA)
 
-→ Chat_06_Contabilità (AGGIORNA):
-  payments ha 3.775 record con 10+ campi non visibili in UI
-  Vedi PRIORITA 1b per lista completa
+→ **Chat_06_Contabilità** (AGGIORNA):
+  payments ha 3.775 record con 10+ campi non visibili in UI (vedi PRIORITA 1b)
+  Sicurezza pagamenti rinforzata 02/05: blocco importi negativi, coerenza Metodo/Data
   ExportWizard già integrato in accounting-sheet.tsx e payments.tsx
-  NOVITÀ DA CHAT_22b/BONIFICA:
-    - 2526GIFT (21 iscrizioni) = buono_regalo
-      Da gestire come sezione dedicata buoni regalo
-    - Rollback import pagamenti ancora pendente (ALTA PRIORITÀ)
-    - Smart Routing import: i pagamenti NON passano
-      più per enrollments per errore
+  Generazione PDF Ricevute/Fatture attiva (jsPDF, prefissi R/S/F)
+  2526GIFT (21 iscrizioni) = buono_regalo (sezione dedicata da fare)
+  Rollback import pagamenti pendente (ALTA PRIORITÀ)
+  Smart Routing: pagamenti NON passano più per enrollments per errore
+  /pagamenti-online estratta in rotta indipendente
 
-→ Chat_08_Corsi/Iscritti (AGGIORNA):
+→ **Chat_08_Corsi/Iscritti** (APPENA CHIUSA chiusura massiva 29-30/04):
   enrollments ha 13.584 record — status tutti 'active'
-  participation_type: 'corso' e 'STANDARD_COURSE' da uniformare
-  Vedi PRIORITA 1b per lista campi da mostrare
-  NOVITÀ DA CHAT_22b/BONIFICA:
-    - 285 SKU riclassificati da storico:
-      27 workshop, 19 domenica_movimento, 14 corso,
-      4 campus, 1 lezione_individuale, 1 prova_gratuita,
-      1 merchandising, 1 allenamenti, 1 buono_regalo
-    - 929 prove: season_id=1 aggiornato
-    - 3 SKU restano storico (contenitori import):
-      QUOTATESSERA, DTYURI, DTNELLA — non toccare
-    - Smart Routing attivo: nuovi import non
-      creeranno più record storico in enrollments
+  participation_type 'corso' e 'STANDARD_COURSE' da uniformare
+  285 SKU riclassificati da storico (27 workshop, 19 dom_mov, 14 corso, ecc.)
+  3 SKU storico contenitori: QUOTATESSERA, DTYURI, DTNELLA — non toccare
+  Smart Routing attivo
+  6 tab accordion in /iscritti_per_attivita
+  6 wrapper pages + 5 schede dettaglio pattern scheda-corso.tsx
+  Vista Pivot Registro di Classe + API bulk attendances (04/05)
 
-→ Chat_23_Log (APERTA):
-  Tabelle log già esistenti nel DB:
-    audit_logs · access_logs · user_activity_logs (2.084 record)
-    team_employee_activity_log · webhook_logs
-  Prima azione: analizza struttura e verifica se le routes
-  le popolano già, poi costruisci UI visualizzazione
-
-→ Chat_12_Gemdario (IN COLLAUDO):
-  ATTENZIONE UI FREEZE — non modificare estetica
-  Raggruppamento corsi nel Planning sparito — da investigare
+→ **Chat_12_Gemdario** (IN COLLAUDO):
+  ⚠️ UI FREEZE — non modificare estetica
+  Raggruppamento corsi nel Planning sparito — da investigare (BUG MASTER)
   Non toccare calendar.tsx, attivita.tsx fino a collaudo
+  courses ora 561 (post-pruning fantasmi)
+  Dialog "Fai l'Appello" attivo
 
-→ FUTURO — Delta import metà maggio:
+→ **Chat_23_Log** (APERTA):
+  Tabelle log esistenti: audit_logs · access_logs · user_activity_logs (2.084)
+  team_employee_activity_log · webhook_logs
+  Prima azione: analizza struttura, verifica popolamento da routes, costruisci UI
+
+→ **Chat_24_DB_Monitor** (CHIUSA F1/F2-001):
+  Cattura modifiche AG: wrapper Pool + binary log (IBRIDA)
+  Mappa Frontend↔DB: db-map-config.ts statico + verifica notturna (IBRIDA)
+  Segnalazioni operatore in E_Segnalazioni_DB.md (4 domande aperte di Gaetano sulla tabella members)
+
+→ **Chat_21_TeoCopilot** (POTENZIATA 01/05):
+  Vercel AI SDK gpt-4o-mini + tool searchMembers/searchCourses
+  Hard-RBAC: tool ereditano permessi utente dal DB
+  Magic Promo Button + Command Palette + Assistente Teo online
+  RBAC blocca fughe dati sensibili (client non vede dati altri)
+
+→ **FUTURO — Delta import metà maggio**:
   Fonte: GSheets aggiornato (stesso formato MASTER)
   Modalità: --solo-nuovi (salta CF già presenti)
   Sezione /importa già pronta con logica aggiornamento
 
-→ FUTURO — P5 STAFF insegnanti:
+→ **FUTURO — P5 STAFF insegnanti**:
   File: STAFF__PERSONAL__ALTRI.xlsx
   Campi: social, diploma, drive folder
   Da fare in sessione separata

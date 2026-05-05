@@ -2864,10 +2864,16 @@ Regole:
             const cols = getTableColumns(item);
             if (cols && Object.keys(cols).length > 0) {
               const colNames = Object.keys(cols);
+              let countResultObj: any = null;
               let rowCount = 0;
               try {
-                const countResult = await db.select({ count: sql<number>`count(*)` }).from(item);
-                rowCount = Number(countResult[0]?.count || 0);
+                const countSelects: any = { total: sql<number>`count(*)` };
+                for (const c of colNames) {
+                    countSelects[c] = sql<number>`count(${cols[c]})`;
+                }
+                const result = await db.select(countSelects).from(item);
+                countResultObj = result[0];
+                rowCount = Number(countResultObj?.total || 0);
               } catch (e) {
                 // Table might not exist in db yet or not a valid table
               }
@@ -2875,7 +2881,11 @@ Regole:
                 table: key,
                 columnCount: colNames.length,
                 rowCount,
-                columns: colNames
+                columns: colNames.map(c => ({
+                  name: c,
+                  type: (cols[c] as any).getSQLType?.() || (cols[c] as any).dataType || "unknown",
+                  recordCount: countResultObj ? Number(countResultObj[c] || 0) : 0
+                }))
               });
             }
           } catch(e) {}
@@ -2886,6 +2896,73 @@ Regole:
     } catch (error) {
       console.error("[API Error] DB Monitor:", error);
       res.status(500).json({ message: "Error reading db stats" });
+    }
+  });
+
+  // ==== Admin DB Monitor Table Data Route ====
+  app.get("/api/admin/db-monitor/table/:tableName", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      if (!user || (user.role?.toLowerCase() !== 'master' && user.role?.toLowerCase() !== 'admin' && user.role?.toLowerCase() !== 'super admin' && user.role?.toLowerCase() !== 'amministratore totale')) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const tableName = req.params.tableName;
+      const item = (schema as any)[tableName];
+      if (!item || typeof item !== 'object') {
+        return res.status(404).json({ message: "Table not found" });
+      }
+      
+      const limit = parseInt(req.query.limit as string) || 5000;
+      const offset = parseInt(req.query.offset as string) || 0;
+      const rows = await db.select().from(item).limit(limit).offset(offset);
+      return res.json(rows);
+    } catch (error) {
+      console.error(`Error fetching data for table ${req.params.tableName}:`, error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.post("/api/admin/db-monitor/flag-batch", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      if (!user || (user.role?.toLowerCase() !== 'master' && user.role?.toLowerCase() !== 'admin' && user.role?.toLowerCase() !== 'super admin' && user.role?.toLowerCase() !== 'amministratore totale')) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      const flags = req.body.flags; // Expecting an array
+      if (!Array.isArray(flags) || flags.length === 0) {
+        return res.status(400).json({ message: "Invalid payload" });
+      }
+
+      const logPath = path.join(process.cwd(), '_GAE_SVILUPPO/_ANTIGRAVITY/01_status_continui/E_Segnalazioni_DB.md');
+      const dateStr = new Date().toLocaleString('it-IT');
+      
+      let logEntry = `\n## Invio Batch - ${dateStr}\n\n`;
+      
+      for (const flag of flags) {
+        const { type, table, ref, reason, data } = flag;
+        logEntry += `- [ ] **[${table.toUpperCase()}]** - ${type === 'colonna' ? 'Colonna' : 'Riga'} \`${ref}\`\n  - **Motivo**: ${reason}\n`;
+        if (data) {
+          logEntry += `  - **Dati**: \`${JSON.stringify(data).substring(0, 500)}\`\n`;
+        }
+        logEntry += '\n';
+      }
+
+      if (!fs.existsSync(logPath)) {
+        fs.writeFileSync(logPath, '# Segnalazioni Anomalie Database\n\n> **Ultimo Aggiornamento:** ' + dateStr + '\n\nQui vengono salvate le segnalazioni effettuate tramite il DB Monitor.\n\n## Checklist Interventi\n');
+      } else {
+        // Aggiorna la data in cima se esiste
+        let content = fs.readFileSync(logPath, 'utf8');
+        content = content.replace(/> \*\*Ultimo Aggiornamento:\*\* .*/, `> **Ultimo Aggiornamento:** ${dateStr}`);
+        fs.writeFileSync(logPath, content);
+      }
+      fs.appendFileSync(logPath, logEntry);
+
+      return res.json({ success: true, count: flags.length });
+    } catch (error) {
+      console.error("Error saving DB monitor flag-batch:", error);
+      return res.status(500).json({ message: "Internal server error" });
     }
   });
 

@@ -347,7 +347,16 @@ export default function CalendarPage() {
             startStr = centerHoursConfig.start;
             endStr = centerHoursConfig.end;
         }
-        const hoursList = Array.from({ length: e - s + 1 }, (_, i) => i + s);
+        
+        let hoursList: number[] = [];
+        if (e >= s) {
+            hoursList = Array.from({ length: e - s + 1 }, (_, i) => i + s);
+        } else {
+            // L'orario di chiusura sfora la mezzanotte (es. chiude all'01:00)
+            for (let i = s; i <= 23; i++) hoursList.push(i);
+            for (let i = 0; i <= e; i++) hoursList.push(i);
+        }
+        
         return { globalStartHour: s, globalEndHour: e, parsedHours: hoursList, globalStartStr: startStr, globalEndStr: endStr };
     }, [centerHoursConfig]);
     // ------------------------------------------
@@ -466,11 +475,12 @@ export default function CalendarPage() {
                 }, 800);
             } else {
                 const currentHour = new Date().getHours();
-                if (currentHour >= 7 && currentHour <= 23) {
-                    const targetScroll = Math.max(0, (currentHour - 7 - 1) * 120);
+                const currentHourIdx = HOURS.indexOf(currentHour);
+                if (currentHourIdx !== -1) {
+                    const targetScroll = Math.max(0, (currentHourIdx - 1) * 120);
                     setTimeout(() => {
                         scrollContainerRef.current?.scrollTo({ top: targetScroll, behavior: 'smooth' });
-                    }, 400);
+                    }, 800);
                 }
             }
         }
@@ -622,6 +632,8 @@ export default function CalendarPage() {
                 }
 
             // 2. Altrimenti, logica di Auto-advance basata sul mese attuale
+            // DISABILITATO PER FIX CALENDARIO ATTIVITÀ OPERATIVO (deve sempre mostrare data odierna)
+            /*
             const now = new Date();
             if (now.getMonth() >= 1 && now.getMonth() <= 6) { // February is index 1, July is 6
                 const activeSeason = seasons.find(s => s.active) || seasons[0];
@@ -654,6 +666,7 @@ export default function CalendarPage() {
                     }
                 }
             }
+            */
             }
         }
         // Imperative setup happens in handleSeasonChange now
@@ -1181,7 +1194,7 @@ export default function CalendarPage() {
         const parts = timeStr.split(":");
         if (parts.length < 2) return 0;
         let hours = parseInt(parts[0], 10) || 0;
-        if (hours === 0 && globalStartHour > 0) hours = 24; // Handle 00:00 as Midnight
+        if (hours < globalStartHour) hours += 24; // Handle times past midnight correctly
         const minutes = parseInt(parts[1], 10) || 0;
         return ((hours * 60 + minutes) - (globalStartHour * 60)) * PX_PER_MIN;
     }, [globalStartHour]);
@@ -2336,10 +2349,14 @@ export default function CalendarPage() {
                                     const heightPx = calendarLayout.cumulativeTops[nextMinOffset] - topPx;
                                     return (
                                         <div key={hour}
-                                            className="absolute inset-x-0 flex w-full flex-col items-center justify-start overflow-hidden border-b border-[#eee] bg-[#f8f9fa] text-xxs font-bold text-[#666] dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400"
+                                            className="absolute inset-x-0 flex w-full flex-col items-center justify-start overflow-hidden border-b border-slate-200 bg-[#f8f9fa] text-xxs font-bold text-[#666] dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400"
                                             style={{ top: `${topPx}px`, height: `${heightPx}px` }}>
                                             <span className="pt-2">{hour.toString().padStart(2, "0")}.00</span>
-                                            {heightPx > 60 && <span className="absolute top-1/2 -translate-y-1/2 text-xxxs font-normal opacity-50">{hour.toString().padStart(2, "0")}.30</span>}
+                                            {heightPx > 60 && (
+                                                <div className="absolute top-1/2 flex w-full -translate-y-1/2 flex-col items-center border-t border-dashed border-slate-200/80 pt-1 dark:border-slate-700/80">
+                                                    <span className="text-xxxs font-normal opacity-50">{hour.toString().padStart(2, "0")}.30</span>
+                                                </div>
+                                            )}
                                         </div>
                                     );
                                 })}
@@ -2353,7 +2370,7 @@ export default function CalendarPage() {
                                         : `repeat(${studios?.length || 1}, minmax(140px, 1fr))`
                                 }}>
                                 {calendarLayout.columns.map((col, colIdx) => (
-                                    <div key={col.id} className="relative h-full border-r border-[#eee] last:border-r-0 dark:border-slate-800">
+                                    <div key={col.id} className="relative h-full border-r border-slate-200 last:border-r-0 dark:border-slate-700">
                                         {HOURS.map((hour, idx) => {
                                             const minOffset = idx * 60;
                                             const nextMinOffset = (idx + 1) * 60;
@@ -2361,7 +2378,7 @@ export default function CalendarPage() {
                                             const heightPx = calendarLayout.cumulativeTops[nextMinOffset] - topPx;
                                             return (
                                                 <div key={hour}
-                                                    className="absolute inset-x-0 cursor-crosshair border-b border-[#eee] transition-colors hover:bg-muted dark:border-slate-800"
+                                                    className="absolute inset-x-0 cursor-crosshair border-b border-slate-200 transition-colors hover:bg-muted dark:border-slate-700"
                                                     style={{ top: `${topPx}px`, height: `${heightPx}px` }}
                                                     onClick={() => {
                                                         const dayId = col.type === 'day' ? col.id : selectedDay;
@@ -2374,7 +2391,9 @@ export default function CalendarPage() {
                                                             hour 
                                                         });
                                                     }}
-                                                />
+                                                >
+                                                    {heightPx > 60 && <div className="absolute top-1/2 w-full border-t border-dashed border-slate-200/80 dark:border-slate-700/80 pointer-events-none" />}
+                                                </div>
                                             );
                                         })}
                                     </div>

@@ -1,178 +1,321 @@
-# RECAP_05_GemPass
-> Aggiornato: 2026_04_28_1700 (convertito da originale 2026_04_26_1800)
-> Stato chat: 🟡 F1/F2 Fase 1 chiusa — Fase 2 (UI fix + nuove funzionalità) da partire
-> Ultimo protocollo: F1-007 / F2-007 (22/22 test superati il 12/04)
+# RECAP CHIUSURA — Chat_05_GemPass
+## Aggiornato: 2026_05_05
+## Stato: 🟡 In corso — F1-001 emesso, non ancora eseguito
+## Questa chat viene eliminata. Il RECAP è la fonte di verità per la prossima sessione.
 
 ---
 
-## 1. SCOPO E PERIMETRO
+## FILE DA LEGGERE ALL'APERTURA DELLA NUOVA CHAT
 
-Modulo per la gestione delle tessere associative (memberships) dei members.
-Governa l'emissione, il rinnovo, il numero tessera, il barcode, la stagione
-di competenza, il tipo di ente (ENDAS/OPES/LIBERTAS), la quota tessera
-pagata, l'API pubblica di verifica stato.
-
-NON gestisce: anagrafica members (vedi Chat_10), pagamenti tessera
-(vedi Chat_06), bonifica orfani (gestita da Chat_22b/Bonifica chiusa).
-
-Visibile a: admin (tutto), operator (lettura+modifica limitata),
-verifica pubblica via API (no auth).
+```
+Leggi dal Progetto Claude (o dalla cartella):
+- 2026_04_26_1800_MASTER_STATUS.md       ← stato globale progetto
+- D_2026_04_25_1215_Stato_DB_Reale.md   ← struttura DB reale
+- D2_2026_04_25_1215_Stato_Mappa_Frontend.md  ← mappa frontend
+- 2026_04_25_1215_ANALISI_MASTER.md     ← analisi trasversale
+- questo file                            ← storia di questa chat
+```
 
 ---
 
-## 2. STATO ATTUALE
+## CONTESTO MODULO
 
-### Cosa è già fatto (Fase 1 — F1-007/F2-007 chiusa il 12/04)
-- Tessere importate: 3.281 record originali
-- 22/22 test backend superati
-- Backfill `season_competence='2526'` su 2.218 record
-- Formato tessera corretto: `2526-000042` (con trattino) — NON modificare
-- API pubblica `/api/public/membership-status/:code`
-- Tabella `member_forms_submissions` creata
-- ALTER memberships: +`is_renewal`, +`renewed_from_id`, +`notes`
-
-### Cosa è già fatto (post Chat_22b Bonifica del 26/04)
-- +24 tessere create da bonifica orfani QUOTATESSERA
-  (con `data_quality_flag='da_verificare'`)
-- ExportWizard con strong typing (date, booleani Sì/No)
-- `sanitizer.ts` attivo su tutti i salvataggi
-- TZ=Europe/Rome su VPS
-- Badge "CF MANCANTE" attivo in UI su 8 membri
-  (members.tsx, anagrafica-home.tsx, gempass.tsx)
-- Bottone "Crea Tessera" disabilitato per i CF mancanti
-
-### Cosa è in corso
-- Niente di attivo. La Fase 2 (UI fix + nuove funzionalità) non è ancora partita.
-
-### Cosa è bloccato
-- Per gli 8 membri senza CF la creazione tessera è bloccata via UI
-  finché non si completa il CF in anagrafica.
+GemPass gestisce le tessere associative dei members (tabella `memberships`).
+Memberships: 3.305 record (3.281 importati + 24 creati da bonifica Chat_22b).
+Stagioni: season_id 1=25/26 · 2=26/27 · 3=24/25
+Formato tessera: 2526-000042 (con trattino) — NON modificare mai.
 
 ---
 
-## 3. TABELLE DB COINVOLTE
+## STATO ATTUALE — cosa funziona
 
-| Tabella | Ruolo | Record (28/04) | Note |
-|---|---|---|---|
-| `memberships` | TABELLA PRINCIPALE | 3.305 | 3.281 originali + 24 da bonifica |
-| `seasons` | stagioni | 3 | 1=25/26, 2=26/27, 3=24/25 |
-| `members` | anagrafica (FK) | 4.918 | data_quality_flag usato per badge |
-| `member_forms_submissions` | firme digitali | 1 | scaffolding ready, kiosk Phase 2 |
-| `payments` | quota tessera (FK) | 12.062 | tramite payments.membership_id |
-
----
-
-## 4. FILE CHIAVE NEL CODEBASE
-
-- `client/src/pages/gempass.tsx` — modulo principale
-- `client/src/pages/memberships.tsx` — vista lista tessere
-- `client/src/pages/anagrafica-home.tsx` — alert CF mancante
-- `client/src/pages/members.tsx` — badge CF mancante in lista
-- `server/routes/gempass.ts` — API tessere
-- `server/routes/public.ts` — API pubblica `/membership-status/:code`
-- `shared/schema.ts` § memberships
-- `server/utils/sanitizer.ts` — applicato anche su gempass save
+```
+✅ Tessere importate: 3.281 record originali (Chat_22)
+✅ +24 tessere create da bonifica (data_quality_flag=da_verificare)
+✅ Backfill season_competence=2526 (2.218 record)
+✅ Formato numero tessera corretto (2526-000042)
+✅ API pubblica /api/public/membership-status/:code attiva
+✅ ExportWizard con strong typing (date, booleani) — da Chat_22b
+✅ sanitizer.ts attivo su tutti i salvataggi — da Chat_22b
+✅ TZ=Europe/Rome su VPS — da Chat_22b
+✅ Badge "CF MANCANTE" attivo in UI su 8 membri
+   (files: members.tsx, anagrafica-home.tsx, gempass.tsx)
+✅ Campi memberships già nel DB:
+   id · member_id · membership_number · membership_type
+   status · issue_date · expiry_date · season_id · fee
+   is_renewal · renewed_from_id · previous_membership_number
+   notes · data_quality_flag
+```
 
 ---
 
-## 5. DECISIONI ARCHITETTURALI APERTE
+## COSA NON FUNZIONA — da sistemare nella prossima sessione
 
-### Decisione 1 — Tabella `membership_events`
-- **Cosa decidere:** struttura della tabella per storico azioni tessera
-  (emissione, rinnovo, sospensione, riattivazione)
-- **Stato:** ⏳ aperta — DA CREARE in Fase 2
-- **Note:** campi suggeriti `id, membership_id, event_type, event_date, notes, operator_id`
+### Bug UI priorità 1-3: campi nel DB ma che mostrano "—" in UI
 
-### Decisione 2 — Bottone "Dati da verificare"
-- **Cosa decidere:** filtro UI che raggruppa
-  - `data_quality_flag='da_verificare'` (24 tessere bonifica)
-  - `data_quality_flag='tessera_mancante_da_assegnare'`
-- **Stato:** ⏳ aperta
+| Campo DB          | Colonna UI       | Valore reale nel DB        |
+|-------------------|------------------|----------------------------|
+| membership_type   | Tipo ente        | ENDAS · OPES · LIBERTAS    |
+| issue_date        | Data emissione   | data tessera               |
+| season_id         | Stagione         | 1=25/26 · 3=24/25          |
+| fee               | Quota            | quota pagata               |
 
-### Decisione 3 — Funzione "Assegna Tessera" rapida
-- **Cosa decidere:** flusso UI per assegnare tessera ai 1.322 membri con
-  `tessera_mancante_da_assegnare`
-- **Stato:** ⏳ aperta
+Causa probabile: la route GET /api/memberships non espone questi campi nel JSON,
+oppure il frontend gempass.tsx non li legge dalla risposta.
+F1-001 doveva verificarlo — vedi sezione PROTOCOLLI.
 
-### Decisione 4 — Mappatura badge qualità in GemPass
-- **Cosa decidere:** colori per ogni `data_quality_flag`
-  - `mancano_dati_obbligatori` → 🔴 rosso (CF MANCANTE — già attivo)
-  - `tessera_mancante_da_assegnare` → 🟡 giallo
-  - `omonimo_da_verificare` → 🔴 rosso
-  - `da_verificare` → 🟠 arancio (24 tessere bonifica)
-  - `incompleto` → ⚪ grigio
-- **Stato:** ⏳ aperta — schema concordato, implementazione mancante
+### Funzionalità da creare (priorità 4-6)
 
-### Decisione 5 — Firma kiosk tablet
-- **Stato:** ⏳ aperta — bassa priorità (Phase 2 lontana)
+```
+PRIORITÀ 4 — Bottone "Dati da verificare"
+  Filtra memberships con data_quality_flag IN:
+    ('da_verificare', 'tessera_mancante_da_assegnare')
+  Counter da mostrare nel bottone:
+    1.322 tessere con tessera_mancante_da_assegnare
+    +24 tessere con da_verificare (da bonifica)
+  Pattern UI: come "Visualizza Duplicati" già presente in Anagrafica
 
----
+PRIORITÀ 5 — Funzione "Assegna Tessera" rapida
+  Per i member con data_quality_flag = tessera_mancante_da_assegnare
+  Permette assegnazione rapida da UI senza aprire scheda completa
+  Campo da aggiungere a memberships: tessera_mancante_da_assegnare (booleano)
+  → ADD COLUMN solo, mai DROP
 
-## 6. PROTOCOLLI ESEGUITI
+PRIORITÀ 6 — Tabella membership_events (storico azioni tessera)
+  Campi: id, membership_id, event_type, event_date, notes, operator_id
+  Tipi evento: emissione · rinnovo · sospensione · riattivazione · ristampa · smarrita
+  Usata per audit trail ogni modifica sulla tessera
 
-### Backend (F1) — Fase 1 chiusa
-- F1-001 → F1-007 — ✅ tutti chiusi (22/22 test)
+FASE 2 (bassa priorità, non blocca):
+  firma kiosk tablet
+```
 
-### Frontend (F2) — Fase 1 chiusa
-- F2-001 → F2-007 — ✅ tutti chiusi
+### Badge qualità da mostrare in GemPass
 
-### Fase 2 (UI fix)
-- Non ancora iniziata. F1-008 / F2-008 saranno i prossimi.
-
----
-
-## 7. PENDENTI
-
-In ordine di priorità:
-
-1. [ ] **Bug UI campi che mostrano "—"** in GemPass:
-   - `membership_type` (Tipo ente: ENDAS/OPES/LIBERTAS)
-   - `issue_date` (Data emissione tessera)
-   - `season_id` (Stagione)
-   - `fee` (Quota tessera pagata)
-   I dati sono già in DB ma la UI non li mostra. Va investigata
-   la query/JSON di risposta API.
-2. [ ] Creare tabella `membership_events` (storico azioni tessera)
-3. [ ] Implementare bottone "Dati da verificare" (include 24 tessere bonifica)
-4. [ ] Implementare funzione "Assegna Tessera" rapida per i 1.322 flaggati
-5. [ ] Implementare badge qualità colorati in GemPass (5 colori)
-6. [ ] (segreteria) Completare CF di 8 membri per sbloccare tesseramento:
-   BELLONI, BOCCHETTI, BURANI, CIONI, GIACOSA, GULIZIA, MONTANI, MOUTIQ
-7. [ ] (segreteria) Revisione delle 24 tessere create da bonifica
-   (membership_type='ENDAS' di default — verificare se corretto)
-8. [ ] (futura, bassa) Firma kiosk tablet Phase 2
+```
+data_quality_flag in members:
+  mancano_dati_obbligatori → 🔴 "CF MANCANTE" (già attivo in UI)
+  tessera_mancante_da_assegnare → 🟡 giallo (da aggiungere)
+  omonimo_da_verificare → 🔴 rosso (da aggiungere)
+  da_verificare → 🟠 arancio (da aggiungere — 24 tessere bonifica)
+  incompleto → ⚪ grigio (da aggiungere)
+```
 
 ---
 
-## 8. INTERSEZIONI CON ALTRE CHAT
+## NOVITÀ DA CHAT_22b BONIFICA — da non perdere
 
-- **Chat_22b_Bonifica** — ha creato 24 tessere e 8 flag CF mancante.
-  Leggere RECAP_22b per dettaglio.
-- **Chat_10_Utenti** — gestisce CF e flag qualità in anagrafica.
-  Sinergia: la validazione CF real-time risolverà alla radice
-  il problema degli 8 membri senza CF.
-- **Chat_06_Contabilità** — `payments.membership_id` collega quote tessera.
-  Modifiche allo schema memberships impattano payments.
-- **Chat_02_GemStaff** — gli insegnanti hanno tessera obbligatoria.
-  Coordinare se si introducono nuovi tipi di tessera.
+```
+8 MEMBRI SENZA CODICE FISCALE:
+  BELLONI HELLEN
+  BOCCHETTI MALTSEVA EKATERINA
+  BURANI SARA
+  CIONI BIANCA
+  GIACOSA CHIARA
+  GULIZIA GABRIELE
+  MONTANI FRANCESCA
+  MOUTIQ JAMILIA
 
----
+Questi 8 hanno:
+  data_quality_flag = 'mancano_dati_obbligatori'
+  Badge rosso "CF MANCANTE" visibile in UI
+  Bottone GemPass disabilitato con tooltip
+  → Completare CF in Anagrafica prima di procedere
 
-## 9. NOTE PER LA PROSSIMA SESSIONE
-
-- **Formato tessera `2526-000042` (con trattino)** — NON modificare.
-- **`memberships`** ha vincolo unicità `member_id + season_id`.
-- **Flag qualità su 24 tessere bonifica**: `data_quality_flag='da_verificare'`,
-  `membership_type='ENDAS'` di default.
-- **CF Validator** disponibile in `shared/utils/cf-validator.ts`
-  (creato da Chat_22b) — usabile per validazione real-time.
-- **Smart Routing import attivo**: i nuovi import di QUOTATESSERA
-  finiscono direttamente in memberships, non in enrollments.
-- **API pubblica** `/api/public/membership-status/:code` non richiede auth.
-- **8 senza CF**: il bottone "Crea Tessera" deve restare disabilitato
-  con tooltip esplicativo.
+24 TESSERE CREATE DA BONIFICA:
+  data_quality_flag = 'da_verificare'
+  membership_type = 'ENDAS' (default — va verificato)
+  Vanno revisionate dalla segreteria
+```
 
 ---
 
-*Aggiornato l'ultima volta da: Claude (chat di Analisi) in data 2026_04_28_1700
-basato su: RECAP_Chat05_GemPass_2026_04_26_1800 + memoria progetto*
+## PROTOCOLLI EMESSI IN QUESTA CHAT
+
+### F1-PROTOCOLLO-001 — emesso, NON ancora eseguito
+
+Antigravity NON ha ancora risposto. Nella nuova chat riproporre questo
+prompt come prima azione verso AG-F1:
+
+```
+F1-PROTOCOLLO-001 — GemPass: audit colonne mute
+
+Antigravity, solo lettura. Tre blocchi:
+
+1. DB stargem_v2 porta 3307:
+
+SHOW COLUMNS FROM memberships;
+
+SELECT id, membership_number, membership_type, season_id, issue_date,
+fee, status FROM memberships ORDER BY id DESC LIMIT 5;
+
+SELECT COUNT(*) totale, COUNT(membership_type) con_tipo,
+COUNT(season_id) con_season, COUNT(issue_date) con_issue,
+COUNT(fee) con_fee, COUNT(membership_number) con_numero
+FROM memberships;
+
+2. Backend — route GET /api/memberships:
+Trova la route in server/routes.ts e la funzione storage collegata.
+Riporta: la query Drizzle usata, i campi selezionati,
+i campi inclusi nel JSON di risposta.
+
+3. Frontend — client/src/pages/gempass.tsx:
+Riporta solo: quale endpoint chiama, come renderizza
+le colonne Tipo / Stagione / Data emissione / Quota.
+Cerca membership_type, season_id, issue_date, fee nel JSX della tabella.
+
+STOP. Zero modifiche. Riporta i tre output e aspetta.
+```
+
+### Stato protocolli al momento della chiusura
+
+```
+F1-001: emesso — NON eseguito
+F2-001: non ancora emesso
+```
+
+---
+
+## DECISIONI ARCHITETTURALI PRESE (definitive)
+
+```
+1. Numero tessera = permanente e immutabile
+   → una volta assegnato non si cambia mai
+
+2. Tessera senza numero → flag booleano
+   tessera_mancante_da_assegnare su memberships
+   → ADD COLUMN solo, mai DROP
+
+3. Tabella membership_events = storico audit tessera
+   → da creare (F1 dedicato, non ancora emesso)
+
+4. Bottone "Dati da verificare" in GemPass
+   → pattern identico a "Visualizza Duplicati" in Anagrafica
+
+5. Assegna Tessera = funzione rapida da GemPass
+   → senza aprire scheda completa del member
+
+6. membership_type contiene ENDAS/OPES/LIBERTAS
+   (NON adulto/minore/b2b come nel design originale)
+   → la UI deve adattarsi ai valori reali del DB
+```
+
+---
+
+## INFO DB COMPLETO
+
+```
+Tabella: memberships (3.305 record)
+  Campi: id · member_id · membership_number · membership_type
+         status · issue_date · expiry_date · season_id · fee
+         is_renewal · renewed_from_id · previous_membership_number
+         notes · data_quality_flag · season_competence · barcode
+  Vincolo unicità: member_id + season_id (un member, una tessera per stagione)
+  season_id FK → seasons.id
+
+Tabella: seasons
+  id=1 → 25/26
+  id=2 → 26/27
+  id=3 → 24/25
+
+Tabella: members (174 colonne, 4.342 record)
+  data_quality_flag → campo centrale per badge e filtri qualità
+  fiscal_code → NULL su 8 membri (vedi sopra)
+
+Tabella: membership_events → DA CREARE
+
+Flag qualità attivi su members (totali):
+  tessera_mancante_da_assegnare: 1.322
+  omonimo_da_verificare: 407
+  mancano_dati_obbligatori: 198
+  nome_match: 179
+  incompleto: 20
+```
+
+---
+
+## REGOLE OPERATIVE — da rispettare nella prossima chat
+
+```
+F1 = AG-Backend (Finestra 1)
+F2 = AG-Frontend (Finestra 2)
+Protocolli: ripartono da F1-001 / F2-001
+
+FLUSSO OBBLIGATORIO:
+1. Claude chiede ad Antigravity di analizzare
+2. Antigravity risponde con analisi e proposta
+3. Claude valuta con Gaetano
+4. Solo dopo → VAI
+5. Il codice lo scrive SEMPRE Antigravity
+
+Ogni risposta di Antigravity indica il numero
+del protocollo: "Risposta F1-PROTOCOLLO-001"
+
+Ogni protocollo = un unico blocco testo copia-incolla.
+
+Stop & Go prima di modificare DB.
+Backup obbligatorio dopo ogni F1 che tocca tabelle.
+MAI DROP su memberships o payments — solo ADD COLUMN.
+Deploy: git push → stop. Gaetano deploya manualmente su Plesk.
+```
+
+---
+
+## REGOLE SUI PROMPT AD ANTIGRAVITY
+
+```
+Stile: brevi, chiari, definitivi.
+Struttura: blocchi numerati, nessuna spiegazione inutile.
+Prima azione sempre: solo lettura (audit) → poi VAI.
+Intestazione obbligatoria: PER AG-F1 (BACKEND) o PER AG-F2 (FRONTEND).
+F1 prima, F2 dopo — mai invertire.
+```
+
+---
+
+## INFRASTRUTTURA
+
+```
+Dev: localhost:5001
+VPS: IONOS 82.165.35.145
+DB: stargem_v2 su MariaDB
+    port 3306 (VPS) / 3307 (SSH tunnel locale)
+App: pm2 porta 5001, nome: stargem
+Deploy: git push → Plesk git pull manuale → npm run build → pm2 reload stargem
+Backup path: /root/backups/ sul VPS
+Ultimo backup: CHAT22B_BONIFICA_OP1235_20260426.sql ✅
+Stack: React + TypeScript + Tailwind + React Query (frontend)
+       Node.js + Drizzle ORM (backend) · MariaDB 11.4
+```
+
+---
+
+## TESTO DI APERTURA NUOVA CHAT
+
+Incolla questo come primo messaggio nella nuova Chat_05:
+
+```
+Sei Claude coordinatore del progetto StarGem Suite.
+Questa è Chat_05_GemPass — nuova sessione.
+
+PRIMA DI TUTTO leggi:
+- 2026_04_26_1800_MASTER_STATUS.md
+- D_2026_04_25_1215_Stato_DB_Reale.md
+- 2026_05_05_RECAP_Chat05_GemPass_CHIUSURA.md  ← questo file
+
+OBIETTIVO: sistemare i bug UI di GemPass
+(4 campi che mostrano "—" invece del valore)
+e creare le funzionalità mancanti.
+
+PRIMA AZIONE: emetti F1-001 verso AG-Backend
+per audit route GET /api/memberships e file gempass.tsx.
+Il testo del prompt F1-001 è già scritto nel RECAP — usalo.
+
+ATTENZIONE:
+- 8 membri con badge CF MANCANTE già attivo — non rimuovere
+- 24 tessere bonifica con data_quality_flag=da_verificare
+- Numero tessera = immutabile — non toccare logica barcode
+
+Dev: localhost:5001
+DB: stargem_v2 porta 3307 (tunnel locale)
+```
