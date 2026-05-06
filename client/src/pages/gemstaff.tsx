@@ -967,7 +967,7 @@ export default function GemStaff() {
     }
   };
 
-  const queryUrl = `/api/gemstaff/insegnanti${showArchive ? "?status=inattivo" : ""}`;
+  const queryUrl = `/api/gemstaff/insegnanti?status=all`;
   const { data: staffListQuery = [], isLoading: isLoadingGs } = useQuery<any[]>(
     {
       queryKey: [queryUrl],
@@ -991,7 +991,7 @@ export default function GemStaff() {
 
   const { data: ptList = [], isLoading: isLoadingPt } = useQuery<any[]>({
     queryKey: ["/api/gemstaff/pt"],
-    queryFn: async () => await apiRequest("GET", "/api/gemstaff/pt"),
+    queryFn: async () => await apiRequest("GET", "/api/gemstaff/pt?status=all"),
   });
 
   const { data: complianceData } = useQuery<any>({
@@ -1053,11 +1053,13 @@ export default function GemStaff() {
       s.specialization?.includes(categoryFilter) ||
       s.corsi?.includes(categoryFilter);
 
-    const sStatus = s.staff_status || "ATTIVO";
-    const matchStatus =
-      statusFilter === "all" ||
-      (statusFilter === "active" && sStatus !== "INATTIVO") ||
-      (statusFilter === "inactive" && sStatus === "INATTIVO");
+    const sStatus = (s.staff_status || "attivo").toLowerCase();
+    
+    if (!showArchive && sStatus === "archivio") return false;
+
+    let matchStatus = true;
+    if (statusFilter === "active") matchStatus = sStatus === "attivo";
+    if (statusFilter === "inactive") matchStatus = sStatus === "inattivo";
 
     return matchName && matchCat && matchStatus;
   });
@@ -1102,9 +1104,15 @@ export default function GemStaff() {
     ? filteredStaff 
     : filteredStaff.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
+  const filteredPtListRaw = ptList.filter((pt: any) => {
+    const sStatus = (pt.staff_status || "attivo").toLowerCase();
+    if (!showArchive && sStatus === "archivio") return false;
+    return true;
+  });
+
   const { sortConfig: sortConfigPt, handleSort: handleSortPt, sortItems: sortItemsPt, isSortedColumn: isSortedColumnPt } =
     useSortableTable<any>("lastName");
-  const sortedPtList = sortItemsPt(ptListSorted, getSortValue);
+  const sortedPtList = sortItemsPt(filteredPtListRaw, getSortValue);
 
   const paginatedPtList = pageSize === 999999
     ? sortedPtList
@@ -1262,9 +1270,22 @@ export default function GemStaff() {
                   </SelectContent>
                 </Select>
               </div>
-              <Badge variant="outline" className="text-sm px-3 py-1.5 h-10 bg-muted/50 text-muted-foreground hidden sm:flex items-center">
-                N. {filteredStaff.length} Record Trovati
-              </Badge>
+              <div className="flex items-center gap-2 hidden sm:flex">
+                <Badge variant="outline" className="text-sm px-3 py-1.5 h-10 bg-muted/50 text-muted-foreground">
+                  N. {filteredStaff.length} Record Trovati
+                </Badge>
+                <div className="flex gap-2">
+                  <span style={{ background: 'var(--color-background-info)', color: 'var(--color-text-info)', padding: '2px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: 500 }} title="Tutti gli insegnanti nel DB">
+                    DB: {staffListQuery.length}
+                  </span>
+                  <span style={{ background: 'var(--color-background-success)', color: 'var(--color-text-success)', padding: '2px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: 500 }}>
+                    Attivi: {staffListQuery.filter(s => (s.staff_status || 'attivo').toLowerCase() === 'attivo').length}
+                  </span>
+                  <span style={{ background: 'var(--color-background-warning)', color: 'var(--color-text-warning)', padding: '2px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: 500 }}>
+                    Inattivi: {staffListQuery.filter(s => (s.staff_status || 'attivo').toLowerCase() === 'inattivo').length}
+                  </span>
+                </div>
+              </div>
               <div className="flex h-10 items-center gap-2 px-2">
                 <Switch
                   id="archive"
@@ -1614,10 +1635,21 @@ export default function GemStaff() {
             </Alert>
           ) : (
             <>
-              <div className="flex items-center justify-start mb-2">
+              <div className="flex items-center gap-2 mb-2">
                 <Badge variant="outline" className="text-sm px-3 py-1.5 h-10 bg-muted/50 text-muted-foreground">
-                  N. {ptList.length} Record Trovati
+                  N. {paginatedPtList.length} Record Trovati
                 </Badge>
+                <div className="flex gap-2">
+                  <span style={{ background: 'var(--color-background-info)', color: 'var(--color-text-info)', padding: '2px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: 500 }} title="Tutti i PT nel DB">
+                    DB: {ptList.length}
+                  </span>
+                  <span style={{ background: 'var(--color-background-success)', color: 'var(--color-text-success)', padding: '2px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: 500 }}>
+                    Attivi: {ptList.filter((s: any) => (s.staff_status || 'attivo').toLowerCase() === 'attivo').length}
+                  </span>
+                  <span style={{ background: 'var(--color-background-warning)', color: 'var(--color-text-warning)', padding: '2px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: 500 }}>
+                    Inattivi: {ptList.filter((s: any) => (s.staff_status || 'attivo').toLowerCase() === 'inattivo').length}
+                  </span>
+                </div>
               </div>
               <div className="overflow-hidden rounded-md border bg-background">
                 <Table>
