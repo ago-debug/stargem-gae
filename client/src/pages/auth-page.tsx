@@ -265,7 +265,7 @@ export default function AuthPage() {
           </div>
 
           {/* COLONNA DESTRA: TEO COPILOT (Visibile anche da Mobile) */}
-          <div className="relative flex size-full min-h-[320px] flex-1 items-center justify-center overflow-hidden rounded-b-xl bg-slate-100 dark:bg-transparent lg:min-h-[400px] lg:rounded-b-none lg:rounded-r-xl">
+          <div className="relative flex size-full min-h-[320px] flex-1 items-center justify-center overflow-hidden rounded-b-xl bg-transparent lg:min-h-[400px] lg:rounded-b-none lg:rounded-r-xl">
             {/* Spotlight circolare chiaro: illumina il centro per il mix-blend, ma svanisce a trasparente prima di toccare gli angoli */}
             <div className="pointer-events-none absolute inset-0 z-0 hidden bg-[radial-gradient(circle,rgba(220,220,220,1)_20%,transparent_65%)] dark:block" />
 
@@ -282,7 +282,7 @@ export default function AuthPage() {
                 loop
                 muted={isMuted}
                 playsInline
-                className="size-full object-contain opacity-[0.98] mix-blend-multiply transition-transform duration-500 group-hover:scale-105 dark:[-webkit-mask-image:radial-gradient(circle,white_20%,transparent_65%)] dark:[mask-image:radial-gradient(circle,white_20%,transparent_65%)]"
+                className="size-full object-contain opacity-[0.98] mix-blend-multiply transition-transform duration-500 [-webkit-mask-image:radial-gradient(circle,white_20%,transparent_65%)] [mask-image:radial-gradient(circle,white_20%,transparent_65%)] group-hover:scale-105"
               />
 
               {/* Pellicola Notturna circolare: scurisce il robot al centro, svanisce a trasparente prima di toccare gli angoli */}
