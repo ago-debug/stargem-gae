@@ -5043,6 +5043,7 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
           email: schema.members.email,
           phone: schema.members.phone,
           photoUrl: schema.members.photoUrl,
+          userPhoto: schema.users.profileImageUrl,
           lastSeenAt: schema.users.lastSeenAt,
           currentSessionStart: schema.users.currentSessionStart,
           lastSessionDuration: schema.users.lastSessionDuration
@@ -5096,6 +5097,7 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
 
         return {
           ...emp,
+          photoUrl: emp.userPhoto || emp.photoUrl,
           checkInOggi: checkinOggi[0]?.timestamp ?? null,
           checkOutOggi: checkoutOggi[0]?.timestamp ?? null,
           oreFisicheOggi: attendanceOggi[0]?.oreLavorate ?? null,
@@ -5438,12 +5440,13 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
            te.id as employeeId, 
            m.first_name as firstName, 
            m.last_name as lastName, 
-           m.photo_url as photoUrl,
+           COALESCE(u.profile_image_url, m.photo_url) as photoUrl,
            tc.tipo as lastEvent, 
            tc.timestamp as lastTimestamp,
            al.ore_lavorate as oreOggi
         FROM team_employees te
         JOIN members m ON m.id = te.member_id
+        LEFT JOIN users u ON u.id = te.user_id
         LEFT JOIN (
            SELECT t1.employee_id, t1.tipo, t1.timestamp 
            FROM team_checkin_events t1
