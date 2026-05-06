@@ -1151,20 +1151,24 @@ export default function GemStaff() {
   );
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 p-6 md:p-8">
-      <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">GemStaff</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Gestione Risorse Umane, Staff e Insegnanti
-          </p>
+    <div className="p-6 md:p-8 space-y-6">
+      <div className="flex items-center justify-between gap-4 flex-wrap bg-gradient-to-r from-slate-50 dark:from-background to-white dark:to-background p-6 rounded-2xl border border-slate-100 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] relative overflow-hidden mb-6">
+        <div className="absolute top-0 right-[-5%] -mt-8 w-40 h-40 rounded-full bg-primary/5 blur-[40px] pointer-events-none" />
+        <div className="flex items-center gap-4 relative z-10">
+          <div className="hidden sm:flex bg-gradient-to-br from-primary/10 to-primary/5 p-3 rounded-xl border border-primary/10 shadow-inner">
+            <Users className="w-8 h-8 text-primary drop-shadow-sm" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-extrabold tracking-tight text-foreground mb-1">GemStaff</h1>
+            <p className="text-sm font-medium text-muted-foreground">Gestione Risorse Umane, Staff, Insegnanti e PT</p>
+          </div>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <Label className="text-sm text-muted-foreground whitespace-nowrap">Per pagina:</Label>
+        <div className="flex items-center gap-2 flex-wrap relative z-10">
+          <div className="flex items-center gap-2 mr-2">
+            <Label className="text-sm text-muted-foreground hidden sm:block">Per pagina:</Label>
             <Select value={pageSize.toString()} onValueChange={handlePageSizeChange}>
-              <SelectTrigger className="w-[80px]">
-                <SelectValue />
+              <SelectTrigger className="w-[80px] h-9">
+                <SelectValue placeholder="50" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="25">25</SelectItem>

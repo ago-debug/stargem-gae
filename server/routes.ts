@@ -4211,7 +4211,9 @@ app.get("/api/gemstaff/insegnanti", isAuthenticated, async (req, res) => {
         and(
           or(
             like(schema.members.participantType, '%INSEGNANTE%'),
-            like(schema.members.participantType, '%Staff%')
+            like(schema.members.participantType, '%Staff%'),
+            like(schema.members.participantType, '%PT%'),
+            like(schema.members.participantType, '%PERSONAL_TRAINER%')
           ),
           status === 'all' ? undefined : eq(schema.members.staffStatus, status as any)
         )
