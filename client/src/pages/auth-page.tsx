@@ -267,10 +267,10 @@ export default function AuthPage() {
           {/* COLONNA DESTRA: TEO COPILOT (Visibile anche da Mobile) */}
           <div className="relative flex size-full min-h-[320px] flex-1 items-center justify-center overflow-hidden rounded-b-xl bg-slate-100 dark:bg-transparent lg:min-h-[400px] lg:rounded-b-none lg:rounded-r-xl">
             {/* Spotlight per illuminare Teo in modalità notte */}
-            <div className="pointer-events-none absolute inset-0 z-0 hidden rounded-b-xl bg-[radial-gradient(circle,rgba(255,255,255,0.85)_15%,transparent_65%)] dark:block lg:rounded-b-none lg:rounded-r-xl" />
+            <div className="pointer-events-none absolute inset-0 hidden rounded-b-xl bg-[radial-gradient(circle,rgba(255,255,255,0.85)_15%,transparent_65%)] dark:block lg:rounded-b-none lg:rounded-r-xl" />
 
             <div
-              className="group absolute inset-0 z-10 flex size-full cursor-pointer items-center justify-center"
+              className="group absolute inset-0 flex size-full cursor-pointer items-center justify-center"
               onClick={handleVideoClick}
             >
               <video
