@@ -283,7 +283,7 @@ export default function AuthPage() {
               />
 
               {/* Pellicola sfumata scura a cerchio (Night Mode Vignette Overlay) */}
-              <div className="pointer-events-none absolute inset-0 z-10 hidden rounded-b-xl bg-[radial-gradient(circle,transparent_25%,rgba(0,0,0,0.4)_70%,hsl(var(--background))_100%)] transition-all duration-500 dark:block lg:rounded-b-none lg:rounded-r-xl" />
+              <div className="pointer-events-none absolute inset-0 z-10 hidden rounded-b-xl bg-[radial-gradient(circle,transparent_15%,rgba(0,0,0,0.7)_55%,hsl(var(--background))_85%)] transition-all duration-500 dark:block lg:rounded-b-none lg:rounded-r-xl" />
 
               {/* Audio Toggle Button */}
               <button
