@@ -282,7 +282,7 @@ export default function AuthPage() {
                 loop
                 muted={isMuted}
                 playsInline
-                className="size-full object-contain opacity-[0.98] mix-blend-multiply transition-transform duration-500 [-webkit-mask-image:radial-gradient(circle,white_40%,transparent_75%)] [mask-image:radial-gradient(circle,white_40%,transparent_75%)] group-hover:scale-105 dark:[-webkit-mask-image:radial-gradient(circle,white_20%,transparent_65%)] dark:[mask-image:radial-gradient(circle,white_20%,transparent_65%)]"
+                className="size-full object-contain opacity-[0.98] mix-blend-multiply transition-transform duration-500 [-webkit-mask-image:radial-gradient(circle,white_30%,transparent_70%)] [mask-image:radial-gradient(circle,white_30%,transparent_70%)] group-hover:scale-105 dark:[-webkit-mask-image:radial-gradient(circle,white_20%,transparent_65%)] dark:[mask-image:radial-gradient(circle,white_20%,transparent_65%)]"
               />
 
               {/* Pellicola Notturna circolare: scurisce il robot al centro, svanisce a trasparente prima di toccare gli angoli */}
