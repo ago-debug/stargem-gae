@@ -281,6 +281,10 @@ export default function AuthPage() {
                 playsInline
                 className="size-full object-contain opacity-[0.98] mix-blend-multiply transition-transform duration-500 group-hover:scale-105"
               />
+
+              {/* Pellicola sfumata scura (Night Mode Overlay) */}
+              <div className="pointer-events-none absolute inset-0 z-10 hidden rounded-b-xl bg-gradient-to-br from-background/95 via-background/40 to-black/20 transition-all duration-500 dark:block lg:rounded-b-none lg:rounded-r-xl" />
+
               {/* Audio Toggle Button */}
               <button
                 onClick={toggleAudio}
