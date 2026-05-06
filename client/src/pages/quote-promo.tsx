@@ -27,7 +27,6 @@ export default function QuotePromo() {
       ? activeSeason
       : seasons?.find((s) => s.id === selectedSeasonId);
 
-
   let isPast = false;
   let isFuture = false;
   if (selectedSeason && activeSeason && selectedSeason.id !== activeSeason.id) {
@@ -73,7 +72,7 @@ export default function QuotePromo() {
                 value="promo"
                 className="gap-2 px-6 text-sm font-semibold data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm"
               >
-                Promo e convenzioni
+                Promozioni Stagionali
               </TabsTrigger>
               <TabsTrigger
                 value="welfare"
