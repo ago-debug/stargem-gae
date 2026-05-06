@@ -265,9 +265,12 @@ export default function AuthPage() {
           </div>
 
           {/* COLONNA DESTRA: TEO COPILOT (Visibile anche da Mobile) */}
-          <div className="relative flex size-full min-h-[320px] flex-1 items-center justify-center overflow-hidden rounded-b-xl bg-slate-100 dark:bg-slate-200 lg:min-h-[400px] lg:rounded-b-none lg:rounded-r-xl">
+          <div className="relative flex size-full min-h-[320px] flex-1 items-center justify-center overflow-hidden rounded-b-xl bg-slate-100 dark:bg-transparent lg:min-h-[400px] lg:rounded-b-none lg:rounded-r-xl">
+            {/* Spotlight per illuminare Teo in modalità notte */}
+            <div className="pointer-events-none absolute inset-0 z-0 hidden rounded-b-xl bg-[radial-gradient(circle,rgba(255,255,255,0.85)_15%,transparent_65%)] dark:block lg:rounded-b-none lg:rounded-r-xl" />
+
             <div
-              className="group absolute inset-0 flex size-full cursor-pointer items-center justify-center"
+              className="group absolute inset-0 z-10 flex size-full cursor-pointer items-center justify-center"
               onClick={handleVideoClick}
             >
               <video
@@ -281,9 +284,6 @@ export default function AuthPage() {
                 playsInline
                 className="size-full object-contain opacity-[0.98] mix-blend-multiply transition-transform duration-500 group-hover:scale-105"
               />
-
-              {/* Pellicola sfumata scura a cerchio (Night Mode Vignette Overlay) */}
-              <div className="pointer-events-none absolute inset-0 z-10 hidden rounded-b-xl bg-[radial-gradient(circle,transparent_15%,rgba(0,0,0,0.6)_50%,rgba(10,10,10,0.95)_80%)] transition-all duration-500 dark:block lg:rounded-b-none lg:rounded-r-xl" />
 
               {/* Audio Toggle Button */}
               <button
