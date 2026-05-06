@@ -1540,17 +1540,17 @@ Regole:
           SUM(CASE WHEN participant_type IS NULL
             OR participant_type = 'SOCIO'
             THEN 1 ELSE 0 END) AS partecipanti,
-          -- Staff = insegnanti + personal trainer
-          SUM(CASE WHEN participant_type IN (
-            'INSEGNANTE','PERSONAL_TRAINER')
+          -- Staff = insegnanti + personal trainer (escludi inattivi/archiviati)
+          SUM(CASE WHEN (participant_type LIKE '%INSEGNANTE%' OR participant_type LIKE '%Staff%' OR participant_type LIKE '%PT%' OR participant_type LIKE '%PERSONAL_TRAINER%')
+            AND (staff_status = 'attivo' OR staff_status IS NULL)
             THEN 1 ELSE 0 END) AS staff,
           -- Team = dipendenti
-          SUM(CASE WHEN participant_type =
-            'DIPENDENTE'
+          SUM(CASE WHEN participant_type = 'DIPENDENTE'
+            AND (staff_status = 'attivo' OR staff_status IS NULL)
             THEN 1 ELSE 0 END) AS team,
           -- Medici
-          SUM(CASE WHEN participant_type
-            LIKE '%MEDIC%'
+          SUM(CASE WHEN participant_type LIKE '%MEDIC%'
+            AND (staff_status = 'attivo' OR staff_status IS NULL)
             THEN 1 ELSE 0 END) AS medici,
           -- Totale generale
           COUNT(*) AS totale

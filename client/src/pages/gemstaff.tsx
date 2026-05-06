@@ -1262,6 +1262,9 @@ export default function GemStaff() {
                   </SelectContent>
                 </Select>
               </div>
+              <Badge variant="outline" className="text-sm px-3 py-1.5 h-10 bg-muted/50 text-muted-foreground hidden sm:flex items-center">
+                N. {filteredStaff.length} Record Trovati
+              </Badge>
               <div className="flex h-10 items-center gap-2 px-2">
                 <Switch
                   id="archive"
@@ -1288,12 +1291,6 @@ export default function GemStaff() {
                   Nuovo Insegnante
                 </Button>
               )}
-            </div>
-
-            <div className="flex items-center justify-between px-2">
-              <span className="text-sm font-medium text-muted-foreground border-b-2 border-red-500 pb-1">
-                N. {filteredStaff.length} Record Trovati
-              </span>
             </div>
 
             <div className="overflow-hidden rounded-md border bg-background">
@@ -1617,10 +1614,10 @@ export default function GemStaff() {
             </Alert>
           ) : (
             <>
-              <div className="flex items-center justify-between px-2 mb-2">
-                <span className="text-sm font-medium text-muted-foreground border-b-2 border-red-500 pb-1">
+              <div className="flex items-center justify-start mb-2">
+                <Badge variant="outline" className="text-sm px-3 py-1.5 h-10 bg-muted/50 text-muted-foreground">
                   N. {ptList.length} Record Trovati
-                </span>
+                </Badge>
               </div>
               <div className="overflow-hidden rounded-md border bg-background">
                 <Table>
