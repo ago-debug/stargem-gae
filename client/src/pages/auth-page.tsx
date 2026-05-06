@@ -282,8 +282,8 @@ export default function AuthPage() {
                 className="size-full object-contain opacity-[0.98] mix-blend-multiply transition-transform duration-500 group-hover:scale-105"
               />
 
-              {/* Pellicola sfumata scura (Night Mode Overlay) */}
-              <div className="pointer-events-none absolute inset-0 z-10 hidden rounded-b-xl bg-gradient-to-br from-background via-background/60 to-black/40 transition-all duration-500 dark:block lg:rounded-b-none lg:rounded-r-xl" />
+              {/* Pellicola sfumata scura a cerchio (Night Mode Vignette Overlay) */}
+              <div className="pointer-events-none absolute inset-0 z-10 hidden rounded-b-xl bg-[radial-gradient(circle,transparent_25%,rgba(0,0,0,0.4)_70%,hsl(var(--background))_100%)] transition-all duration-500 dark:block lg:rounded-b-none lg:rounded-r-xl" />
 
               {/* Audio Toggle Button */}
               <button
