@@ -3,6 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ListinoTab } from "@/components/quote-promo/listino-tab";
 import { PromoTab } from "@/components/quote-promo/promo-tab";
+import { PromoStagionaliTab } from "@/components/quote-promo/promo-stagionali-tab";
 import { CarnetTab } from "@/components/quote-promo/carnet-tab";
 import { ConvenzioniTab } from "@/components/quote-promo/convenzioni-tab";
 import { StaffRatesTab } from "@/components/quote-promo/staff-rates-tab";
@@ -69,10 +70,16 @@ export default function QuotePromo() {
                 Listino prezzi
               </TabsTrigger>
               <TabsTrigger
-                value="promo"
+                value="promo-stagionali"
                 className="gap-2 px-6 text-sm font-semibold data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm"
               >
                 Promozioni Stagionali
+              </TabsTrigger>
+              <TabsTrigger
+                value="promo"
+                className="gap-2 px-6 text-sm font-semibold data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm"
+              >
+                Promo e convenzioni
               </TabsTrigger>
               <TabsTrigger
                 value="welfare"
@@ -127,6 +134,9 @@ export default function QuotePromo() {
 
           <TabsContent value="listino" className="mt-0 outline-none">
             <ListinoTab seasonId={selectedSeasonId} />
+          </TabsContent>
+          <TabsContent value="promo-stagionali" className="mt-0 outline-none">
+            <PromoStagionaliTab seasonId={selectedSeasonId} />
           </TabsContent>
           <TabsContent value="promo" className="mt-0 outline-none">
             <PromoTab seasonId={selectedSeasonId} />
