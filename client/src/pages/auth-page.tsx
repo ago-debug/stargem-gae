@@ -265,7 +265,7 @@ export default function AuthPage() {
           </div>
 
           {/* COLONNA DESTRA: TEO COPILOT (Visibile anche da Mobile) */}
-          <div className="relative flex size-full min-h-[320px] flex-1 items-center justify-center rounded-b-xl bg-slate-100 dark:bg-slate-200 lg:min-h-[400px] lg:rounded-b-none lg:rounded-r-xl">
+          <div className="relative flex size-full min-h-[320px] flex-1 items-center justify-center overflow-hidden rounded-b-xl bg-slate-100 dark:bg-slate-200 lg:min-h-[400px] lg:rounded-b-none lg:rounded-r-xl">
             <div
               className="group absolute inset-0 flex size-full cursor-pointer items-center justify-center"
               onClick={handleVideoClick}
@@ -283,7 +283,7 @@ export default function AuthPage() {
               />
 
               {/* Pellicola sfumata scura a cerchio (Night Mode Vignette Overlay) */}
-              <div className="pointer-events-none absolute inset-0 z-10 hidden rounded-b-xl bg-[radial-gradient(circle,transparent_15%,rgba(0,0,0,0.5)_50%,hsl(var(--background))_80%)] transition-all duration-500 dark:block lg:rounded-b-none lg:rounded-r-xl" />
+              <div className="pointer-events-none absolute inset-0 z-10 hidden rounded-b-xl bg-[radial-gradient(ellipse_at_center,transparent_15%,rgba(0,0,0,0.5)_55%,hsl(var(--background))_85%)] transition-all duration-500 dark:block lg:rounded-b-none lg:rounded-r-xl" />
 
               {/* Audio Toggle Button */}
               <button
