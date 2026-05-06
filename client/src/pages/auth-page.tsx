@@ -266,13 +266,14 @@ export default function AuthPage() {
 
           {/* COLONNA DESTRA: TEO COPILOT (Visibile anche da Mobile) */}
           <div className="relative flex size-full min-h-[320px] flex-1 items-center justify-center overflow-hidden rounded-b-xl bg-slate-100 dark:bg-transparent lg:min-h-[400px] lg:rounded-b-none lg:rounded-r-xl">
-            {/* Spotlight per illuminare Teo in modalità notte */}
-            <div className="pointer-events-none absolute inset-0 hidden rounded-b-xl bg-[radial-gradient(circle,rgba(255,255,255,0.85)_15%,transparent_65%)] dark:block lg:rounded-b-none lg:rounded-r-xl" />
-
+            {/* Wrapper con maschera radiale per fondere perfettamente gli angoli col fondo traslucido in Dark Mode */}
             <div
-              className="group absolute inset-0 flex size-full cursor-pointer items-center justify-center"
+              className="group absolute inset-0 flex size-full cursor-pointer items-center justify-center dark:[-webkit-mask-image:radial-gradient(circle,white_20%,transparent_70%)] dark:[mask-image:radial-gradient(circle,white_20%,transparent_70%)]"
               onClick={handleVideoClick}
             >
+              {/* Sfondo chiaro isolato per permettere al mix-blend-multiply del video di funzionare prima di essere mascherato */}
+              <div className="absolute inset-0 z-0 hidden bg-slate-200 dark:block" />
+
               <video
                 key={
                   teoVideo
@@ -282,8 +283,11 @@ export default function AuthPage() {
                 loop
                 muted={isMuted}
                 playsInline
-                className="size-full object-contain opacity-[0.98] mix-blend-multiply transition-transform duration-500 group-hover:scale-105"
+                className="relative z-10 size-full object-contain opacity-[0.98] mix-blend-multiply transition-transform duration-500 group-hover:scale-105"
               />
+
+              {/* Pellicola Notturna applicata SOLO sulla parte visibile della maschera */}
+              <div className="pointer-events-none absolute inset-0 z-20 hidden bg-black/40 dark:block" />
 
               {/* Audio Toggle Button */}
               <button
