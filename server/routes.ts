@@ -1540,17 +1540,14 @@ Regole:
           SUM(CASE WHEN participant_type IS NULL
             OR participant_type = 'SOCIO'
             THEN 1 ELSE 0 END) AS partecipanti,
-          -- Staff = insegnanti + personal trainer (escludi inattivi/archiviati)
+          -- Staff = insegnanti + personal trainer (tutti, attivi e inattivi, per contatore generale DB)
           SUM(CASE WHEN (participant_type LIKE '%INSEGNANTE%' OR participant_type LIKE '%Staff%' OR participant_type LIKE '%PT%' OR participant_type LIKE '%PERSONAL_TRAINER%')
-            AND (staff_status = 'attivo' OR staff_status IS NULL)
             THEN 1 ELSE 0 END) AS staff,
           -- Team = dipendenti
           SUM(CASE WHEN participant_type = 'DIPENDENTE'
-            AND (staff_status = 'attivo' OR staff_status IS NULL)
             THEN 1 ELSE 0 END) AS team,
           -- Medici
           SUM(CASE WHEN participant_type LIKE '%MEDIC%'
-            AND (staff_status = 'attivo' OR staff_status IS NULL)
             THEN 1 ELSE 0 END) AS medici,
           -- Totale generale
           COUNT(*) AS totale
@@ -4203,7 +4200,7 @@ app.get("/api/gemstaff/insegnanti", isAuthenticated, async (req, res) => {
         email: schema.members.email,
         phone: schema.members.phone,
         participantType: schema.members.participantType,
-        staffStatus: schema.members.staffStatus,
+        staff_status: schema.members.staffStatus,
         lezioniPrivateAutorizzate: schema.members.lezioniPrivateAutorizzate,
         lezioniPrivateAutorizzateAt: schema.members.lezioniPrivateAutorizzateAt,
         lezioniPrivateAutorizzateBy: schema.members.lezioniPrivateAutorizzateBy,
@@ -4216,7 +4213,7 @@ app.get("/api/gemstaff/insegnanti", isAuthenticated, async (req, res) => {
             like(schema.members.participantType, '%INSEGNANTE%'),
             like(schema.members.participantType, '%Staff%')
           ),
-          eq(schema.members.staffStatus, status as any)
+          status === 'all' ? undefined : eq(schema.members.staffStatus, status as any)
         )
       );
 
@@ -4339,7 +4336,7 @@ app.get("/api/gemstaff/pt", isAuthenticated, async (req, res) => {
         email: schema.members.email,
         phone: schema.members.phone,
         participantType: schema.members.participantType,
-        staffStatus: schema.members.staffStatus,
+        staff_status: schema.members.staffStatus,
         lezioniPrivateAutorizzate: schema.members.lezioniPrivateAutorizzate,
         lezioniPrivateAutorizzateAt: schema.members.lezioniPrivateAutorizzateAt,
         lezioniPrivateAutorizzateBy: schema.members.lezioniPrivateAutorizzateBy,
@@ -4353,7 +4350,7 @@ app.get("/api/gemstaff/pt", isAuthenticated, async (req, res) => {
             like(schema.members.participantType, '%PT%'),
             like(schema.members.participantType, '%PERSONAL_TRAINER%')
           ),
-          eq(schema.members.staffStatus, status as any)
+          status === 'all' ? undefined : eq(schema.members.staffStatus, status as any)
         )
       );
 
