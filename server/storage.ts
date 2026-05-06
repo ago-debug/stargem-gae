@@ -1339,6 +1339,7 @@ export class DatabaseStorage implements IStorage {
     const [rows]: any = await db.execute(searchCondition === sql`1 = 1` ? sql`
       SELECT
         m.*,
+        u.profile_image_url as user_photo,
         COALESCE((
           SELECT COUNT(*) 
           FROM enrollments e 
@@ -1358,12 +1359,14 @@ export class DatabaseStorage implements IStorage {
           LIMIT 1
         ) as active_membership
       FROM members m
+      LEFT JOIN users u ON m.user_id = u.id
       ORDER BY m.last_name, m.first_name
       LIMIT ${pageSize}
       OFFSET ${offset}
     ` : sql`
       SELECT
         m.*,
+        u.profile_image_url as user_photo,
         COALESCE((
           SELECT COUNT(*) 
           FROM enrollments e 
@@ -1383,6 +1386,7 @@ export class DatabaseStorage implements IStorage {
           LIMIT 1
         ) as active_membership
       FROM members m
+      LEFT JOIN users u ON m.user_id = u.id
       WHERE ${searchCondition}
       ORDER BY m.last_name, m.first_name
       LIMIT ${pageSize}
@@ -1440,7 +1444,7 @@ export class DatabaseStorage implements IStorage {
       country: row.country,
       address: row.address,
       notes: row.notes,
-      photoUrl: row.photo_url,
+      photoUrl: row.user_photo || row.photo_url,
       active: row.active,
       enrollmentStatus: row.enrollment_status,
       createdAt: row.created_at,
