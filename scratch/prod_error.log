@@ -1,0 +1,17 @@
+Launching browser...
+Navigating to https://stargem.studio-gem.it/ ...
+PAGE LOG: Failed to load resource: the server responded with a status of 401 ()
+PAGE LOG: Error: Minified React error #426; visit https://reactjs.org/docs/error-decoder.html?invariant=426 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.
+    at _N (https://stargem.studio-gem.it/assets/index-DfjN2eXP.js:41:38665)
+    at Ah (https://stargem.studio-gem.it/assets/index-DfjN2eXP.js:41:39567)
+    at W_ (https://stargem.studio-gem.it/assets/index-DfjN2eXP.js:41:35914)
+    at A1 (https://stargem.studio-gem.it/assets/index-DfjN2eXP.js:41:36717)
+    at ri (https://stargem.studio-gem.it/assets/index-DfjN2eXP.js:39:3274)
+    at https://stargem.studio-gem.it/assets/index-DfjN2eXP.js:41:34246
+PAGE ERROR: Minified React error #426; visit https://reactjs.org/docs/error-decoder.html?invariant=426 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.
+PAGE LOG: Failed to load resource: the server responded with a status of 404 ()
+REQUEST FAILED: https://eu-assets.i.posthog.com/array/phc_placeholder_key/config.js net::ERR_ABORTED
+PAGE LOG: Failed to load resource: the server responded with a status of 400 ()
+PAGE LOG: Failed to load resource: the server responded with a status of 404 ()
+PAGE LOG: Failed to load resource: the server responded with a status of 401 ()
+Done.
