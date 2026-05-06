@@ -265,7 +265,7 @@ export default function AuthPage() {
           </div>
 
           {/* COLONNA DESTRA: TEO COPILOT (Visibile anche da Mobile) */}
-          <div className="relative flex size-full min-h-[320px] flex-1 items-center justify-center rounded-b-xl border-t border-border/60 bg-gradient-to-b from-white/10 to-slate-100 dark:from-white/10 dark:to-slate-200 lg:min-h-[400px] lg:rounded-b-none lg:rounded-r-xl lg:border-l lg:border-t-0 lg:bg-gradient-to-r">
+          <div className="relative flex size-full min-h-[320px] flex-1 items-center justify-center rounded-b-xl bg-slate-100 dark:bg-slate-200 lg:min-h-[400px] lg:rounded-b-none lg:rounded-r-xl">
             <div
               className="group absolute inset-0 flex size-full cursor-pointer items-center justify-center"
               onClick={handleVideoClick}
