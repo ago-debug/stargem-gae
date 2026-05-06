@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import {
   Table,
   TableBody,
@@ -8,230 +10,278 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Save, Plus, AlertCircle } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Plus, Ticket, Pencil, Trash2 } from "lucide-react";
+import { PromoRuleModal } from "./promo-rule-modal";
+import { useToast } from "@/hooks/use-toast";
+import type { PromoRule } from "@shared/schema";
+
+const getTargetBadgeColor = (target: string) => {
+  switch (target) {
+    case "public":
+      return "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300";
+    case "company":
+      return "bg-purple-100 text-purple-800";
+    case "staff":
+      return "bg-orange-100 text-orange-800";
+    case "personal":
+      return "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400";
+    case "welfare":
+      return "bg-green-100 text-green-800 dark:text-green-400";
+    default:
+      return "bg-slate-100 dark:bg-slate-800 text-foreground";
+  }
+};
 
 interface PromoTabProps {
   seasonId: number | "active";
 }
 
 export function PromoTab({ seasonId }: PromoTabProps) {
-  // BOZZA: Dati fittizi per la visualizzazione
-  const [selectedPromo, setSelectedPromo] = useState("autunno");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingPromo, setEditingPromo] = useState<PromoRule | null>(null);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
-  const promos = [
-    { id: "autunno", name: "Promo Autunno" },
-    { id: "inverno", name: "Promo Inverno" },
-    { id: "primavera", name: "Promo Primavera" },
-    { id: "estate", name: "Promo Estate" },
-  ];
+  const {
+    data: promos,
+    isLoading,
+    error,
+  } = useQuery<PromoRule[]>({
+    queryKey: ["/api/promo-rules", seasonId],
+    queryFn: async () => {
+      const res = await fetch(`/api/promo-rules?seasonId=${seasonId}`);
+      if (!res.ok) throw new Error("Failed to fetch");
+      return res.json();
+    },
+    retry: 1,
+  });
 
-  // Matrice fittizia simile al "Listino Base"
-  const [matrix, setMatrix] = useState([
-    {
-      category: "Adulti",
-      course1: "-10%",
-      course2: "-15%",
-      course3: "-20%",
-      pack10: "",
+  const deleteMutation = useMutation({
+    mutationFn: async (id: number) => {
+      await apiRequest("DELETE", `/api/promo-rules/${id}`);
     },
-    {
-      category: "Bambini",
-      course1: "-10€",
-      course2: "-15€",
-      course3: "",
-      pack10: "",
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/promo-rules"] });
+      toast({
+        title: "Eliminato",
+        description: "Regola promozionale rimossa.",
+      });
     },
-    { category: "Aerial", course1: "", course2: "", course3: "", pack10: "" },
-    {
-      category: "Privata sing.",
-      course1: "",
-      course2: "",
-      course3: "",
-      pack10: "",
+    onError: () => {
+      toast({
+        title: "Errore (404)",
+        description: "Endpoint non ancora disponibile.",
+        variant: "destructive",
+      });
     },
-    {
-      category: "Affitto 1+1",
-      course1: "",
-      course2: "",
-      course3: "",
-      pack10: "",
-    },
-  ]);
+  });
 
-  const handleCellChange = (rowIndex: number, field: string, value: string) => {
-    const newMatrix = [...matrix];
-    (newMatrix[rowIndex] as any)[field] = value;
-    setMatrix(newMatrix);
-  };
+  const is404 = error?.message?.includes("404");
 
   return (
     <div className="space-y-6">
-      <Alert className="border-blue-200 bg-blue-50 text-blue-800 dark:border-blue-900 dark:bg-blue-950/30 dark:text-blue-300">
-        <AlertCircle className="size-4 text-blue-600" />
-        <AlertDescription>
-          <strong>Bozza Interfaccia:</strong> Questa è un'anteprima della nuova
-          logica per le Promozioni. Le celle accettano sia valori fissi (es.{" "}
-          <strong>-10€</strong>) sia percentuali (es. <strong>-15%</strong>).
-          Lasciando vuoto, la promo non si applica.
-        </AlertDescription>
-      </Alert>
+      <div className="flex items-center justify-between rounded-lg border bg-background p-4 shadow-sm">
+        <div>
+          <h2 className="text-lg font-bold">Regole Promozionali</h2>
+          <p className="text-sm text-muted-foreground">
+            Gestisci sconti in percentuale o a valore fisso
+          </p>
+        </div>
+        <Button
+          onClick={() => {
+            setEditingPromo(null);
+            setIsModalOpen(true);
+          }}
+          className="gap-2"
+        >
+          <Plus className="size-4" /> Nuovo Codice
+        </Button>
+      </div>
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between border-b bg-muted/50 pb-4">
-          <div>
-            <CardTitle className="text-xl">
-              Gestione Promozioni Stagionali
-            </CardTitle>
-            <CardDescription>
-              Configura gli sconti da applicare al Listino Base per ogni periodo
-              promozionale.
-            </CardDescription>
-          </div>
-          <div className="flex items-center gap-3">
-            <Select value={selectedPromo} onValueChange={setSelectedPromo}>
-              <SelectTrigger className="w-[200px] bg-background font-semibold">
-                <SelectValue placeholder="Seleziona Promo..." />
-              </SelectTrigger>
-              <SelectContent>
-                {promos.map((p) => (
-                  <SelectItem key={p.id} value={p.id}>
-                    {p.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button variant="outline" className="shadow-sm">
-              <Plus className="mr-2 size-4" /> Nuova Promo
-            </Button>
-            <Button className="bg-indigo-600 shadow-sm hover:bg-indigo-700">
-              <Save className="mr-2 size-4" /> Salva Griglia
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="p-6">
-          <div className="mb-6 flex gap-4">
-            <div className="flex-1">
-              <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Nome Promozione
-              </label>
-              <Input
-                defaultValue={promos.find((p) => p.id === selectedPromo)?.name}
-                className="font-semibold"
-              />
-            </div>
-            <div className="flex-1">
-              <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Validità (Dal - Al)
-              </label>
-              <div className="flex items-center gap-2">
-                <Input type="date" defaultValue="2026-09-01" />
-                <span className="text-muted-foreground">-</span>
-                <Input type="date" defaultValue="2026-10-31" />
-              </div>
-            </div>
-          </div>
-
-          <div className="overflow-hidden rounded-md border">
-            <Table>
-              <TableHeader className="bg-slate-50 dark:bg-slate-800/50">
-                <TableRow>
-                  <TableHead className="w-[200px] border-r font-semibold">
-                    Categoria (Listino Base)
-                  </TableHead>
-                  <TableHead className="border-r text-center font-semibold">
-                    1 corso
-                  </TableHead>
-                  <TableHead className="border-r text-center font-semibold">
-                    2 corsi
-                  </TableHead>
-                  <TableHead className="border-r text-center font-semibold">
-                    3+ corsi
-                  </TableHead>
-                  <TableHead className="text-center font-semibold">
-                    Pack 10 / Extra
-                  </TableHead>
+      <div className="min-h-[300px] overflow-hidden rounded-lg border bg-background shadow-sm">
+        <Table>
+          <TableHeader className="bg-muted">
+            <TableRow>
+              <TableHead>Codice</TableHead>
+              <TableHead>Tipo Target</TableHead>
+              <TableHead>Valore</TableHead>
+              <TableHead>Validità</TableHead>
+              <TableHead>Utilizzi</TableHead>
+              <TableHead>Regole Extra</TableHead>
+              <TableHead className="text-right">Azioni</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading && !is404 ? (
+              // Skeleton Loader
+              Array.from({ length: 3 }).map((_, i) => (
+                <TableRow key={i}>
+                  <TableCell>
+                    <Skeleton className="h-4 w-[100px]" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-[80px]" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-[60px]" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-[120px]" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-[100px]" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-[80px]" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="ml-auto size-8" />
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {matrix.map((row, i) => (
-                  <TableRow key={i} className="hover:bg-muted/30">
-                    <TableCell className="border-r bg-muted/10 font-medium">
-                      {row.category}
+              ))
+            ) : is404 || !promos || promos.length === 0 ? (
+              // Empty State
+              <TableRow>
+                <TableCell colSpan={7} className="h-48 text-center">
+                  <div className="flex flex-col items-center justify-center text-muted-foreground opacity-60">
+                    <Ticket className="mb-3 size-10 text-slate-300" />
+                    <span className="font-medium">
+                      Nessuna promozione trovata.
+                    </span>
+                    <span className="mt-1 text-xs">
+                      L'endpoint /api/promo-rules non ha restituito dati o
+                      mancano configurazioni.
+                    </span>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ) : (
+              // Data Rows
+              promos.map((promo) => {
+                const isExpired =
+                  promo.validTo && new Date(promo.validTo) < new Date();
+                const progressWidth = promo.maxUses
+                  ? `${Math.min(100, Math.round(((promo.usedCount || 0) / promo.maxUses) * 100))}%`
+                  : "0%";
+
+                return (
+                  <TableRow key={promo.id}>
+                    <TableCell className="font-mono font-bold text-foreground/80">
+                      {promo.code}
                     </TableCell>
-                    <TableCell className="border-r p-2">
-                      <Input
-                        value={row.course1}
-                        onChange={(e) =>
-                          handleCellChange(i, "course1", e.target.value)
-                        }
-                        placeholder="-10% o -15€"
-                        className="h-9 text-center"
-                      />
+                    <TableCell>
+                      <Badge
+                        variant="outline"
+                        className={getTargetBadgeColor(promo.targetType)}
+                      >
+                        {promo.targetType.toUpperCase()}
+                      </Badge>
                     </TableCell>
-                    <TableCell className="border-r p-2">
-                      <Input
-                        value={row.course2}
-                        onChange={(e) =>
-                          handleCellChange(i, "course2", e.target.value)
-                        }
-                        placeholder="-10% o -15€"
-                        className="h-9 text-center"
-                      />
+                    <TableCell className="font-mono">
+                      {promo.ruleType === "percentage"
+                        ? `${promo.value}%`
+                        : `€${promo.value}`}
                     </TableCell>
-                    <TableCell className="border-r p-2">
-                      <Input
-                        value={row.course3}
-                        onChange={(e) =>
-                          handleCellChange(i, "course3", e.target.value)
-                        }
-                        placeholder="-10% o -15€"
-                        className="h-9 text-center"
-                      />
+                    <TableCell>
+                      <div className="flex flex-col gap-1">
+                        <span className="text-xs">
+                          {promo.validFrom
+                            ? new Date(promo.validFrom).toLocaleDateString()
+                            : "N/A"}{" "}
+                          -{" "}
+                          {promo.validTo
+                            ? new Date(promo.validTo).toLocaleDateString()
+                            : "Infinite"}
+                        </span>
+                        {isExpired && (
+                          <Badge
+                            variant="destructive"
+                            className="h-3 w-fit px-1 text-xxxs"
+                          >
+                            SCADUTO
+                          </Badge>
+                        )}
+                      </div>
                     </TableCell>
-                    <TableCell className="p-2">
-                      <Input
-                        value={row.pack10}
-                        onChange={(e) =>
-                          handleCellChange(i, "pack10", e.target.value)
-                        }
-                        placeholder="-10% o -15€"
-                        className="h-9 text-center"
-                      />
+                    <TableCell>
+                      <div className="flex w-24 flex-col gap-1">
+                        <span className="text-xs text-muted-foreground">
+                          {promo.usedCount || 0} / {promo.maxUses || "∞"}
+                        </span>
+                        {promo.maxUses && (
+                          <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                            <div
+                              className="h-full bg-primary"
+                              style={{ width: progressWidth }}
+                            ></div>
+                          </div>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-col gap-1">
+                        {promo.excludeOpen && (
+                          <Badge
+                            variant="outline"
+                            className="h-4 w-fit border-red-200 bg-red-50 text-xxxs text-red-700 dark:border-red-900/50 dark:bg-red-950/20"
+                          >
+                            NO OPEN
+                          </Badge>
+                        )}
+                        {promo.notCumulative && (
+                          <Badge
+                            variant="outline"
+                            className="h-4 w-fit border-amber-200 bg-amber-50 text-xxxs text-amber-700 dark:border-amber-900/50 dark:bg-amber-950/20"
+                          >
+                            NO CUMULO
+                          </Badge>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          setEditingPromo(promo);
+                          setIsModalOpen(true);
+                        }}
+                      >
+                        <Pencil className="size-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-destructive hover:bg-red-50 dark:bg-red-950/20"
+                        onClick={() => {
+                          if (
+                            confirm(
+                              "Vuoi davvero disattivare questa regole promozionale?",
+                            )
+                          ) {
+                            deleteMutation.mutate(promo.id);
+                          }
+                        }}
+                        disabled={deleteMutation.isPending}
+                      >
+                        <Trash2 className="size-4" />
+                      </Button>
                     </TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+                );
+              })
+            )}
+          </TableBody>
+        </Table>
+      </div>
 
-          <div className="mt-4 flex items-start gap-2 rounded-md bg-slate-50 p-3 text-sm text-muted-foreground dark:bg-slate-900">
-            <AlertCircle className="mt-0.5 size-4 shrink-0 text-slate-400" />
-            <p>
-              In questa griglia decidi quali categorie e pacchetti beneficiano
-              della promozione selezionata. Scrivi <strong>-15%</strong> per uno
-              sconto percentuale, oppure <strong>-20€</strong> per uno sconto
-              fisso. Se lasci una cella vuota, il prezzo base rimarrà invariato
-              per quella combinazione.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+      <PromoRuleModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        editingPromo={editingPromo}
+      />
     </div>
   );
 }
