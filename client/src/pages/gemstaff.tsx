@@ -781,8 +781,26 @@ export default function GemStaff() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingInstructor, setEditingInstructor] = useState<any>(null);
   const [isPrivateLessonsAuth, setIsPrivateLessonsAuth] = useState(false);
+  
+  const [pageSize, setPageSize] = useState<number>(() => {
+    const saved = localStorage.getItem("gemstaff_page_size");
+    return saved ? parseInt(saved, 10) : 50;
+  });
+  const [currentPage, setCurrentPage] = useState(1);
+
   const queryClient = useQueryClient();
   const { toast } = useToast();
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab, searchName, categoryFilter, statusFilter, showArchive, pageSize]);
+
+  const handlePageSizeChange = (val: string) => {
+    const size = parseInt(val, 10);
+    setPageSize(size);
+    localStorage.setItem("gemstaff_page_size", val);
+    setCurrentPage(1);
+  };
 
   const createAccountMutation = useMutation({
     mutationFn: async (memberId: number) =>
@@ -1076,9 +1094,21 @@ export default function GemStaff() {
     }
   };
 
-  const { sortConfig, handleSort, sortItems, isSortedColumn } =
+  const { sortConfig: sortConfigStaff, handleSort: handleSortStaff, sortItems: sortItemsStaff, isSortedColumn: isSortedColumnStaff } =
     useSortableTable<any>("lastName");
-  const filteredStaff = sortItems(filteredStaffRaw, getSortValue);
+  const filteredStaff = sortItemsStaff(filteredStaffRaw, getSortValue);
+  
+  const paginatedStaff = pageSize === 999999 
+    ? filteredStaff 
+    : filteredStaff.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+  const { sortConfig: sortConfigPt, handleSort: handleSortPt, sortItems: sortItemsPt, isSortedColumn: isSortedColumnPt } =
+    useSortableTable<any>("lastName");
+  const sortedPtList = sortItemsPt(ptListSorted, getSortValue);
+
+  const paginatedPtList = pageSize === 999999
+    ? sortedPtList
+    : sortedPtList.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const userRole = user?.role?.toLowerCase() || "";
   const isAdmin = [
@@ -1120,6 +1150,22 @@ export default function GemStaff() {
           <p className="mt-1 text-sm text-muted-foreground">
             Gestione Risorse Umane, Staff e Insegnanti
           </p>
+        </div>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <Label className="text-sm text-muted-foreground whitespace-nowrap">Per pagina:</Label>
+            <Select value={pageSize.toString()} onValueChange={handlePageSizeChange}>
+              <SelectTrigger className="w-[80px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="25">25</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+                <SelectItem value="100">100</SelectItem>
+                <SelectItem value="999999">Tutti</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </div>
 
@@ -1244,6 +1290,12 @@ export default function GemStaff() {
               )}
             </div>
 
+            <div className="flex items-center justify-between px-2">
+              <span className="text-sm font-medium text-muted-foreground border-b-2 border-red-500 pb-1">
+                N. {filteredStaff.length} Record Trovati
+              </span>
+            </div>
+
             <div className="overflow-hidden rounded-md border bg-background">
               <Table>
                 <TableHeader>
@@ -1358,7 +1410,7 @@ export default function GemStaff() {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    filteredStaff.map((s) => {
+                    paginatedStaff.map((s) => {
                       const assignedCourses = getInstructorCourses(
                         s.instructorId,
                       );
@@ -1564,48 +1616,81 @@ export default function GemStaff() {
               </AlertDescription>
             </Alert>
           ) : (
-            <div className="overflow-hidden rounded-md border bg-background">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Nome</TableHead>
-                    <TableHead>Ruolo</TableHead>
-                    <TableHead>Cellulare</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Stato</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {ptListSorted.map((pt: any) => (
-                    <TableRow
-                      key={pt.id || pt.firstName}
-                      className="cursor-pointer hover:bg-muted"
-                      onClick={() => setSelectedStaff(pt)}
-                    >
-                      <TableCell className="font-semibold">
-                        {pt.lastName} {pt.firstName}
-                      </TableCell>
-                      <TableCell>
-                        {pt.specializzazione || "Personal Trainer"}
-                      </TableCell>
-                      <TableCell>{pt.phone || "—"}</TableCell>
-                      <TableCell>{pt.email || "—"}</TableCell>
-                      <TableCell>
-                        <Badge
-                          className={
-                            pt.staff_status === "INATTIVO"
-                              ? "bg-slate-400"
-                              : "bg-emerald-500"
-                          }
-                        >
-                          {pt.staff_status || "ATTIVO"}
-                        </Badge>
-                      </TableCell>
+            <>
+              <div className="flex items-center justify-between px-2 mb-2">
+                <span className="text-sm font-medium text-muted-foreground border-b-2 border-red-500 pb-1">
+                  N. {ptList.length} Record Trovati
+                </span>
+              </div>
+              <div className="overflow-hidden rounded-md border bg-background">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <SortableTableHead
+                        sortKey="lastName"
+                        currentSort={sortConfigPt}
+                        onSort={handleSortPt}
+                      >
+                        Cognome
+                      </SortableTableHead>
+                      <SortableTableHead
+                        sortKey="firstName"
+                        currentSort={sortConfigPt}
+                        onSort={handleSortPt}
+                      >
+                        Nome
+                      </SortableTableHead>
+                      <TableHead>Ruolo</TableHead>
+                      <TableHead>Cellulare</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Stato</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+                  </TableHeader>
+                  <TableBody>
+                    {paginatedPtList.map((pt: any) => (
+                      <TableRow
+                        key={pt.id || pt.firstName}
+                        className="cursor-pointer hover:bg-muted"
+                        onClick={() => setSelectedStaff(pt)}
+                      >
+                        <TableCell
+                          className={cn(
+                            "font-semibold",
+                            isSortedColumnPt("lastName") && "sorted-column-cell"
+                          )}
+                        >
+                          {pt.lastName}
+                        </TableCell>
+                        <TableCell
+                          className={cn(
+                            "font-semibold",
+                            isSortedColumnPt("firstName") && "sorted-column-cell"
+                          )}
+                        >
+                          {pt.firstName}
+                        </TableCell>
+                        <TableCell>
+                          {pt.specializzazione || "Personal Trainer"}
+                        </TableCell>
+                        <TableCell>{pt.phone || "—"}</TableCell>
+                        <TableCell>{pt.email || "—"}</TableCell>
+                        <TableCell>
+                          <Badge
+                            className={
+                              pt.staff_status === "INATTIVO"
+                                ? "bg-slate-400"
+                                : "bg-emerald-500"
+                            }
+                          >
+                            {pt.staff_status || "ATTIVO"}
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </>
           )}
         </TabsContent>
 

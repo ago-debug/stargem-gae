@@ -4350,8 +4350,8 @@ app.get("/api/gemstaff/pt", isAuthenticated, async (req, res) => {
         and(
           // @ts-ignore // TODO: STI-cleanup
           or(
-            eq(schema.members.participantType, 'PT'),
-            eq(schema.members.participantType, 'PERSONAL_TRAINER')
+            like(schema.members.participantType, '%PT%'),
+            like(schema.members.participantType, '%PERSONAL_TRAINER%')
           ),
           eq(schema.members.staffStatus, status as any)
         )
