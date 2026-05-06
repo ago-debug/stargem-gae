@@ -149,10 +149,10 @@ export default function AuthPage() {
       />
 
       {/* Sfondo decorativo vettoriale premium */}
-      <div className="absolute inset-0 z-0 bg-gradient-to-br from-primary/10 via-background to-blue-500/10" />
-      <div className="pointer-events-none absolute right-[-5%] top-[-10%] h-[500px] w-[500px] animate-pulse rounded-full bg-primary/10 blur-[100px]" />
+      <div className="absolute inset-0 z-0 bg-gradient-to-br from-primary/10 via-background to-blue-500/10 dark:bg-none" />
+      <div className="pointer-events-none absolute right-[-5%] top-[-10%] h-[500px] w-[500px] animate-pulse rounded-full bg-primary/10 blur-[100px] dark:animate-none dark:opacity-0" />
       <div
-        className="pointer-events-none absolute bottom-[-10%] left-[-5%] h-[400px] w-[400px] animate-pulse rounded-full bg-blue-500/10 blur-[80px]"
+        className="pointer-events-none absolute bottom-[-10%] left-[-5%] h-[400px] w-[400px] animate-pulse rounded-full bg-blue-500/10 blur-[80px] dark:animate-none dark:opacity-0"
         style={{ animationDelay: "2s" }}
       />
 
@@ -283,7 +283,7 @@ export default function AuthPage() {
               />
 
               {/* Pellicola sfumata scura a cerchio (Night Mode Vignette Overlay) */}
-              <div className="pointer-events-none absolute inset-0 z-10 hidden rounded-b-xl bg-[radial-gradient(ellipse_at_center,transparent_15%,rgba(0,0,0,0.5)_55%,hsl(var(--background))_85%)] transition-all duration-500 dark:block lg:rounded-b-none lg:rounded-r-xl" />
+              <div className="pointer-events-none absolute inset-0 z-10 hidden rounded-b-xl bg-[radial-gradient(circle,transparent_15%,rgba(0,0,0,0.5)_50%,hsl(var(--background)/0.9)_80%)] transition-all duration-500 dark:block lg:rounded-b-none lg:rounded-r-xl" />
 
               {/* Audio Toggle Button */}
               <button
