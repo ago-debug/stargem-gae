@@ -69,18 +69,18 @@ interface MemberFormData {
   photoUrl?: string | null;
   // Minor fields
   isMinor?: boolean;
-  motherFirstName?: string | null;
-  motherLastName?: string | null;
-  motherFiscalCode?: string | null;
-  motherEmail?: string | null;
-  motherPhone?: string | null;
-  motherMobile?: string | null;
-  fatherFirstName?: string | null;
-  fatherLastName?: string | null;
-  fatherFiscalCode?: string | null;
-  fatherEmail?: string | null;
-  fatherPhone?: string | null;
-  fatherMobile?: string | null;
+  genitore1FirstName?: string | null;
+  genitore1LastName?: string | null;
+  genitore1FiscalCode?: string | null;
+  genitore1Email?: string | null;
+  genitore1Phone?: string | null;
+  genitore1Mobile?: string | null;
+  genitore2FirstName?: string | null;
+  genitore2LastName?: string | null;
+  genitore2FiscalCode?: string | null;
+  genitore2Email?: string | null;
+  genitore2Phone?: string | null;
+  genitore2Mobile?: string | null;
   // Additional UI-only fields
   dataIscrizione?: string;
   primaIscrizione?: string;
@@ -307,20 +307,20 @@ export default function AnagraficaHome() {
         hasMedicalCertificate: selectedMember.hasMedicalCertificate || false,
         medicalCertificateExpiry: formatForInput(selectedMember.medicalCertificateExpiry),
         active: selectedMember.active !== false,
-        photoUrl: selectedMember.photoUrl || null,
+        photoUrl: (selectedMember as any).photoUrl || null,
         isMinor: selectedMember.isMinor || false,
-        motherFirstName: selectedMember.motherFirstName || "",
-        motherLastName: selectedMember.motherLastName || "",
-        motherFiscalCode: selectedMember.motherFiscalCode || "",
-        motherEmail: selectedMember.motherEmail || "",
-        motherPhone: selectedMember.motherPhone || "",
-        motherMobile: selectedMember.motherMobile || "",
-        fatherFirstName: selectedMember.fatherFirstName || "",
-        fatherLastName: selectedMember.fatherLastName || "",
-        fatherFiscalCode: selectedMember.fatherFiscalCode || "",
-        fatherEmail: selectedMember.fatherEmail || "",
-        fatherPhone: selectedMember.fatherPhone || "",
-        fatherMobile: selectedMember.fatherMobile || "",
+        genitore1FirstName: selectedMember.genitore1FirstName || "",
+        genitore1LastName: selectedMember.genitore1LastName || "",
+        genitore1FiscalCode: selectedMember.genitore1FiscalCode || "",
+        genitore1Email: selectedMember.genitore1Email || "",
+        genitore1Phone: selectedMember.genitore1Phone || "",
+        genitore1Mobile: selectedMember.genitore1Mobile || "",
+        genitore2FirstName: selectedMember.genitore2FirstName || "",
+        genitore2LastName: selectedMember.genitore2LastName || "",
+        genitore2FiscalCode: selectedMember.genitore2FiscalCode || "",
+        genitore2Email: selectedMember.genitore2Email || "",
+        genitore2Phone: selectedMember.genitore2Phone || "",
+        genitore2Mobile: selectedMember.genitore2Mobile || "",
       });
       // Ensure we are on the anagrafica tab when loading a member
       if (activeTab === "anagrafica" || activeTab === "") {
@@ -518,18 +518,18 @@ export default function AnagraficaHome() {
       hasMedicalCertificate: formData.hasMedicalCertificate === true,
       photoUrl: formData.photoUrl,
       isMinor: formData.isMinor === true,
-      motherFirstName: normalizeEmpty(formData.motherFirstName),
-      motherLastName: normalizeEmpty(formData.motherLastName),
-      motherFiscalCode: normalizeEmpty(formData.motherFiscalCode),
-      motherEmail: normalizeEmpty(formData.motherEmail),
-      motherPhone: normalizeEmpty(formData.motherPhone),
-      motherMobile: normalizeEmpty(formData.motherMobile),
-      fatherFirstName: normalizeEmpty(formData.fatherFirstName),
-      fatherLastName: normalizeEmpty(formData.fatherLastName),
-      fatherFiscalCode: normalizeEmpty(formData.fatherFiscalCode),
-      fatherEmail: normalizeEmpty(formData.fatherEmail),
-      fatherPhone: normalizeEmpty(formData.fatherPhone),
-      fatherMobile: normalizeEmpty(formData.fatherMobile),
+      genitore1FirstName: normalizeEmpty(formData.genitore1FirstName),
+      genitore1LastName: normalizeEmpty(formData.genitore1LastName),
+      genitore1FiscalCode: normalizeEmpty(formData.genitore1FiscalCode),
+      genitore1Email: normalizeEmpty(formData.genitore1Email),
+      genitore1Phone: normalizeEmpty(formData.genitore1Phone),
+      genitore1Mobile: normalizeEmpty(formData.genitore1Mobile),
+      genitore2FirstName: normalizeEmpty(formData.genitore2FirstName),
+      genitore2LastName: normalizeEmpty(formData.genitore2LastName),
+      genitore2FiscalCode: normalizeEmpty(formData.genitore2FiscalCode),
+      genitore2Email: normalizeEmpty(formData.genitore2Email),
+      genitore2Phone: normalizeEmpty(formData.genitore2Phone),
+      genitore2Mobile: normalizeEmpty(formData.genitore2Mobile),
     };
     saveMutation.mutate(dataToSave);
   };
@@ -574,20 +574,20 @@ export default function AnagraficaHome() {
       hasMedicalCertificate: member.hasMedicalCertificate || false,
       medicalCertificateExpiry: formatForInput(member.medicalCertificateExpiry),
       active: member.active !== false,
-      photoUrl: member.photoUrl || null,
+      photoUrl: (member as any).photoUrl || null,
       isMinor: member.isMinor || false,
-      motherFirstName: member.motherFirstName || "",
-      motherLastName: member.motherLastName || "",
-      motherFiscalCode: member.motherFiscalCode || "",
-      motherEmail: member.motherEmail || "",
-      motherPhone: member.motherPhone || "",
-      motherMobile: member.motherMobile || "",
-      fatherFirstName: member.fatherFirstName || "",
-      fatherLastName: member.fatherLastName || "",
-      fatherFiscalCode: member.fatherFiscalCode || "",
-      fatherEmail: member.fatherEmail || "",
-      fatherPhone: member.fatherPhone || "",
-      fatherMobile: member.fatherMobile || "",
+      genitore1FirstName: member.genitore1FirstName || "",
+      genitore1LastName: member.genitore1LastName || "",
+      genitore1FiscalCode: member.genitore1FiscalCode || "",
+      genitore1Email: member.genitore1Email || "",
+      genitore1Phone: member.genitore1Phone || "",
+      genitore1Mobile: member.genitore1Mobile || "",
+      genitore2FirstName: member.genitore2FirstName || "",
+      genitore2LastName: member.genitore2LastName || "",
+      genitore2FiscalCode: member.genitore2FiscalCode || "",
+      genitore2Email: member.genitore2Email || "",
+      genitore2Phone: member.genitore2Phone || "",
+      genitore2Mobile: member.genitore2Mobile || "",
     });
   };
 
@@ -629,7 +629,7 @@ export default function AnagraficaHome() {
   const generatedMemberId = selectedMemberId ? String(selectedMemberId).padStart(7, '0') : "0000001";
 
   const tabs = [
-    { id: "anagrafica", label: "Anagrafica", icon: User },
+    { id: "anagrafica", label: "Utente", icon: User },
     { id: "corsi", label: "Corsi", icon: BookOpen },
     { id: "workshop", label: "Workshop", icon: Calendar },
     { id: "pagamenti", label: "Pagamenti", icon: CreditCard },
@@ -650,7 +650,7 @@ export default function AnagraficaHome() {
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div className="space-y-2 min-w-0">
               <div>
-                <h1 className="text-xl sm:text-2xl font-semibold" data-testid="text-page-title">Sistema di Gestione Anagrafica</h1>
+                <h1 className="text-xl sm:text-2xl font-semibold" data-testid="text-page-title">Sistema di Gestione Utente</h1>
                 <p className="text-xs sm:text-sm text-muted-foreground">Inserimento e interrogazione dati</p>
               </div>
               <MemberSearch
@@ -672,7 +672,7 @@ export default function AnagraficaHome() {
               <div className="hidden lg:flex gap-2">
       <ExportWizard 
         filename="anagrafica_completa"
-        title="Esporta Anagrafica"
+        title="Esporta Utenti"
         apiEndpoint="/api/export"
         apiParams={{ table: 'members' }}
         columns={[
@@ -760,9 +760,7 @@ export default function AnagraficaHome() {
             <Card key={selectedMemberId || 'new'}>
               <CardHeader className="pb-4">
                 <CardTitle className="flex items-center gap-2 text-lg">
-                  <User className="w-5 h-5" />
-                  Anagrafica
-                </CardTitle>
+                  <User className="w-5 h-5" />Utente</CardTitle>
                 {selectedMember?.dataQualityFlag === 'mancano_dati_obbligatori' && (
                   <div className="bg-red-50 dark:bg-red-950/20 border-l-4 border-red-600 p-4 mt-4 rounded-md shadow-sm">
                     <div className="flex items-center">
@@ -1097,28 +1095,28 @@ export default function AnagraficaHome() {
                       <div className="space-y-3">
                         <h4 className="text-sm font-bold text-primary border-b pb-1">Dati Madre</h4>
                         <div className="grid grid-cols-2 gap-2">
-                          <Input placeholder="Nome" value={formData.motherFirstName || ""} onChange={e => setFormData(p => ({ ...p, motherFirstName: e.target.value }))} />
-                          <Input placeholder="Cognome" value={formData.motherLastName || ""} onChange={e => setFormData(p => ({ ...p, motherLastName: e.target.value }))} />
+                          <Input placeholder="Nome" value={formData.genitore1FirstName || ""} onChange={e => setFormData(p => ({ ...p, genitore1FirstName: e.target.value }))} />
+                          <Input placeholder="Cognome" value={formData.genitore1LastName || ""} onChange={e => setFormData(p => ({ ...p, genitore1LastName: e.target.value }))} />
                         </div>
-                        <Input placeholder="Codice Fiscale" className="font-mono uppercase" value={formData.motherFiscalCode || ""} onChange={e => setFormData(p => ({ ...p, motherFiscalCode: e.target.value.toUpperCase() }))} />
-                        <Input placeholder="Email" value={formData.motherEmail || ""} onChange={e => setFormData(p => ({ ...p, motherEmail: e.target.value }))} />
+                        <Input placeholder="Codice Fiscale" className="font-mono uppercase" value={formData.genitore1FiscalCode || ""} onChange={e => setFormData(p => ({ ...p, genitore1FiscalCode: e.target.value.toUpperCase() }))} />
+                        <Input placeholder="Email" value={formData.genitore1Email || ""} onChange={e => setFormData(p => ({ ...p, genitore1Email: e.target.value }))} />
                         <div className="grid grid-cols-2 gap-2">
-                          <Input placeholder="Telefono" value={formData.motherPhone || ""} onChange={e => setFormData(p => ({ ...p, motherPhone: e.target.value }))} />
-                          <Input placeholder="Cellulare" value={formData.motherMobile || ""} onChange={e => setFormData(p => ({ ...p, motherMobile: e.target.value }))} />
+                          <Input placeholder="Telefono" value={formData.genitore1Phone || ""} onChange={e => setFormData(p => ({ ...p, genitore1Phone: e.target.value }))} />
+                          <Input placeholder="Cellulare" value={formData.genitore1Mobile || ""} onChange={e => setFormData(p => ({ ...p, genitore1Mobile: e.target.value }))} />
                         </div>
                       </div>
                       {/* Padre */}
                       <div className="space-y-3">
                         <h4 className="text-sm font-bold text-primary border-b pb-1">Dati Padre</h4>
                         <div className="grid grid-cols-2 gap-2">
-                          <Input placeholder="Nome" value={formData.fatherFirstName || ""} onChange={e => setFormData(p => ({ ...p, fatherFirstName: e.target.value }))} />
-                          <Input placeholder="Cognome" value={formData.fatherLastName || ""} onChange={e => setFormData(p => ({ ...p, fatherLastName: e.target.value }))} />
+                          <Input placeholder="Nome" value={formData.genitore2FirstName || ""} onChange={e => setFormData(p => ({ ...p, genitore2FirstName: e.target.value }))} />
+                          <Input placeholder="Cognome" value={formData.genitore2LastName || ""} onChange={e => setFormData(p => ({ ...p, genitore2LastName: e.target.value }))} />
                         </div>
-                        <Input placeholder="Codice Fiscale" className="font-mono uppercase" value={formData.fatherFiscalCode || ""} onChange={e => setFormData(p => ({ ...p, fatherFiscalCode: e.target.value.toUpperCase() }))} />
-                        <Input placeholder="Email" value={formData.fatherEmail || ""} onChange={e => setFormData(p => ({ ...p, fatherEmail: e.target.value }))} />
+                        <Input placeholder="Codice Fiscale" className="font-mono uppercase" value={formData.genitore2FiscalCode || ""} onChange={e => setFormData(p => ({ ...p, genitore2FiscalCode: e.target.value.toUpperCase() }))} />
+                        <Input placeholder="Email" value={formData.genitore2Email || ""} onChange={e => setFormData(p => ({ ...p, genitore2Email: e.target.value }))} />
                         <div className="grid grid-cols-2 gap-2">
-                          <Input placeholder="Telefono" value={formData.fatherPhone || ""} onChange={e => setFormData(p => ({ ...p, fatherPhone: e.target.value }))} />
-                          <Input placeholder="Cellulare" value={formData.fatherMobile || ""} onChange={e => setFormData(p => ({ ...p, fatherMobile: e.target.value }))} />
+                          <Input placeholder="Telefono" value={formData.genitore2Phone || ""} onChange={e => setFormData(p => ({ ...p, genitore2Phone: e.target.value }))} />
+                          <Input placeholder="Cellulare" value={formData.genitore2Mobile || ""} onChange={e => setFormData(p => ({ ...p, genitore2Mobile: e.target.value }))} />
                         </div>
                       </div>
                     </div>

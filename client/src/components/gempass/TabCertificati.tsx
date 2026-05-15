@@ -93,7 +93,7 @@ export function TabCertificati() {
   return (
     <div className="space-y-6 mt-4">
       <div className="flex items-center justify-end">
-        <Button onClick={() => alert("Per aggiungere un certificato, utilizza la scheda Anagrafica dell'utente.")}>
+        <Button onClick={() => alert("Per aggiungere un certificato, utilizza la scheda Utente dell'utente.")}>
           <Plus className="w-4 h-4 mr-2" />
           Nuovo Certificato
         </Button>

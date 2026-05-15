@@ -73,15 +73,15 @@ function runTests() {
 
   // CASO 6: Generazione Number id Piccolo
   const num_small = generateMembershipNumber(7, 2024, 2025);
-  assertEqual("6. Member Numb (Id Piccolo)", num_small, "2425-0007");
+  assertEqual("6. Member Numb (Id Piccolo)", num_small, "2425-000007");
 
   // CASO 7: Generazione Number id Grande
   const num_large = generateMembershipNumber(14502, 2024, 2025);
-  assertEqual("7. Member Numb (Id Grande)", num_large, "2425-14502");
+  assertEqual("7. Member Numb (Id Grande)", num_large, "2425-014502");
 
   // CASO 8: Generazione Barcode
-  const bc = generateBarcode("2526-0850");
-  assertEqual("8. Barcode (Trattini rimossi)", bc, "T25260850");
+  const bc = generateBarcode("2526-000850");
+  assertEqual("8. Barcode (Trattini rimossi)", bc, "T2526000850");
 
   console.log(`\nRisultato Finale: ${passed} Passati, ${failed} Falliti`);
   if (failed > 0) process.exit(1);

@@ -59,10 +59,8 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 
-import {
-  SortableTableHead,
-  useSortableTable,
-} from "@/components/sortable-table-head";
+import { SortableHeader } from "@/components/shared/SortableHeader";
+import { useSortableList } from "@/hooks/useSortableList";
 import { cn } from "@/lib/utils";
 import { AccordiTab } from "@/components/quote-promo/accordi-tab";
 
@@ -1096,9 +1094,8 @@ export default function GemStaff() {
     }
   };
 
-  const { sortConfig: sortConfigStaff, handleSort: handleSortStaff, sortItems: sortItemsStaff, isSortedColumn: isSortedColumnStaff } =
-    useSortableTable<any>("lastName");
-  const filteredStaff = sortItemsStaff(filteredStaffRaw, getSortValue);
+  const { sortConfig: sortConfigStaff, handleSort: handleSortStaff, sortedData: filteredStaff } =
+    useSortableList<any>(filteredStaffRaw, "lastName", "asc", getSortValue);
   
   const paginatedStaff = pageSize === 999999 
     ? filteredStaff 
@@ -1110,9 +1107,8 @@ export default function GemStaff() {
     return true;
   });
 
-  const { sortConfig: sortConfigPt, handleSort: handleSortPt, sortItems: sortItemsPt, isSortedColumn: isSortedColumnPt } =
-    useSortableTable<any>("lastName");
-  const sortedPtList = sortItemsPt(filteredPtListRaw, getSortValue);
+  const { sortConfig: sortConfigPt, handleSort: handleSortPt, sortedData: sortedPtList } =
+    useSortableList<any>(filteredPtListRaw, "lastName", "asc", getSortValue);
 
   const paginatedPtList = pageSize === 999999
     ? sortedPtList
@@ -1190,7 +1186,7 @@ export default function GemStaff() {
                 className="flex items-center gap-2"
               >
                 <Users className="size-4" />
-                <span className="hidden sm:inline">Anagrafica Insegnanti</span>
+                <span className="hidden sm:inline">Profilo Insegnanti</span>
               </TabsTrigger>
               <TabsTrigger value="pt" className="flex items-center gap-2">
                 <Briefcase className="size-4" />
@@ -1322,64 +1318,64 @@ export default function GemStaff() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <SortableTableHead
-                      sortKey="lastName"
+                    <SortableHeader
+                      column="lastName"
                       currentSort={sortConfigStaff}
                       onSort={handleSortStaff}
                     >
                       Cognome
-                    </SortableTableHead>
-                    <SortableTableHead
-                      sortKey="firstName"
+                    </SortableHeader>
+                    <SortableHeader
+                      column="firstName"
                       currentSort={sortConfigStaff}
                       onSort={handleSortStaff}
                     >
                       Nome
-                    </SortableTableHead>
-                    <SortableTableHead
-                      sortKey="specialization"
+                    </SortableHeader>
+                    <SortableHeader
+                      column="specialization"
                       currentSort={sortConfigStaff}
                       onSort={handleSortStaff}
                     >
                       Specializzazione
-                    </SortableTableHead>
-                    <SortableTableHead
-                      sortKey="courses"
+                    </SortableHeader>
+                    <SortableHeader
+                      column="courses"
                       currentSort={sortConfigStaff}
                       onSort={handleSortStaff}
                     >
                       Corsi Assegnati
-                    </SortableTableHead>
-                    <SortableTableHead
-                      sortKey="email"
+                    </SortableHeader>
+                    <SortableHeader
+                      column="email"
                       currentSort={sortConfigStaff}
                       onSort={handleSortStaff}
                     >
                       Email
-                    </SortableTableHead>
-                    <SortableTableHead
-                      sortKey="phone"
+                    </SortableHeader>
+                    <SortableHeader
+                      column="phone"
                       currentSort={sortConfigStaff}
                       onSort={handleSortStaff}
                     >
                       Telefono
-                    </SortableTableHead>
+                    </SortableHeader>
                     {isAdmin && (
-                      <SortableTableHead
-                        sortKey="hourlyRate"
+                      <SortableHeader
+                        column="hourlyRate"
                         currentSort={sortConfigStaff}
                         onSort={handleSortStaff}
                       >
                         Tariffa Oraria
-                      </SortableTableHead>
+                      </SortableHeader>
                     )}
-                    <SortableTableHead
-                      sortKey="status"
+                    <SortableHeader
+                      column="status"
                       currentSort={sortConfigStaff}
                       onSort={handleSortStaff}
                     >
                       Staff Status
-                    </SortableTableHead>
+                    </SortableHeader>
                     {isAdmin && (
                       <TableHead className="text-right">Azioni</TableHead>
                     )}
@@ -1445,7 +1441,7 @@ export default function GemStaff() {
                           <TableCell
                             className={cn(
                               "font-medium",
-                              isSortedColumnStaff("lastName") &&
+                              sortConfigStaff.field === "lastName" &&
                                 "sorted-column-cell",
                             )}
                           >
@@ -1454,7 +1450,7 @@ export default function GemStaff() {
                           <TableCell
                             className={cn(
                               "font-medium",
-                              isSortedColumnStaff("firstName") &&
+                              sortConfigStaff.field === "firstName" &&
                                 "sorted-column-cell",
                             )}
                           >
@@ -1462,7 +1458,7 @@ export default function GemStaff() {
                           </TableCell>
                           <TableCell
                             className={cn(
-                              isSortedColumnStaff("specialization") &&
+                              sortConfigStaff.field === "specialization" &&
                                 "sorted-column-cell",
                             )}
                           >
@@ -1470,7 +1466,7 @@ export default function GemStaff() {
                           </TableCell>
                           <TableCell
                             className={cn(
-                              isSortedColumnStaff("courses") && "sorted-column-cell",
+                              sortConfigStaff.field === "courses" && "sorted-column-cell",
                             )}
                           >
                             <div className="flex flex-wrap gap-1">
@@ -1519,7 +1515,7 @@ export default function GemStaff() {
                           </TableCell>
                           <TableCell
                             className={cn(
-                              isSortedColumnStaff("email") && "sorted-column-cell",
+                              sortConfigStaff.field === "email" && "sorted-column-cell",
                             )}
                           >
                             {s.email ? (
@@ -1536,7 +1532,7 @@ export default function GemStaff() {
                           </TableCell>
                           <TableCell
                             className={cn(
-                              isSortedColumnStaff("phone") && "sorted-column-cell",
+                              sortConfigStaff.field === "phone" && "sorted-column-cell",
                             )}
                           >
                             {s.phone ? (
@@ -1554,7 +1550,7 @@ export default function GemStaff() {
                           {isAdmin && (
                             <TableCell
                               className={cn(
-                                isSortedColumnStaff("hourlyRate") &&
+                                sortConfigStaff.field === "hourlyRate" &&
                                   "sorted-column-cell",
                               )}
                             >
@@ -1563,7 +1559,7 @@ export default function GemStaff() {
                           )}
                           <TableCell
                             className={cn(
-                              isSortedColumnStaff("status") && "sorted-column-cell",
+                              sortConfigStaff.field === "status" && "sorted-column-cell",
                             )}
                           >
                             <Badge
@@ -1659,20 +1655,20 @@ export default function GemStaff() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <SortableTableHead
-                        sortKey="lastName"
+                      <SortableHeader
+                        column="lastName"
                         currentSort={sortConfigPt}
                         onSort={handleSortPt}
                       >
                         Cognome
-                      </SortableTableHead>
-                      <SortableTableHead
-                        sortKey="firstName"
+                      </SortableHeader>
+                      <SortableHeader
+                        column="firstName"
                         currentSort={sortConfigPt}
                         onSort={handleSortPt}
                       >
                         Nome
-                      </SortableTableHead>
+                      </SortableHeader>
                       <TableHead>Ruolo</TableHead>
                       <TableHead>Cellulare</TableHead>
                       <TableHead>Email</TableHead>
@@ -1689,7 +1685,7 @@ export default function GemStaff() {
                         <TableCell
                           className={cn(
                             "font-semibold",
-                            isSortedColumnPt("lastName") && "sorted-column-cell"
+                            sortConfigPt.field === "lastName" && "sorted-column-cell"
                           )}
                         >
                           {pt.lastName}
@@ -1697,7 +1693,7 @@ export default function GemStaff() {
                         <TableCell
                           className={cn(
                             "font-semibold",
-                            isSortedColumnPt("firstName") && "sorted-column-cell"
+                            sortConfigPt.field === "firstName" && "sorted-column-cell"
                           )}
                         >
                           {pt.firstName}

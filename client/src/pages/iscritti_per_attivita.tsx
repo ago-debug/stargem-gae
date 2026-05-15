@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -9,7 +8,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link, useLocation } from "wouter";
 import { EnrollmentDetailBadge } from "@/components/multi-select-enrollment-details";
-import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
+import { SortableHeader } from "@/components/shared/SortableHeader";
+import { sortArray } from "@/hooks/useSortableList";
+import { useState } from "react";
+import { SortConfig } from "@/components/shared/SortableHeader";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -81,9 +83,42 @@ export default function IscrittiPerAttivita() {
   const [expandedCampus, setExpandedCampus] = useState<string[]>([]);
   const [, setLocation] = useLocation();
 
-  const { sortConfig: courseSort, handleSort: handleCourseSort, sortItems: sortCourseItems, isSortedColumn: isCourseSorted } = useSortableTable<any>("lastName");
-  const { sortConfig: workshopSort, handleSort: handleWorkshopSort, sortItems: sortWorkshopItems, isSortedColumn: isWorkshopSorted } = useSortableTable<any>("lastName");
-  const { sortConfig: activitySort, handleSort: handleActivitySort, sortItems: sortActivityItems, isSortedColumn: isActivitySorted } = useSortableTable<any>("lastName");
+  const [courseSort, setcourseSort] = useState<SortConfig>({ field: "lastName", direction: "asc" });
+  const handleCourseSort = (field: string) => {
+    setcourseSort((prev) => {
+      if (prev.field === field) {
+        if (prev.direction === null) return { field, direction: "asc" };
+        if (prev.direction === "asc") return { field, direction: "desc" };
+        return { field, direction: null };
+      }
+      return { field, direction: "asc" };
+    });
+  };
+  const isCourseSorted = (field: string) => courseSort?.field === field;
+  const [workshopSort, setworkshopSort] = useState<SortConfig>({ field: "lastName", direction: "asc" });
+  const handleWorkshopSort = (field: string) => {
+    setworkshopSort((prev) => {
+      if (prev.field === field) {
+        if (prev.direction === null) return { field, direction: "asc" };
+        if (prev.direction === "asc") return { field, direction: "desc" };
+        return { field, direction: null };
+      }
+      return { field, direction: "asc" };
+    });
+  };
+  const isWorkshopSorted = (field: string) => workshopSort?.field === field;
+  const [activitySort, setactivitySort] = useState<SortConfig>({ field: "lastName", direction: "asc" });
+  const handleActivitySort = (field: string) => {
+    setactivitySort((prev) => {
+      if (prev.field === field) {
+        if (prev.direction === null) return { field, direction: "asc" };
+        if (prev.direction === "asc") return { field, direction: "desc" };
+        return { field, direction: null };
+      }
+      return { field, direction: "asc" };
+    });
+  };
+  const isActivitySorted = (field: string) => activitySort?.field === field;
 
   const getSortValue = (enrollment: any, key: string) => {
     switch (key) {
@@ -768,16 +803,16 @@ export default function IscrittiPerAttivita() {
                               <Table>
                                 <TableHeader>
                                   <TableRow>
-                                    <SortableTableHead sortKey="lastName" currentSort={courseSort} onSort={handleCourseSort}>Cognome</SortableTableHead>
-                                    <SortableTableHead sortKey="firstName" currentSort={courseSort} onSort={handleCourseSort}>Nome</SortableTableHead>
-                                    <SortableTableHead sortKey="email" currentSort={courseSort} onSort={handleCourseSort}>Email</SortableTableHead>
+                                    <SortableHeader column="lastName" currentSort={courseSort} onSort={handleCourseSort}>Cognome</SortableHeader>
+                                    <SortableHeader column="firstName" currentSort={courseSort} onSort={handleCourseSort}>Nome</SortableHeader>
+                                    <SortableHeader column="email" currentSort={courseSort} onSort={handleCourseSort}>Email</SortableHeader>
                                     <TableHead>Dettagli</TableHead>
-                                    <SortableTableHead sortKey="date" currentSort={courseSort} onSort={handleCourseSort}>Data Iscrizione</SortableTableHead>
+                                    <SortableHeader column="date" currentSort={courseSort} onSort={handleCourseSort}>Data Iscrizione</SortableHeader>
                                     <TableHead className="text-right">Azioni</TableHead>
                                   </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                  {sortCourseItems(courseEnrollments, getSortValue).map((enrollment) => (
+                                  {sortArray(courseEnrollments, courseSort, getSortValue).map((enrollment) => (
                                     <TableRow key={enrollment.enrollmentId}>
                                       <TableCell className={cn("font-medium", isCourseSorted("lastName") && "sorted-column-cell")}>{enrollment.lastName}</TableCell>
                                       <TableCell className={cn(isCourseSorted("firstName") && "sorted-column-cell")}>{enrollment.firstName}</TableCell>
@@ -945,14 +980,14 @@ export default function IscrittiPerAttivita() {
                               <Table>
                                 <TableHeader>
                                   <TableRow>
-                                    <SortableTableHead sortKey="lastName" currentSort={workshopSort} onSort={handleWorkshopSort}>Cognome</SortableTableHead>
-                                    <SortableTableHead sortKey="firstName" currentSort={workshopSort} onSort={handleWorkshopSort}>Nome</SortableTableHead>
-                                    <SortableTableHead sortKey="email" currentSort={workshopSort} onSort={handleWorkshopSort}>Email</SortableTableHead>
+                                    <SortableHeader column="lastName" currentSort={workshopSort} onSort={handleWorkshopSort}>Cognome</SortableHeader>
+                                    <SortableHeader column="firstName" currentSort={workshopSort} onSort={handleWorkshopSort}>Nome</SortableHeader>
+                                    <SortableHeader column="email" currentSort={workshopSort} onSort={handleWorkshopSort}>Email</SortableHeader>
                                     <TableHead className="text-right">Azioni</TableHead>
                                   </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                  {sortWorkshopItems(workshopEnrollments, getSortValue).map((enrollment) => (
+                                  {sortArray(workshopEnrollments, workshopSort, getSortValue).map((enrollment) => (
                                     <TableRow key={enrollment.enrollmentId}>
                                       <TableCell className={cn("font-medium", isWorkshopSorted("lastName") && "sorted-column-cell")}>{enrollment.lastName}</TableCell>
                                       <TableCell className={cn(isWorkshopSorted("firstName") && "sorted-column-cell")}>{enrollment.firstName}</TableCell>
@@ -1108,16 +1143,16 @@ export default function IscrittiPerAttivita() {
                           <Table>
                             <TableHeader className="bg-muted/30">
                               <TableRow>
-                                <SortableTableHead sortKey="lastName" currentSort={activitySort} onSort={handleActivitySort}>Cognome</SortableTableHead>
-                                <SortableTableHead sortKey="firstName" currentSort={activitySort} onSort={handleActivitySort}>Nome</SortableTableHead>
-                                <SortableTableHead sortKey="email" currentSort={activitySort} onSort={handleActivitySort}>Email</SortableTableHead>
+                                <SortableHeader column="lastName" currentSort={activitySort} onSort={handleActivitySort}>Cognome</SortableHeader>
+                                <SortableHeader column="firstName" currentSort={activitySort} onSort={handleActivitySort}>Nome</SortableHeader>
+                                <SortableHeader column="email" currentSort={activitySort} onSort={handleActivitySort}>Email</SortableHeader>
                                 <TableHead>Insegnante</TableHead>
-                                <SortableTableHead sortKey="date" currentSort={activitySort} onSort={handleActivitySort}>Data Iscrizione</SortableTableHead>
+                                <SortableHeader column="date" currentSort={activitySort} onSort={handleActivitySort}>Data Iscrizione</SortableHeader>
                                 <TableHead className="text-right">Azioni</TableHead>
                               </TableRow>
                             </TableHeader>
                             <TableBody>
-                              {sortActivityItems(alEnrollments, getSortValue).map((enroll: any) => {
+                              {sortArray(alEnrollments, activitySort, getSortValue).map((enroll: any) => {
                                 const instructorName = enroll.courseInstructorName?.trim() || al.courseInstructorName?.trim() || al.instructorName?.trim() || '-';
                                 return (
                                   <TableRow key={enroll.id}>
@@ -1270,15 +1305,15 @@ export default function IscrittiPerAttivita() {
                           <Table>
                             <TableHeader className="bg-muted/30">
                               <TableRow>
-                                <SortableTableHead sortKey="lastName" currentSort={activitySort} onSort={handleActivitySort}>Cognome</SortableTableHead>
-                                <SortableTableHead sortKey="firstName" currentSort={activitySort} onSort={handleActivitySort}>Nome</SortableTableHead>
-                                <SortableTableHead sortKey="email" currentSort={activitySort} onSort={handleActivitySort}>Email</SortableTableHead>
-                                <SortableTableHead sortKey="date" currentSort={activitySort} onSort={handleActivitySort}>Data Iscrizione</SortableTableHead>
+                                <SortableHeader column="lastName" currentSort={activitySort} onSort={handleActivitySort}>Cognome</SortableHeader>
+                                <SortableHeader column="firstName" currentSort={activitySort} onSort={handleActivitySort}>Nome</SortableHeader>
+                                <SortableHeader column="email" currentSort={activitySort} onSort={handleActivitySort}>Email</SortableHeader>
+                                <SortableHeader column="date" currentSort={activitySort} onSort={handleActivitySort}>Data Iscrizione</SortableHeader>
                                 <TableHead className="text-right">Azioni</TableHead>
                               </TableRow>
                             </TableHeader>
                             <TableBody>
-                              {sortActivityItems(dmEnrollments, getSortValue).map((enroll: any) => {
+                              {sortArray(dmEnrollments, activitySort, getSortValue).map((enroll: any) => {
                                 return (
                                   <TableRow key={enroll.id}>
                                     <TableCell className={cn("font-medium", isActivitySorted("lastName") && "sorted-column-cell")}>{enroll.memberLastName || '-'}</TableCell>
@@ -1766,16 +1801,16 @@ export default function IscrittiPerAttivita() {
                                   <Table>
                                     <TableHeader>
                                       <TableRow>
-                                        <SortableTableHead sortKey="lastName" currentSort={activitySort} onSort={handleActivitySort}>Cognome</SortableTableHead>
-                                        <SortableTableHead sortKey="firstName" currentSort={activitySort} onSort={handleActivitySort}>Nome</SortableTableHead>
-                                        <SortableTableHead sortKey="email" currentSort={activitySort} onSort={handleActivitySort}>Email</SortableTableHead>
+                                        <SortableHeader column="lastName" currentSort={activitySort} onSort={handleActivitySort}>Cognome</SortableHeader>
+                                        <SortableHeader column="firstName" currentSort={activitySort} onSort={handleActivitySort}>Nome</SortableHeader>
+                                        <SortableHeader column="email" currentSort={activitySort} onSort={handleActivitySort}>Email</SortableHeader>
                                         <TableHead>{item.id === 'allenamenti' ? 'Insegnante' : 'Dettagli'}</TableHead>
-                                        <SortableTableHead sortKey="date" currentSort={activitySort} onSort={handleActivitySort}>Data Iscrizione</SortableTableHead>
+                                        <SortableHeader column="date" currentSort={activitySort} onSort={handleActivitySort}>Data Iscrizione</SortableHeader>
                                         <TableHead className="text-right">Azioni</TableHead>
                                       </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                      {sortActivityItems(activityEnrollments, getSortValue).map((enroll: any) => {
+                                      {sortArray(activityEnrollments, activitySort, getSortValue).map((enroll: any) => {
                                         let instructorName = '-';
                                         if (item.id === 'allenamenti') {
                                            const n1 = enroll.courseInstructorName?.trim();

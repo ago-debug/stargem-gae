@@ -109,8 +109,8 @@ export function MembershipCard({ member }: MembershipCardProps) {
 
                         {/* Photo - Slightly smaller to save vertical space */}
                         <div className="w-20 h-20 bg-gray-50 border border-gray-100 overflow-hidden mb-2 shadow-inner flex-shrink-0">
-                            {member.photoUrl ? (
-                                <img src={member.photoUrl} alt="Foto" className="w-full h-full object-cover" />
+                            {(member as any).photoUrl ? (
+                                <img src={(member as any).photoUrl} alt="Foto" className="w-full h-full object-cover" />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center text-gray-200">
                                     <svg className="w-10 h-10" fill="currentColor" viewBox="0 0 24 24">

@@ -34,7 +34,7 @@ export function sanitizeMemberData<T extends Record<string, any>>(data: T): T {
   
   const titleFields = [
     'address', 'profession', 'educationTitle', 'bankName', 
-    'motherLastName', 'motherFirstName', 'fatherLastName', 'fatherFirstName', 
+    'genitore1LastName', 'genitore1FirstName', 'genitore2LastName', 'genitore2FirstName', 
     'tutor1LastName', 'tutor1FirstName', 'tutor2LastName', 'tutor2FirstName', 
     'guardianLastName', 'guardianFirstName',
     'emergencyContact1Name', 'emergencyContact2Name', 'emergencyContact3Name',

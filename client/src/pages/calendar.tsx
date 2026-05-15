@@ -3387,7 +3387,7 @@ export default function CalendarPage() {
             <Dialog open={quickAddMemberOpen} onOpenChange={setQuickAddMemberOpen} >
                 <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
                     <DialogHeader>
-                        <DialogTitle>Anagrafica Completa Nuovo Partecipante</DialogTitle>
+                        <DialogTitle>Profilo Completo Nuovo Utente</DialogTitle>
                         <DialogDescription>Compila tutti i campi richiesti per l'iscrizione.</DialogDescription>
                     </DialogHeader>
                     <div className="space-y-6 py-4">

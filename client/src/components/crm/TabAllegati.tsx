@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check, ArrowDown, X, FileUp, Camera } from "lucide-react";
+import { FileUploadInput } from "@/components/shared/FileUploadInput";
 import { type AllegatiState } from "@/components/crm/CrmFormContext";
 import { useCrmForm } from "@/components/crm/CrmFormContext";
 
@@ -16,58 +17,9 @@ export function TabAllegati() {
     setDirtyFields
   } = useCrmForm();
 
-  const compressImage = (file: File, maxWidth = 1200, quality = 0.7): Promise<string> => {
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          let width = img.width;
-          let height = img.height;
-
-          if (width > maxWidth) {
-            height = Math.round((height * maxWidth) / width);
-            width = maxWidth;
-          }
-
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          if (ctx) {
-            ctx.drawImage(img, 0, 0, width, height);
-            resolve(canvas.toDataURL('image/jpeg', quality));
-          } else {
-            resolve(event.target?.result as string);
-          }
-        };
-        img.src = event.target?.result as string;
-      };
-      reader.readAsDataURL(file);
-    });
-  };
-
-  const handlePhotoUpload = async (file: File | null) => {
-    if (!file) return;
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/heic', 'image/heif', 'image/webp', 'image/avif', 'image/tiff'];
-    if (!allowedTypes.includes(file.type) && !file.name.match(/\.(jpg|jpeg|png|heic|heif|webp|avif|tiff?)$/i)) {
-      alert('Formato foto non supportato. Usa JPG, PNG, HEIC, HEIF o WebP.');
-      return;
-    }
-
-    try {
-      const compressedBase64 = await compressImage(file, 800, 0.7);
-      setPhotoFile({ file, preview: compressedBase64 });
-      setDirtyFields((prev: Record<string, boolean>) => ({ ...prev, photo: true }));
-    } catch (e) {
-      console.error("Compression failed", e);
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setPhotoFile({ file, preview: e.target?.result as string });
-        setDirtyFields((prev: Record<string, boolean>) => ({ ...prev, photo: true }));
-      };
-      reader.readAsDataURL(file);
-    }
+    const handlePhotoUploadComplete = (url: string) => {
+    setPhotoFile({ file: null, preview: url });
+    setDirtyFields((prev: Record<string, boolean>) => ({ ...prev, photo: true }));
   };
 
   const removePhoto = () => {
@@ -79,48 +31,13 @@ export function TabAllegati() {
     setOpenAllegatoSections(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
-  const handleFileUpload = async (key: keyof AllegatiState, file: File | null) => {
-    if (!file) return;
-    const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
-    if (!allowedTypes.includes(file.type)) {
-      alert('Formato file non supportato. Usa PDF, JPG o PNG.');
-      return;
-    }
+  const handleFileUploadComplete = (key: keyof AllegatiState, url: string, fileName: string) => {
     const today = new Date().toISOString().split('T')[0];
-
-    if (file.type.startsWith('image/')) {
-      try {
-        const compressedBase64 = await compressImage(file, 1200, 0.6);
-        setAllegati(prev => ({
-          ...prev,
-          [key]: { ...prev[key], hasFile: true, fileName: file.name, data: today, previewUrl: compressedBase64 }
-        }));
-        setDirtyFields((prev: Record<string, boolean>) => ({ ...prev, allegati: true }));
-      } catch (e) {
-        console.error("Attachment compression failed", e);
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const base64Data = e.target?.result as string;
-          setAllegati(prev => ({
-            ...prev,
-            [key]: { ...prev[key], hasFile: true, fileName: file.name, data: today, previewUrl: base64Data }
-          }));
-          setDirtyFields((prev: Record<string, boolean>) => ({ ...prev, allegati: true }));
-        };
-        reader.readAsDataURL(file);
-      }
-    } else {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const base64Data = e.target?.result as string;
-        setAllegati(prev => ({
-          ...prev,
-          [key]: { ...prev[key], hasFile: true, fileName: file.name, data: today, previewUrl: base64Data }
-        }));
-        setDirtyFields((prev: Record<string, boolean>) => ({ ...prev, allegati: true }));
-      };
-      reader.readAsDataURL(file);
-    }
+    setAllegati(prev => ({
+      ...prev,
+      [key]: { ...prev[key], hasFile: true, fileName: fileName, data: today, previewUrl: url }
+    }));
+    setDirtyFields((prev: Record<string, boolean>) => ({ ...prev, allegati: true }));
   };
 
   const removeAllegatoFile = (key: keyof AllegatiState) => {
@@ -135,17 +52,10 @@ export function TabAllegati() {
 
   const openPreview = (previewUrl?: string) => {
     if (!previewUrl) {
-      alert("Anteprima non disponibile per questo file. Se è stato caricato prima dell'aggiornamento, ricaricalo per abilitare l'anteprima.");
+      alert("Anteprima non disponibile per questo file.");
       return;
     }
-    const win = window.open();
-    if (win) {
-      if (previewUrl.startsWith('data:image/')) {
-        win.document.write('<body style="margin:0;display:flex;justify-content:center;align-items:center;background:#f0f0f0;height:100vh;"><img src="' + previewUrl + '" style="max-width:100%; max-height:100%; object-fit:contain; box-shadow:0 10px 25px rgba(0,0,0,0.1);" /></body>');
-      } else {
-        win.document.write('<iframe src="' + previewUrl + '" frameborder="0" style="border:0; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%;" allowfullscreen></iframe>');
-      }
-    }
+    window.open(previewUrl, '_blank');
   };
 
   const updateAllegato = (key: keyof AllegatiState, field: string, value: string | number) => {
@@ -169,13 +79,14 @@ export function TabAllegati() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-3">
-                <input
-                  type="file"
+                <FileUploadInput
+                  endpoint="/api/uploads/avatar"
+                  extraFields={selectedMemberId ? { employee_id: selectedMemberId } : undefined}
                   accept=".jpg,.jpeg,.png,.heic,.heif,.webp,.avif,.tiff,.tif"
+                  onUploadComplete={handlePhotoUploadComplete}
+                  buttonText="Carica Foto"
                   className="hidden"
-                  id="upload-photo"
-                  onChange={(e) => handlePhotoUpload(e.target.files?.[0] || null)}
-                  data-testid="input-upload-photo"
+                  currentUrl={null}
                 />
                 {photoFile.preview ? (
                   <div className="relative">
@@ -198,14 +109,14 @@ export function TabAllegati() {
                     <p className="text-xs text-muted-foreground mt-1 truncate text-center" data-testid="text-photo-filename">{photoFile.file?.name}</p>
                   </div>
                 ) : (
-                  <label
-                    htmlFor="upload-photo"
-                    className="cursor-pointer flex flex-col items-center justify-center gap-2 border-2 border-dashed border-amber-300 dark:border-amber-800/50 dark:border-amber-700 rounded-md aspect-[3/4] transition-colors hover:bg-muted/50"
-                    data-testid="label-upload-photo"
-                  >
-                    <Camera className="w-10 h-10 text-amber-400" />
-                    <span className="text-xs text-muted-foreground text-center px-2">Carica foto<br />JPG, PNG, HEIC, WebP</span>
-                  </label>
+                  
+                  <FileUploadInput
+                    endpoint="/api/uploads/avatar"
+                    extraFields={selectedMemberId ? { employee_id: selectedMemberId } : undefined}
+                    accept=".jpg,.jpeg,.png,.heic,.heif,.webp,.avif,.tiff,.tif"
+                    onUploadComplete={handlePhotoUploadComplete}
+                    buttonText="Carica Foto"
+                  />
                 )}
               </CardContent>
             </Card>
@@ -255,17 +166,7 @@ export function TabAllegati() {
                   {openAllegatoSections.domandaTesseramento && (
                     <div className="p-3 pt-0 space-y-3">
                       <div className={`border-2 border-dashed rounded-md p-3 text-center ${allegati.domandaTesseramento.hasFile ? 'border-green-400 dark:border-green-700 bg-green-50 dark:bg-green-900/20' : 'border-amber-300 dark:border-amber-800/50 dark:border-amber-700'}`}>
-                        <input
-                          type="file"
-                          accept=".pdf,.jpg,.jpeg,.png"
-                          className="hidden"
-                          id="upload-domanda-tesseramento"
-                          onChange={(e) => {
-                            handleFileUpload('domandaTesseramento', e.target.files?.[0] || null);
-                            e.target.value = '';
-                          }}
-                          data-testid="input-upload-domanda-tesseramento"
-                        />
+                        
                         {allegati.domandaTesseramento.hasFile ? (
                           <div className="flex items-center justify-between gap-2">
                             <div className="flex items-center gap-2 text-sm text-success700 dark:text-success400">
@@ -289,10 +190,14 @@ export function TabAllegati() {
                             </Button>
                           </div>
                         ) : (
-                          <label htmlFor="upload-domanda-tesseramento" className="cursor-pointer flex flex-col items-center gap-1" data-testid="label-upload-domanda-tesseramento">
-                            <FileUp className="w-6 h-6 text-amber-500" />
-                            <span className="text-xs text-muted-foreground">Carica PDF, JPG o PNG</span>
-                          </label>
+                          
+                          <FileUploadInput
+                            endpoint="/api/uploads/document"
+                            extraFields={{ document_type: 'domandaTesseramento' }}
+                            accept=".pdf,.jpg,.jpeg,.png"
+                            onUploadComplete={(url) => handleFileUploadComplete('domandaTesseramento', url, 'Documento domandaTesseramento')}
+                            buttonText="Carica domandaTesseramento"
+                          />
                         )}
                       </div>
                       <div className="grid grid-cols-2 gap-2">
@@ -355,17 +260,7 @@ export function TabAllegati() {
                   {openAllegatoSections.regolamento && (
                     <div className="p-3 pt-0 space-y-3">
                       <div className={`border-2 border-dashed rounded-md p-3 text-center ${allegati.regolamento.hasFile ? 'border-green-400 dark:border-green-700 bg-green-50 dark:bg-green-900/20' : 'border-amber-300 dark:border-amber-800/50 dark:border-amber-700'}`}>
-                        <input
-                          type="file"
-                          accept=".pdf,.jpg,.jpeg,.png"
-                          className="hidden"
-                          id="upload-regolamento"
-                          onChange={(e) => {
-                            handleFileUpload('regolamento', e.target.files?.[0] || null);
-                            e.target.value = '';
-                          }}
-                          data-testid="input-upload-regolamento"
-                        />
+                        
                         {allegati.regolamento.hasFile ? (
                           <div className="flex items-center justify-between gap-2">
                             <div className="flex items-center gap-2 text-sm text-green-700 dark:text-green-400">
@@ -389,10 +284,14 @@ export function TabAllegati() {
                             </Button>
                           </div>
                         ) : (
-                          <label htmlFor="upload-regolamento" className="cursor-pointer flex flex-col items-center gap-1" data-testid="label-upload-regolamento">
-                            <FileUp className="w-6 h-6 text-amber-500" />
-                            <span className="text-xs text-muted-foreground">Carica PDF, JPG o PNG</span>
-                          </label>
+                          
+                          <FileUploadInput
+                            endpoint="/api/uploads/document"
+                            extraFields={{ document_type: 'regolamento' }}
+                            accept=".pdf,.jpg,.jpeg,.png"
+                            onUploadComplete={(url) => handleFileUploadComplete('regolamento', url, 'Documento regolamento')}
+                            buttonText="Carica regolamento"
+                          />
                         )}
                       </div>
                       <div className="grid grid-cols-2 gap-2">
@@ -455,17 +354,7 @@ export function TabAllegati() {
                   {openAllegatoSections.privacy && (
                     <div className="p-3 pt-0 space-y-3">
                       <div className={`border-2 border-dashed rounded-md p-3 text-center ${allegati.privacy.hasFile ? 'border-green-400 dark:border-green-700 bg-green-50 dark:bg-green-900/20' : 'border-amber-300 dark:border-amber-800/50 dark:border-amber-700'}`}>
-                        <input
-                          type="file"
-                          accept=".pdf,.jpg,.jpeg,.png"
-                          className="hidden"
-                          id="upload-privacy"
-                          onChange={(e) => {
-                            handleFileUpload('privacy', e.target.files?.[0] || null);
-                            e.target.value = '';
-                          }}
-                          data-testid="input-upload-privacy"
-                        />
+                        
                         {allegati.privacy.hasFile ? (
                           <div className="flex items-center justify-between gap-2">
                             <div className="flex items-center gap-2 text-sm text-green-700 dark:text-green-400">
@@ -489,10 +378,14 @@ export function TabAllegati() {
                             </Button>
                           </div>
                         ) : (
-                          <label htmlFor="upload-privacy" className="cursor-pointer flex flex-col items-center gap-1" data-testid="label-upload-privacy">
-                            <FileUp className="w-6 h-6 text-amber-500" />
-                            <span className="text-xs text-muted-foreground">Carica PDF, JPG o PNG</span>
-                          </label>
+                          
+                          <FileUploadInput
+                            endpoint="/api/uploads/document"
+                            extraFields={{ document_type: 'privacy' }}
+                            accept=".pdf,.jpg,.jpeg,.png"
+                            onUploadComplete={(url) => handleFileUploadComplete('privacy', url, 'Documento privacy')}
+                            buttonText="Carica privacy"
+                          />
                         )}
                       </div>
                       <div className="grid grid-cols-2 gap-2">
@@ -555,17 +448,7 @@ export function TabAllegati() {
                   {openAllegatoSections.certificatoMedico && (
                     <div className="p-3 pt-0 space-y-3">
                       <div className={`border-2 border-dashed rounded-md p-3 text-center ${allegati.certificatoMedico.hasFile ? 'border-green-400 dark:border-green-700 bg-green-50 dark:bg-green-900/20' : 'border-amber-300 dark:border-amber-800/50 dark:border-amber-700'}`}>
-                        <input
-                          type="file"
-                          accept=".pdf,.jpg,.jpeg,.png"
-                          className="hidden"
-                          id="upload-certificato-medico"
-                          onChange={(e) => {
-                            handleFileUpload('certificatoMedico', e.target.files?.[0] || null);
-                            e.target.value = '';
-                          }}
-                          data-testid="input-upload-certificato-medico"
-                        />
+                        
                         {allegati.certificatoMedico.hasFile ? (
                           <div className="flex items-center justify-between gap-2">
                             <div className="flex items-center gap-2 text-sm text-green-700 dark:text-green-400">
@@ -589,10 +472,14 @@ export function TabAllegati() {
                             </Button>
                           </div>
                         ) : (
-                          <label htmlFor="upload-certificato-medico" className="cursor-pointer flex flex-col items-center gap-1" data-testid="label-upload-certificato-medico">
-                            <FileUp className="w-6 h-6 text-amber-500" />
-                            <span className="text-xs text-muted-foreground">Carica PDF, JPG o PNG</span>
-                          </label>
+                          
+                          <FileUploadInput
+                            endpoint="/api/uploads/medical-certificate"
+                            extraFields={selectedMemberId ? { member_id: selectedMemberId } : undefined}
+                            accept=".pdf,.jpg,.jpeg,.png"
+                            onUploadComplete={(url) => handleFileUploadComplete('certificatoMedico', url, 'Certificato Medico')}
+                            buttonText="Carica Certificato"
+                          />
                         )}
                       </div>
                       <div className="grid grid-cols-2 gap-2">

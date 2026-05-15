@@ -22,6 +22,7 @@ import {
   getGoogleOAuth2Client
 } from "./google-calendar";
 import { registerPaymentRoutes } from "./routes/payments";
+import { registerImportChunkedRoutes } from "./routes/importChunked";
 import { log } from "./vite";
 import { db, pool } from "./db";
 import { sendSMS, sendEmail } from "./notifications";
@@ -892,6 +893,7 @@ Regole:
   };
   // Register modularized routes
   registerPaymentRoutes(app, { checkPermission, logUserActivity });
+  registerImportChunkedRoutes(app);
 
   // ==== Google Auth Routes ====
   app.get("/api/auth/google/url", isAuthenticated, isAdmin, async (req, res) => {
@@ -3723,7 +3725,8 @@ app.post("/api/gempass/tessere", isAuthenticated, async (req, res) => {
     }
 
     const { generateMembershipNumber, calculateMembershipExpiry } =
-      await import('./utils/membership.js');
+      // @ts-ignore
+    await import('./utils/membership');
 
     const membershipNumber = generateMembershipNumber(
       season_competence, resolvedMemberId
@@ -3792,7 +3795,8 @@ app.patch("/api/gempass/tessere/:id/rinnova", isAuthenticated, async (req, res) 
     if (!oldRecord) return res.status(404).json({ error: 'Tessera non trovata' });
 
     const { generateMembershipNumber, calculateMembershipExpiry } =
-      await import('./utils/membership.js');
+      // @ts-ignore
+    await import('./utils/membership');
 
     const newNumber = generateMembershipNumber(
       season_competence, oldRecord.memberId
@@ -7010,7 +7014,7 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
               lastName: rowData['Cognome'] || rowData['Last Name'] || rowData['lastName'],
               email: rowData['Email'] || rowData['email'] || null,
               phone: rowData['Telefono'] || rowData['Phone'] || rowData['phone'] || null,
-              specialization: rowData['Specializzazione'] || rowData['Specialization'] || rowData['specialization'] || null,
+              
               hourlyRate: rowData['Tariffa Oraria'] || rowData['Hourly Rate'] || rowData['hourlyRate'] || null,
               bio: null,
               active: true,
@@ -7830,7 +7834,7 @@ app.post("/api/gemstaff/firme", isAuthenticated, async (req, res) => {
           { name: 'lastName', type: 'string', label: 'Cognome' },
           { name: 'email', type: 'string', label: 'Email' },
           { name: 'phone', type: 'string', label: 'Telefono' },
-          { name: 'specialization', type: 'string', label: 'Specializzazione' },
+          
           { name: 'hourlyRate', type: 'number', label: 'Tariffa Oraria' },
           { name: 'active', type: 'boolean', label: 'Attivo' },
         ],

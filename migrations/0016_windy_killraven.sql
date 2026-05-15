@@ -1,0 +1,9 @@
+CREATE INDEX `last_name_idx` ON `members` (`last_name`);
+CREATE INDEX `first_name_idx` ON `members` (`first_name`);
+CREATE INDEX `email_idx` ON `members` (`email`);
+CREATE INDEX `status_idx` ON `enrollments` (`status`);
+CREATE INDEX `enrollment_date_idx` ON `enrollments` (`enrollment_date`);
+CREATE INDEX `target_date_idx` ON `enrollments` (`target_date`);
+CREATE INDEX `status_idx` ON `payments` (`status`);
+CREATE INDEX `paid_date_idx` ON `payments` (`paid_date`);
+CREATE INDEX `due_date_idx` ON `payments` (`due_date`);

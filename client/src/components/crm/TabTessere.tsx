@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { IdCard, Stethoscope, Plus } from "lucide-react";
+import { FileUploadInput } from "@/components/shared/FileUploadInput";
 import { useLocation } from "wouter";
 import { useCrmForm, BottomSectionsState } from "./CrmFormContext";
 
@@ -298,6 +299,15 @@ export function TabTessere({
                       <SelectItem value="base">Base</SelectItem>
                     </SelectContent>
                   </Select>
+                </div>
+                <div className="space-y-2 lg:col-span-6 mt-2">
+                  <Label>Documento Certificato Medico (PDF/Immagine)</Label>
+                  <FileUploadInput 
+                    endpoint="/api/uploads/medical-certificate"
+                    extraFields={{ member_id: selectedMemberId }}
+                    onUploadComplete={(url) => handleBottomSectionChange('certificatoMedico', 'fileUrl', url)}
+                    currentUrl={bottomSectionsData.certificatoMedico.fileUrl}
+                  />
                 </div>
               </div>
             </>

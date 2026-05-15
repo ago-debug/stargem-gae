@@ -31,6 +31,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Checkbox } from "@/components/ui/checkbox";
+import { ListPageHeader } from "@/components/shared/ListPageHeader";
+import { splitFullName } from "@/lib/utils/splitFullName";
 
 
 
@@ -215,12 +217,22 @@ export default function GemTeam() {
     // Nessun sort front-end: il backend ordina giÃ  per display_order ASC
     const sortedAPI = [...dipendentiAPI];
 
-    return sortedAPI.map(d => ({
+    const mapped = sortedAPI.map(d => {
+      let finalFirstName = d.firstName || (d.username === 'admin' ? 'Admin' : d.username === 'botAI' ? 'Bot' : 'Sconosciuto');
+      let finalLastName = d.lastName || (d.username === 'admin' ? 'Master' : d.username === 'botAI' ? 'AI' : '');
+
+      if ((!finalLastName || finalLastName.trim() === '') && finalFirstName !== 'Admin' && finalFirstName !== 'Bot' && finalFirstName !== 'Sconosciuto') {
+        const split = splitFullName(finalFirstName);
+        finalFirstName = split.firstName;
+        finalLastName = split.lastName;
+      }
+
+      return {
       id: d.id,
       userId: d.userId,
       memberId: d.memberId,
-      nome: d.firstName || (d.username === 'admin' ? 'Admin' : d.username === 'botAI' ? 'Bot' : 'Sconosciuto'),
-      cognome: d.lastName || (d.username === 'admin' ? 'Master' : d.username === 'botAI' ? 'AI' : ''),
+      nome: finalFirstName,
+      cognome: finalLastName,
       team: (d.team === 'Staff' || d.team === 'staff') ? 'collaboratori' : (d.team || 'collaboratori'),
       ruolo: (d.noteHr === 'Staff' || d.noteHr === 'staff') ? 'N/A' : (d.noteHr || "N/A"),
       attivo: d.attivo,
@@ -232,7 +244,13 @@ export default function GemTeam() {
       last_seen_at: d.lastSeenAt,
       current_session_start: d.currentSessionStart,
       last_session_duration: d.lastSessionDuration
-    }));
+      };
+    });
+
+    return mapped.sort((a, b) => {
+      if (a.cognome === b.cognome) return a.nome.localeCompare(b.nome);
+      return (a.cognome || '').localeCompare(b.cognome || '');
+    });
   }, [dipendentiAPI]);
 
   useEffect(() => {
@@ -877,6 +895,10 @@ export default function GemTeam() {
 
         <TabsContent value="dipendenti">
           <div className="px-6 md:px-8 max-w-7xl mx-auto space-y-6">
+            <ListPageHeader 
+              title="Team / Collaboratori" 
+              totalRecords={filteredDipendenti.length} 
+            />
             {/* Filtri */}
             <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
               <div className="relative w-full md:w-80">

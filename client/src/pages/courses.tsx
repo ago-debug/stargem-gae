@@ -62,12 +62,11 @@ import {
 } from "lucide-react";
 import { ExportWizard } from "@/components/ExportWizard";
 import { ActivityNavMenu } from "@/components/activity-nav-menu";
+import { ListPageHeader } from "@/components/shared/ListPageHeader";
 import { CourseUnifiedModal } from "@/components/CourseUnifiedModal";
 import { CourseDuplicationWizard } from "@/components/CourseDuplicationWizard";
-import {
-  SortableTableHead,
-  useSortableTable,
-} from "@/components/sortable-table-head";
+import { SortableHeader } from "@/components/shared/SortableHeader";
+import { useSortableList } from "@/hooks/useSortableList";
 import {
   MultiSelectStatus,
   StatusBadge,
@@ -548,8 +547,8 @@ export default function Courses() {
       );
     }) || [];
 
-  const { sortConfig, handleSort, sortItems, isSortedColumn } =
-    useSortableTable<(typeof filteredCourses)[0]>("sku");
+  
+  const isSortedColumn = (key: string) => sortConfig?.field === key;
 
   const getSortValue = (course: (typeof filteredCourses)[0], key: string) => {
     switch (key) {
@@ -581,7 +580,8 @@ export default function Courses() {
     }
   };
 
-  const sortedCourses = sortItems(filteredCourses, getSortValue);
+  const { sortConfig, handleSort, sortedData: sortedCourses } =
+    useSortableList<(typeof filteredCourses)[0]>(filteredCourses, "sku", "asc", getSortValue);
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
@@ -993,7 +993,12 @@ export default function Courses() {
                 <p className="text-sm">Inizia aggiungendo il primo corso</p>
               </div>
             ) : (
-              <Table>
+              <>
+                <ListPageHeader
+                  title="Elenco Corsi"
+                  totalRecords={filteredCourses.length}
+                />
+                <Table className="mt-4">
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-[40px]">
@@ -1007,69 +1012,69 @@ export default function Courses() {
                         }
                       />
                     </TableHead>
-                    <SortableTableHead
-                      sortKey="sku"
+                    <SortableHeader
+                      column="sku"
                       currentSort={sortConfig}
                       onSort={handleSort}
                     >
                       SKU/Codice
-                    </SortableTableHead>
-                    <SortableTableHead
-                      sortKey="name"
+                    </SortableHeader>
+                    <SortableHeader
+                      column="name"
                       currentSort={sortConfig}
                       onSort={handleSort}
                     >
                       Corso
-                    </SortableTableHead>
-                    <SortableTableHead
-                      sortKey="category"
+                    </SortableHeader>
+                    <SortableHeader
+                      column="category"
                       currentSort={sortConfig}
                       onSort={handleSort}
                     >
                       Categoria
-                    </SortableTableHead>
-                    <SortableTableHead
-                      sortKey="instructor"
+                    </SortableHeader>
+                    <SortableHeader
+                      column="instructor"
                       currentSort={sortConfig}
                       onSort={handleSort}
                     >
                       Staff/Insegnante
-                    </SortableTableHead>
-                    <SortableTableHead
-                      sortKey="price"
+                    </SortableHeader>
+                    <SortableHeader
+                      column="price"
                       currentSort={sortConfig}
                       onSort={handleSort}
                     >
                       Prezzo
-                    </SortableTableHead>
-                    <SortableTableHead
-                      sortKey="capacity"
+                    </SortableHeader>
+                    <SortableHeader
+                      column="capacity"
                       currentSort={sortConfig}
                       onSort={handleSort}
                     >
                       Posti
-                    </SortableTableHead>
-                    <SortableTableHead
-                      sortKey="enrollments"
+                    </SortableHeader>
+                    <SortableHeader
+                      column="enrollments"
                       currentSort={sortConfig}
                       onSort={handleSort}
                     >
                       Iscritti
-                    </SortableTableHead>
-                    <SortableTableHead
-                      sortKey="period"
+                    </SortableHeader>
+                    <SortableHeader
+                      column="period"
                       currentSort={sortConfig}
                       onSort={handleSort}
                     >
                       Periodo
-                    </SortableTableHead>
-                    <SortableTableHead
-                      sortKey="status"
+                    </SortableHeader>
+                    <SortableHeader
+                      column="status"
                       currentSort={sortConfig}
                       onSort={handleSort}
                     >
                       Stato
-                    </SortableTableHead>
+                    </SortableHeader>
                     <TableHead>Interno</TableHead>
                     <TableHead className="text-right">Azioni</TableHead>
                   </TableRow>
@@ -1094,7 +1099,7 @@ export default function Courses() {
                         <TableCell
                           className={cn(
                             "text-xs text-muted-foreground",
-                            isSortedColumn("sku") && "sorted-column-cell",
+                            sortConfig?.field === "sku" && "sorted-column-cell",
                           )}
                         >
                           {course.sku || "-"}
@@ -1102,7 +1107,7 @@ export default function Courses() {
                         <TableCell
                           className={cn(
                             "font-medium",
-                            isSortedColumn("name") && "sorted-column-cell",
+                            sortConfig?.field === "name" && "sorted-column-cell",
                           )}
                         >
                           <div className="flex flex-col">
@@ -1128,7 +1133,7 @@ export default function Courses() {
                         </TableCell>
                         <TableCell
                           className={
-                            isSortedColumn("category")
+                            sortConfig?.field === "category"
                               ? "sorted-column-cell"
                               : ""
                           }
@@ -1140,7 +1145,7 @@ export default function Courses() {
                         </TableCell>
                         <TableCell
                           className={
-                            isSortedColumn("instructor")
+                            sortConfig?.field === "instructor"
                               ? "sorted-column-cell"
                               : ""
                           }
@@ -1153,14 +1158,14 @@ export default function Courses() {
                         </TableCell>
                         <TableCell
                           className={
-                            isSortedColumn("price") ? "sorted-column-cell" : ""
+                            sortConfig?.field === "price" ? "sorted-column-cell" : ""
                           }
                         >
                           €{course.price || "0.00"}
                         </TableCell>
                         <TableCell
                           className={
-                            isSortedColumn("capacity")
+                            sortConfig?.field === "capacity"
                               ? "sorted-column-cell"
                               : ""
                           }
@@ -1169,7 +1174,7 @@ export default function Courses() {
                         </TableCell>
                         <TableCell
                           className={
-                            isSortedColumn("enrollments")
+                            sortConfig?.field === "enrollments"
                               ? "sorted-column-cell"
                               : ""
                           }
@@ -1204,7 +1209,7 @@ export default function Courses() {
                         <TableCell
                           className={cn(
                             "text-xs text-muted-foreground",
-                            isSortedColumn("period") && "sorted-column-cell",
+                            sortConfig?.field === "period" && "sorted-column-cell",
                           )}
                         >
                           {course.startDate && course.endDate
@@ -1213,7 +1218,7 @@ export default function Courses() {
                         </TableCell>
                         <TableCell
                           className={
-                            isSortedColumn("status") ? "sorted-column-cell" : ""
+                            sortConfig?.field === "status" ? "sorted-column-cell" : ""
                           }
                         >
                           <div className="flex flex-col items-start gap-1">
@@ -1325,8 +1330,9 @@ export default function Courses() {
                       </TableRow>
                     );
                   })}
-                </TableBody>
-              </Table>
+                  </TableBody>
+                </Table>
+              </>
             )}
           </CardContent>
         </Card>

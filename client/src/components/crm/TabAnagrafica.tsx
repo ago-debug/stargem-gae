@@ -9,6 +9,7 @@ import {
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { ConflictBadge } from "@/components/conflict-badge";
 import { useCrmForm } from "./CrmFormContext";
+import { useMascheraStore } from "@/lib/stores/mascheraStore";
 import { useCFCheck, useEmailCheck, usePhoneCheck } from "@/hooks/useFieldConflictCheck";
 import { parseFiscalCode, getPlaceDetails } from "@/lib/fiscalCodeUtils";
 import {
@@ -25,9 +26,12 @@ interface TabAnagraficaProps {
 }
 
 export function TabAnagrafica({ renderMancaDato, getInputClassName }: TabAnagraficaProps) {
+  // Zustand selectors: isolano i re-render solo a questa tab
+  const formData = useMascheraStore(state => state.formData);
+  const handleChange = useMascheraStore(state => state.handleChange);
+
+  // Legacy Context fields
   const { 
-    formData, 
-    handleChange, 
     verificaStato, 
     avviaVerifica, 
     selectedMemberId,
@@ -90,9 +94,7 @@ export function TabAnagrafica({ renderMancaDato, getInputClassName }: TabAnagraf
       <CardHeader className="pb-4">
         <CardTitle className="flex items-center justify-between text-lg">
           <div className="flex items-center gap-2">
-            <User className="w-5 h-5 sidebar-icon-gold" />
-            Anagrafica
-          </div>
+            <User className="w-5 h-5 sidebar-icon-gold" />Utente</div>
           <span className="text-sm font-medium px-3 py-1 bg-amber-100 dark:bg-amber-900/30 dark:bg-amber-900/40 text-amber-800 dark:text-amber-400 dark:text-amber-200 rounded-full border border-amber-200 dark:border-amber-900/50 dark:border-amber-800/60">
             Dati Personali
           </span>
@@ -164,7 +166,7 @@ export function TabAnagrafica({ renderMancaDato, getInputClassName }: TabAnagraf
                   className={getInputClassName("telefono", true)}
                 />
                 {renderMancaDato(formData.telefono)}
-                <ConflictBadge result={phoneCheck} type="phone" />
+                <ConflictBadge result={phoneCheck} type="telefono" />
               </div>
             </div>
             <div className="space-y-2">

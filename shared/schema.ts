@@ -495,6 +495,33 @@ export type Course = typeof courses.$inferSelect;
 
 // Members (iscritti)
 export const members = mysqlTable("members", {
+
+  legacyAthenaId: varchar("legacy_athena_id", { length: 50 }),
+  legacyMasterId: varchar("legacy_master_id", { length: 50 }),
+  genitore1FirstName: varchar("genitore1_first_name", { length: 100 }),
+  genitore1LastName: varchar("genitore1_last_name", { length: 100 }),
+  genitore1FiscalCode: varchar("genitore1_fiscal_code", { length: 20 }),
+  importedLotto: varchar("imported_lotto", { length: 50 }),
+  importedSourceRowIndex: int("imported_source_row_index"),
+  importedBy: varchar("imported_by", { length: 50 }),
+  importedAt: timestamp("imported_at"),
+  dataQualityFlag: json("data_quality_flag"),
+  extraData: json("extra_data"),
+  attachmentsUrl: text("attachments_url"),
+
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
   id: int("id").primaryKey().autoincrement(),
   userId: varchar("user_id", { length: 255 }).references(() => users.id, { onDelete: "set null" }),
   firstName: varchar("first_name", { length: 255 }).notNull(),
@@ -528,34 +555,7 @@ export const members = mysqlTable("members", {
   // Flag minorenne
   isMinor: boolean("is_minor").default(false), // Se il partecipante è minorenne
 
-  // Dati genitori (per minorenni)
-  motherFirstName: varchar("mother_first_name", { length: 255 }), // Nome madre
-  motherLastName: varchar("mother_last_name", { length: 255 }), // Cognome madre
-  motherFiscalCode: varchar("mother_fiscal_code", { length: 16 }), // Codice fiscale madre
-  motherEmail: varchar("mother_email", { length: 255 }), // Email madre
-  motherPhone: varchar("mother_phone", { length: 50 }), // Telefono madre
-  motherMobile: varchar("mother_mobile", { length: 50 }), // Cellulare madre
-  motherBirthDate: date("mother_birth_date"),
-  motherBirthPlace: varchar("mother_birth_place", { length: 255 }),
-  motherBirthProvince: varchar("mother_birth_province", { length: 2 }),
-  motherStreetAddress: varchar("mother_street_address", { length: 255 }),
-  motherCity: varchar("mother_city", { length: 100 }),
-  motherProvince: varchar("mother_province", { length: 2 }),
-  motherPostalCode: varchar("mother_postal_code", { length: 10 }),
-
-  fatherFirstName: varchar("father_first_name", { length: 255 }), // Nome padre
-  fatherLastName: varchar("father_last_name", { length: 255 }), // Cognome padre
-  fatherFiscalCode: varchar("father_fiscal_code", { length: 16 }), // Codice fiscale padre
-  fatherEmail: varchar("father_email", { length: 255 }), // Email padre
-  fatherPhone: varchar("father_phone", { length: 50 }), // Telefono padre
-  fatherMobile: varchar("father_mobile", { length: 50 }), // Cellulare padre
-  fatherBirthDate: date("father_birth_date"),
-  fatherBirthPlace: varchar("father_birth_place", { length: 255 }),
-  fatherBirthProvince: varchar("father_birth_province", { length: 2 }),
-  fatherStreetAddress: varchar("father_street_address", { length: 255 }),
-  fatherCity: varchar("father_city", { length: 100 }),
-  fatherProvince: varchar("father_province", { length: 2 }),
-  fatherPostalCode: varchar("father_postal_code", { length: 10 }),
+  // Dati genitori (per minorenni) // Nome madre // Cognome madre // Codice fiscale madre // Email madre // Telefono madre // Cellulare madre // Nome padre // Cognome padre // Codice fiscale padre // Email padre // Telefono padre // Cellulare padre
 
   photoUrl: text("photo_url"), // Consider a manual ALTER to LONGTEXT if needed
 
@@ -585,7 +585,11 @@ export const members = mysqlTable("members", {
 
   // Indirizzo suddiviso
 
-  city: varchar("city", { length: 100 }), // Città
+  city: varchar("city", { length: 100 }),
+  domicileCountry: varchar("domicile_country", { length: 100 }),
+  domicileCity: varchar("domicile_city", { length: 100 }),
+  domicilePostalCode: varchar("domicile_postal_code", { length: 20 }),
+  domicileProvince: varchar("domicile_province", { length: 2 }), // Città
   province: varchar("province", { length: 2 }), // Provincia (sigla 2 lettere)
   postalCode: varchar("postal_code", { length: 10 }), // CAP
   country: varchar("country", { length: 100 }).default("Italia"), // Stato/Nazione
@@ -593,7 +597,6 @@ export const members = mysqlTable("members", {
   address: text("address"), // Mantenuto per retrocompatibilità
   notes: text("notes"),
   previousMembershipNumber: varchar("previous_membership_number", { length: 50 }),
-  dataQualityFlag: varchar("data_quality_flag", { length: 50 }),
 
   // ANAGRAFICA
   title: varchar("title", { length: 20 }),
@@ -628,10 +631,10 @@ export const members = mysqlTable("members", {
   carPlate: varchar("car_plate", { length: 20 }),
 
   // TUTOR 2 EXTRA
-  tutor2FirstName: varchar("tutor2_first_name", { length: 100 }),
-  tutor2LastName: varchar("tutor2_last_name", { length: 100 }),
-  tutor2BirthDate: date("tutor2_birth_date"),
-  tutor2BirthPlace: varchar("tutor2_birth_place", { length: 100 }),
+  genitore2FirstName: varchar("genitore2_first_name", { length: 100 }),
+  genitore2LastName: varchar("genitore2_last_name", { length: 100 }),
+  genitore2BirthDate: date("genitore2_birth_date"),
+  genitore2BirthPlace: varchar("genitore2_birth_place", { length: 100 }),
 
   // DOCUMENTO
   documentIssuedBy: varchar("document_issued_by", { length: 100 }),
@@ -676,6 +679,7 @@ export const members = mysqlTable("members", {
   sedeRiferimento: varchar("sede_riferimento", { length: 100 }),
   athenaMemberType: varchar("athena_member_type", { length: 50 }),
   firstEnrollmentDate: date("first_enrollment_date"),
+  lastRenewalDate: date("last_renewal_date"),
   consentCertificate: boolean("consent_certificate").default(false),
   consentModule: boolean("consent_module").default(false),
   codiceCatastale: varchar("codice_catastale", { length: 10 }),
@@ -684,23 +688,30 @@ export const members = mysqlTable("members", {
   codiceFe: varchar("codice_fe", { length: 50 }),
 
   // Campi Tutori (GDPR e minori)
-  tutor1FiscalCode: varchar("tutor1_fiscal_code", { length: 16 }),
-  tutor1BirthDate: date("tutor1_birth_date"),
-  tutor1BirthPlace: varchar("tutor1_birth_place", { length: 100 }),
-  tutor1Phone: varchar("tutor1_phone", { length: 20 }),
-  tutor1Email: varchar("tutor1_email", { length: 255 }),
-  tutor2FiscalCode: varchar("tutor2_fiscal_code", { length: 16 }),
-  tutor2Phone: varchar("tutor2_phone", { length: 20 }),
-  tutor2Email: varchar("tutor2_email", { length: 255 }),
+  genitore1BirthDate: date("genitore1_birth_date"),
+  genitore1BirthPlace: varchar("genitore1_birth_place", { length: 100 }),
+  genitore1Phone: varchar("genitore1_phone", { length: 20 }),
+  genitore1Email: varchar("genitore1_email", { length: 255 }),
+  genitore1Mobile: varchar("genitore1_mobile", { length: 50 }),
+  genitore1Address: varchar("genitore1_address", { length: 255 }),
+  genitore1City: varchar("genitore1_city", { length: 100 }),
+  genitore1Province: varchar("genitore1_province", { length: 2 }),
+  genitore1PostalCode: varchar("genitore1_postal_code", { length: 10 }),
+  genitore2FiscalCode: varchar("genitore2_fiscal_code", { length: 16 }),
+  genitore2Phone: varchar("genitore2_phone", { length: 20 }),
+  genitore2Email: varchar("genitore2_email", { length: 255 }),
+  genitore2Mobile: varchar("genitore2_mobile", { length: 50 }),
+  genitore2Address: varchar("genitore2_address", { length: 255 }),
+  genitore2City: varchar("genitore2_city", { length: 100 }),
+  genitore2Province: varchar("genitore2_province", { length: 2 }),
+  genitore2PostalCode: varchar("genitore2_postal_code", { length: 10 }),
+  citizenship: varchar("citizenship", { length: 100 }),
   nationality: varchar("nationality", { length: 100 }),
   region: varchar("region", { length: 100 }),
   consentImage: boolean("consent_image").default(false),
   consentMarketing: boolean("consent_marketing").default(false),
 
   // Campi Insegnanti
-  specialization: text("specialization"),
-  bio: text("bio"),
-  hourlyRate: decimal("hourly_rate", { precision: 10, scale: 2 }),
 
   // CRM Profiling
   crmProfileLevel: varchar("crm_profile_level", { length: 20 }), // PLATINUM, GOLD, SILVER, or NONE
@@ -733,8 +744,6 @@ export const members = mysqlTable("members", {
   healthNotes: text('health_notes'),
   foodAlerts: varchar('food_alerts', { length: 255 }),
   tags: varchar('tags', { length: 500 }),
-  residencePermit: varchar('residence_permit', { length: 100 }),
-  residencePermitExpiry: date('residence_permit_expiry'),
 });
 
 export const membersRelations = relations(members, ({ one, many }) => ({
@@ -753,8 +762,6 @@ export const insertMemberSchema = createInsertSchema(members, {
   entityCardIssueDate: z.coerce.date().nullish(),
   entityCardExpiryDate: z.coerce.date().nullish(),
   medicalCertificateExpiry: z.coerce.date().nullish(),
-  motherBirthDate: z.coerce.date().nullish(),
-  fatherBirthDate: z.coerce.date().nullish(),
   insertionDate: z.coerce.date().nullish(),
   tesserinoTecnicoIssueDate: z.coerce.date().nullish(),
 }).omit({
@@ -1131,6 +1138,16 @@ export type PaymentMethod = typeof paymentMethods.$inferSelect;
 
 // Payments
 export const payments = mysqlTable("payments", {
+
+  payerId: int("payer_id"),
+  payerType: mysqlEnum("payer_type", ['member','society','external']),
+  billingSubjectId: int("billing_subject_id"),
+  billingSubjectType: mysqlEnum("billing_subject_type", ['member','society','external']),
+  documentType: mysqlEnum("document_type", ['ricevuta_istituzionale','fattura','booking_only','gift_card']).default('ricevuta_istituzionale'),
+  paymentGroupId: varchar("payment_group_id", { length: 36 }),
+  giftCardAmount: decimal("gift_card_amount", { precision: 10, scale: 2 }).default('0'),
+  balanceAmount: decimal("balance_amount", { precision: 10, scale: 2 }).default('0'),
+
   id: int("id").primaryKey().autoincrement(),
   memberId: int("member_id").references(() => members.id, { onDelete: "set null" }),
   // Legacy Enrollment FKs (To be removed completely in Phase 3)
@@ -2403,6 +2420,9 @@ export type MemberFormsSubmissions = typeof memberFormsSubmissions.$inferSelect;
 // ============================================================================
 
 export const teamEmployees = mysqlTable("team_employees", {
+
+  avatarUrl: varchar("avatar_url", { length: 500 }),
+
   id: int("id").primaryKey().autoincrement(),
   memberId: int("member_id").notNull().references(() => members.id, { onDelete: "restrict" }),
   userId: varchar("user_id", { length: 255 }).references(() => users.id, { onDelete: "set null" }),
@@ -2726,3 +2746,94 @@ export type MerchandisingCategory = { id: number, name: string, description: str
 
 export const insertCategorySchema = z.object({ name: z.string(), description: z.string().nullable().optional(), color: z.string().nullable().optional(), sortOrder: z.number().optional() });
 export type Category = { id: number, name: string, description: string | null, color: string | null, sortOrder: number };
+
+export const dossiers = mysqlTable("dossiers", {
+  id: int("id").primaryKey().autoincrement(),
+  memberId: int("member_id").notNull(),
+  dossierType: mysqlEnum("dossier_type", ['nuovo_iscritto','rinnovo','trial_to_member','modifica_dati','iscrizione_corso','acquisto_carnet','acquisto_eventi','altro']).notNull(),
+  status: mysqlEnum("status", ['bozza','in_compilazione','in_pagamento','completato','annullato']).notNull().default('bozza'),
+  createdBy: varchar("created_by", { length: 255 }),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  completedAt: timestamp("completed_at"),
+  paymentGroupId: varchar("payment_group_id", { length: 36 }),
+  tenantId: varchar("tenant_id", { length: 50 }).notNull().default('1'),
+  extraData: json("extra_data")
+});
+
+export const dossierSteps = mysqlTable("dossier_steps", {
+  id: int("id").primaryKey().autoincrement(),
+  dossierId: int("dossier_id").notNull(),
+  stepName: mysqlEnum("step_name", ['anagrafica','tutori','certificato_medico','documenti','pagamento','tesseramento','iscrizione_attivita']).notNull(),
+  status: mysqlEnum("status", ['pending','completed','blocked','skipped']).notNull().default('pending'),
+  completedAt: timestamp("completed_at"),
+  blockingReason: text("blocking_reason"),
+  completedBy: varchar("completed_by", { length: 255 }),
+  tenantId: varchar("tenant_id", { length: 50 }).notNull().default('1')
+});
+
+export const dossierAuditLog = mysqlTable("dossier_audit_log", {
+  id: int("id").primaryKey().autoincrement(),
+  dossierId: int("dossier_id").notNull(),
+  action: mysqlEnum("action", ['created','step_completed','step_blocked','status_changed','annullato','completed']).notNull(),
+  performedBy: varchar("performed_by", { length: 255 }),
+  performedAt: timestamp("performed_at").defaultNow(),
+  details: json("details"),
+  tenantId: varchar("tenant_id", { length: 50 }).notNull().default('1')
+});
+
+export const externalPayers = mysqlTable("external_payers", {
+  id: int("id").primaryKey().autoincrement(),
+  businessName: varchar("business_name", { length: 255 }).notNull(),
+  fiscalCode: varchar("fiscal_code", { length: 20 }),
+  vatNumber: varchar("vat_number", { length: 20 }),
+  address: text("address"),
+  notes: text("notes"),
+  tenantId: varchar("tenant_id", { length: 50 }).notNull().default('1'),
+  createdAt: timestamp("created_at").defaultNow()
+});
+
+export const societies = mysqlTable("societies", {
+  id: int("id").primaryKey().autoincrement(),
+  businessName: varchar("business_name", { length: 255 }).notNull(),
+  fiscalCode: varchar("fiscal_code", { length: 20 }),
+  vatNumber: varchar("vat_number", { length: 20 }),
+  address: text("address"),
+  isWelfareProvider: boolean("is_welfare_provider").default(false),
+  welfareFormula: mysqlEnum("welfare_formula", ['sconto','pacchetto_prepagato','tessera_collettiva','voucher_esterno','mix']),
+  voucherProvider: varchar("voucher_provider", { length: 100 }),
+  billingFrequency: mysqlEnum("billing_frequency", ['mensile','trimestrale','annuale','on_demand']),
+  active: boolean("active").default(true),
+  tenantId: varchar("tenant_id", { length: 50 }).notNull().default('1'),
+  createdAt: timestamp("created_at").defaultNow()
+});
+
+export const paymentParticipants = mysqlTable("payment_participants", {
+  id: int("id").primaryKey().autoincrement(),
+  paymentId: int("payment_id").notNull(),
+  memberId: int("member_id").notNull(),
+  activityType: mysqlEnum("activity_type", ['corso','tesseramento','lezione_individuale','workshop','campus','affitto','merchandising','altro']).notNull(),
+  activityId: int("activity_id"),
+  amountAttributed: decimal("amount_attributed", { precision: 10, scale: 2 }).notNull(),
+  notes: text("notes"),
+  tenantId: varchar("tenant_id", { length: 50 }).notNull().default('1'),
+  createdAt: timestamp("created_at").defaultNow()
+});
+
+export const importBatches = mysqlTable("import_batches", {
+  batchId: varchar("batch_id", { length: 36 }).primaryKey(),
+  startedAt: timestamp("started_at").defaultNow(),
+  totalChunks: int("total_chunks").notNull(),
+  completedChunks: int("completed_chunks").default(0),
+  recordsImported: int("records_imported").default(0),
+  recordsSkipped: int("records_skipped").default(0),
+  recordsUpdated: int("records_updated").default(0),
+  errorsLog: json("errors_log")
+});
+
+export type Dossier = typeof dossiers.$inferSelect;
+export type DossierStep = typeof dossierSteps.$inferSelect;
+export type ExternalPayer = typeof externalPayers.$inferSelect;
+export type Society = typeof societies.$inferSelect;
+
+

@@ -50,7 +50,7 @@ function MembershipCardInternal({ member }: { member: Member }) {
                     <img src={logoStarGem} alt="Logo" className="h-full object-contain" />
                 </div>
                 <div className="w-20 h-20 bg-gray-50 border border-gray-100 overflow-hidden mb-2 shadow-inner">
-                    {member.photoUrl && <img src={member.photoUrl} alt="Foto" className="w-full h-full object-cover" />}
+                    {(member as any).photoUrl && <img src={(member as any).photoUrl} alt="Foto" className="w-full h-full object-cover" />}
                 </div>
                 <div className="mb-2">
                     {qrCodeUrl && <img src={qrCodeUrl} alt="QR" className="w-20 h-20" />}

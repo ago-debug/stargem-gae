@@ -79,7 +79,7 @@ export function generateMembershipNumber(
 
   const startYY = seasonStartYear.toString().slice(-2);
   const endYY = seasonEndYear.toString().slice(-2);
-  const paddedId = memberId.toString().padStart(4, "0");
+  const paddedId = memberId.toString().padStart(6, "0");
 
   return `${startYY}${endYY}-${paddedId}`;
 }
@@ -140,4 +140,14 @@ export function buildMembershipPayload(
     // Add the legacy renewalType for backward compatibility until dropped
     renewalType: membershipType.toLowerCase() as "nuovo" | "rinnovo",
   };
+}
+
+/**
+ * Calcola la data di scadenza tessera dal codice stagione.
+ * La tessera scade SEMPRE il 31 agosto della stagione di competenza.
+ * Esempio: seasonCode='2526' → endYear=2026 → 2026-08-31
+ */
+export function calculateMembershipExpiry(seasonCode: string): Date {
+  const endYear = 2000 + parseInt(seasonCode.slice(2, 4), 10);
+  return new Date(endYear, 7, 31, 23, 59, 59, 999);
 }
