@@ -20,9 +20,12 @@ import { useAuth } from "@/hooks/use-auth";
 import { hasWritePermission } from "@/App";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Plus, Search, Edit, Trash2, Users, GraduationCap, CreditCard, FileText, ChevronLeft, ChevronRight, ChevronUp, Download, Upload, Camera, Smartphone, Coins, AlertTriangle } from "lucide-react";
+import { PhoneBadge } from "@/components/shared/PhoneBadge";
+import { validatePhone } from "@/lib/utils/phoneValidator";
 import { MembershipCard } from "@/components/membership-card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
+import { SortableHeader } from "@/components/shared/SortableHeader";
+import { useSortableList } from "@/hooks/useSortableList";
 import { cn } from "@/lib/utils";
 import type { Member, InsertMember, Attendance } from "@shared/schema";
 import { DuplicateMergeModal } from "@/components/duplicate-merge-modal";
@@ -191,8 +194,6 @@ export default function Members() {
     );
   }, [membersData?.members]);
 
-  const { sortConfig, handleSort, sortItems, isSortedColumn } = useSortableTable<Member>("lastName");
-
   const getSortValue = (member: Member, key: string) => {
     switch (key) {
       case "lastName": return member.lastName;
@@ -209,7 +210,8 @@ export default function Members() {
     }
   };
 
-  const members = sortItems(membersRaw, getSortValue);
+  const { sortConfig, handleSort, sortedData: members } = useSortableList<Member>(membersRaw, "lastName", "asc", getSortValue);
+  const isSortedColumn = (key: string) => sortConfig?.field === key;
   const totalMembers = membersData?.total || 0;
   const totalPages = Math.ceil(totalMembers / pageSize);
 
@@ -431,7 +433,7 @@ export default function Members() {
     if (editingMember) {
       setHasMedicalCert(editingMember.hasMedicalCertificate || false);
       setIsMinorChecked(editingMember.isMinor || false);
-      setPhotoPreview(editingMember.photoUrl || null);
+      setPhotoPreview((editingMember as any).photoUrl || null);
       if (editingMember.dateOfBirth) {
         const dateStr = typeof editingMember.dateOfBirth === 'string' ? editingMember.dateOfBirth : new Date(editingMember.dateOfBirth).toISOString().split('T')[0];
         const age = calculateAge(dateStr);
@@ -565,19 +567,19 @@ export default function Members() {
       isMinor: isMinorChecked,
 
       // Dati genitori
-      motherFirstName: showParentFields ? (formData.get("motherFirstName") as string || null) : null,
-      motherLastName: showParentFields ? (formData.get("motherLastName") as string || null) : null,
-      motherFiscalCode: showParentFields ? (formData.get("motherFiscalCode") as string || null) : null,
-      motherEmail: showParentFields ? (formData.get("motherEmail") as string || null) : null,
-      motherPhone: showParentFields ? (formData.get("motherPhone") as string || null) : null,
-      motherMobile: showParentFields ? (formData.get("motherMobile") as string || null) : null,
+      genitore1FirstName: showParentFields ? (formData.get("genitore1FirstName") as string || null) : null,
+      genitore1LastName: showParentFields ? (formData.get("genitore1LastName") as string || null) : null,
+      genitore1FiscalCode: showParentFields ? (formData.get("genitore1FiscalCode") as string || null) : null,
+      genitore1Email: showParentFields ? (formData.get("genitore1Email") as string || null) : null,
+      genitore1Phone: showParentFields ? (formData.get("genitore1Phone") as string || null) : null,
+      genitore1Mobile: showParentFields ? (formData.get("genitore1Mobile") as string || null) : null,
 
-      fatherFirstName: showParentFields ? (formData.get("fatherFirstName") as string || null) : null,
-      fatherLastName: showParentFields ? (formData.get("fatherLastName") as string || null) : null,
-      fatherFiscalCode: showParentFields ? (formData.get("fatherFiscalCode") as string || null) : null,
-      fatherEmail: showParentFields ? (formData.get("fatherEmail") as string || null) : null,
-      fatherPhone: showParentFields ? (formData.get("fatherPhone") as string || null) : null,
-      fatherMobile: showParentFields ? (formData.get("fatherMobile") as string || null) : null,
+      genitore2FirstName: showParentFields ? (formData.get("genitore2FirstName") as string || null) : null,
+      genitore2LastName: showParentFields ? (formData.get("genitore2LastName") as string || null) : null,
+      genitore2FiscalCode: showParentFields ? (formData.get("genitore2FiscalCode") as string || null) : null,
+      genitore2Email: showParentFields ? (formData.get("genitore2Email") as string || null) : null,
+      genitore2Phone: showParentFields ? (formData.get("genitore2Phone") as string || null) : null,
+      genitore2Mobile: showParentFields ? (formData.get("genitore2Mobile") as string || null) : null,
 
       address: formData.get("address") as string || null,
       notes: formData.get("notes") as string || null,
@@ -614,8 +616,8 @@ export default function Members() {
     if (!member.email) missing.push("Email");
 
     if (isMinor) {
-      if (!member.fatherFirstName && !member.motherFirstName) missing.push("Dati Genitore (Nome)");
-      if (!member.fatherLastName && !member.motherLastName) missing.push("Dati Genitore (Cognome)");
+      if (!member.genitore2FirstName && !member.genitore1FirstName) missing.push("Dati Genitore (Nome)");
+      if (!member.genitore2LastName && !member.genitore1LastName) missing.push("Dati Genitore (Cognome)");
     }
 
     // specific checks based on participantType
@@ -815,7 +817,7 @@ export default function Members() {
             <Users className="w-8 h-8 text-primary drop-shadow-sm" />
           </div>
           <div>
-            <h1 className="text-3xl font-extrabold tracking-tight text-foreground mb-1">Anagrafica Generale</h1>
+            <h1 className="text-3xl font-extrabold tracking-tight text-foreground mb-1">Utente</h1>
             <p className="text-sm font-medium text-muted-foreground">Gestisci partecipanti, staff e team con ricerca avanzata e filtri multidimensionali</p>
           </div>
         </div>
@@ -844,7 +846,7 @@ export default function Members() {
           </Button>
           <ExportWizard 
             filename="anagrafica"
-            title="Esporta Anagrafica"
+            title="Esporta Utenti"
             apiEndpoint="/api/export"
             apiParams={{ 
               table: 'members',
@@ -901,9 +903,9 @@ export default function Members() {
               { key: 'weight', label: 'Peso', default: false },
               
               // TUTORI (default false)
-              { key: 'tutor1FiscalCode', label: 'CF Tutore 1', default: false },
-              { key: 'tutor1Phone', label: 'Telefono Tutore 1', default: false },
-              { key: 'tutor1Email', label: 'Email Tutore 1', default: false },
+              { key: 'tutor1FiscalCode', label: 'CF Genitore 1', default: false },
+              { key: 'tutor1Phone', label: 'Telefono Genitore 1', default: false },
+              { key: 'tutor1Email', label: 'Email Genitore 1', default: false },
               
               // DATI EXTRA AGGIUNTIVI (default false)
               { key: 'pIva', label: 'Partita IVA', default: false },
@@ -913,9 +915,9 @@ export default function Members() {
               { key: 'patenteTipo', label: 'Tipo Patente', default: false },
               { key: 'patentePendere', label: 'Patente Scadenza', default: false, type: 'date' },
               { key: 'carPlate', label: 'Targa', default: false },
-              { key: 'tutor2FirstName', label: 'Nome Tutore 2', default: false },
-              { key: 'tutor2LastName', label: 'Cognome Tutore 2', default: false },
-              { key: 'tutor2BirthDate', label: 'Data Nascita Tutore 2', default: false, type: 'date' },
+              { key: 'tutor2FirstName', label: 'Nome Genitore 2', default: false },
+              { key: 'tutor2LastName', label: 'Cognome Genitore 2', default: false },
+              { key: 'tutor2BirthDate', label: 'Data Nascita Genitore 2', default: false, type: 'date' },
               { key: 'emergencyContact1Name', label: 'Contatto Emergenza 1', default: false },
               { key: 'emergencyContact1Phone', label: 'Tel. Emergenza 1', default: false },
               { key: 'emergencyContact2Name', label: 'Contatto Emergenza 2', default: false },
@@ -1246,17 +1248,18 @@ export default function Members() {
                         aria-label="Seleziona tutti"
                       />
                     </TableHead>
-                    <SortableTableHead sortKey="lastName" currentSort={sortConfig} onSort={handleSort}>Cognome</SortableTableHead>
-                    <SortableTableHead sortKey="firstName" currentSort={sortConfig} onSort={handleSort}>Nome</SortableTableHead>
-                    <SortableTableHead sortKey="fiscalCode" currentSort={sortConfig} onSort={handleSort}>Codice Fiscale</SortableTableHead>
-                    <SortableTableHead sortKey="email" currentSort={sortConfig} onSort={handleSort}>Email</SortableTableHead>
-                    <SortableTableHead sortKey="mobile" currentSort={sortConfig} onSort={handleSort}>Mobile</SortableTableHead>
-                    <SortableTableHead sortKey="cardNumber" currentSort={sortConfig} onSort={handleSort}>Tessera</SortableTableHead>
-                    <SortableTableHead sortKey="medicalCert" currentSort={sortConfig} onSort={handleSort}>Cert. Medico</SortableTableHead>
-                    <SortableTableHead sortKey="crm" currentSort={sortConfig} onSort={handleSort}>Livello CRM</SortableTableHead>
-                    <SortableTableHead sortKey="status" currentSort={sortConfig} onSort={handleSort}>Stato</SortableTableHead>
+                    <SortableHeader column="lastName" currentSort={sortConfig} onSort={handleSort}>Cognome</SortableHeader>
+                    <SortableHeader column="firstName" currentSort={sortConfig} onSort={handleSort}>Nome</SortableHeader>
+                    <SortableHeader column="fiscalCode" currentSort={sortConfig} onSort={handleSort}>Codice Fiscale</SortableHeader>
+                    <SortableHeader column="email" currentSort={sortConfig} onSort={handleSort}>Email</SortableHeader>
+                    <SortableHeader column="mobile" currentSort={sortConfig} onSort={handleSort}>Mobile</SortableHeader>
+                    <TableHead>Data Quality</TableHead>
+                    <SortableHeader column="cardNumber" currentSort={sortConfig} onSort={handleSort}>Tessera</SortableHeader>
+                    <SortableHeader column="medicalCert" currentSort={sortConfig} onSort={handleSort}>Cert. Medico</SortableHeader>
+                    <SortableHeader column="crm" currentSort={sortConfig} onSort={handleSort}>Livello CRM</SortableHeader>
+                    <SortableHeader column="status" currentSort={sortConfig} onSort={handleSort}>Stato</SortableHeader>
                     <TableHead className="w-10"></TableHead>
-                    <SortableTableHead sortKey="coursesCount" currentSort={sortConfig} onSort={handleSort} className="text-right">Corsi Attivi</SortableTableHead>
+                    <SortableHeader column="coursesCount" currentSort={sortConfig} onSort={handleSort} className="text-right">Corsi Attivi</SortableHeader>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -1274,7 +1277,7 @@ export default function Members() {
                             aria-label={`Seleziona ${member.lastName} ${member.firstName}`}
                           />
                         </TableCell>
-                        <TableCell className={cn(isSortedColumn("lastName") && "sorted-column-cell")}>
+                        <TableCell className={cn(sortConfig?.field === "lastName" && "sorted-column-cell")}>
                           <div className="flex items-center gap-2">
                             <Link href={`/maschera-input?memberId=${member.id}`}>
                               <span
@@ -1308,14 +1311,14 @@ export default function Members() {
                             )}
                           </div>
                         </TableCell>
-                        <TableCell className={cn(isSortedColumn("firstName") && "sorted-column-cell")}>
+                        <TableCell className={cn(sortConfig?.field === "firstName" && "sorted-column-cell")}>
                           <Link href={`/maschera-input?memberId=${member.id}`}>
                             <span className="hover:underline cursor-pointer font-bold">
                               {member.firstName}
                             </span>
                           </Link>
                         </TableCell>
-                        <TableCell className={cn("font-mono text-sm", isSortedColumn("fiscalCode") && "sorted-column-cell")}>
+                        <TableCell className={cn("font-mono text-sm", sortConfig?.field === "fiscalCode" && "sorted-column-cell")}>
                           {member.fiscalCode ? member.fiscalCode : (
                             <div className="flex items-center gap-1 text-red-500 font-bold text-xs" title="Manca Dato">
                               <AlertTriangle className="w-3 h-3 fill-red-500 text-white" />
@@ -1323,7 +1326,7 @@ export default function Members() {
                             </div>
                           )}
                         </TableCell>
-                        <TableCell className={cn(isSortedColumn("email") && "sorted-column-cell")}>
+                        <TableCell className={cn(sortConfig?.field === "email" && "sorted-column-cell")}>
                           {member.email ? member.email : (
                             <div className="flex items-center gap-1 text-red-500 font-bold text-xs" title="Manca Dato">
                               <AlertTriangle className="w-3 h-3 fill-red-500 text-white" />
@@ -1331,15 +1334,47 @@ export default function Members() {
                             </div>
                           )}
                         </TableCell>
-                        <TableCell className={cn(isSortedColumn("mobile") && "sorted-column-cell")}>
-                          {member.mobile || member.phone ? (member.mobile || member.phone) : (
+                        <TableCell className={cn(sortConfig?.field === "mobile" && "sorted-column-cell")}>
+                          {member.mobile || member.phone ? (
+                            <PhoneBadge phone={member.mobile || member.phone} />
+                          ) : (
                             <div className="flex items-center gap-1 text-red-500 font-bold text-xs" title="Manca Dato">
                               <AlertTriangle className="w-3 h-3 fill-red-500 text-white" />
                               <span>Manca Dato</span>
                             </div>
                           )}
                         </TableCell>
-                        <TableCell className={cn(isSortedColumn("cardNumber") && "sorted-column-cell")}>
+                        <TableCell>
+                          {(() => {
+                            const missing = getMissingData(member);
+                            const phoneVal = validatePhone(member.mobile || member.phone);
+                            const errors = [...missing];
+                            if (!phoneVal.valid && phoneVal.error) errors.push(phoneVal.error);
+                            
+                            if (errors.length === 0) return <span className="text-muted-foreground">—</span>;
+                            return (
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <div className="flex items-center gap-1 cursor-help">
+                                      <AlertTriangle className="w-4 h-4 text-amber-500" />
+                                      <span className="text-xs font-bold text-amber-600">{errors.length} Anomali{errors.length > 1 ? 'e' : 'a'}</span>
+                                    </div>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <div className="text-sm p-1">
+                                      <p className="font-bold mb-1">Dati da correggere:</p>
+                                      <ul className="list-disc pl-4 space-y-0.5">
+                                        {errors.map((err, i) => <li key={i}>{err}</li>)}
+                                      </ul>
+                                    </div>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            );
+                          })()}
+                        </TableCell>
+                        <TableCell className={cn(sortConfig?.field === "cardNumber" && "sorted-column-cell")}>
                           {member.cardNumber ? (
                             <div className="text-sm">
                               <div>{member.cardNumber}</div>
@@ -1356,7 +1391,7 @@ export default function Members() {
                             </div>
                           )}
                         </TableCell>
-                        <TableCell className={cn(isSortedColumn("medicalCert") && "sorted-column-cell")}>
+                        <TableCell className={cn(sortConfig?.field === "medicalCert" && "sorted-column-cell")}>
                           {member.hasMedicalCertificate ? (
                             <Badge variant={
                               member.medicalCertificateExpiry && new Date(member.medicalCertificateExpiry) < new Date()
@@ -1375,7 +1410,7 @@ export default function Members() {
                             </div>
                           )}
                         </TableCell>
-                        <TableCell className={cn(isSortedColumn("crm") && "sorted-column-cell")}>
+                        <TableCell className={cn(sortConfig?.field === "crm" && "sorted-column-cell")}>
                           {member.crmProfileLevel && member.crmProfileLevel !== "NONE" ? (
                             <Badge className={
                               member.crmProfileLevel === 'PLATINUM' ? 'bg-slate-900 border-slate-900 text-white' : 
@@ -1386,7 +1421,7 @@ export default function Members() {
                             </Badge>
                           ) : <span className="text-muted-foreground text-xs font-mono">-</span>}
                         </TableCell>
-                        <TableCell className={cn(isSortedColumn("status") && "sorted-column-cell")}>
+                        <TableCell className={cn(sortConfig?.field === "status" && "sorted-column-cell")}>
                           <Badge variant={member.active ? "default" : "secondary"}>
                             {member.active ? "Attivo" : "Inattivo"}
                           </Badge>
@@ -1416,7 +1451,7 @@ export default function Members() {
                             return null;
                           })()}
                         </TableCell>
-                        <TableCell className={cn("text-right", isSortedColumn("coursesCount") && "sorted-column-cell")}>
+                        <TableCell className={cn("text-right", sortConfig?.field === "coursesCount" && "sorted-column-cell")}>
                           {(member as any).activeCourseCount > 0 ? (
                             <Badge variant="outline" className="text-xs">
                               {(member as any).activeCourseCount} {(member as any).activeCourseCount === 1 ? "corso" : "corsi"}
@@ -1913,66 +1948,66 @@ export default function Members() {
                     <h4 className="font-medium text-foreground">Madre</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="motherFirstName">Nome Madre</Label>
+                        <Label htmlFor="genitore1FirstName">Nome Madre</Label>
                         <Input
-                          id="motherFirstName"
-                          name="motherFirstName"
-                          defaultValue={editingMember?.motherFirstName || ""}
-                          data-testid="input-motherFirstName"
+                          id="genitore1FirstName"
+                          name="genitore1FirstName"
+                          defaultValue={editingMember?.genitore1FirstName || ""}
+                          data-testid="input-genitore1FirstName"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="motherLastName">Cognome Madre</Label>
+                        <Label htmlFor="genitore1LastName">Cognome Madre</Label>
                         <Input
-                          id="motherLastName"
-                          name="motherLastName"
-                          defaultValue={editingMember?.motherLastName || ""}
-                          data-testid="input-motherLastName"
+                          id="genitore1LastName"
+                          name="genitore1LastName"
+                          defaultValue={editingMember?.genitore1LastName || ""}
+                          data-testid="input-genitore1LastName"
                         />
                       </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="motherFiscalCode">Codice Fiscale Madre</Label>
+                        <Label htmlFor="genitore1FiscalCode">Codice Fiscale Madre</Label>
                         <Input
-                          id="motherFiscalCode"
-                          name="motherFiscalCode"
-                          defaultValue={editingMember?.motherFiscalCode || ""}
+                          id="genitore1FiscalCode"
+                          name="genitore1FiscalCode"
+                          defaultValue={editingMember?.genitore1FiscalCode || ""}
                           maxLength={16}
                           className="uppercase font-mono"
-                          data-testid="input-motherFiscalCode"
+                          data-testid="input-genitore1FiscalCode"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="motherEmail">Email Madre</Label>
+                        <Label htmlFor="genitore1Email">Email Madre</Label>
                         <Input
-                          id="motherEmail"
-                          name="motherEmail"
+                          id="genitore1Email"
+                          name="genitore1Email"
                           type="email"
-                          defaultValue={editingMember?.motherEmail || ""}
-                          data-testid="input-motherEmail"
+                          defaultValue={editingMember?.genitore1Email || ""}
+                          data-testid="input-genitore1Email"
                         />
                       </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="motherPhone">Telefono Madre</Label>
+                        <Label htmlFor="genitore1Phone">Telefono Madre</Label>
                         <Input
-                          id="motherPhone"
-                          name="motherPhone"
-                          defaultValue={editingMember?.motherPhone || ""}
-                          data-testid="input-motherPhone"
+                          id="genitore1Phone"
+                          name="genitore1Phone"
+                          defaultValue={editingMember?.genitore1Phone || ""}
+                          data-testid="input-genitore1Phone"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="motherMobile">Mobile Madre</Label>
+                        <Label htmlFor="genitore1Mobile">Mobile Madre</Label>
                         <Input
-                          id="motherMobile"
-                          name="motherMobile"
-                          defaultValue={editingMember?.motherMobile || ""}
-                          data-testid="input-motherMobile"
+                          id="genitore1Mobile"
+                          name="genitore1Mobile"
+                          defaultValue={editingMember?.genitore1Mobile || ""}
+                          data-testid="input-genitore1Mobile"
                         />
                       </div>
                     </div>
@@ -1985,66 +2020,66 @@ export default function Members() {
                     <h4 className="font-medium text-foreground">Padre</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="fatherFirstName">Nome Padre</Label>
+                        <Label htmlFor="genitore2FirstName">Nome Padre</Label>
                         <Input
-                          id="fatherFirstName"
-                          name="fatherFirstName"
-                          defaultValue={editingMember?.fatherFirstName || ""}
-                          data-testid="input-fatherFirstName"
+                          id="genitore2FirstName"
+                          name="genitore2FirstName"
+                          defaultValue={editingMember?.genitore2FirstName || ""}
+                          data-testid="input-genitore2FirstName"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="fatherLastName">Cognome Padre</Label>
+                        <Label htmlFor="genitore2LastName">Cognome Padre</Label>
                         <Input
-                          id="fatherLastName"
-                          name="fatherLastName"
-                          defaultValue={editingMember?.fatherLastName || ""}
-                          data-testid="input-fatherLastName"
+                          id="genitore2LastName"
+                          name="genitore2LastName"
+                          defaultValue={editingMember?.genitore2LastName || ""}
+                          data-testid="input-genitore2LastName"
                         />
                       </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="fatherFiscalCode">Codice Fiscale Padre</Label>
+                        <Label htmlFor="genitore2FiscalCode">Codice Fiscale Padre</Label>
                         <Input
-                          id="fatherFiscalCode"
-                          name="fatherFiscalCode"
-                          defaultValue={editingMember?.fatherFiscalCode || ""}
+                          id="genitore2FiscalCode"
+                          name="genitore2FiscalCode"
+                          defaultValue={editingMember?.genitore2FiscalCode || ""}
                           maxLength={16}
                           className="uppercase font-mono"
-                          data-testid="input-fatherFiscalCode"
+                          data-testid="input-genitore2FiscalCode"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="fatherEmail">Email Padre</Label>
+                        <Label htmlFor="genitore2Email">Email Padre</Label>
                         <Input
-                          id="fatherEmail"
-                          name="fatherEmail"
+                          id="genitore2Email"
+                          name="genitore2Email"
                           type="email"
-                          defaultValue={editingMember?.fatherEmail || ""}
-                          data-testid="input-fatherEmail"
+                          defaultValue={editingMember?.genitore2Email || ""}
+                          data-testid="input-genitore2Email"
                         />
                       </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="fatherPhone">Telefono Padre</Label>
+                        <Label htmlFor="genitore2Phone">Telefono Padre</Label>
                         <Input
-                          id="fatherPhone"
-                          name="fatherPhone"
-                          defaultValue={editingMember?.fatherPhone || ""}
-                          data-testid="input-fatherPhone"
+                          id="genitore2Phone"
+                          name="genitore2Phone"
+                          defaultValue={editingMember?.genitore2Phone || ""}
+                          data-testid="input-genitore2Phone"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="fatherMobile">Mobile Padre</Label>
+                        <Label htmlFor="genitore2Mobile">Mobile Padre</Label>
                         <Input
-                          id="fatherMobile"
-                          name="fatherMobile"
-                          defaultValue={editingMember?.fatherMobile || ""}
-                          data-testid="input-fatherMobile"
+                          id="genitore2Mobile"
+                          name="genitore2Mobile"
+                          defaultValue={editingMember?.genitore2Mobile || ""}
+                          data-testid="input-genitore2Mobile"
                         />
                       </div>
                     </div>
@@ -2543,7 +2578,7 @@ export default function Members() {
                   Come risolvere
                 </h4>
                 <ol className="list-decimal list-inside text-muted-foreground space-y-1">
-                  <li>Cerca le anagrafiche elencate usando la barra di ricerca in Anagrafica a Lista</li>
+                  <li>Cerca le anagrafiche elencate usando la barra di ricerca in Utente a Lista</li>
                   <li>Seleziona le anagrafiche duplicate con le spunte a sinistra</li>
                   <li>Clicca sul pulsante viola "Unisci Selezionati" che comparirà in alto a destra</li>
                   <li>Scegli l'anagrafica da mantenere come principale, i dati delle altre verranno trasferiti su di essa</li>

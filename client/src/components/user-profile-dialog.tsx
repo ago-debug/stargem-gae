@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Upload, Loader2, Camera, Moon, Sun, Monitor } from "lucide-react";
+import { FileUploadInput } from "@/components/shared/FileUploadInput";
 import { useTheme } from "next-themes";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
@@ -63,29 +64,9 @@ export function UserProfileDialog({ children, targetUser }: UserProfileDialogPro
     updateProfileMutation.mutate({ phone });
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (file.size > 2 * 1024 * 1024) {
-      toast({ variant: "destructive", title: "File troppo grande", description: "L'immagine deve pesare al massimo 2 MB." });
-      return;
-    }
-
-    setUploading(true);
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const base64 = event.target?.result as string;
-      setPreviewImage(base64); // Show immediately in UI
-      updateProfileMutation.mutate({ profileImageUrl: base64 }, {
-        onSettled: () => setUploading(false)
-      });
-    };
-    reader.onerror = () => {
-      setUploading(false);
-      toast({ variant: "destructive", title: "Errore di caricamento", description: "Impossibile leggere il file." });
-    };
-    reader.readAsDataURL(file);
+  const handleFileComplete = (url: string) => {
+    setPreviewImage(url);
+    updateProfileMutation.mutate({ profileImageUrl: url });
   };
 
   return (
@@ -115,17 +96,15 @@ export function UserProfileDialog({ children, targetUser }: UserProfileDialogPro
               </div>
             )}
             
-            <label className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-              {uploading ? (
-                <Loader2 className="h-6 w-6 animate-spin text-white" />
-              ) : (
-                <>
-                  <Upload className="w-5 h-5 text-white mb-1" />
-                  <span className="text-xxs text-white font-medium">Carica</span>
-                </>
-              )}
-              <input type="file" className="hidden" accept="image/png, image/jpeg, image/webp" onChange={handleFileChange} disabled={uploading} />
-            </label>
+            <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+              <FileUploadInput 
+                endpoint="/api/uploads/avatar" 
+                extraFields={{ employee_id: user?.id }}
+                accept=".png,.jpg,.jpeg,.webp" 
+                onUploadComplete={handleFileComplete} 
+                buttonText="Carica" 
+              />
+            </div>
           </div>
 
           <div className="w-full space-y-4">

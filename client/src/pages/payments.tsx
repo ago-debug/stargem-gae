@@ -9,6 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { SortableHeader } from "@/components/shared/SortableHeader";
+import { useSortableList } from "@/hooks/useSortableList";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Search, CreditCard, Check, ChevronsUpDown, X, Edit, Download, Filter, User, Wallet } from "lucide-react";
@@ -16,7 +18,6 @@ import { ExportWizard } from "@/components/ExportWizard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
 import { cn } from "@/lib/utils";
 import type { Payment, InsertPayment, Member, PaymentMethod, Course } from "@shared/schema";
 import { useDebounce } from "@/hooks/use-debounce";
@@ -190,7 +191,7 @@ export default function Payments() {
     return matchesPending;
   });
 
-  const { sortConfig, handleSort, sortItems, isSortedColumn } = useSortableTable<Payment>("dueDate");
+  
 
   const getSortValue = (payment: Payment, key: string) => {
     switch (key) {
@@ -205,7 +206,14 @@ export default function Payments() {
     }
   };
 
-  const filteredPayments = sortItems(filteredPaymentsRaw, getSortValue);
+  
+  const { sortConfig, handleSort, sortedData: filteredPayments } = useSortableList<Payment>(
+    filteredPaymentsRaw, 
+    "dueDate", 
+    "desc", 
+    getSortValue
+  );
+
 
   const formatLocalISO = (date: Date | string | null | undefined) => {
     if (!date) return "";
@@ -334,39 +342,39 @@ export default function Payments() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <SortableTableHead sortKey="member" currentSort={sortConfig} onSort={handleSort}>Partecipante</SortableTableHead>
-                  <SortableTableHead sortKey="type" currentSort={sortConfig} onSort={handleSort}>Tipo</SortableTableHead>
-                  <SortableTableHead sortKey="description" currentSort={sortConfig} onSort={handleSort}>Descrizione</SortableTableHead>
-                  <SortableTableHead sortKey="amount" currentSort={sortConfig} onSort={handleSort}>Importo</SortableTableHead>
-                  <SortableTableHead sortKey="dueDate" currentSort={sortConfig} onSort={handleSort}>Scadenza</SortableTableHead>
-                  <SortableTableHead sortKey="paidDate" currentSort={sortConfig} onSort={handleSort}>Pagato il</SortableTableHead>
-                  <SortableTableHead sortKey="paymentMethod" currentSort={sortConfig} onSort={handleSort}>Metodo</SortableTableHead>
+                  <SortableHeader column="member" currentSort={sortConfig} onSort={handleSort}>Partecipante</SortableHeader>
+                  <SortableHeader column="type" currentSort={sortConfig} onSort={handleSort}>Tipo</SortableHeader>
+                  <SortableHeader column="description" currentSort={sortConfig} onSort={handleSort}>Descrizione</SortableHeader>
+                  <SortableHeader column="amount" currentSort={sortConfig} onSort={handleSort}>Importo</SortableHeader>
+                  <SortableHeader column="dueDate" currentSort={sortConfig} onSort={handleSort}>Scadenza</SortableHeader>
+                  <SortableHeader column="paidDate" currentSort={sortConfig} onSort={handleSort}>Pagato il</SortableHeader>
+                  <SortableHeader column="paymentMethod" currentSort={sortConfig} onSort={handleSort}>Metodo</SortableHeader>
                   <TableHead className="text-right">Azioni</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredPayments.map((payment) => (
                   <TableRow key={payment.id} data-testid={`payment-row-${payment.id}`}>
-                    <TableCell className={cn("font-medium", isSortedColumn("member") && "sorted-column-cell")}>
+                    <TableCell className={cn("font-medium", sortConfig?.field === "member" && "sorted-column-cell")}>
                       <button
                         onClick={() => setLocation(`${window.location.pathname}?editMemberId=${payment.memberId}`)}
                         className="flex items-center gap-2 hover:underline text-primary text-left"
-                        title="Modifica Anagrafica"
+                        title="Modifica Utente"
                       >
                         <User className="w-3 h-3" />
                         {getMemberName(payment)}
                       </button>
                     </TableCell>
-                    <TableCell className={cn("capitalize", isSortedColumn("type") && "sorted-column-cell")}>{payment.type}</TableCell>
-                    <TableCell className={cn(isSortedColumn("description") && "sorted-column-cell")}>{payment.description || "-"}</TableCell>
-                    <TableCell className={cn("font-medium", isSortedColumn("amount") && "sorted-column-cell")}>€{payment.amount}</TableCell>
-                    <TableCell className={cn(isSortedColumn("dueDate") && "sorted-column-cell")}>
+                    <TableCell className={cn("capitalize", sortConfig?.field === "type" && "sorted-column-cell")}>{payment.type}</TableCell>
+                    <TableCell className={cn(sortConfig?.field === "description" && "sorted-column-cell")}>{payment.description || "-"}</TableCell>
+                    <TableCell className={cn("font-medium", sortConfig?.field === "amount" && "sorted-column-cell")}>€{payment.amount}</TableCell>
+                    <TableCell className={cn(sortConfig?.field === "dueDate" && "sorted-column-cell")}>
                       {payment.dueDate ? new Date(payment.dueDate).toLocaleDateString('it-IT') : "-"}
                     </TableCell>
-                    <TableCell className={cn(isSortedColumn("paidDate") && "sorted-column-cell")}>
+                    <TableCell className={cn(sortConfig?.field === "paidDate" && "sorted-column-cell")}>
                       {payment.paidDate ? new Date(payment.paidDate).toLocaleString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : "-"}
                     </TableCell>
-                    <TableCell className={cn("capitalize", isSortedColumn("paymentMethod") && "sorted-column-cell")}>{payment.paymentMethod || "-"}</TableCell>
+                    <TableCell className={cn("capitalize", sortConfig?.field === "paymentMethod" && "sorted-column-cell")}>{payment.paymentMethod || "-"}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-2">
                         <Button

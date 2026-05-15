@@ -1,0 +1,2 @@
+{"level":"info","message":"POST /api/users/presence/offline 200 in 158ms :: {\"success\":true}","service":"stargem-manager","timestamp":"2026-05-08 16:57:12"}
+{"level":"info","message":"POST /api/users/presence/offline 200 in 153ms :: {\"success\":true}","service":"stargem-manager","timestamp":"2026-05-08 16:57:13"}

@@ -1,4 +1,13 @@
+---
+tags: [regole, filesystem]
+aggiornato: 2026-04-28
+tipo: regole
+---
+
 # 📂 GAE_SVILUPPO — Cartella di scambio StarGem Suite
+
+> Collegati: [[00_INDEX]] · [[ISTRUZIONI_COWORK_2026_05_05]] · [[MASTER_STATUS]] · [[ANALISI_MASTER]]
+
 
 Punto di sincronizzazione tra **Gaetano** (proprietario), **Claude**
 (coordinatore, via MCP filesystem da Claude Desktop) e **Antigravity**
@@ -157,6 +166,230 @@ elimina lo snapshot. Il codice di produzione non viene mai toccato da Claude.
 - AG NON deploya in produzione (solo `git commit` + `git push origin main`,
   poi STOP — il deploy lo fa Gaetano via Plesk)
 - AG NON anticipa decisioni architetturali — esplora e propone, Gaetano decide
+
+### 13. Convenzione `tenant_id` per nuove tabelle (preparazione SaaS multi-tenant)
+
+Aggiunta dopo lo strategic review 2026-05-11 (F1 raccomandazione).
+**Qualunque tabella creata da oggi in poi** deve includere:
+
+```sql
+tenant_id VARCHAR(50) NOT NULL DEFAULT '1'
+```
+
+Inoltre, ogni nuovo vincolo `UNIQUE` deve essere chiave composita che include `tenant_id`:
+- `UNIQUE(tenant_id, email)` anziché `UNIQUE(email)`
+- `UNIQUE(tenant_id, fiscal_code)` anziché `UNIQUE(fiscal_code)`
+
+Costo oggi: trascurabile. Beneficio: evita 6-12 mesi di refactor al momento della migrazione SaaS multi-tenant. Le tabelle pre-2026-05-11 verranno migrate gradualmente nel piano multi-tenant.
+
+### 14. Validazione automatica forzata in Stop & Go
+
+Aggiunta dopo lo strategic review 2026-05-11 (F1 raccomandazione).
+Prima di chiudere un protocollo Stop & Go che ha modificato codice, AG deve eseguire (e riportare l'esito) di:
+
+```bash
+npx tsc --noEmit              # zero errori TypeScript obbligatori
+npm run lint                   # zero errori lint obbligatori
+npm test                       # se esistono test su quel modulo, devono passare
+npm run build                  # se le modifiche toccano file di entry o config
+```
+
+Output nel report Stop & Go: blocco `## Validazione automatica` con esito di ogni comando. Se uno fallisce: ferma il protocollo, descrivi l'errore, non chiudere il task.
+
+Eccezione: Stop & Go di sola analisi/lettura senza modifiche al codice non richiedono validazione.
+
+### 15. Tracciabilità OBBLIGATORIA dei lavori AG in `_ANTIGRAVITY/`
+
+Aggiunta dopo il reset totale del 2026-05-11 (Gaetano ha rilevato che AG aveva fatto lavori non tracciati nei file di status, e Claude operava su info datate).
+
+**Ogni Stop & Go chiuso da AG deve produrre OBBLIGATORIAMENTE:**
+
+1. **Aggiornamento di `_ANTIGRAVITY/01_status_continui/F_<timestamp>_ULTIMI_AGGIORNAMENTI.md`** (il file più letto come bibbia del contesto): aggiunta in cima della nota di chiusura del task, con data e descrizione 2-3 righe.
+   - Se il file F_ esistente è recente (stesso giorno): aggiungi nota in cima senza creare nuovo file.
+   - Se il file F_ esistente è di un giorno precedente: archivia il vecchio in `99_archivio/` con timestamp e crea il nuovo `F_<YYYY_MM_DD_HHMM>_ULTIMI_AGGIORNAMENTI.md`.
+
+2. **Aggiornamento del file A→G o Z pertinente** se il lavoro tocca un'area specifica (es. lavoro su backend → aggiorna `A_*` se architettura, `C_*` se stato lavori; lavoro su frontend → aggiorna `B_*`; lavoro su DB → aggiorna `D_*`; lavoro su sicurezza/pruning → aggiorna `Z_*`).
+
+3. **Report completo in `_ANTIGRAVITY/02_output_protocolli/`** con nome convenzionale: `report_F1-NNN_<topic>_<YYYY_MM_DD>.md` o `audit_F1-NNN_<topic>_<YYYY_MM_DD>.md`. Niente lavoro non documentato.
+
+4. **Se il lavoro modifica il DB** (CREATE/ALTER/DROP/INSERT massivo): documentare in `Z_<timestamp>_REPORT_<topic>_DB.md` con prima/dopo i conteggi delle tabelle toccate.
+
+**Eccezione:** sessioni di sola lettura/analisi per Gaetano (audit on-demand) richiedono comunque il report in `02_output_protocolli/` ma non l'aggiornamento di F_ se non chiudono protocolli operativi.
+
+**Violazione = causa di disallineamento tra documentazione e codice reale**, esattamente il problema che ha portato al reset del 2026-05-11. La tracciabilità non è opzionale.
+
+### 16. Validità temporale dei file canonici e verifica obbligatoria pre-intervento
+
+Aggiunta dopo il reset totale del 2026-05-11 (Gaetano: "Lo storico è lo storico, ma se facciamo fare interventi vecchi facciamo un casino").
+
+**Principio:** un file canonico non è "vero per sempre". Ha una **data di ultima verifica** rispetto al codice reale. Più tempo passa, più è probabile che sia disallineato.
+
+**Ogni file canonico vivo deve avere nel frontmatter:**
+```yaml
+---
+aggiornato: YYYY-MM-DD
+ultima_verifica_vs_codice: YYYY-MM-DD
+fonti_verificate:
+  - path/al/file/o/audit/usato
+---
+```
+
+Quando manca `ultima_verifica_vs_codice` o è uguale a `aggiornato`, il file ha lo stesso valore di affidabilità della sua data.
+
+**Decadimento di affidabilità (regole di default):**
+
+| Tipo file | Validità prima della re-verifica |
+|---|---|
+| `MASTER_STATUS.md` | 7 giorni |
+| `ANALISI_MASTER.md` | 30 giorni (cambia raramente, è strategia) |
+| `F_*_ULTIMI_AGGIORNAMENTI.md` | 3 giorni (storia recente) |
+| `RECAP_NN_*.md` modulo specifico | 14 giorni dall'ultima modifica al codice del modulo |
+| Audit / report puntuali in `_ANTIGRAVITY/02_output_protocolli/` | Sempre (sono fotografie datate, non file vivi) |
+
+**Procedura obbligatoria PRIMA di pianificare un intervento:**
+
+1. Verifica nel frontmatter del/dei file canonici che useresti come base: `ultima_verifica_vs_codice` è entro la finestra di validità?
+2. Se SÌ → usa il file come fonte e procedi
+3. Se NO → chiedi ad AG un mini-audit di verifica della parte rilevante (può essere 15-30 min, basta poco) PRIMA di lanciare l'intervento vero. Aggiorna il `ultima_verifica_vs_codice` con la nuova data e la nota dell'audit.
+
+**Storico vs vivo:**
+- **File "vivi"** (in `_CLAUDE/01_canonici/`, `_CLAUDE/03_recap_chat/`, `_CLAUDE/04_per_antigravity/`, `_ANTIGRAVITY/01_status_continui/`): vanno mantenuti aggiornati e verificati. Il decadimento si applica a questi.
+- **File "storici"** (in `99_archivio/`): non si toccano e non guidano interventi. Possono essere CONSULTATI come riferimento, ma una loro citazione in una decisione operativa DEVE essere accompagnata da verifica corrente vs codice. *"Lo dice il vecchio MASTER_STATUS"* non è un argomento valido per un intervento.
+
+**Violazione = causa di rifare lavori già fatti o di rompere cose appena sistemate.** Esattamente il problema del 11/05.
+
+### 17. Timestamp con ORA obbligatorio nel frontmatter
+
+Aggiunta dopo richiesta di Gaetano il 2026-05-11: *"È una regola importantissima. Così abbiamo in tempo reale quando sono stati aggiornati."*
+
+Tutti i file canonici vivi (sia in `_CLAUDE/` sia in `_ANTIGRAVITY/`) devono avere nel frontmatter **data + ora** in formato ISO 8601 esteso:
+
+```yaml
+---
+aggiornato: 2026-05-11T16:45
+ultima_verifica_vs_codice: 2026-05-11T16:45
+validita_prevista: 7 giorni (scade 2026-05-18T16:45)
+fonti_verificate:
+  - path/al/file
+---
+```
+
+**Formato obbligatorio:** `YYYY-MM-DDTHH:MM` (es. `2026-05-11T16:45`). NON `2026-05-11` (solo data).
+
+**Vale per:**
+- Tutti i canonici `_CLAUDE/01_canonici/*`
+- Tutti i RECAP `_CLAUDE/03_recap_chat/*`
+- Tutti i file vivi `_ANTIGRAVITY/01_status_continui/*` (A, B, C, D, F, G, H, Y, Z, ecc.)
+- Tutti i moduli analisi `_CLAUDE/02_moduli_analisi/*`
+- Output protocolli con valore "vivo" `_ANTIGRAVITY/02_output_protocolli/*`
+
+**Vale per Claude e per Antigravity.** Niente eccezioni. Tutti i file vanno timbrati con la data+ora reale dell'ultimo aggiornamento.
+
+Quando crei un file ex novo o lo aggiorni: usa `date +%Y-%m-%dT%H:%M` da bash, o equivalente, per ottenere il timestamp corrente.
+
+### 18. Numerazione progressiva dei prompt Claude → Antigravity
+
+Aggiunta dopo richiesta di Gaetano il 2026-05-11: serve un meccanismo di tracciamento univoco per non perdere il conto di cosa è stato chiesto e cosa è stato eseguito.
+
+**Convenzione:**
+- Ogni prompt che Claude (Cowork) invia ad AG deve avere un **numero progressivo** nella forma `F1-NNN` (per AG Backend) o `F2-NNN` (per AG Frontend).
+- La numerazione è **progressiva globale** per ciascun asse (F1 e F2 sono numerazioni separate).
+- Parte da `001` con il prossimo prompt che Claude scrive (post 2026-05-11T19:11).
+- **Non si resetta** mai.
+
+**Riferimento incrociato nei file:**
+- AG deve riportare il numero del prompt all'inizio di ogni sua risposta operativa, es. `"Risposta F1-007 — Audit Anagrafica Backend"`.
+- Il numero deve apparire anche nel **nome del file di output** che AG produce, es. `audit_F1-007_anagrafica_2026_05_11.md`, `report_F2-005_fix_X_2026_05_11.md`.
+- L'aggiornamento di `F_*_ULTIMI_AGGIORNAMENTI.md` deve includere il numero del prompt chiuso.
+
+**Indice dei prompt:**
+Claude mantiene un indice cronologico in `_CLAUDE/04_per_antigravity/INDEX_PROMPT.md` (lista F1 e F2 separate, con data, topic, file di output prodotto). L'indice si aggiorna ad ogni nuovo prompt inviato.
+
+**Storico (pre-2026-05-11T19:11):** i numeri usati nei nomi file precedenti (es. `report_F2-001_fix_4_errori_ts_2026_05_11.md`) sono retrospettivi e restano dove sono. La nuova numerazione progressiva parte da 001 con i prompt successivi a questo articolo.
+
+### 19. Checklist progetto canonica sempre aggiornata
+
+Aggiunta dopo richiesta di Gaetano il 2026-05-11: serve una vista d'insieme delle cose fatte / in corso / da fare di tutto il progetto, aggiornata ad ogni cambio di stato.
+
+**File canonico:** `_CLAUDE/01_canonici/CHECKLIST_PROGETTO.md`
+
+**Sezioni obbligatorie:**
+1. **✅ Completato** — cose chiuse con data
+2. **🟡 In corso** — cose attualmente in lavorazione (chi, cosa, da quando)
+3. **📋 Backlog prossimi** — cose pianificate prossime, in ordine di priorità
+4. **🚫 Bloccato / Decisioni pendenti** — cose ferme in attesa di qualcosa/qualcuno
+5. **🗑️ Archiviato / Cancellato** — cose esplicitamente cancellate con motivazione
+
+**Regole di aggiornamento:**
+- Claude (Cowork) la aggiorna **ad ogni cambio di stato** (task chiuso da AG, decisione presa da Gaetano, piano nuovo aggiunto)
+- Frontmatter conforme regola 17 (timestamp con ora) + regola 16 (`ultima_verifica_vs_codice`)
+- Voci linkate al file/audit/recap di riferimento quando applicabile (wikilink `[[nome_file]]`)
+- Per task con numero prompt: includere F1-NNN / F2-NNN nella voce
+
+**Quando consultarla:** prima di iniziare qualunque task operativo, controllare la checklist per non duplicare lavoro e per vedere se ci sono dipendenze.
+
+### 20. Comunicazione Claude → Gaetano: sempre con opzioni multiple
+
+Aggiunta dopo richiesta di Gaetano il 2026-05-11.
+
+Quando Claude (Cowork) pone una domanda decisionale a Gaetano, **deve sempre presentare 2-4 opzioni esplicite e numerate**, mai domande aperte tipo *"cosa preferisci?"*. Esempio corretto:
+> "Procediamo col piano refactor?
+> (a) Sì, lancia subito F1-002 + F2-002
+> (b) Sì, ma rivediamo prima il piano
+> (c) No, fermiamoci"
+
+Quando possibile usare il tool `AskUserQuestion` per rendere le opzioni cliccabili.
+
+Domande aperte senza opzioni = vietate (perdono tempo a Gaetano).
+
+### 21. Ordine canonico dei prompt: F1 SEMPRE PRIMA di F2
+
+Aggiunta dopo richiesta esplicita di Gaetano il 2026-05-12 (la regola era già in ISTRUZIONI_COWORK ma Claude l'ha violata).
+
+**Quando Claude mostra a Gaetano due (o più) prompt da incollare nello stesso messaggio:**
+
+- **F1 (Backend) sempre PRIMA**, in alto
+- **F2 (Frontend) sempre DOPO**, in basso
+- Se esistono altri agenti futuri (es. F3), l'ordine sarà F1 → F2 → F3, sempre crescente
+
+Vale anche quando il task F1 è ancora in attesa di applicazione e quello F2 è già un OK semplice. **L'ordine è F1 sopra F2 sotto, sempre.**
+
+Vale anche nei file di prompt che Claude crea in `_CLAUDE/04_per_antigravity/`: le sezioni F1 vanno prima delle sezioni F2.
+
+**Motivazione:** Gaetano legge dall'alto. Avere ordine fisso evita confusione e velocizza il copia-incolla operativo.
+
+### 22. Wikilink Obsidian obbligatori nei file vivi del vault
+
+Aggiunta dopo richiesta di Gaetano il 2026-05-12T14:15: tutto deve essere navigabile dal grafo Obsidian.
+
+**Regola:**
+Quando un file VIVO del vault (in `_CLAUDE/` o `_ANTIGRAVITY/01_status_continui/`) referenzia un ALTRO file del vault, deve usare la sintassi wikilink `[[NomeFile]]` (senza `.md`) invece del path testuale `_CLAUDE/cartella/NomeFile.md`.
+
+**Vale in particolare per `_ANTIGRAVITY/01_status_continui/`:**
+- Tutti i file faro A→G + Y + Z devono usare wikilink quando citano:
+  - Altri file faro (es. `[[A_2026_05_11_Architettura_Core_Server]]`)
+  - File canonici (es. `[[MASTER_STATUS]]`, `[[CHECKLIST_PROGETTO]]`, `[[00_LEGGIMI]]`)
+  - RECAP e audit (es. `[[audit_F1-002_anagrafica_approfondito_2026_05_11]]`)
+  - Documenti di analisi (es. `[[piano_refactor_anagrafica_2026_05_11]]`)
+
+**Vale per tutti i file vivi:**
+- `_CLAUDE/01_canonici/`
+- `_CLAUDE/02_moduli_analisi/`
+- `_CLAUDE/03_recap_chat/`
+- `_CLAUDE/04_per_antigravity/` (file documentali, NON i prompt copia-incolla)
+- `_CLAUDE/06_per_cowork/`
+- `_ANTIGRAVITY/01_status_continui/`
+- `_ANTIGRAVITY/02_output_protocolli/` (report e audit, dove referenziano altri file)
+
+**Eccezioni — dove NON usare wikilink:**
+1. **Prompt copia-incolla per AG** (es. blocchi di codice ` ``` ` dentro file in `_CLAUDE/04_per_antigravity/`): AG non interpreta wikilink, gli serve il path completo `_GAE_SVILUPPO/_CLAUDE/...`. Wikilink solo nei file documentali del vault, non nei prompt operativi.
+2. **Path a file di codice del progetto StarGem** (es. `server/routes.ts:1234`): non sono nel vault Obsidian, restano come path testuale.
+3. **Path a screenshot/PDF in `_CLAUDE/05_allegati/`**: il path testuale è cliccabile da Obsidian come "Link to file", non serve wikilink. Se vuoi farli apparire come nodi nel grafo, usa embed `![[nome.png]]`.
+
+**Motivazione:** il grafo Obsidian disegna i collegamenti SOLO tra wikilink. Senza wikilink i file restano isolati come "nodi orfani" → il grafo perde di significato. Con wikilink ovunque, il grafo diventa un cervello visuale navigabile per Gaetano e per Claude in sessioni future.
+
+**AG obbligo:**
+Quando AG modifica/crea un file faro o di output, deve usare wikilink come da regola. La validazione finale di Stop & Go (regola 14) include controllo che NON ci siano path testuali a file del vault dove sarebbe richiesto wikilink.
 
 ---
 

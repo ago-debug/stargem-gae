@@ -50,7 +50,7 @@ export function QuickMemberAddModal({ isOpen, onOpenChange, onSuccess, defaultRo
     },
     onSuccess: (newMember) => {
       queryClient.invalidateQueries({ queryKey: ["/api/members"] });
-      toast({ title: "Anagrafica creata con successo", description: `${newMember.firstName} ${newMember.lastName} registrato.` });
+      toast({ title: "Utente creato con successo", description: `${newMember.firstName} ${newMember.lastName} registrato.` });
       onOpenChange(false);
       setFormData({ firstName: "", lastName: "", email: "", phone: "", fiscalCode: "" });
       if (onSuccess && newMember.id) {
@@ -71,7 +71,7 @@ export function QuickMemberAddModal({ isOpen, onOpenChange, onSuccess, defaultRo
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md w-full">
         <DialogHeader>
-          <DialogTitle>Aggiunta Rapida Anagrafica</DialogTitle>
+          <DialogTitle>Aggiunta Rapida Utente</DialogTitle>
           <DialogDescription>
             Inserisci i dati minimi per registrare questa persona all'interno del sistema delle prenotazioni.
           </DialogDescription>

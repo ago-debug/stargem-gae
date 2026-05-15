@@ -1,6 +1,9 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import Papa from "papaparse";
+import { v4 as uuidv4 } from "uuid";
+import { Progress } from "@/components/ui/progress";
 import {
   Card,
   CardContent,
@@ -72,7 +75,14 @@ const MEMBER_FIELDS = [
   { key: "placeOfBirth", label: "Luogo Nascita" },
   { key: "birthProvince", label: "Provincia Nascita" },
   { key: "birthCountry", label: "Nazione Nascita" },
-  { key: "nationality", label: "Nazionalità" },
+  { key: "citizenship", label: "Cittadinanza (passaporto)" },
+  { key: "nationality", label: "Nazionalità (origine)" },
+  { key: "country", label: "Nazione Residenza" },
+  { key: "domicileCountry", label: "Nazione Domicilio" },
+  { key: "domicileCity", label: "Città Domicilio" },
+  { key: "domicileProvince", label: "Provincia Domicilio" },
+  { key: "domicilePostalCode", label: "CAP Domicilio" },
+  
 
   // Contatti e Residenza
   { key: "email", label: "Email" },
@@ -89,11 +99,23 @@ const MEMBER_FIELDS = [
 
   // Classificazione
   { key: "athenaId", label: "Athena ID (Provenienza)" },
+  { key: "sedeRiferimento", label: "Sede Riferimento" },
+  { key: "codiceCatastale", label: "Codice Catastale" },
+  { key: "mastroC", label: "Mastro C." },
+  { key: "mastroCol", label: "Mastro Col." },
+  { key: "privacyAccepted", label: "Consenso Privacy" },
+  { key: "consentImage", label: "Consenso Immagini" },
+  { key: "consentModule", label: "Consenso Modulo" },
+  { key: "consentMarketing", label: "Consenso Marketing/Newsletter" },
   { key: "participantType", label: "Tipo Partecipante" },
+  { key: "categoryLegacy", label: "Categoria (Legacy)" },
+  { key: "groupLegacy", label: "Gruppo (Legacy)" },
   { key: "fromWhere", label: "Da Dove Viene" },
   { key: "teamSegreteria", label: "Team Segreteria" },
   { key: "season", label: "Stagione" },
   { key: "insertionDate", label: "Data Inserimento" },
+  { key: "firstEnrollmentDate", label: "Data Iscrizione Storica" },
+  { key: "lastRenewalDate", label: "Data Ultimo Rinnovo" },
   { key: "title", label: "Titolo" },
   { key: "profession", label: "Professione" },
 
@@ -113,31 +135,31 @@ const MEMBER_FIELDS = [
   // Dati Minorenni e Tutori
   { key: "isMinor", label: "È Minorenne" },
 
-  { key: "motherFirstName", label: "Nome Madre (Tutore 1)" },
-  { key: "motherLastName", label: "Cognome Madre (Tutore 1)" },
-  { key: "motherFiscalCode", label: "CF Madre" },
-  { key: "motherEmail", label: "Email Madre" },
-  { key: "motherPhone", label: "Telefono Madre" },
-  { key: "motherMobile", label: "Cellulare Madre" },
-  { key: "motherBirthDate", label: "Data Nascita Madre" },
-  { key: "motherBirthPlace", label: "Luogo Nascita Madre" },
-  { key: "motherStreetAddress", label: "Indirizzo Madre" },
-  { key: "motherCity", label: "Città Madre" },
-  { key: "motherProvince", label: "Provincia Madre" },
-  { key: "motherPostalCode", label: "CAP Madre" },
+  { key: "genitore1FirstName", label: "Nome Genitore 1" },
+  { key: "genitore1LastName", label: "Cognome Genitore 1" },
+  { key: "genitore1FiscalCode", label: "CF Genitore 1" },
+  { key: "genitore1Email", label: "Email Genitore 1" },
+  { key: "genitore1Phone", label: "Telefono Genitore 1" },
+  { key: "genitore1Mobile", label: "Cellulare Genitore 1" },
+  { key: "genitore1BirthDate", label: "Data Nascita Genitore 1" },
+  { key: "genitore1BirthPlace", label: "Luogo Nascita Genitore 1" },
+  { key: "genitore1Address", label: "Indirizzo Genitore 1" },
+  { key: "genitore1City", label: "Città Genitore 1" },
+  { key: "genitore1Province", label: "Provincia Genitore 1" },
+  { key: "genitore1PostalCode", label: "CAP Genitore 1" },
 
-  { key: "fatherFirstName", label: "Nome Padre (Tutore 2)" },
-  { key: "fatherLastName", label: "Cognome Padre (Tutore 2)" },
-  { key: "fatherFiscalCode", label: "CF Padre" },
-  { key: "fatherEmail", label: "Email Padre" },
-  { key: "fatherPhone", label: "Telefono Padre" },
-  { key: "fatherMobile", label: "Cellulare Padre" },
-  { key: "fatherBirthDate", label: "Data Nascita Padre" },
-  { key: "fatherBirthPlace", label: "Luogo Nascita Padre" },
-  { key: "fatherStreetAddress", label: "Indirizzo Padre" },
-  { key: "fatherCity", label: "Città Padre" },
-  { key: "fatherProvince", label: "Provincia Padre" },
-  { key: "fatherPostalCode", label: "CAP Padre" },
+  { key: "genitore2FirstName", label: "Nome Genitore 2" },
+  { key: "genitore2LastName", label: "Cognome Genitore 2" },
+  { key: "genitore2FiscalCode", label: "CF Genitore 2" },
+  { key: "genitore2Email", label: "Email Genitore 2" },
+  { key: "genitore2Phone", label: "Telefono Genitore 2" },
+  { key: "genitore2Mobile", label: "Cellulare Genitore 2" },
+  { key: "genitore2BirthDate", label: "Data Nascita Genitore 2" },
+  { key: "genitore2BirthPlace", label: "Luogo Nascita Genitore 2" },
+  { key: "genitore2Address", label: "Indirizzo Genitore 2" },
+  { key: "genitore2City", label: "Città Genitore 2" },
+  { key: "genitore2Province", label: "Provincia Genitore 2" },
+  { key: "genitore2PostalCode", label: "CAP Genitore 2" },
 
   // Privacy e Varie
   { key: "privacyAccepted", label: "Privacy Accettata" },
@@ -146,13 +168,28 @@ const MEMBER_FIELDS = [
   { key: "marketingConsent", label: "Consenso Marketing" },
   { key: "imageConsent", label: "Consenso Immagine" },
   { key: "documentType", label: "Tipo Documento" },
+  { key: "documentIssuedBy", label: "Documento Rilasciato Da" },
+  { key: "documentIssueDate", label: "Data Rilascio Documento" },
   { key: "documentExpiry", label: "Scadenza Documento" },
   { key: "notes", label: "Note Generali" },
   { key: "adminNotes", label: "Note Amministrative" },
+  { key: "healthNotes", label: "Note Sanitarie / Alimentari" },
   { key: "dataQualityFlag", label: "Flag Qualità Dati" },
   { key: "tags", label: "Tags" },
   { key: "tesserinoTecnicoNumber", label: "Numero Tesserino Tecnico" },
   { key: "tesserinoTecnicoIssueDate", label: "Scadenza Tesserino Tecnico" },
+
+  // Domicilio Diverso
+  { key: "domicileAddress", label: "Indirizzo Domicilio" },
+  { key: "domicileZip", label: "CAP Domicilio" },
+  { key: "domicileCity", label: "Città Domicilio" },
+  { key: "domicileProvince", label: "Provincia Domicilio" },
+  { key: "domicileCountry", label: "Nazione Domicilio" },
+
+  // Dati Bancari
+  { key: "iban", label: "IBAN" },
+  { key: "bankName", label: "Banca" },
+  { key: "ridNumber", label: "Numero RID" },
 ];
 
 const PAYMENTS_FIELDS = [
@@ -222,13 +259,196 @@ interface SheetHeader {
 }
 
 interface ImportResult {
+  batchId?: string;
   success?: boolean;
   inserted?: number;
   imported?: number;
   updated?: number;
   skipped?: number;
-  total?: number;
-  errors?: { row: number; message: string }[];
+  errors?: any[];
+}
+
+
+function normalizeColumnName(str: string): string {
+  return str.toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]/g, "");
+}
+
+function levenshtein(a: string, b: string): number {
+  const matrix = [];
+  for (let i = 0; i <= b.length; i++) {
+    matrix[i] = [i];
+  }
+  for (let j = 0; j <= a.length; j++) {
+    matrix[0][j] = j;
+  }
+  for (let i = 1; i <= b.length; i++) {
+    for (let j = 1; j <= a.length; j++) {
+      if (b.charAt(i - 1) == a.charAt(j - 1)) {
+        matrix[i][j] = matrix[i - 1][j - 1];
+      } else {
+        matrix[i][j] = Math.min(matrix[i - 1][j - 1] + 1, Math.min(matrix[i][j - 1] + 1, matrix[i - 1][j] + 1));
+      }
+    }
+  }
+  return matrix[b.length][a.length];
+}
+
+const aliasDictionary: Record<string, string[]> = {
+  fiscalCode: ["cod fiscale", "codice fiscale", "cf", "cod fisc"],
+  lastName: ["cognome"],
+  firstName: ["nome"],
+  dateOfBirth: ["data di nascita", "data nascita", "datanascita", "data nas"],
+  gender: ["sesso"],
+  birthCountry: ["nazione nasc", "nazione di nascita", "nazionenasc", "naz nascita", "nazione nasc."],
+  placeOfBirth: ["citta nasc", "luogo nascita", "cittanasc", "città nasc.", "città nasc"],
+  birthProvince: ["prov nasc", "provincia nascita", "provnasc", "prv nasc", "prov. nasc"],
+  country: ["nazione", "nazionedomic", "nazionedomicilio", "nazione residenza", "nazione domic.", "nazione domic"],
+  citizenship: ["cittadinanza"],
+  nationality: ["nazionalità"],
+  address: ["indirizzo", "indirdomicilio", "indirizzodomicilio", "indir. domicilio"],
+  postalCode: ["cap", "capdomic", "capdomicilio", "cap domic.", "cap domic", "cap residenza"],
+  city: ["cittaresid", "cittaresidenza", "cittadomicilio", "cittaresid", "città resid.", "citta resid.", "citta resid", "citta domicilio", "città domicilio"],
+  province: ["provincia", "provinciadomic", "provinciadomicilio", "prov", "provincia domic.", "provincia domicilio"],
+  region: ["regione"],
+  mobile: ["cellulare", "cell", "mobile"],
+  phone: ["telefono", "tel", "telefono fisso"],
+  email: ["e-mail", "email", "e_mail"],
+  athenaId: ["athenaid", "legacyathenaid", "id athena"],
+  cardNumber: ["numerotessera", "num tessera", "numero tessera"],
+  entityCardNumber: ["athenatessera", "num tessera ente"],
+  document_issued_by: ["documentorilasciatoda", "docrilasciatoda", "documento rilasciato da", "doc rilasciato da"],
+  document_issue_date: ["datarildoc", "datarilasciodoc", "data ril doc", "data ril. doc."],
+  document_expiry: ["scadenzadocumento", "scaddoc", "scadenza documento"],
+  cardExpiryDate: ["scadtesserasocio", "scadenzatessera", "scad. tessera socio"],
+  newsletter_consent: ["consensoinvio", "newsletter", "privacy", "consenso invio"],
+  firstEnrollmentDate: ["data iscrizione", "data richi. iscri.", "data richi iscri", "data prima iscrizione"],
+  lastRenewalDate: ["data rinnovo", "ultimo rinnovo"],
+  medicalCertificateExpiry: ["scadenza visita", "scad visita", "scadenza certificato"],
+  sedeRiferimento: ["sede riferimento", "sede rif"],
+  codiceCatastale: ["cod. catast. comune", "cod comune", "codice catastale", "cod. comune"],
+  mastroC: ["mastro c.", "mastro c"],
+  mastroCol: ["mastro col.", "mastro col"],
+  privacyAccepted: ["privacy", "consenso privacy", "cons. privacy"],
+  consentImage: ["cons. immag.", "consenso immagine", "cons. immag"],
+  consentModule: ["cons. modulo", "consenso modulo", "cons. modulo"],
+  consentMarketing: ["consenso invio", "newsletter"],
+  genitore1FirstName: ["nometutore", "nometutore1", "nome tutore"],
+  genitore1LastName: ["cognometutore", "cognometutore1", "cognome tutore"],
+  genitore1FiscalCode: ["codfisctutore", "cftutore", "codfisc tutore", "codicefisc tutore", "cod.fisc. tutore"],
+  genitore1Address: ["indirizzo tutore", "ind. tutore"],
+  genitore1City: ["città tutore", "citta tutore"],
+  genitore1Province: ["provincia tutore", "prov. tutore"],
+  genitore1PostalCode: ["cap tut.", "cap tutore"],
+  genitore1Phone: ["telefono tutore", "tel tutore"],
+  genitore1Email: ["email tutore", "e-mail tutore"],
+  genitore1BirthDate: ["data nascita tutore"],
+  genitore1BirthPlace: ["luogo nascita tutore"],
+  genitore2FirstName: ["nome tutore 2"],
+  genitore2LastName: ["cognome tutore 2"],
+  genitore2FiscalCode: ["cod.fisc. tutore 2", "cf tutore 2", "cod fisc tutore 2"],
+  genitore2Address: ["indirizzo tutore 2", "ind. tutore 2"],
+  genitore2City: ["città tutore 2", "citta tutore 2"],
+  genitore2Province: ["provincia tutore 2", "prov. tutore 2"],
+  genitore2PostalCode: ["cap tut. 2", "cap tutore 2"],
+  genitore2Phone: ["telefono tutore 2", "tel tutore 2"],
+  genitore2Email: ["email tutore 2", "e-mail tutore 2"],
+  genitore2BirthDate: ["data nascita tutore 2"],
+  genitore2BirthPlace: ["luogo nascita tutore 2"]
+};
+
+const normalizedAliases: Record<string, string[]> = {};
+for (const key of Object.keys(aliasDictionary)) {
+  normalizedAliases[key] = aliasDictionary[key].map(normalizeColumnName);
+}
+
+function calculateAutoMapping(headers: any[], fields: any[], savedMap: Record<string, number> = {}): Record<string, number | null> {
+  const initialMapping: Record<string, number | null> = {};
+  const usedIndexes = new Set<number>();
+
+  // Prima passa i salvati
+  fields.forEach(field => {
+    if (savedMap[field.key] !== undefined && savedMap[field.key] !== null) {
+      initialMapping[field.key] = savedMap[field.key];
+      usedIndexes.add(savedMap[field.key]);
+    } else {
+      initialMapping[field.key] = null;
+    }
+  });
+
+  // Poi calcola per i non mappati
+  fields.forEach(field => {
+    if (initialMapping[field.key] !== null) return;
+    
+    const fieldKeyNorm = normalizeColumnName(field.key);
+    const fieldLabelNorm = normalizeColumnName(field.label);
+    const aliases = normalizedAliases[field.key] || [];
+
+    let bestMatchIndex = -1;
+    let bestMatchScore = 999;
+
+    headers.forEach(h => {
+      if (usedIndexes.has(h.index)) return;
+      const hNorm = normalizeColumnName(h.name);
+      
+      const isNascita = hNorm.includes('nasc');
+      const isDomicilio = hNorm.includes('domic');
+      const isResidenza = !isNascita && !isDomicilio;
+      
+      // Strict constraints for Ambiguous Fields
+      if (field.key === 'country' && !isResidenza) return;
+      if (field.key === 'postalCode' && !isResidenza) return;
+      if (field.key === 'city' && !isResidenza) return;
+      if (field.key === 'province' && !isResidenza) return;
+      
+      if (field.key === 'birthCountry' && !isNascita) return;
+      if (field.key === 'domicileCountry' && !isDomicilio) return;
+      if (field.key === 'domicileCity' && !isDomicilio) return;
+      if (field.key === 'domicilePostalCode' && !isDomicilio) return;
+      if (field.key === 'domicileProvince' && !isDomicilio) return;
+
+      // Exact match
+      if (hNorm === fieldKeyNorm || hNorm === fieldLabelNorm || aliases.includes(hNorm)) {
+        if (bestMatchScore > 0) {
+            bestMatchIndex = h.index;
+            bestMatchScore = 0;
+        }
+        return;
+      }
+      
+      // Subset match
+      if (hNorm.length > 4 && bestMatchScore > 0) {
+        if (hNorm.includes(fieldLabelNorm) || fieldLabelNorm.includes(hNorm)) {
+            bestMatchIndex = h.index;
+            bestMatchScore = 1;
+        } else {
+            // fuzzy match
+            const dist = levenshtein(hNorm, fieldLabelNorm);
+            if (dist <= 2 && dist < bestMatchScore) {
+                bestMatchIndex = h.index;
+                bestMatchScore = dist;
+            }
+            for (const alias of aliases) {
+                if (alias.length > 4) {
+                    const d = levenshtein(hNorm, alias);
+                    if (d <= 2 && d < bestMatchScore) {
+                        bestMatchIndex = h.index;
+                        bestMatchScore = d;
+                    }
+                }
+            }
+        }
+      }
+    });
+
+    if (bestMatchIndex !== -1 && bestMatchScore <= 2) {
+      initialMapping[field.key] = bestMatchIndex;
+      usedIndexes.add(bestMatchIndex); // Bug 4: The column is consumed and won't be mapped to any other field!
+    }
+  });
+
+  return initialMapping;
 }
 
 export default function ImportData() {
@@ -236,6 +456,23 @@ export default function ImportData() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [importType, setImportType] = useState<string>("");
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
+
+  // Chunking state
+  const [importProgress, setImportProgress] = useState(0);
+  const [importStatus, setImportStatus] = useState<string>("");
+  const [isImportingChunks, setIsImportingChunks] = useState(false);
+  const cancelRef = useRef(false);
+
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isImportingChunks) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [isImportingChunks]);
 
   // Google Sheets state
   const [spreadsheetId, setSpreadsheetId] = useState<string>("");
@@ -357,30 +594,8 @@ export default function ImportData() {
       }
 
       const headers = data.headers || [];
-      currentFields.forEach((field) => {
-        if (savedMap[field.key] !== undefined) {
-          initialMapping[field.key] = savedMap[field.key];
-        } else {
-          // Auto-mappatura intelligente: SOLO corrispondenze esatte per evitare disastri
-          const match = headers.find((h: any) => {
-            const hName = h.name.toLowerCase().trim();
-            const fLabel = field.label.toLowerCase().trim();
-            const fKey = field.key.toLowerCase().trim();
-            return hName === fLabel || hName === fKey;
-          });
-          initialMapping[field.key] = match ? match.index : null;
-        }
-      });
-
-      // Rimuoviamo eventuali duplicati nell'auto-mappatura
-      const usedIndexes = new Set<number>();
-      for (const k of Object.keys(initialMapping)) {
-        if (initialMapping[k] !== null) {
-          if (usedIndexes.has(initialMapping[k]!)) initialMapping[k] = null;
-          else usedIndexes.add(initialMapping[k]!);
-        }
-      }
-      setFieldMapping(initialMapping);
+      const newMapping = calculateAutoMapping(headers, currentFields, savedMap);
+      setFieldMapping(newMapping);
 
       // Set default import key
       setImportKey(entityType === "members" ? "fiscalCode" : "sku");
@@ -441,25 +656,13 @@ export default function ImportData() {
         if (savedMap[field.key] !== undefined) {
           initialMapping[field.key] = savedMap[field.key];
         } else {
-          // Auto-mappatura intelligente: SOLO corrispondenze esatte
-          const match = headers.find((h: any) => {
-            const hName = h.name.toLowerCase().trim();
-            const fLabel = field.label.toLowerCase().trim();
-            const fKey = field.key.toLowerCase().trim();
-            return hName === fLabel || hName === fKey;
-          });
-          initialMapping[field.key] = match ? match.index : null;
+          // Auto-mappatura intelligente
+          initialMapping[field.key] = null;
         }
       });
 
-      const usedIndexes = new Set<number>();
-      for (const k of Object.keys(initialMapping)) {
-        if (initialMapping[k] !== null) {
-          if (usedIndexes.has(initialMapping[k]!)) initialMapping[k] = null;
-          else usedIndexes.add(initialMapping[k]!);
-        }
-      }
-      setFieldMapping(initialMapping);
+      const newMapping = calculateAutoMapping(headers, currentFields, savedMap);
+      setFieldMapping(newMapping);
 
       // Set default import key
       setImportKey(entityType === "members" ? "fiscalCode" : "sku");
@@ -726,6 +929,98 @@ export default function ImportData() {
     });
   };
 
+  const handleChunkedImport = async (params: {
+    file: File;
+    fieldMapping: Record<string, number>;
+    importKey: string;
+    entityType: string;
+    delimiter: string;
+    autoCreateRecords?: boolean;
+    seasonOverride?: number | null;
+  }) => {
+    setIsImportingChunks(true);
+    setImportProgress(0);
+    setImportResult(null);
+    cancelRef.current = false;
+
+    Papa.parse(params.file, {
+      header: false, // Usiamo array per mappatura con gli indici
+      skipEmptyLines: true,
+      complete: async (results) => {
+        // La prima riga è l'header (se usiamo header:false), quindi i dati veri partono dall'indice 1
+        const allRecords = results.data.slice(1);
+        const chunkSize = 500;
+        const totalChunks = Math.ceil(allRecords.length / chunkSize);
+        const batchId = uuidv4();
+
+        let inserted = 0;
+        let updated = 0;
+        let skipped = 0;
+        let errors: any[] = [];
+
+        for (let i = 0; i < totalChunks; i++) {
+          if (cancelRef.current) {
+            setImportStatus("Importazione annullata. Sono stati salvati i record fino al chunk precedente.");
+            break;
+          }
+
+          const chunk = allRecords.slice(i * chunkSize, (i + 1) * chunkSize);
+          setImportStatus(`Importazione chunk ${i + 1} di ${totalChunks}...`);
+
+          try {
+            const response = await fetch("/api/import/chunked", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                chunk_index: i,
+                total_chunks: totalChunks,
+                batch_id: batchId,
+                records: chunk,
+                fieldMapping: params.fieldMapping,
+                importKey: params.importKey,
+                entityType: params.entityType,
+                autoCreateRecords: params.autoCreateRecords,
+                seasonOverride: params.seasonOverride,
+              }),
+            });
+
+            if (!response.ok) throw new Error("Errore nel chunk " + i);
+            const data = await response.json();
+
+            inserted += data.inserted || 0;
+            updated += data.updated || 0;
+            skipped += data.skipped || 0;
+            if (data.errors) errors = [...errors, ...data.errors];
+
+            setImportProgress(Math.round(((i + 1) / totalChunks) * 100));
+          } catch (error) {
+            toast({
+              title: "Errore Import",
+              description: String(error),
+              variant: "destructive",
+            });
+            break;
+          }
+        }
+
+        setIsImportingChunks(false);
+        setImportResult({ inserted, updated, skipped, errors, batchId } as any);
+        toast({
+          title: "Importazione completata",
+          description: `${inserted} nuovi, ${updated} aggiornati`,
+        });
+      },
+      error: (error) => {
+        toast({
+          title: "Errore lettura file",
+          description: error.message,
+          variant: "destructive",
+        });
+        setIsImportingChunks(false);
+      },
+    });
+  };
+
   const handleMappedImport = () => {
     // Filter out null mappings
     const activeMapping: Record<string, number> = {};
@@ -761,7 +1056,7 @@ export default function ImportData() {
 
     // Use file import or Google Sheets import based on source type
     if (sourceType === "file" && selectedFile) {
-      fileMappedImportMutation.mutate({
+      handleChunkedImport({
         file: selectedFile,
         fieldMapping: activeMapping,
         importKey,
@@ -855,7 +1150,7 @@ export default function ImportData() {
   const downloadTemplate = (type: string) => {
     const templates: Record<string, string> = {
       members:
-        "id_db,cognome,nome,codice_fiscale,email,telefono,cellulare,whatsapp,data_nascita,luogo_nascita,provincia_nascita,indirizzo,citta,cap,provincia,sesso,tipo_partecipante,cf_tutore,nome_tutore,telefono_tutore,note,stato\n,Rossi,Mario,RSSMRA90A15F205X,mario@email.com,021234567,3331234567,,1990-01-15,Milano,MI,Via Roma 1,Milano,20100,MI,M,,,,,,ATTIVO\n",
+        "id_db,cognome,nome,codice_fiscale,email,telefono,cellulare,whatsapp,data_nascita,luogo_nascita,provincia_nascita,indirizzo,citta,cap,provincia,sesso,tipo_partecipante,cf_genitore,nome_genitore,telefono_genitore,note,stato\n,Rossi,Mario,RSSMRA90A15F205X,mario@email.com,021234567,3331234567,,1990-01-15,Milano,MI,Via Roma 1,Milano,20100,MI,M,,,,,,ATTIVO\n",
       payments:
         "id_db,codice_fiscale,cognome,nome,tipo_pagamento,importo,importo_pagato,metodo_pagamento,data_pagamento,descrizione,codice_corso,codice_sconto,valore_sconto,periodo,operatore,canale_vendita,data_accredito,numero_ricevute,acconto\n,RSSMRA90A15F205X,Rossi,Mario,ISCRIZIONE,50.00,50.00,BONIFICO,2024-01-10,Quota iscrizione,YOGA-01,,,MENSILE,Admin,,,1,\n",
       enrollments:
@@ -911,20 +1206,8 @@ export default function ImportData() {
   };
 
   const handleAutoMap = () => {
-    // Already populated by preview response matching keys, but this forces a re-evaluation
-    // based on typical columns
-    const initialMapping: Record<string, number | null> = {};
-    currentFields.forEach((field) => {
-      // Find a matching sheet header
-      const match = sheetHeaders.find(
-        (h) =>
-          h.name.toLowerCase().includes(field.label.toLowerCase()) ||
-          h.name.toLowerCase().includes(field.key.toLowerCase()) ||
-          field.label.toLowerCase().includes(h.name.toLowerCase()),
-      );
-      initialMapping[field.key] = match ? match.index : null;
-    });
-    setFieldMapping(initialMapping);
+    const newMapping = calculateAutoMapping(sheetHeaders, currentFields, {});
+    setFieldMapping(newMapping);
     toast({
       title: "Auto-Mappatura",
       description: "Assegnazioni calcolate dove possibile.",
@@ -1837,21 +2120,43 @@ export default function ImportData() {
                       </div>
 
                       <div className="mt-6 flex justify-center">
-                        <Button
-                          size="lg"
-                          className="h-14 px-8 text-lg"
-                          onClick={handleMappedImport}
-                          disabled={isImporting}
-                        >
-                          {isImporting ? (
-                            <Loader2 className="mr-3 size-6 animate-spin" />
-                          ) : (
-                            <Settings2 className="mr-3 size-6" />
-                          )}
-                          {isImporting
-                            ? "Elaborazione in corso..."
-                            : "CONFERMA E AVVIA IMPORTAZIONE REALE"}
-                        </Button>
+                        {!isImportingChunks ? (
+                          <Button
+                            size="lg"
+                            className="h-14 px-8 text-lg"
+                            onClick={handleMappedImport}
+                            disabled={isImporting}
+                          >
+                            {isImporting ? (
+                              <Loader2 className="mr-3 size-6 animate-spin" />
+                            ) : (
+                              <Settings2 className="mr-3 size-6" />
+                            )}
+                            {isImporting
+                              ? "Elaborazione in corso..."
+                              : "CONFERMA E AVVIA IMPORTAZIONE REALE"}
+                          </Button>
+                        ) : (
+                          <div className="w-full max-w-lg space-y-4">
+                            <div className="flex justify-between text-sm font-medium">
+                              <span>{importStatus}</span>
+                              <span>{importProgress}%</span>
+                            </div>
+                            <Progress value={importProgress} className="h-4 w-full" />
+                            <div className="flex justify-center pt-2">
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={() => {
+                                  cancelRef.current = true;
+                                  setImportStatus("Richiesta di annullamento in corso...");
+                                }}
+                              >
+                                Annulla Chunk Successivi
+                              </Button>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   ) : (
@@ -1903,33 +2208,51 @@ export default function ImportData() {
                     <div className="text-center">
                       <div className="mb-4 inline-block rounded-lg bg-destructive/10 px-4 py-2 text-sm font-medium text-destructive">
                         Attenzione: Si sono verificati{" "}
-                        {importResult.errors.length} errori durante la
+                        {importResult.errors.length} errori o conflitti durante la
                         procedura.
                       </div>
                       <br />
-                      <Button
-                        variant="outline"
-                        className="border-destructive text-destructive hover:bg-destructive hover:text-white"
-                        onClick={() => {
-                          const csv =
-                            "riga,CF,motivo_errore\n" +
-                            importResult
-                              .errors!.map(
-                                (e) =>
-                                  `${e.row},NA,"${e.message.replace(/"/g, '""')}"`,
-                              )
-                              .join("\n");
-                          const blob = new Blob([csv], { type: "text/csv" });
-                          const url = window.URL.createObjectURL(blob);
-                          const a = document.createElement("a");
-                          a.href = url;
-                          a.download = `error_report_${entityType}.csv`;
-                          a.click();
-                        }}
-                      >
-                        <Download className="mr-2 size-4" /> Scarica report
-                        completo
-                      </Button>
+                      <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                        <Button
+                          variant="outline"
+                          className="border-destructive text-destructive hover:bg-destructive hover:text-white"
+                          onClick={() => {
+                            // Link to backend endpoint for skipped records
+                            if (importResult.batchId) {
+                              window.location.href = `/api/import/batch/${importResult.batchId}/skipped`;
+                            } else {
+                              // Fallback
+                              const csv =
+                                "riga,CF,motivo_errore\n" +
+                                importResult
+                                  .errors!.map(
+                                    (e: any) =>
+                                      `${e.row || ""},${e.cf || ""},"${(e.message || e.error || "").replace(/"/g, '""')}"`,
+                                  )
+                                  .join("\n");
+                              const blob = new Blob([csv], { type: "text/csv" });
+                              const url = window.URL.createObjectURL(blob);
+                              const a = document.createElement("a");
+                              a.href = url;
+                              a.download = `errori_importazione.csv`;
+                              a.click();
+                            }
+                          }}
+                        >
+                          <Download className="mr-2 size-4" /> 📥 Scarica scarti CSV
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                             if (importResult.batchId) {
+                               window.location.href = `/api/import/batch/${importResult.batchId}/conflicts`;
+                             }
+                          }}
+                        >
+                           <Download className="mr-2 size-4" /> 📥 Scarica log conflitti CSV
+                        </Button>
+                      </div>
+
                       <p className="mt-2 text-xs text-muted-foreground">
                         Il file CSV contiene riga, CF, motivo per ogni anomalia
                       </p>

@@ -1,0 +1,38 @@
+---
+aggiornato: 2026-05-11
+ultima_verifica_vs_codice: 2026-05-11
+validita_prevista: 2026-06-11
+fonti_verificate:
+  - "[[stato_di_fatto_F1_backend_2026_05_11]]"
+---
+
+# A — Architettura Core Server
+**Documento Faro — Backend**
+
+Questo file traccia la macro-architettura reale del server Node/Express/Drizzle al 11 Maggio 2026.
+
+## 1. Struttura Cartelle Server
+- `server/`
+  - `routes.ts`: Il controller monolitico principale dell'applicazione (oltre 12.000 righe). Punto focale del debito tecnico e delle dipendenze incrociate.
+  - `storage.ts`: Strato DAO (Data Access Object) per interfacciarsi con Drizzle ORM.
+  - `auth.ts`: Configurazione Passport.js per strategie di autenticazione e rate limiting.
+  - `db.ts`: Inizializzazione della connessione al database MySQL/MariaDB (via `mysql2`).
+  - `utils/`: Funzioni helper, tra cui il middleware cruciale `auth-middleware.ts` (`isAuthenticated`).
+  - `routes/`: Inizio di modularizzazione (es. `payments.ts`), da completare.
+
+## 2. Route API per Dominio
+Le route API sono quasi tutte definite linearmente dentro `server/routes.ts`. I principali raggruppamenti logici sono:
+- **Auth & IAM**: `/api/auth/register`, `/api/auth/login`, `/api/users`
+- **GemTeam**: `/api/gemteam/*` (gestione turni, presenze interne, check-in dipendenti)
+- **CRM / Anagrafica**: `/api/members`, `/api/memberships`, `/api/medical-certificates`
+- **Erogazione (STI)**: `/api/courses`, `/api/enrollments`, `/api/attendances`
+- **Cassa & Quote**: `/api/payments`, `/api/course-quotes-grid`, `/api/checkout`
+- **Telemetria / AI**: `/api/access-logs`, `/api/ai/*`
+
+## 3. Middleware e Sicurezza
+- **`isAuthenticated`**: Middleware base che verifica la validità della sessione JWT/Passport per le route protette.
+- **Rate Limiting**: Configurato in `auth.ts` per prevenire attacchi brute-force sugli endpoint di login.
+- **Logging**: Tracciamento delle sessioni in `user_session_segments` e log azioni utente in `user_activity_logs`.
+
+## 4. Architettura Dati (Drizzle)
+Il database utilizza un pattern **Single Table Inheritance (STI)** sulla tabella `courses` (842 record), permettendo di gestire ogni tipo di attività (Saggi, Workshop, Domeniche) senza i 16 silos legacy originari. Le migrazioni sono gestite tramite file `.sql` crudi nella cartella `migrations/`.

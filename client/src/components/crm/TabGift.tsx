@@ -44,11 +44,11 @@ export function TabGift({
                 disabled={!selectedMemberId}
                 onClick={() => {
                   setShowGiftFields(true);
-                  setBottomSectionsData(prev => ({
+                  setBottomSectionsData((prev: any) => ({
                     ...prev,
                     gift: [...prev.gift, { id: Date.now().toString(), tipo: "", valore: "", numero: "", dataEmissione: "", dataScadenza: "", motivazione: "", dataUtilizzo: "", iban: "" }]
                   }));
-                  setDirtyFields(prev => ({ ...prev, gift_added: true }));
+                  setDirtyFields((prev: any) => ({ ...prev, gift_added: true }));
                 }}
               >
                 <Plus className="w-4 h-4" />

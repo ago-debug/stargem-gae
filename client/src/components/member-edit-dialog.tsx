@@ -76,7 +76,7 @@ export function MemberEditDialog() {
         if (member) {
             setHasMedicalCert(member.hasMedicalCertificate || false);
             setIsMinorChecked(member.isMinor || false);
-            setPhotoPreview(member.photoUrl || null);
+            setPhotoPreview((member as any).photoUrl || null);
             setSelectedCategoryId(member.categoryId?.toString() || "none");
             setCfValue(member.fiscalCode || "");
             setEmailValue(member.email || "");
@@ -98,7 +98,7 @@ export function MemberEditDialog() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["/api/members"] });
-            toast({ title: "Anagrafica aggiornata con successo" });
+            toast({ title: "Utente aggiornato con successo" });
             handleClose();
         },
         onError: (error: any) => {
@@ -177,7 +177,7 @@ export function MemberEditDialog() {
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
                         <User className="w-5 h-5 text-primary" />
-                        Modifica Rapida Anagrafica - {member?.lastName} {member?.firstName}
+                        Modifica Rapida Utente - {member?.lastName} {member?.firstName}
                     </DialogTitle>
                     <DialogDescription>
                         Aggiorna i dati anagrafici e i contatti dell'iscritto.
@@ -443,29 +443,29 @@ export function MemberEditDialog() {
                                 <div className="space-y-3">
                                     <h5 className="text-xs font-bold text-primary border-b pb-1 uppercase">Dati Madre</h5>
                                     <div className="grid grid-cols-2 gap-2">
-                                        <Input name="motherFirstName" placeholder="Nome" defaultValue={member?.motherFirstName || ""} className="h-8 text-xs" />
-                                        <Input name="motherLastName" placeholder="Cognome" defaultValue={member?.motherLastName || ""} className="h-8 text-xs" />
+                                        <Input name="genitore1FirstName" placeholder="Nome" defaultValue={member?.genitore1FirstName || ""} className="h-8 text-xs" />
+                                        <Input name="genitore1LastName" placeholder="Cognome" defaultValue={member?.genitore1LastName || ""} className="h-8 text-xs" />
                                     </div>
-                                    <Input name="motherFiscalCode" placeholder="Codice Fiscale" defaultValue={member?.motherFiscalCode || ""} className="h-8 text-xs font-mono uppercase" maxLength={16} />
+                                    <Input name="genitore1FiscalCode" placeholder="Codice Fiscale" defaultValue={member?.genitore1FiscalCode || ""} className="h-8 text-xs font-mono uppercase" maxLength={16} />
                                     <div className="grid grid-cols-2 gap-2">
-                                        <Input name="motherPhone" placeholder="Tel" defaultValue={member?.motherPhone || ""} className="h-8 text-xs" />
-                                        <Input name="motherMobile" placeholder="Cell" defaultValue={member?.motherMobile || ""} className="h-8 text-xs" />
+                                        <Input name="genitore1Phone" placeholder="Tel" defaultValue={member?.genitore1Phone || ""} className="h-8 text-xs" />
+                                        <Input name="genitore1Mobile" placeholder="Cell" defaultValue={member?.genitore1Mobile || ""} className="h-8 text-xs" />
                                     </div>
-                                    <Input name="motherEmail" placeholder="Email" defaultValue={member?.motherEmail || ""} className="h-8 text-xs" />
+                                    <Input name="genitore1Email" placeholder="Email" defaultValue={member?.genitore1Email || ""} className="h-8 text-xs" />
                                 </div>
                                 {/* Padre */}
                                 <div className="space-y-3">
                                     <h5 className="text-xs font-bold text-primary border-b pb-1 uppercase">Dati Padre</h5>
                                     <div className="grid grid-cols-2 gap-2">
-                                        <Input name="fatherFirstName" placeholder="Nome" defaultValue={member?.fatherFirstName || ""} className="h-8 text-xs" />
-                                        <Input name="fatherLastName" placeholder="Cognome" defaultValue={member?.fatherLastName || ""} className="h-8 text-xs" />
+                                        <Input name="genitore2FirstName" placeholder="Nome" defaultValue={member?.genitore2FirstName || ""} className="h-8 text-xs" />
+                                        <Input name="genitore2LastName" placeholder="Cognome" defaultValue={member?.genitore2LastName || ""} className="h-8 text-xs" />
                                     </div>
-                                    <Input name="fatherFiscalCode" placeholder="Codice Fiscale" defaultValue={member?.fatherFiscalCode || ""} className="h-8 text-xs font-mono uppercase" maxLength={16} />
+                                    <Input name="genitore2FiscalCode" placeholder="Codice Fiscale" defaultValue={member?.genitore2FiscalCode || ""} className="h-8 text-xs font-mono uppercase" maxLength={16} />
                                     <div className="grid grid-cols-2 gap-2">
-                                        <Input name="fatherPhone" placeholder="Tel" defaultValue={member?.fatherPhone || ""} className="h-8 text-xs" />
-                                        <Input name="fatherMobile" placeholder="Cell" defaultValue={member?.fatherMobile || ""} className="h-8 text-xs" />
+                                        <Input name="genitore2Phone" placeholder="Tel" defaultValue={member?.genitore2Phone || ""} className="h-8 text-xs" />
+                                        <Input name="genitore2Mobile" placeholder="Cell" defaultValue={member?.genitore2Mobile || ""} className="h-8 text-xs" />
                                     </div>
-                                    <Input name="fatherEmail" placeholder="Email" defaultValue={member?.fatherEmail || ""} className="h-8 text-xs" />
+                                    <Input name="genitore2Email" placeholder="Email" defaultValue={member?.genitore2Email || ""} className="h-8 text-xs" />
                                 </div>
                             </div>
                         )}

@@ -1125,7 +1125,7 @@ export class DatabaseStorage implements IStorage {
         instructorId: studioBookings.instructorId,
         instructorFirstName: instructorMembers.firstName,
         instructorLastName: instructorMembers.lastName,
-        specialization: instructorMembers.specialization,
+        
         seasonId: studioBookings.seasonId,
       })
       .from(studioBookings)
@@ -1190,25 +1190,53 @@ export class DatabaseStorage implements IStorage {
 
   // ==== Members ====
   async getMembers(limit?: number, offset?: number): Promise<Member[]> {
-    let query = db.select().from(members).orderBy(desc(members.createdAt));
+    let query = db.select({
+      member: members,
+      membership: memberships,
+      medical: medicalCertificates
+    })
+    .from(members)
+    .leftJoin(memberships, and(eq(members.id, memberships.memberId), eq(memberships.status, 'active')))
+    .leftJoin(medicalCertificates, and(eq(members.id, medicalCertificates.memberId), eq(medicalCertificates.status, 'valid')))
+    .orderBy(desc(members.createdAt));
+
     if (limit !== undefined) query = (query as any).limit(limit);
     if (offset !== undefined) query = (query as any).offset(offset);
-    return await query as any;
+    
+    const results = await query as any[];
+    return results.map(row => ({
+      ...row.member,
+      cardNumber: row.membership?.membershipNumber || null,
+      cardIssueDate: row.membership?.issueDate || null,
+      cardExpiryDate: row.membership?.expiryDate || null,
+      entityCardNumber: row.membership?.entityCardNumber || null,
+      entityCardExpiryDate: row.membership?.entityCardExpiryDate || null,
+      hasMedicalCertificate: !!row.medical,
+      medicalCertificateExpiry: row.medical?.expiryDate || null,
+    }));
   }
 
   async getMembersWithEntityCards(): Promise<Member[]> {
-    const list = await db.select().from(members)
+    const rows = await db.select({ member: members, membership: memberships })
+      .from(members)
+      .leftJoin(memberships, eq(members.id, memberships.memberId))
       .where(
         or(
-          isNotNull(members.entityCardNumber),
-          isNotNull(members.entityCardType),
-          sql`JSON_EXTRACT(${members.tessereMetadata}, '$.tesseraEnte') IS NOT NULL AND JSON_EXTRACT(${members.tessereMetadata}, '$.tesseraEnte') != '""' AND JSON_EXTRACT(${members.tessereMetadata}, '$.tesseraEnte') != ''`,
-          sql`JSON_EXTRACT(${members.attachmentMetadata}, '$.tesseraEnte.ente') IS NOT NULL AND JSON_EXTRACT(${members.attachmentMetadata}, '$.tesseraEnte.ente') != '""' AND JSON_EXTRACT(${members.attachmentMetadata}, '$.tesseraEnte.ente') != ''`
+          isNotNull(memberships.entityCardNumber),
+          sql`JSON_EXTRACT(${members.tessereMetadata}, '$.tesseraEnte') IS NOT NULL AND JSON_EXTRACT(${members.tessereMetadata}, '$.tesseraEnte') != '""' AND JSON_EXTRACT(${members.tessereMetadata}, '$.tesseraEnte') != ''`
         )
       )
       .orderBy(members.lastName, members.firstName);
 
-    return list.map(m => {
+    return rows.map(r => {
+      const m = r.member;
+      
+      // Override from memberships if present
+      if (r.membership) {
+        if (r.membership.entityCardNumber) m.entityCardNumber = r.membership.entityCardNumber;
+        if (r.membership.entityCardExpiryDate) m.entityCardExpiryDate = r.membership.entityCardExpiryDate as any;
+      }
+
       // Decode tessereMetadata for Num and Expiry
       if (m.tessereMetadata) {
         try {
@@ -1217,21 +1245,20 @@ export class DatabaseStorage implements IStorage {
             m.entityCardNumber = meta.tesseraEnte;
           }
           if (meta.scadenzaTesseraEnte && !m.entityCardExpiryDate) {
-            m.entityCardExpiryDate = new Date(meta.scadenzaTesseraEnte);
+            m.entityCardExpiryDate = new Date(meta.scadenzaTesseraEnte) as any;
           }
         } catch (e) {
           console.error("Failed to parse tessereMetadata for entity card fallback", e);
         }
       }
-      // Decode attachmentMetadata for Type/Ente Name
-      if (m.attachmentMetadata) {
+      // Decode attachmentsUrl for Type/Ente Name if needed (Base64 dropped in F1-010)
+      if (m.attachmentsUrl) {
         try {
-          const att = typeof m.attachmentMetadata === 'string' ? JSON.parse(m.attachmentMetadata) : m.attachmentMetadata;
-          if (att?.tesseraEnte?.ente && !m.entityCardType) {
-            m.entityCardType = att.tesseraEnte.ente;
-          }
+          const att = typeof m.attachmentsUrl === 'string' ? JSON.parse(m.attachmentsUrl) : m.attachmentsUrl;
+          // Logica spostata: non ci basiamo più su un blob JSON anonimo. 
+          // Se servisse, si leggerebbe da un record tipizzato.
         } catch (e) {
-          console.error("Failed to parse attachmentMetadata for entity card type fallback", e);
+          console.error("Failed to parse attachmentsUrl", e);
         }
       }
       return m;
@@ -1339,6 +1366,13 @@ export class DatabaseStorage implements IStorage {
     const [rows]: any = await db.execute(searchCondition === sql`1 = 1` ? sql`
       SELECT
         m.*,
+        mm_join.membership_number as card_number,
+        mm_join.issue_date as card_issue_date,
+        mm_join.expiry_date as card_expiry_date,
+        mm_join.entity_card_number as entity_card_number,
+        mm_join.entity_card_expiry_date as entity_card_expiry_date,
+        CASE WHEN mc_join.id IS NOT NULL THEN 1 ELSE 0 END as has_medical_certificate,
+        mc_join.expiry_date as medical_certificate_expiry,
         u.profile_image_url as user_photo,
         COALESCE((
           SELECT COUNT(*) 
@@ -1360,12 +1394,21 @@ export class DatabaseStorage implements IStorage {
         ) as active_membership
       FROM members m
       LEFT JOIN users u ON m.user_id = u.id
+      LEFT JOIN memberships mm_join ON mm_join.member_id = m.id AND mm_join.status = 'active'
+      LEFT JOIN medical_certificates mc_join ON mc_join.member_id = m.id AND mc_join.status = 'valid'
       ORDER BY m.last_name, m.first_name
       LIMIT ${pageSize}
       OFFSET ${offset}
     ` : sql`
       SELECT
         m.*,
+        mm_join.membership_number as card_number,
+        mm_join.issue_date as card_issue_date,
+        mm_join.expiry_date as card_expiry_date,
+        mm_join.entity_card_number as entity_card_number,
+        mm_join.entity_card_expiry_date as entity_card_expiry_date,
+        CASE WHEN mc_join.id IS NOT NULL THEN 1 ELSE 0 END as has_medical_certificate,
+        mc_join.expiry_date as medical_certificate_expiry,
         u.profile_image_url as user_photo,
         COALESCE((
           SELECT COUNT(*) 
@@ -1387,6 +1430,8 @@ export class DatabaseStorage implements IStorage {
         ) as active_membership
       FROM members m
       LEFT JOIN users u ON m.user_id = u.id
+      LEFT JOIN memberships mm_join ON mm_join.member_id = m.id AND mm_join.status = 'active'
+      LEFT JOIN medical_certificates mc_join ON mc_join.member_id = m.id AND mc_join.status = 'valid'
       WHERE ${searchCondition}
       ORDER BY m.last_name, m.first_name
       LIMIT ${pageSize}
@@ -1425,18 +1470,18 @@ export class DatabaseStorage implements IStorage {
       hasMedicalCertificate: row.has_medical_certificate,
       medicalCertificateExpiry: row.medical_certificate_expiry,
       isMinor: row.is_minor,
-      motherFirstName: row.mother_first_name,
-      motherLastName: row.mother_last_name,
-      motherFiscalCode: row.mother_fiscal_code,
-      motherEmail: row.mother_email,
-      motherPhone: row.mother_phone,
-      motherMobile: row.mother_mobile,
-      fatherFirstName: row.father_first_name,
-      fatherLastName: row.father_last_name,
-      fatherFiscalCode: row.father_fiscal_code,
-      fatherEmail: row.father_email,
-      fatherPhone: row.father_phone,
-      fatherMobile: row.father_mobile,
+      genitore1FirstName: row.genitore1_first_name,
+      genitore1LastName: row.genitore1_last_name,
+      genitore1FiscalCode: row.genitore1_fiscal_code,
+      genitore1Email: row.genitore1_email,
+      genitore1Phone: row.genitore1_phone,
+      genitore1Mobile: row.genitore1_mobile,
+      genitore2FirstName: row.genitore2_first_name,
+      genitore2LastName: row.genitore2_last_name,
+      genitore2FiscalCode: row.genitore2_fiscal_code,
+      genitore2Email: row.genitore2_email,
+      genitore2Phone: row.genitore2_phone,
+      genitore2Mobile: row.genitore2_mobile,
 
       city: row.city,
       province: row.province,
@@ -1444,7 +1489,11 @@ export class DatabaseStorage implements IStorage {
       country: row.country,
       address: row.address,
       notes: row.notes,
-      photoUrl: row.user_photo || row.photo_url,
+      photoUrl: Array.isArray(row.attachments_url) 
+        ? row.attachments_url.find((a: any) => a.type === 'avatar')?.url || row.user_photo
+        : (row.attachments_url && typeof row.attachments_url === 'string' 
+            ? (() => { try { return JSON.parse(row.attachments_url).find((a: any) => a.type === 'avatar')?.url || row.user_photo; } catch { return row.user_photo; } })()
+            : row.user_photo),
       active: row.active,
       enrollmentStatus: row.enrollment_status,
       createdAt: row.created_at,
@@ -1458,7 +1507,7 @@ export class DatabaseStorage implements IStorage {
       tessereMetadata: row.tessere_metadata,
       certificatoMedicoMetadata: row.certificato_medico_metadata,
       giftMetadata: row.gift_metadata,
-      attachmentMetadata: row.attachment_metadata,
+      attachmentsUrl: row.attachments_url,
       paymentMetadata: row.payment_metadata,
       activeMembership: row.active_membership ? (typeof row.active_membership === 'string' ? JSON.parse(row.active_membership) : row.active_membership) : null,
     }));
@@ -1467,8 +1516,32 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getMember(id: number): Promise<Member | undefined> {
-    const [member] = await db.select().from(members).where(eq(members.id, id));
-    return member;
+    const [row] = await db.select({
+      member: members,
+      membership: memberships,
+      medical: medicalCertificates
+    })
+    .from(members)
+    .leftJoin(memberships, and(eq(members.id, memberships.memberId), eq(memberships.status, 'active')))
+    .leftJoin(medicalCertificates, and(eq(members.id, medicalCertificates.memberId), eq(medicalCertificates.status, 'valid')))
+    .where(eq(members.id, id));
+
+    if (!row) return undefined;
+    return {
+      ...row.member,
+      cardNumber: row.membership?.membershipNumber || null,
+      cardIssueDate: row.membership?.issueDate || null,
+      cardExpiryDate: row.membership?.expiryDate || null,
+      entityCardNumber: row.membership?.entityCardNumber || null,
+      entityCardExpiryDate: row.membership?.entityCardExpiryDate || null,
+      hasMedicalCertificate: !!row.medical,
+      medicalCertificateExpiry: row.medical?.expiryDate || null,
+      photoUrl: Array.isArray(row.member.attachmentsUrl) 
+        ? row.member.attachmentsUrl.find((a: any) => a.type === 'avatar')?.url 
+        : (row.member.attachmentsUrl && typeof row.member.attachmentsUrl === 'string'
+            ? (() => { try { return JSON.parse(row.member.attachmentsUrl as string).find((a: any) => a.type === 'avatar')?.url; } catch { return null; } })()
+            : null),
+    } as any;
   }
 
   async getMemberByFiscalCode(fiscalCode: string): Promise<Member | undefined> {
@@ -3253,7 +3326,7 @@ export class DatabaseStorage implements IStorage {
     const seasonCode = member.cardNumber.split('-')[0] || "2526";
     
     // Dynamically import the expiry calculator
-    const { calculateMembershipExpiry } = await import('./utils/membership.js');
+    const { calculateMembershipExpiry } = await import('./utils/season.js');
     const expiryDate = calculateMembershipExpiry(seasonCode);
 
     const feeAmount = tessereMeta.quota || "25.00";

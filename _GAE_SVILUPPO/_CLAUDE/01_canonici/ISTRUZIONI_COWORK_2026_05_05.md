@@ -1,5 +1,14 @@
+---
+tags: [canonico, regole, cowork]
+aggiornato: 2026-05-05
+tipo: canonico
+---
+
 # 🎛️ ISTRUZIONI COWORK — StarGem Suite
 ## Aggiornato: 2026_05_05_1010
+
+> Collegati: [[00_INDEX]] · [[MASTER_STATUS]] · [[ANALISI_MASTER]] · [[00_LEGGIMI]] · [[00_BRIEFING_RIPRESA_2026_05_05]]
+
 ## Sostituisce le custom_instructions del Progetto Claude.ai (chiuso il 05/05/2026)
 
 > **Cos'è questo file:** la "constitution" del modello operativo Cowork.

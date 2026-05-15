@@ -32,7 +32,7 @@ export function TabTutori({ renderMancaDato, getInputClassName }: TabTutoriProps
       <AccordionTrigger className="text-sm font-semibold hover:no-underline py-3">
         <div className="flex items-center gap-2 text-amber-700 dark:text-amber-500">
           <Users className="w-4 h-4" />
-          Genitori / Tutori (Minorenni e Contatti)
+          Genitori (Minorenni e Contatti)
         </div>
       </AccordionTrigger>
       <AccordionContent className="space-y-6 pt-2 pb-4">

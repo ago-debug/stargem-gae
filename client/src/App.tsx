@@ -59,6 +59,8 @@ const GestioneAttivitaStub = React.lazy(
 const IscrizioniPagamenti = React.lazy(
   () => import("@/pages/iscrizioni-pagamenti"),
 );
+const WizardPage = React.lazy(() => import("@/pages/wizard-page"));
+const DashboardDossiers = React.lazy(() => import("@/pages/dashboard-dossiers"));
 const PriceLists = React.lazy(() => import("@/pages/listini"));
 const ListiniHome = React.lazy(() => import("@/pages/listini-home"));
 const QuoteListini = React.lazy(() => import("@/pages/quote-listini"));
@@ -322,6 +324,10 @@ function Router() {
         <ProtectedRoute path="/gemteam" component={GemTeam} />
         <ProtectedRoute path="/gemteam/me" component={GemTeamMe} />
         <ProtectedRoute path="/area-tesserati" component={AreaTesserati} />
+
+        {/* MC2 Stepper UI Routes */}
+        <ProtectedRoute path="/dashboard/dossiers" component={DashboardDossiers} />
+        <ProtectedRoute path="/dossiers/:id/wizard" component={WizardPage} />
 
         <ProtectedRoute path="/admin" component={AdminPanel} />
         <ProtectedRoute path="/db-monitor" component={DbMonitor} />

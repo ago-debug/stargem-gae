@@ -85,17 +85,22 @@ declare const __BUILD_DATE__: string;
 // 1. SEGRETERIA OPERATIVA
 const registrationItems = [
   {
-    title: "Dashboard",
-    url: "/",
+    title: "Home Segreteria",
+    url: "/dashboard/dossiers",
     icon: LayoutDashboard,
   },
   {
-    title: "Maschera Input",
+    title: "Pratica guidata (nuova)",
+    url: "/dossiers/nuovo/wizard",
+    icon: FileText,
+  },
+  {
+    title: "Maschera classica 🟡",
     url: "/maschera-input",
     icon: Users,
   },
   {
-    title: "Anagrafica Generale",
+    title: "Utente",
     url: "/anagrafica-generale",
     icon: IdCard,
   },

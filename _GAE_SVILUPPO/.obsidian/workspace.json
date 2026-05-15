@@ -1,0 +1,229 @@
+{
+  "main": {
+    "id": "da9b4b2146c1a426",
+    "type": "split",
+    "children": [
+      {
+        "id": "a5e6f38d7d160012",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "24ec4c09ed78a36a",
+            "type": "leaf",
+            "state": {
+              "type": "graph",
+              "state": {},
+              "icon": "lucide-git-fork",
+              "title": "Vista grafo"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "c79add303a2ffa08",
+    "type": "split",
+    "children": [
+      {
+        "id": "fb5bc8f915607e62",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "1ab15f5c35e08d4a",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Esplora risorse"
+            }
+          },
+          {
+            "id": "aa805a7dc5d92a62",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Ricerca"
+            }
+          },
+          {
+            "id": "4353eedb65763377",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Segnalibri"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 287.5
+  },
+  "right": {
+    "id": "d3e0b57ad222932d",
+    "type": "split",
+    "children": [
+      {
+        "id": "4341205b1fcb090e",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "c558526c4395622a",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Riferimenti"
+            }
+          },
+          {
+            "id": "f39a29e3132e5269",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Collegamenti in uscita"
+            }
+          },
+          {
+            "id": "961ae03900140c6e",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Etichette"
+            }
+          },
+          {
+            "id": "6aa36313bafc97f8",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "Tutte le proprietà"
+            }
+          },
+          {
+            "id": "067f4dfc21b37d2a",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Struttura"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Apri selezione rapida": false,
+      "graph:Apri vista grafo": false,
+      "canvas:Crea nuova lavagna": false,
+      "daily-notes:Apri nota del giorno": false,
+      "templates:Inserisci modello": false,
+      "command-palette:Apri riquadro comandi": false,
+      "bases:Crea nuova Base": false
+    }
+  },
+  "active": "24ec4c09ed78a36a",
+  "lastOpenFiles": [
+    "_CLAUDE/_templates/RECAP_TEMPLATE.md",
+    "_CLAUDE/_templates/DAILY_NOTE_TEMPLATE.md",
+    "_CLAUDE/_templates",
+    "_CLAUDE/05_allegati/_segnalazioni/SEG-007_gemstaff_pt_produzione_riferimento.png",
+    "_CLAUDE/05_allegati/_segnalazioni/SEG-006_utenti_permessi_account_agro_da_chiarire.png",
+    "_CLAUDE/05_allegati/_segnalazioni/SEG-005_gemteam_avatar_iniziali_ordine_sbagliato.png",
+    "_CLAUDE/05_allegati/_segnalazioni/SEG-004_anagrafica_telefoni_errati_data_quality.png",
+    "_CLAUDE/05_allegati/_segnalazioni/SEG-003_pattern_globale_ordine_alfabetico_colonne.png",
+    "_CLAUDE/05_allegati/_segnalazioni/SEG-002_anagrafica_rinominare_utente_classificazione.png",
+    "_CLAUDE/05_allegati/_segnalazioni/SEG-001_gemstaff_pt_contatore_e_split_cognome_nome.png",
+    "_CLAUDE/05_allegati/_segnalazioni/2026_04_20_classificazione_stargem_v2.pdf",
+    "_CLAUDE/05_allegati/_segnalazioni/00_LEGGIMI.md",
+    "_CLAUDE/05_allegati/_segnalazioni",
+    "_CLAUDE/05_allegati/_esempi/Screenshot 2026-04-03 alle 17.17.22.png",
+    "_CLAUDE/05_allegati/_esempi/Screenshot 2026-04-03 alle 17.16.18.png",
+    "_CLAUDE/05_allegati/_esempi/Screenshot 2026-04-03 alle 17.15.05.png",
+    "_CLAUDE/05_allegati/_esempi",
+    "_CLAUDE/05_allegati/22_Import_Export_dati/estrap_2026-05-05_anagrafica_Athena_stagione25-26 - anagrafica25-26.csv",
+    "_CLAUDE/05_allegati/22_Import_Export_dati/estrap_2026-05-04_estrapolazione_Master_Gsheet - anagrafica.csv",
+    "_CLAUDE/05_allegati/03_GemTeam/gemteam_pre_reimport_20260511_1819.sql",
+    "_CLAUDE/05_allegati/03_GemTeam/gemteam_pre_reimport_2026-05-11T16-19-34-867Z.json",
+    "_CLAUDE/05_allegati/01_quote_e_promo/spiegazione_QUOTE_PARAM_guida_dettagliata.xlsx",
+    "_CLAUDE/05_allegati/01_quote_e_promo/appunti per creare QUOTE.xlsx",
+    "_CLAUDE/04_per_antigravity/_TEMPLATE_REFACTOR.md",
+    "_CLAUDE/04_per_antigravity/_TEMPLATE_QUICK_FIX.md",
+    "_CLAUDE/04_per_antigravity/_TEMPLATE_AUDIT.md",
+    "_CLAUDE/04_per_antigravity/INDEX_PROMPT.md",
+    "_CLAUDE/04_per_antigravity/03_PROMPT_AUDIT_FLUSSO_ISCRIZIONI_2026_05_12.md",
+    "_CLAUDE/04_per_antigravity/02_PROMPT_RICOSTRUZIONE_FARO_E_PERFORMANCE_2026_05_11.md",
+    "_CLAUDE/04_per_antigravity/01_PROMPT_FIX_TS_E_AUDIT_ANAGRAFICA_2026_05_11.md",
+    "_CLAUDE/04_per_antigravity/00_PROMPT_STATO_DI_FATTO_2026_05_11.md",
+    "_CLAUDE/03_recap_chat/RECAP_DIAGNOSTICA_HUB_COWORK_2026_05_15.md",
+    "_CLAUDE/02_moduli_analisi/sintesi_cross_asse_fase_3_2026_05_13.md",
+    "_CLAUDE/02_moduli_analisi/recap_formula_tessere.md",
+    "_CLAUDE/02_moduli_analisi/proposal_Quote_Param_2026_05_12.md",
+    "_CLAUDE/02_moduli_analisi/piano_refactor_anagrafica_2026_05_11.md",
+    "_CLAUDE/02_moduli_analisi/classificazione_utenti_2026_05_13bis.md",
+    "_CLAUDE/02_moduli_analisi/classificazione_utenti_2026_05_13.md",
+    "_CLAUDE/01_canonici/CHECKLIST_PROGETTO.md",
+    "_CLAUDE/00_INDEX.md",
+    "_ANTIGRAVITY/99_archivio/screening_DB_F1-002_2026_04_28.md",
+    "_ANTIGRAVITY/99_archivio/report_F2-028_fix_2526_allenamento_2026_04_29.md",
+    "_ANTIGRAVITY/99_archivio/report_F2-027_fix_pagine_bianche_2026_04_29.md",
+    "_ANTIGRAVITY/99_archivio/report_F2-026_3schede_ad_hoc_2026_04_29.md",
+    "_ANTIGRAVITY/99_archivio/report_F2-025_posizione_contatore_fix_allenamenti_2026_04_29.md",
+    "_ANTIGRAVITY/99_archivio/report_F2-024_contatori_e_fix_schede_2026_04_29.md",
+    "Senza nome.canvas"
+  ]
+}

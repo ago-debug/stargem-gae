@@ -35,6 +35,7 @@ import {
   Upload,
   Activity
 } from "lucide-react";
+import { FileUploadInput } from "@/components/shared/FileUploadInput";
 import type { User, UserRole } from "@shared/schema";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
@@ -276,48 +277,12 @@ export default function UtentiPermessi() {
     createUserMutation.mutate(data);
   };
 
-  const handleNewUserFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (file.size > 2 * 1024 * 1024) {
-      toast({ variant: "destructive", title: "File troppo grande", description: "L'immagine deve pesare al massimo 2 MB." });
-      return;
-    }
-
-    setUploadingNewUserImage(true);
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      setNewUserImageBase64(event.target?.result as string);
-      setUploadingNewUserImage(false);
-    };
-    reader.onerror = () => {
-      setUploadingNewUserImage(false);
-      toast({ variant: "destructive", title: "Errore di caricamento", description: "Impossibile leggere il file." });
-    };
-    reader.readAsDataURL(file);
+  const handleNewUserFileComplete = (url: string) => {
+    setNewUserImageBase64(url);
   };
 
-  const handleEditUserFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (file.size > 2 * 1024 * 1024) {
-      toast({ variant: "destructive", title: "File troppo grande", description: "L'immagine deve pesare al massimo 2 MB." });
-      return;
-    }
-
-    setUploadingEditUserImage(true);
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      setEditUserImageBase64(event.target?.result as string);
-      setUploadingEditUserImage(false);
-    };
-    reader.onerror = () => {
-      setUploadingEditUserImage(false);
-      toast({ variant: "destructive", title: "Errore di caricamento", description: "Impossibile leggere il file." });
-    };
-    reader.readAsDataURL(file);
+  const handleEditUserFileComplete = (url: string) => {
+    setEditUserImageBase64(url);
   };
 
   const handleUpdateUser = (e: React.FormEvent<HTMLFormElement>) => {
@@ -706,17 +671,14 @@ export default function UtentiPermessi() {
                     <Camera className="w-6 h-6" />
                   </div>
                 )}
-                <label className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-                  {uploadingNewUserImage ? (
-                    <Loader2 className="h-5 w-5 animate-spin text-white" />
-                  ) : (
-                    <>
-                      <Upload className="w-4 h-4 text-white mb-1" />
-                      <span className="text-xxxs text-white font-medium">Carica</span>
-                    </>
-                  )}
-                  <input type="file" className="hidden" accept="image/png, image/jpeg, image/webp" onChange={handleNewUserFileChange} disabled={uploadingNewUserImage} />
-                </label>
+                <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <FileUploadInput 
+                    endpoint="/api/uploads/avatar" 
+                    accept=".png,.jpg,.jpeg,.webp" 
+                    onUploadComplete={handleNewUserFileComplete} 
+                    buttonText="Carica" 
+                  />
+                </div>
               </div>
             </div>
 
@@ -801,7 +763,7 @@ export default function UtentiPermessi() {
                       <span className="text-xxxs text-white font-medium">Cambia</span>
                     </>
                   )}
-                  <input type="file" className="hidden" accept="image/png, image/jpeg, image/webp" onChange={handleEditUserFileChange} disabled={uploadingEditUserImage} />
+                  
                 </label>
               </div>
             </div>

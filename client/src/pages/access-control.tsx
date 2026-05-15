@@ -333,7 +333,7 @@ export default function AccessControl() {
         <TabsList className="grid w-full max-w-md grid-cols-2">
           <TabsTrigger value="search" data-testid="tab-search">
             <Search className="w-4 h-4 mr-2" />
-            Ricerca Anagrafica
+            Ricerca Utente
           </TabsTrigger>
           <TabsTrigger value="barcode" data-testid="tab-barcode">
             <ScanBarcode className="w-4 h-4 mr-2" />

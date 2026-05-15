@@ -1475,6 +1475,10 @@ function MascheraInputGeneraleContent(props?: any) {
 
   return (
     <div className="flex flex-col h-full" data-testid="page-maschera-input-generale">
+      <div className="p-4 bg-amber-100/50 border-b border-amber-200 text-amber-800 flex items-center justify-between text-sm">
+        <p><strong>🟡 Stai usando la maschera classica.</strong> La nuova Pratica Guidata sarà l'unico flusso dal 28 Maggio.</p>
+        <Button variant="outline" size="sm" onClick={() => window.location.href = '/dossiers/nuovo/wizard'} className="border-amber-300 text-amber-700 hover:bg-amber-100">Provala ora</Button>
+      </div>
       <datalist id="province-list">{["AG","AL","AN","AO","AP","AQ","AR","AT","AV","BA","BG","BI","BL","BN","BO","BR","BS","BT","BZ","CA","CB","CE","CH","CL","CN","CO","CR","CS","CT","CZ","EN","FC","FE","FG","FI","FM","FR","GE","GO","GR","IM","IS","KR","LC","LE","LI","LO","LT","LU","MB","MC","ME","MI","MN","MO","MS","MT","NA","NO","NU","OR","PA","PC","PD","PE","PG","PI","PN","PO","PR","PT","PU","PV","PZ","RA","RC","RE","RG","RI","RM","RN","RO","SA","SI","SO","SP","SR","SS","SU","SV","TA","TE","TN","TO","TP","TR","TS","TV","UD","VA","VB","VC","VE","VI","VR","VT","VV"].map(p => <option key={p} value={p} />)}</datalist>
       <datalist id="comuni-list">{["Roma", "Milano", "Napoli", "Torino", "Palermo", "Genova", "Bologna", "Firenze", "Bari", "Catania", "Venezia", "Verona", "Messina", "Padova", "Trieste", "Brescia", "Terni", "Taranto", "Prato", "Parma", "Modena", "Reggio Calabria", "Reggio Emilia", "Perugia", "Ravenna", "Livorno", "Cagliari", "Foggia", "Rimini", "Salerno", "Ferrara", "Sassari", "Latina", "Giugliano in Campania", "Monza", "Siracusa", "Pescara", "Bergamo", "Forlì", "Trento", "Vicenza", "Bolzano", "Novara", "Piacenza", "Ancona", "Andria", "Arezzo", "Udine", "Cesena", "Lecce"].map(c => <option key={c} value={c} />)}</datalist>
       {/* Header fisso con navigazione */}
@@ -1619,7 +1623,7 @@ function MascheraInputGeneraleContent(props?: any) {
           <div className="flex items-center gap-2 flex-wrap">
             {[
               { id: "intestazione", label: "Intestazione", icon: FileText },
-              { id: "anagrafica", label: "Anagrafica", icon: Users },
+              { id: "anagrafica", label: "Utente", icon: Users },
               { id: "pagamenti", label: "Pagamenti", icon: CreditCard },
               { id: "ricevute", label: "Ricevute", icon: Receipt },
               { id: "gift", label: "Gift/Buono", icon: Gift },
@@ -1986,7 +1990,7 @@ export default function MascheraInputGenerale(props?: any) {
   const storeMemberId = useMemberStore((state) => state.selectedMemberId);
   const finalMemberId = storeMemberId !== null ? storeMemberId : (memberIdStr ? Number(memberIdStr) : null);
   
-  const [verificaStato, setVerificaStato] = useState({
+  const [verificaStato, setVerificaStato] = useState<Record<string, boolean>>({
     telefono: false,
     email: false,
     cfGen1: false,

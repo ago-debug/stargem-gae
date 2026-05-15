@@ -113,6 +113,13 @@
       "when": 1775701791259,
       "tag": "0015_carnet_prezzi_completo",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "5",
+      "when": 1778583968839,
+      "tag": "0016_windy_killraven",
+      "breakpoints": true
     }
   ]
 }

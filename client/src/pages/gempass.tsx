@@ -1,3 +1,5 @@
+import { SortableHeader } from "@/components/shared/SortableHeader";
+import { useSortableList } from "@/hooks/useSortableList";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -110,9 +112,9 @@ export default function GemPassTesseramenti() {
   if (filterStato !== 'all') queryParams.set('status', filterStato);
 
   const { data: tessereResponse, isLoading } = useQuery<{data: MembershipRecord[], total: number}>({
-    queryKey: ['/api/gempass/tessere', page, pageSize, debouncedSearch, filterTipo, filterStato],
+    queryKey: ['/api/memberships', page, pageSize, debouncedSearch, filterTipo, filterStato],
     queryFn: async () => {
-      const res = await fetch(`/api/gempass/tessere?${queryParams.toString()}`);
+      const res = await fetch(`/api/memberships?${queryParams.toString()}`);
       if (!res.ok) throw new Error('Failed to fetch tessere');
       return res.json();
     }
@@ -201,6 +203,21 @@ export default function GemPassTesseramenti() {
 
   const filtered = memberships; // Ora il filtro è tutto lato server
 
+  const getSortValueMemberships = (m: any, field: string) => {
+    switch (field) {
+      case 'number': return m.membershipNumber;
+      case 'user': return m.memberLastName + ' ' + m.memberFirstName;
+      case 'type': return m.membershipType;
+      case 'season': return m.seasonId;
+      case 'expiry': return m.expiryDate;
+      case 'status': return m.status;
+      default: return m[field];
+    }
+  };
+
+  const { sortConfig: membershipsSort, handleSort: handleMembershipsSort, sortedData: sortedFiltered } = useSortableList(filtered, 'user', 'asc', getSortValueMemberships);
+
+
   // Tab 2 Functions
   const handleSearchCF = async () => {
     if (!cfSearch.trim()) return;
@@ -258,10 +275,52 @@ export default function GemPassTesseramenti() {
 
   const createTesseraMutation = useMutation({
     mutationFn: async (payload: any) => {
-      const res = await fetch('/api/gempass/tessere', {
+      let finalMemberId = payload.member_id;
+
+      // 1. Se è un nuovo utente, creiamo prima l'anagrafica
+      if (!finalMemberId && payload.anagrafica) {
+        const an = payload.anagrafica;
+        const memberRes = await fetch('/api/members', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            firstName: an.nome,
+            lastName: an.cognome,
+            fiscalCode: an.codiceFiscale.toUpperCase(),
+            email: an.email || null,
+            phone: an.cellulare || null,
+            dateOfBirth: an.dataNascita || null,
+            placeOfBirth: an.natoA || null,
+            participantType: 'ALLIEVO'
+          })
+        });
+        if (!memberRes.ok) {
+          const err = await memberRes.json();
+          throw new Error(err.message || 'Errore creazione anagrafica');
+        }
+        const memberData = await memberRes.json();
+        finalMemberId = memberData.id;
+      }
+
+      // 2. Determiniamo parametri per il nuovo endpoint /api/memberships
+      const currentYear = new Date().getFullYear();
+      const seasonCode = payload.season_competence || '';
+      const isCorrente = seasonCode.startsWith(String(currentYear).slice(-2));
+      
+      const membershipPayload = {
+        memberId: finalMemberId,
+        membershipType: payload.member_id ? "RINNOVO" : "NUOVO",
+        seasonCompetence: isCorrente ? "CORRENTE" : "SUCCESSIVA",
+        fee: payload.membership_type === 'minore' ? 15 : 25,
+        issueDate: new Date().toISOString(),
+        expiryDate: new Date().toISOString(), // Sarà ricalcolata dal backend
+        notes: payload.notes
+      };
+
+      const res = await fetch('/api/memberships', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(membershipPayload),
       });
       if (!res.ok) {
         const err = await res.json();
@@ -291,7 +350,6 @@ export default function GemPassTesseramenti() {
       setFirmaTutore1(false);
       setFirmaTutore2(false);
       
-      queryClient.invalidateQueries({ queryKey: ['/api/gempass/tessere'] });
       queryClient.invalidateQueries({ queryKey: ['/api/memberships'] });
     },
     onError: (error: Error) => {
@@ -396,12 +454,12 @@ export default function GemPassTesseramenti() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>N. Tessera</TableHead>
-                  <TableHead>Utente</TableHead>
-                  <TableHead>Tipo</TableHead>
-                  <TableHead>Stagione</TableHead>
-                  <TableHead>Scadenza</TableHead>
-                  <TableHead>Stato</TableHead>
+                  <SortableHeader column="number" currentSort={membershipsSort} onSort={handleMembershipsSort}>N. Tessera</SortableHeader>
+                  <SortableHeader column="user" currentSort={membershipsSort} onSort={handleMembershipsSort}>Utente</SortableHeader>
+                  <SortableHeader column="type" currentSort={membershipsSort} onSort={handleMembershipsSort}>Tipo</SortableHeader>
+                  <SortableHeader column="season" currentSort={membershipsSort} onSort={handleMembershipsSort}>Stagione</SortableHeader>
+                  <SortableHeader column="expiry" currentSort={membershipsSort} onSort={handleMembershipsSort}>Scadenza</SortableHeader>
+                  <SortableHeader column="status" currentSort={membershipsSort} onSort={handleMembershipsSort}>Stato</SortableHeader>
                   <TableHead className="text-right">Azioni</TableHead>
                 </TableRow>
               </TableHeader>
@@ -425,7 +483,7 @@ export default function GemPassTesseramenti() {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filtered.map((m) => {
+                  sortedFiltered.map((m: any) => {
                     const memberFullName = `${m.memberLastName || ''} ${m.memberFirstName || ''}`.trim() || `ID: ${m.memberId}`;
                     const typeInfo = getTypeBadgeInfo(m.membershipType);
                     const computedStato = getComputedStatus(m);
@@ -496,7 +554,7 @@ export default function GemPassTesseramenti() {
             
             {/* SEZIONE A - Ricerca / Lookup */}
             <div className="space-y-4">
-              <h2 className="text-lg font-semibold border-b pb-2">Sezione A — Ricerca Anagrafica</h2>
+              <h2 className="text-lg font-semibold border-b pb-2">Sezione A — Ricerca Utente</h2>
               <div className="flex flex-col sm:flex-row gap-4 items-end">
                 <div className="space-y-1 flex-1 max-w-sm">
                   <Label>Codice Fiscale</Label>
@@ -633,69 +691,69 @@ export default function GemPassTesseramenti() {
               {membershipType === 'minore' && (
                 <div className="mt-8 space-y-4 border-t pt-6 bg-muted/50 p-4 rounded-lg">
                   <h3 className="font-bold text-base text-foreground">
-                    👨‍👩‍👧 Dati Genitori / Tutori Legali <span className="text-red-500">*</span>
+                    👨‍👩‍👧 Dati Genitori <span className="text-red-500">*</span>
                   </h3>
                   <p className="text-xs text-muted-foreground mb-4">Campi obbligatori per tesseramento socio minore.</p>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <h4 className="col-span-1 md:col-span-2 font-semibold text-sm text-foreground/80 pb-2 border-b">Tutore 1</h4>
+                    <h4 className="col-span-1 md:col-span-2 font-semibold text-sm text-foreground/80 pb-2 border-b">Genitore 1</h4>
                     <div>
-                      <Label>Cognome tutore 1 <span className="text-red-500">*</span></Label>
+                      <Label>Cognome genitore 1 <span className="text-red-500">*</span></Label>
                       <Input value={tutore1.cognome} onChange={e => setTutore1(p => ({ ...p, cognome: e.target.value }))} placeholder="Cognome" />
                     </div>
                     <div>
-                      <Label>Nome tutore 1 <span className="text-red-500">*</span></Label>
+                      <Label>Nome genitore 1 <span className="text-red-500">*</span></Label>
                       <Input value={tutore1.nome} onChange={e => setTutore1(p => ({ ...p, nome: e.target.value }))} placeholder="Nome" />
                     </div>
                     <div>
-                      <Label>Codice Fiscale tutore 1 <span className="text-red-500">*</span></Label>
+                      <Label>Codice Fiscale genitore 1 <span className="text-red-500">*</span></Label>
                       <Input value={tutore1.codiceFiscale} onChange={e => setTutore1(p => ({...p, codiceFiscale: e.target.value.toUpperCase()}))} placeholder="RSSMRA80A01H501Z" className="uppercase" />
                     </div>
                     <div>
-                      <Label>Cellulare tutore 1</Label>
+                      <Label>Cellulare genitore 1</Label>
                       <Input value={tutore1.cellulare} onChange={e => setTutore1(p => ({ ...p, cellulare: e.target.value }))} placeholder="+39 333 000000" />
                     </div>
                     <div className="col-span-1 md:col-span-2">
-                      <Label>Email tutore 1</Label>
+                      <Label>Email genitore 1</Label>
                       <Input value={tutore1.email} onChange={e => setTutore1(p => ({ ...p, email: e.target.value }))} placeholder="email@esempio.it" type="email" />
                     </div>
 
-                    {/* Tutore 2 */}
-                    <h4 className="col-span-1 md:col-span-2 font-semibold text-sm text-foreground/80 mt-6 pb-2 border-b">Tutore 2</h4>
+                    {/* Genitore 2 */}
+                    <h4 className="col-span-1 md:col-span-2 font-semibold text-sm text-foreground/80 mt-6 pb-2 border-b">Genitore 2</h4>
                     <div>
-                      <Label>Cognome tutore 2 <span className="text-red-500">*</span></Label>
+                      <Label>Cognome genitore 2 <span className="text-red-500">*</span></Label>
                       <Input value={tutore2.cognome} onChange={e => setTutore2(p => ({ ...p, cognome: e.target.value }))} placeholder="Cognome" />
                     </div>
                     <div>
-                      <Label>Nome tutore 2 <span className="text-red-500">*</span></Label>
+                      <Label>Nome genitore 2 <span className="text-red-500">*</span></Label>
                       <Input value={tutore2.nome} onChange={e => setTutore2(p => ({ ...p, nome: e.target.value }))} placeholder="Nome" />
                     </div>
                     <div>
-                      <Label>Codice Fiscale tutore 2 <span className="text-red-500">*</span></Label>
+                      <Label>Codice Fiscale genitore 2 <span className="text-red-500">*</span></Label>
                       <Input value={tutore2.codiceFiscale} onChange={e => setTutore2(p => ({...p, codiceFiscale: e.target.value.toUpperCase()}))} placeholder="RSSMRA80A01H501Z" className="uppercase" />
                     </div>
                     <div>
-                      <Label>Cellulare tutore 2</Label>
+                      <Label>Cellulare genitore 2</Label>
                       <Input value={tutore2.cellulare} onChange={e => setTutore2(p => ({ ...p, cellulare: e.target.value }))} placeholder="+39 333 000000" />
                     </div>
                     <div className="col-span-1 md:col-span-2">
-                      <Label>Email tutore 2</Label>
+                      <Label>Email genitore 2</Label>
                       <Input value={tutore2.email} onChange={e => setTutore2(p => ({ ...p, email: e.target.value }))} placeholder="email@esempio.it" type="email" />
                     </div>
                   </div>
 
-                  {/* Firma tutori */}
+                  {/* Firma genitori */}
                   <div className="space-y-4 mt-6 pt-4 border-t">
                     <div className="flex items-center gap-3">
                       <Checkbox id="firma-tutore1" checked={firmaTutore1} onCheckedChange={(v) => setFirmaTutore1(!!v)} />
                       <Label htmlFor="firma-tutore1" className="text-sm font-medium cursor-pointer">
-                        Confermo che il Tutore 1 HA FIRMATO la domanda cartacea <span className="text-red-500">*</span>
+                        Confermo che il Genitore 1 HA FIRMATO la domanda cartacea <span className="text-red-500">*</span>
                       </Label>
                     </div>
                     <div className="flex items-center gap-3">
                       <Checkbox id="firma-tutore2" checked={firmaTutore2} onCheckedChange={(v) => setFirmaTutore2(!!v)} />
                       <Label htmlFor="firma-tutore2" className="text-sm font-medium cursor-pointer">
-                        Confermo che il Tutore 2 HA FIRMATO la domanda cartacea <span className="text-red-500">*</span>
+                        Confermo che il Genitore 2 HA FIRMATO la domanda cartacea <span className="text-red-500">*</span>
                       </Label>
                     </div>
                   </div>
