@@ -4,7 +4,9 @@ import { WizardStep } from "../WizardStep";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
+import { NuovoPagamentoModal as NuovoPagamentoModalMC3 } from "@/components/payments/NuovoPagamentoModal";
 
 interface PagamentoStepProps {
   isActive: boolean;
@@ -22,6 +24,7 @@ export function PagamentoStep({ isActive, wizard }: PagamentoStepProps) {
 
   const { data: courses } = useQuery<any[]>({ queryKey: ["/api/courses"] });
   const { data: priceLists } = useQuery<any[]>({ queryKey: ["/api/price-lists"] });
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     wizard.updateStepData('pagamento', localData);
@@ -109,7 +112,20 @@ export function PagamentoStep({ isActive, wizard }: PagamentoStepProps) {
         
         <div className="text-sm text-amber-600 bg-amber-50 p-4 rounded-md border border-amber-200">
           Nota: L'integrazione completa della griglia listini (MC3) sostituirà temporaneamente la modale di checkout esistente in futuro.
+          <div className="mt-4">
+            <Button onClick={() => setIsModalOpen(true)} type="button" variant="default">
+              + Registra Pagamento Completo
+            </Button>
+          </div>
         </div>
+
+        <NuovoPagamentoModalMC3
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          defaultMemberId={wizard.memberId ? Number(wizard.memberId) : undefined}
+          defaultAmount={parseFloat(localData.importo) || 0}
+          defaultReason={localData.note}
+        />
       </div>
     </WizardStep>
   );

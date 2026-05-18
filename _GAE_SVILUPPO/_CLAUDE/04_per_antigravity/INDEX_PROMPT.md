@@ -1,6 +1,6 @@
 ---
-aggiornato: 2026-05-15T08:00
-ultima_verifica_vs_codice: 2026-05-15T08:00
+aggiornato: 2026-05-15T18:30
+ultima_verifica_vs_codice: 2026-05-15T18:30
 validita_prevista: indice progressivo, sempre attuale
 tipo: indice-tracciamento
 tags: [index, antigravity, prompt-tracking]
@@ -35,7 +35,15 @@ tags: [index, antigravity, prompt-tracking]
 | F1-018 | 2026-05-14T19:30 | Verifica operativa BE MC1+MC2+MC3 — 3 bug critici emersi | ✅ CHIUSO 2026-05-14T20:25 — pass/fail per test | [[verifica_F1-018_BE_post_fase3_2026_05_14]] |
 | F1-019 | 2026-05-14T20:30 | FIX 3 bug critici BE (attachments_url rinomina, createdBy VARCHAR, MC3 snake/camel, /api/health) | ✅ CHIUSO 2026-05-14T20:50 — tsc 0, curl test 200/201 | [[report_F1-019_fix_bug_critici_BE_2026_05_14]] |
 | F1-020 | 2026-05-14T21:00 | Verifica /importa + decision pack STRADA A/B/A+B per Lotto 1 anagrafica | ✅ CHIUSO 2026-05-14T21:30 — Raccomandata STRADA B con fix CF | [[report_F1-020_verifica_importa_decision_pack_2026_05_14]] |
-| F1-022 | 2026-05-15T08:00 | FIX 2 bug critici Test E2E (PATCH step "not found" + upload mkdir recursive) | 🟡 IN CORSO | (atteso) |
+| F1-022 | 2026-05-15T08:00 | FIX 2 bug critici Test E2E (PATCH step "not found" + upload mkdir recursive) | ✅ CHIUSO | (integrato F1-024) |
+| F1-023 | 2026-05-15T10:00 | Auto-mapping CSV alias dict + Levenshtein | ✅ CHIUSO | (integrato F1-024) |
+| F1-024 | 2026-05-15T11:00 | FIX filePreviewMutation trigger auto-mapping | ✅ CHIUSO | — |
+| F1-025 | 2026-05-15T12:00 | Bug calendario-attivita (Drizzle ↔ DB drift, payment_methods missing) | ✅ CHIUSO — generate regole 23+27+28 | — |
+| F1-026 | 2026-05-15T13:00 | Schema drop mother_/father_/bio/specialization + rename tutor1/2→genitore1/2 + last_renewal_date + attachments_url + legacy_*_id | ✅ CHIUSO | — |
+| F1-027 | 2026-05-15T14:00 | Rename nationality→citizenship + ADD nationality + ADD domicile_* (cittadinanza vs nazionalità) | ✅ CHIUSO | — |
+| F1-028 | 2026-05-15T15:00 | Audit V1 cleanup/extension schema (poi sostituito da V2) | ✅ CHIUSO | superato |
+| F1-029v2 | 2026-05-15T16:30 | Audit V2 cleanup/extension schema (3 Q operative — risposte Recommended × 3) | ✅ CHIUSO | [[audit_F1-029v2_cleanup_extension_schema_2026_05_15]] |
+| F1-030 | 2026-05-15T18:30 | Esecuzione migration: ADD 21 col members + FK society_provenienza_id + ADD 25 col team_employees + UPDATE pre-DROP 5 website + DROP 32 col + alias dict + scratch cleanup | 🟡 PRONTO AL LANCIO | [[F1-030_PROMPT_esecuzione_migration_schema_2026_05_15]] |
 
 ## Asse F2 (Frontend)
 
@@ -56,6 +64,9 @@ tags: [index, antigravity, prompt-tracking]
 | F2-014 | 2026-05-14T19:30 | Verifica operativa FE — 11 errori TS + HelpTooltip + Banner | ✅ CHIUSO 2026-05-14T20:25 — pass/fail per test | [[verifica_F2-014_FE_post_fase3_2026_05_14]] |
 | F2-015 | 2026-05-14T20:30 | FIX 11 errori TS + crea HelpTooltip + Banner dismissione maschera classica | ✅ CHIUSO 2026-05-14T20:55 — tsc 0, npm build OK | [[report_F2-015_fix_ts_helptooltip_banner_2026_05_14]] |
 | F2-016 | 2026-05-14T21:00 | TEST INTEGRATO Wizard E2E (7 scenari + screenshot) — 2 bug critici emersi | ✅ CHIUSO 2026-05-14T22:00 — Verdetto NON pronto uso reale (2 bug) | [[test_F2-016_integrato_wizard_e2e_2026_05_14]] |
+| F2-017 | 2026-05-15T09:00 | FIX 2 bug Wizard + nomenclatura genitore (TabTutori→TabGenitori, tutor1_*→genitore1_*) | ✅ CHIUSO | — |
+| F2-018 | 2026-05-15T13:00 | StoriaProvenienzaTab componente nuovo (audit log Lotto 1 visibile per utente) | ✅ CHIUSO | — |
+| F2-019 | 2026-05-15T15:34 | Innesto StoriaProvenienzaTab in maschera-input-generale + pulizia root ~80+ file scratch/test/fix (Regola 28) | ✅ CHIUSO 2026-05-15T17:50 — tsc 0, build 0 | [[report_F2-019_storia_provenienza_e_pulizia_2026_05_15]] + [[cleanup_F2-019_root_pulizia_2026_05_15]] |
 
 ---
 
@@ -94,3 +105,4 @@ I file in `_CLAUDE/04_per_antigravity/`:
 - [[01_PROMPT_FIX_TS_E_AUDIT_ANAGRAFICA_2026_05_11]]
 - [[02_PROMPT_RICOSTRUZIONE_FARO_E_PERFORMANCE_2026_05_11]]
 - [[03_PROMPT_AUDIT_FLUSSO_ISCRIZIONI_2026_05_12]] — F1-004 + F2-003 (megaaudit)
+- [[F1-030_PROMPT_esecuzione_migration_schema_2026_05_15]] — pronto al lancio

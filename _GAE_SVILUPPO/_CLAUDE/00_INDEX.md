@@ -168,6 +168,13 @@ Aperte attualmente:
 | 19 | Checklist progetto sempre aggiornata | [[00_LEGGIMI]] §19 |
 | 20 | Domande Claude → Gaetano sempre con opzioni multiple | [[00_LEGGIMI]] §20 |
 | 21 | F1 SOPRA, F2 SOTTO nei prompt | [[00_LEGGIMI]] §21 |
+| 22 | Wikilink Obsidian obbligatori file vivi | [[00_LEGGIMI]] §22 |
+| 23 | Verifica allineamento Drizzle ↔ DB post-migration | [[00_LEGGIMI]] §23 |
+| 24 | Grep preventivo prima di DROP/RENAME schema | [[00_LEGGIMI]] §24 |
+| 25 | Backup DB obbligatorio prima migration distruttive | [[00_LEGGIMI]] §25 |
+| 26 | Migration scripts IDEMPOTENTI | [[00_LEGGIMI]] §26 |
+| 27 | Sincronizzare schema.ts + storage.ts + routes.ts | [[00_LEGGIMI]] §27 |
+| 28 | Cleanup file scratch/test/fix dopo task | [[00_LEGGIMI]] §28 |
 
 ---
 

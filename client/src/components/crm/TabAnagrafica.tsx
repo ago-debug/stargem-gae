@@ -52,11 +52,9 @@ export function TabAnagrafica({ renderMancaDato, getInputClassName }: TabAnagraf
       const toExpand: string[] = [];
       
       if (formData.cognomeGen1 || formData.cfGen1 || formData.cognomeGen2 || formData.cfGen2) toExpand.push("tutori");
-      if (formData.emergencyContact1Name || formData.emergencyContact2Name || formData.emergencyContact3Name) toExpand.push("emergenza");
-      if (formData.companyName || formData.pIva || formData.codiceFe) toExpand.push("fatturazione");
-      if (formData.sizeShirt || formData.sizePants || formData.sizeShoes || formData.height || formData.weight) toExpand.push("merchandising");
-      if (formData.socialInstagram || formData.socialTiktok || formData.socialFacebook || formData.website || formData.driveFolderUrl) toExpand.push("social");
-      if (formData.bankName || formData.iban || formData.alboNumero || formData.patenteTipo || formData.educationTitle) toExpand.push("bancari");
+            if (formData.companyName || formData.codiceFe) toExpand.push("fatturazione");
+            if (formData.driveFolderUrl) toExpand.push("social");
+      if (formData.bankName || formData.iban) toExpand.push("bancari");
       if (formData.mastroC || formData.mastroCol || formData.codiceCatastale) toExpand.push("legacy");
       
       setExpandedAccordions(toExpand);
@@ -293,33 +291,6 @@ export function TabAnagrafica({ renderMancaDato, getInputClassName }: TabAnagraf
           
           <TabTutori renderMancaDato={renderMancaDato} getInputClassName={getInputClassName} />
 
-          {/* Emergenza */}
-          <AccordionItem value="emergenza" className="border-b-0 border-amber-100 dark:border-amber-900/30 mb-2 bg-amber-50/50 dark:bg-amber-900/10 rounded-lg px-4">
-            <AccordionTrigger className="text-sm font-semibold hover:no-underline py-3">
-              <div className="flex items-center gap-2 text-amber-700 dark:text-amber-500">
-                <AlertCircle className="w-4 h-4" />
-                Contatti di Emergenza
-              </div>
-            </AccordionTrigger>
-            <AccordionContent className="space-y-4 pt-2 pb-4">
-              {[1, 2, 3].map((num) => (
-                <div key={num} className="grid grid-cols-1 sm:grid-cols-3 gap-4 border-l-2 border-amber-200 dark:border-amber-800 pl-3">
-                  <div className="space-y-2">
-                    <Label className="text-xs">Nome Contatto {num}</Label>
-                    <Input className="h-8" value={(formData as any)[`emergencyContact${num}Name`]} onChange={(e) => handleChange(`emergencyContact${num}Name`, e.target.value)} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-xs">Telefono {num}</Label>
-                    <Input className="h-8" value={(formData as any)[`emergencyContact${num}Phone`]} onChange={(e) => handleChange(`emergencyContact${num}Phone`, e.target.value)} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-xs">Email {num}</Label>
-                    <Input className="h-8" value={(formData as any)[`emergencyContact${num}Email`]} onChange={(e) => handleChange(`emergencyContact${num}Email`, e.target.value)} />
-                  </div>
-                </div>
-              ))}
-            </AccordionContent>
-          </AccordionItem>
 
           {/* Dati Fatturazione & Azienda */}
           <AccordionItem value="fatturazione" className="border-b-0 border-slate-100 dark:border-slate-800 mb-2 bg-slate-50/50 dark:bg-slate-900/20 rounded-lg px-4">
@@ -334,10 +305,6 @@ export function TabAnagrafica({ renderMancaDato, getInputClassName }: TabAnagraf
                 <div className="space-y-2">
                   <Label className="text-xs">Ragione Sociale</Label>
                   <Input className="h-8" value={formData.companyName} onChange={(e) => handleChange("companyName", e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-xs">Partita IVA</Label>
-                  <Input className="h-8" value={formData.pIva} onChange={(e) => handleChange("pIva", e.target.value)} />
                 </div>
                 <div className="space-y-2">
                   <Label className="text-xs">Codice SDI (Fatt. Elettronica)</Label>
@@ -377,39 +344,6 @@ export function TabAnagrafica({ renderMancaDato, getInputClassName }: TabAnagraf
             </AccordionContent>
           </AccordionItem>
 
-          {/* Merchandising & Taglie */}
-          <AccordionItem value="merchandising" className="border-b-0 border-slate-100 dark:border-slate-800 mb-2 bg-slate-50/50 dark:bg-slate-900/20 rounded-lg px-4">
-            <AccordionTrigger className="text-sm font-semibold hover:no-underline py-3">
-              <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
-                <Shirt className="w-4 h-4" />
-                Merchandising & Taglie
-              </div>
-            </AccordionTrigger>
-            <AccordionContent className="space-y-4 pt-2 pb-4">
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
-                <div className="space-y-2">
-                  <Label className="text-xs">Taglia Maglia</Label>
-                  <Input className="h-8" value={formData.sizeShirt} onChange={(e) => handleChange("sizeShirt", e.target.value)} placeholder="Es. M" />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-xs">Taglia Pantalone</Label>
-                  <Input className="h-8" value={formData.sizePants} onChange={(e) => handleChange("sizePants", e.target.value)} placeholder="Es. M" />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-xs">Numero Scarpe</Label>
-                  <Input className="h-8" value={formData.sizeShoes} onChange={(e) => handleChange("sizeShoes", e.target.value)} placeholder="Es. 42" />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-xs">Altezza (cm)</Label>
-                  <Input className="h-8" value={formData.height} onChange={(e) => handleChange("height", e.target.value)} placeholder="Es. 175" />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-xs">Peso (kg)</Label>
-                  <Input className="h-8" value={formData.weight} onChange={(e) => handleChange("weight", e.target.value)} placeholder="Es. 70" />
-                </div>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
 
           {/* Social & Digital */}
           <AccordionItem value="social" className="border-b-0 border-slate-100 dark:border-slate-800 mb-2 bg-slate-50/50 dark:bg-slate-900/20 rounded-lg px-4">
@@ -420,28 +354,10 @@ export function TabAnagrafica({ renderMancaDato, getInputClassName }: TabAnagraf
               </div>
             </AccordionTrigger>
             <AccordionContent className="space-y-4 pt-2 pb-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label className="text-xs">Instagram</Label>
-                  <Input className="h-8" value={formData.socialInstagram} onChange={(e) => handleChange("socialInstagram", e.target.value)} placeholder="@username" />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-xs">TikTok</Label>
-                  <Input className="h-8" value={formData.socialTiktok} onChange={(e) => handleChange("socialTiktok", e.target.value)} placeholder="@username" />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-xs">Facebook</Label>
-                  <Input className="h-8" value={formData.socialFacebook} onChange={(e) => handleChange("socialFacebook", e.target.value)} placeholder="URL Profilo" />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-xs">Sito Web / Portfolio</Label>
-                  <Input className="h-8" value={formData.website} onChange={(e) => handleChange("website", e.target.value)} placeholder="https://" />
-                </div>
                 <div className="space-y-2 sm:col-span-2">
                   <Label className="text-xs">Cartella Drive Condivisa (Link)</Label>
                   <Input className="h-8" value={formData.driveFolderUrl} onChange={(e) => handleChange("driveFolderUrl", e.target.value)} placeholder="https://drive.google.com/..." />
                 </div>
-              </div>
             </AccordionContent>
           </AccordionItem>
 
@@ -462,44 +378,6 @@ export function TabAnagrafica({ renderMancaDato, getInputClassName }: TabAnagraf
                 <div className="space-y-2">
                   <Label className="text-xs">IBAN</Label>
                   <Input className="h-8" value={formData.iban} onChange={(e) => handleChange("iban", e.target.value)} placeholder="IT..." />
-                </div>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 border-t border-slate-200 dark:border-slate-800">
-                <div className="space-y-2">
-                  <Label className="text-xs">Albo Professionale (Tipo)</Label>
-                  <Input className="h-8" value={formData.alboTipo} onChange={(e) => handleChange("alboTipo", e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-xs">Numero Albo</Label>
-                  <Input className="h-8" value={formData.alboNumero} onChange={(e) => handleChange("alboNumero", e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-xs">Sezione Albo</Label>
-                  <Input className="h-8" value={formData.alboSezione} onChange={(e) => handleChange("alboSezione", e.target.value)} />
-                </div>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label className="text-xs">Patente (Tipo)</Label>
-                  <Input className="h-8" value={formData.patenteTipo} onChange={(e) => handleChange("patenteTipo", e.target.value)} placeholder="Es. B" />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-xs">Scadenza Patente</Label>
-                  <Input className="h-8" type="date" value={formData.patenteScadenza} onChange={(e) => handleChange("patenteScadenza", e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-xs">Targa Auto</Label>
-                  <Input className="h-8" value={formData.carPlate} onChange={(e) => handleChange("carPlate", e.target.value)} />
-                </div>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 border-t border-slate-200 dark:border-slate-800">
-                <div className="space-y-2">
-                  <Label className="text-xs">Titolo di Studio / Formazione</Label>
-                  <Input className="h-8" value={formData.educationTitle} onChange={(e) => handleChange("educationTitle", e.target.value)} />
-                </div>
-                <div className="space-y-2 sm:col-span-2">
-                  <Label className="text-xs">Istituto / Ente Formatore</Label>
-                  <Input className="h-8" value={formData.educationInstitute} onChange={(e) => handleChange("educationInstitute", e.target.value)} />
                 </div>
               </div>
             </AccordionContent>

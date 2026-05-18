@@ -1,6 +1,6 @@
 ---
 tags: [regole, filesystem]
-aggiornato: 2026-04-28
+aggiornato: 2026-05-15T19:30
 tipo: regole
 ---
 
@@ -390,6 +390,211 @@ Quando un file VIVO del vault (in `_CLAUDE/` o `_ANTIGRAVITY/01_status_continui/
 
 **AG obbligo:**
 Quando AG modifica/crea un file faro o di output, deve usare wikilink come da regola. La validazione finale di Stop & Go (regola 14) include controllo che NON ci siano path testuali a file del vault dove sarebbe richiesto wikilink.
+
+### 23. Verifica allineamento Drizzle ↔ DB dopo OGNI migration
+
+Aggiunta dopo F1-028 (15/05/2026) — bug `/calendario-attivita` causato da Drizzle schema disallineato dal DB.
+
+**Regola:**
+Dopo qualsiasi `ALTER TABLE`, `DROP COLUMN`, `RENAME COLUMN`, `CREATE TABLE` (o equivalente migration Drizzle), AG deve OBBLIGATORIAMENTE:
+
+1. Eseguire `DESCRIBE <tabella>` su MySQL e ottenere lista colonne reali
+2. Confrontare con definizione Drizzle in `shared/schema.ts`
+3. Se differenze rilevate (colonne in Drizzle ma non in DB, o viceversa), APPLICARE migration mancanti finché allineato
+4. Se MySQL rifiuta ALTER per "Row size too large" o altro vincolo, usare `SET SESSION innodb_strict_mode=OFF;` o convertire VARCHAR a TEXT per liberare row size (vedi F1-019, F1-026)
+
+**Smoke test obbligatorio post-allineamento:**
+- `npx tsc --noEmit` → exit 0
+- curl `/api/health` → 200
+- curl 5+ endpoint critici (`/api/members`, `/api/instructors`, `/api/payment-methods`, `/api/courses`, eventualmente `/api/calendario-attivita`) → tutti 200
+- Se anche UNO fallisce → diagnosticare causa + fix prima di chiudere Stop & Go
+
+**Motivazione:** Vite hot-reload propaga modifiche TypeScript ma non vede divergenze schema. Bug DB ↔ codice esplodono a runtime (ER_BAD_FIELD_ERROR, ER_NO_SUCH_TABLE). Senza smoke test, problemi emergono solo quando un utente apre una pagina.
+
+### 24. Grep preventivo prima di DROP/RENAME schema
+
+Aggiunta dopo F1-028 (15/05/2026) — drop legacy mother_/father_/bio/specialization aveva lasciato reference rotti in routes.ts.
+
+**Regola:**
+Prima di eseguire `DROP COLUMN`, `RENAME COLUMN` o eliminazione di entità Drizzle, AG deve:
+
+1. `grep -rn "<old_name>" server/ shared/ client/` (case-insensitive se serve)
+2. Identificare TUTTI i reference (codice TS, Drizzle queries, label UI, alias dictionaries)
+3. Fixare codice PRIMA della migration (così il vecchio codice non gira più sul vecchio campo quando il campo sparisce)
+4. ALTER TABLE → tsc → smoke test (vedi regola 23)
+
+**Eccezioni:**
+- Reference in audit_logs o changelog storici → lasciare (sono dati storici, non codice attivo)
+- Reference in commenti `// TODO` → ok rimanere, ma rimuovere se sono indicazioni di rifattorizzare
+
+**Motivazione:** "Drop senza grep" = bomba a tempo. Tutto compila (TypeScript non vede colonne DB) ma a runtime ER_BAD_FIELD esplode.
+
+### 25. Backup DB obbligatorio prima migration distruttive
+
+Aggiunta dopo F1-026, F1-027 (15/05/2026) — entrambi avevano DROP COLUMN che rompeva dati se errore.
+
+**Regola:**
+Prima di QUALSIASI migration che modifica struttura (ADD/DROP/RENAME COLUMN, CREATE/DROP TABLE), AG OBBLIGATORIAMENTE:
+
+1. Esegue `mysqldump` dell'intero schema con dati: `mysqldump -h $DB_HOST -P $DB_PORT -u $DB_USER -p$DB_PASS $DB_NAME > backups/pre_<task_id>_<timestamp>.sql`
+2. Verifica file generato (non zero bytes, contiene `INSERT INTO`)
+3. Documenta path nel report Stop & Go
+4. Solo dopo procede con migration
+
+**Cartella backups/:**
+- Esiste o creata in root progetto (gitignored)
+- Pulizia automatica > 30 giorni (cron successivo)
+- Ogni backup prima di migration distruttiva preserva 1 settimana minimo
+
+**Motivazione:** se ALTER va male (es. character set incompatibile), serve rollback rapido. Senza backup → ore di debug + rischio dati persi.
+
+### 26. Migration scripts IDEMPOTENTI
+
+Aggiunta dopo F1-021b, F1-026 (15/05/2026) — script applicati 2 volte causavano errori ER_DUP_FIELDNAME, ER_DUP_KEYNAME.
+
+**Regola:**
+Tutti gli script di migration (ADD/DROP/RENAME COLUMN, CREATE TABLE, ALTER) devono essere idempotenti = lanciabili più volte senza danno.
+
+**Pattern obbligatori:**
+- `CREATE TABLE IF NOT EXISTS` invece di `CREATE TABLE`
+- Prima di ADD COLUMN: query `DESCRIBE` o `SHOW COLUMNS LIKE 'col_name'` → se esiste, skip
+- Prima di DROP COLUMN: stesso check, se non esiste skip
+- Prima di RENAME: check su entrambi i nomi (vecchio + nuovo)
+- Per indici: `CREATE INDEX IF NOT EXISTS` (MariaDB 10.4+) o try/catch con `ER_DUP_KEYNAME`
+
+**Esempio script tipo:**
+```javascript
+async function safeAddColumn(conn, table, col, type) {
+  const [existing] = await conn.query(`SHOW COLUMNS FROM ${table} LIKE ?`, [col]);
+  if (existing.length === 0) {
+    await conn.query(`ALTER TABLE ${table} ADD COLUMN ${col} ${type}`);
+  }
+}
+```
+
+**Motivazione:** durante debug capita di rilanciare script. Se rompe alla seconda esecuzione, ostacola lo sviluppo.
+
+### 27. Sincronizzazione obbligatoria schema.ts + storage.ts + routes.ts
+
+Aggiunta dopo F1-026, F1-028 (15/05/2026) — drop di campi su Drizzle senza fixare storage.ts/routes.ts causa runtime errors.
+
+**Regola:**
+Quando AG modifica `shared/schema.ts` (aggiungere/rimuovere/rinominare campi/tabelle), DEVE controllare e sincronizzare anche:
+
+1. **`server/storage.ts`** — funzioni che fanno `db.select().from(table)` o `db.insert(table).values({...})`. Se campo droppato e ancora referenziato in `.select({col: table.col})` o `.values({col: ...})` → fix obbligatorio.
+
+2. **`server/routes.ts`** (e split moduli `server/routes/*.ts`) — endpoint che leggono/scrivono il campo. Se ritornavano `member.bio` ma `bio` droppato → fix response shape.
+
+3. **`client/src/...`** — componenti che leggono il campo. Se cambiava nome (es. `nationality` → `citizenship` + nuovo `nationality`), aggiornare interfacce TS, JSX, alias dictionaries.
+
+4. **Frontmatter `_GAE_SVILUPPO/_ANTIGRAVITY/01_status_continui/D_*_Mappa_Dati_e_Frontend_BACKEND.md`** — documentazione struttura DB, da aggiornare.
+
+**Eccezione**: campi `_metadata`, audit log entries pre-esistenti, commenti — non si toccano.
+
+**Motivazione:** Drizzle è solo schema definition. Le query reali stanno in storage.ts/routes.ts. Modificare uno senza l'altro = ER_BAD_FIELD_ERROR a runtime.
+
+### 28. Cleanup file scratch/test/fix dopo task
+
+Aggiunta dopo recap diagnostica Cowork (15/05/2026) — root inquinata da ~80 file scratch_/fix_/test_ accumulati.
+
+**Regola:**
+Al termine di ogni task AG, prima di chiudere Stop & Go, AG OBBLIGATORIAMENTE rimuove o sposta i file temporanei creati durante l'esecuzione:
+
+**File da eliminare** (one-shot già usati):
+- `scratch_*.ts`, `scratch.ts`, `scratch.tsx`
+- `fix_*.cjs`, `fix_*.ts` (script una tantum di fix)
+- `patch_*.cjs`
+- `test_*.cjs`, `test_*.ts` (a meno che siano test reali in `tests/` o `__tests__/`)
+- `update_f*.cjs`, `update_schema.cjs`
+
+**File da spostare in `scripts/_archive/<task_id>/`:**
+- Script di migration una-tantum già applicati (es. `run-migration-F1-026.cjs`)
+- Audit/diff script che potrebbero servire come reference
+
+**File da mantenere:**
+- Test reali in cartelle dedicate (`server/tests/`, `client/tests/`, `tests/`)
+- Script di manutenzione ricorrente (es. cron, backup, healthcheck)
+- File con prefisso permanente (no `scratch_`, `fix_`, `temp_`)
+
+**Motivazione:** root pulita = onboarding facile + repo professionale. Anche AG fatica con file mischiati durante grep.
+
+---
+
+### 29. Full-width responsive obbligatorio su TUTTE le pagine
+
+Aggiunta dopo richiesta UX di Gaetano (15/05/2026) — diverse pagine hanno `max-w-screen-xl/lg/md` arbitrari che lasciano fasce vuote ai lati su schermi >1400px.
+
+**Regola:**
+Ogni pagina del gestionale DEVE adattarsi all'ampiezza totale della finestra. Layout standard:
+
+```tsx
+// CORRETTO
+<div className="w-full px-6 py-4">
+  <header>...</header>
+  <main className="w-full">...</main>
+</div>
+
+// VIETATO (cap fissi che lasciano spazio vuoto)
+<div className="max-w-screen-xl mx-auto">...</div>
+<div className="max-w-7xl">...</div>
+<div className="container mx-auto">...</div>  // tailwind 'container' ha cap
+```
+
+**Eccezioni esplicite (UNICHE consentite):**
+- Form a colonna singola di input (max 720px per leggibilità)
+- Modali e dialog (Radix dialog ha sua larghezza)
+- Login/onboarding screen (centratura intenzionale)
+
+**Pattern globale:**
+- `AppLayout` (wrapper di livello pagina) → `w-full min-h-screen px-6 py-4`
+- Content area → `w-full` (mai max-width restrittivi)
+- Tabelle → scrollable orizzontalmente solo se overflow reale, mai cap di larghezza
+
+**Verifica:** prima di chiudere task FE che tocca layout, AG fa screenshot a 1920px e 1440px → la content area DEVE riempire 100% del viewport (meno sidebar).
+
+**Motivazione:** browser desktop moderni hanno schermi 1440-2560px. Pagine cappate sembrano "vecchie" e sprecano spazio prezioso per tabelle dati e dashboard.
+
+---
+
+### 30. Eliminazione UI = screenshot prima/dopo obbligatorio
+
+Aggiunta dopo richiesta esplicita di Gaetano (15/05/2026) — quando rimuoviamo input/sezioni/feature UI, Gaetano deve poter validare visivamente prima del commit.
+
+**Regola:**
+Quando un task elimina elementi UI visibili (campi input, bottoni, sezioni, tab, pagine), AG OBBLIGATORIAMENTE produce:
+
+1. Screenshot **prima** della modifica (stato attuale UI con elementi presenti)
+2. Screenshot **dopo** la modifica (stato risultante UI con elementi rimossi)
+3. Allegare entrambi al report Stop & Go in `_GAE_SVILUPPO/_ANTIGRAVITY/02_output_protocolli/`
+
+**Quando si applica:**
+- DROP campi UI (es. F2-021 rimozione 32 input obsoleti TabAnagrafica)
+- Rimozione tab/sezioni intere
+- Dismissione pagine vecchie
+- Refactor che cambia significativamente layout pagina
+
+**Quando NON si applica:**
+- Refactor interno senza cambio visivo
+- Aggiunta nuovi elementi (basta screenshot finale)
+- Modifiche stilistiche minori (colori, padding piccolo)
+
+**Motivazione:** Gaetano è product owner e vuole sempre validare visivamente cosa scompare dall'UI. Eliminazioni a freddo senza prova grafica generano sorprese sgradite.
+
+---
+
+### 31. Maschera classica anagrafica NON va eliminata (policy)
+
+Aggiunta dopo richiesta esplicita di Gaetano (15/05/2026) — la nuova Pratica Guidata (Wizard) NON sostituisce la maschera classica `maschera-input-generale.tsx`.
+
+**Policy:**
+- La maschera classica resta accessibile e funzionale
+- Banner attivo "Stai usando la maschera classica. Dal 28/05/2026 la Pratica Guidata sarà l'unico flusso." → resta visibile
+- Dal 28/05/2026 la maschera classica diventa **read-only / consultazione**, ma non viene rimossa dal codice fino a esplicita decisione Gaetano
+- Tutte le modifiche dati dopo 28/05 passano dal Wizard
+
+**Motivazione:** transizione graduale, non disruptive. La maschera classica è punto di riferimento visivo storico, gli operatori segreteria hanno memoria muscolare. Eliminazione = trauma operativo evitabile.
+
+**Eccezioni alla policy:** nessuna senza approvazione esplicita Gaetano in chat.
 
 ---
 
