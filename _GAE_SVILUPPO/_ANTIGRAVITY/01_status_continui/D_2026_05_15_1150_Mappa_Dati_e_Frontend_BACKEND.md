@@ -41,3 +41,7 @@ Questo conferma che il motore di pricing è la feature strutturalmente più rece
 ### 15 Maggio 2026 - 11:50
 - Nuova tabella: `import_batches`
 - `members` aggiornata con colonne tolleranza import (`data_quality_flag`, `extra_data`, `tutor1_fiscal_code`).
+
+### 18 Maggio 2026 - 15:15
+- Sincronizzazione colonne mancanti su `members`: aggiunte le colonne mancanti (es. `alias`, `p_iva`) per risolvere crash `ER_BAD_FIELD_ERROR` su endpoint come `/api/instructors`.
+- Modifica di diverse colonne `VARCHAR(255)` a `TEXT` per rispettare il limite ROW_SIZE (65k) in MariaDB/MySQL.
