@@ -14,3 +14,9 @@ debug.sh
 scripts/tunnel-db.sh
 
 backups/
+
+*.log
+scripts/backups/
+scripts/logs/
+scripts/_archive/
+uploads/
