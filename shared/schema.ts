@@ -37,7 +37,9 @@ export const sessions = mysqlTable(
 );
 
 export const users = mysqlTable("users", {
-  id: varchar("id", { length: 255 }).primaryKey().$defaultFn(() => crypto.randomUUID()),
+  id: varchar("id", { length: 255 })
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
   username: varchar("username", { length: 255 }).unique().notNull(),
   password: varchar("password", { length: 255 }).notNull(),
   email: varchar("email", { length: 255 }).unique(),
@@ -56,20 +58,26 @@ export const users = mysqlTable("users", {
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
 });
 
-export const userSessionSegments = mysqlTable("user_session_segments", {
-  id: int("id").primaryKey().autoincrement(),
-  userId: varchar("user_id", { length: 255 }).notNull().references(() => users.id, { onDelete: "cascade" }),
-  startedAt: timestamp("started_at").notNull().defaultNow(),
-  lastHeartbeatAt: timestamp("last_heartbeat_at"),
-  endedAt: timestamp("ended_at"),
-  tipo: mysqlEnum("tipo", ["online", "pausa"]).notNull().default("online"),
-  durataMinuti: int("durata_minuti"),
-  createdAt: timestamp("created_at").defaultNow(),
-}, (table) => [
-  index("idx_user_date").on(table.userId, table.startedAt),
-  index("idx_tipo").on(table.tipo),
-  index("idx_ended").on(table.endedAt),
-]);
+export const userSessionSegments = mysqlTable(
+  "user_session_segments",
+  {
+    id: int("id").primaryKey().autoincrement(),
+    userId: varchar("user_id", { length: 255 })
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    startedAt: timestamp("started_at").notNull().defaultNow(),
+    lastHeartbeatAt: timestamp("last_heartbeat_at"),
+    endedAt: timestamp("ended_at"),
+    tipo: mysqlEnum("tipo", ["online", "pausa"]).notNull().default("online"),
+    durataMinuti: int("durata_minuti"),
+    createdAt: timestamp("created_at").defaultNow(),
+  },
+  (table) => [
+    index("idx_user_date").on(table.userId, table.startedAt),
+    index("idx_tipo").on(table.tipo),
+    index("idx_ended").on(table.endedAt),
+  ],
+);
 
 export const userRoles = mysqlTable("user_roles", {
   id: int("id").primaryKey().autoincrement(),
@@ -144,7 +152,9 @@ export const countries = mysqlTable("countries", {
   isDefault: boolean("is_default").default(false),
 });
 
-export const insertCountrySchema = createInsertSchema(countries).omit({ id: true });
+export const insertCountrySchema = createInsertSchema(countries).omit({
+  id: true,
+});
 export type InsertCountry = z.infer<typeof insertCountrySchema>;
 export type Country = typeof countries.$inferSelect;
 
@@ -154,7 +164,9 @@ export const provinces = mysqlTable("provinces", {
   code: varchar("code", { length: 2 }).notNull(), // Sigla provincia (MI, RM, TO)
   name: varchar("name", { length: 100 }).notNull(),
   region: varchar("region", { length: 100 }), // Regione
-  countryId: int("country_id").references(() => countries.id, { onDelete: "cascade" }),
+  countryId: int("country_id").references(() => countries.id, {
+    onDelete: "cascade",
+  }),
 });
 
 export const provincesRelations = relations(provinces, ({ one, many }) => ({
@@ -165,7 +177,9 @@ export const provincesRelations = relations(provinces, ({ one, many }) => ({
   cities: many(cities),
 }));
 
-export const insertProvinceSchema = createInsertSchema(provinces).omit({ id: true });
+export const insertProvinceSchema = createInsertSchema(provinces).omit({
+  id: true,
+});
 export type InsertProvince = z.infer<typeof insertProvinceSchema>;
 export type Province = typeof provinces.$inferSelect;
 
@@ -173,7 +187,9 @@ export type Province = typeof provinces.$inferSelect;
 export const cities = mysqlTable("cities", {
   id: int("id").primaryKey().autoincrement(),
   name: varchar("name", { length: 100 }).notNull(),
-  provinceId: int("province_id").references(() => provinces.id, { onDelete: "cascade" }),
+  provinceId: int("province_id").references(() => provinces.id, {
+    onDelete: "cascade",
+  }),
   postalCode: varchar("postal_code", { length: 10 }), // CAP principale
   istatCode: varchar("istat_code", { length: 10 }), // Codice ISTAT
 });
@@ -205,7 +221,9 @@ export const customLists = mysqlTable("custom_lists", {
 
 export const customListItems = mysqlTable("custom_list_items", {
   id: int("id").primaryKey().autoincrement(),
-  listId: int("list_id").references(() => customLists.id, { onDelete: "cascade" }),
+  listId: int("list_id").references(() => customLists.id, {
+    onDelete: "cascade",
+  }),
   value: varchar("value", { length: 255 }).notNull(), // The actual string value (e.g., 'Yoga Base')
   sortOrder: int("sort_order").default(0),
   active: boolean("active").default(true),
@@ -216,12 +234,15 @@ export const customListsRelations = relations(customLists, ({ many }) => ({
   items: many(customListItems),
 }));
 
-export const customListItemsRelations = relations(customListItems, ({ one }) => ({
-  list: one(customLists, {
-    fields: [customListItems.listId],
-    references: [customLists.id],
+export const customListItemsRelations = relations(
+  customListItems,
+  ({ one }) => ({
+    list: one(customLists, {
+      fields: [customListItems.listId],
+      references: [customLists.id],
+    }),
   }),
-}));
+);
 
 export const aiUsageLogs = mysqlTable("ai_usage_logs", {
   id: int("id").primaryKey().autoincrement(),
@@ -231,15 +252,20 @@ export const aiUsageLogs = mysqlTable("ai_usage_logs", {
   completionTokens: int("completion_tokens").default(0),
   totalTokens: int("total_tokens").default(0),
   model: varchar("model", { length: 50 }).notNull(),
-  costUsd: decimal("cost_usd", { precision: 10, scale: 6 }).default('0'), // Up to 6 decimals for fractions of cent
+  costUsd: decimal("cost_usd", { precision: 10, scale: 6 }).default("0"), // Up to 6 decimals for fractions of cent
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const insertCustomListSchema = createInsertSchema(customLists).omit({ id: true, createdAt: true });
+export const insertCustomListSchema = createInsertSchema(customLists).omit({
+  id: true,
+  createdAt: true,
+});
 export type InsertCustomList = z.infer<typeof insertCustomListSchema>;
 export type CustomList = typeof customLists.$inferSelect;
 
-export const insertCustomListItemSchema = createInsertSchema(customListItems).omit({ id: true });
+export const insertCustomListItemSchema = createInsertSchema(
+  customListItems,
+).omit({ id: true });
 export type InsertCustomListItem = z.infer<typeof insertCustomListItemSchema>;
 export type CustomListItem = typeof customListItems.$inferSelect;
 
@@ -249,25 +275,11 @@ export type CustomListItem = typeof customListItems.$inferSelect;
 
 // Categories (hierarchical structure)
 
-
 // Workshop Categories (separate category system for workshops)
-
-
-
-
-
-
-
-
-
-
-
 
 // Vacation Study Categories (hierarchical structure for vacation study programs)
 
-
 // Client Categories (hierarchical structure for client classification)
-
 
 // Subscription Types (Tipo Iscrizione)
 export const subscriptionTypes = mysqlTable("sub_types", {
@@ -278,11 +290,15 @@ export const subscriptionTypes = mysqlTable("sub_types", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const insertSubscriptionTypeSchema = createInsertSchema(subscriptionTypes).omit({
+export const insertSubscriptionTypeSchema = createInsertSchema(
+  subscriptionTypes,
+).omit({
   id: true,
   createdAt: true,
 });
-export type InsertSubscriptionType = z.infer<typeof insertSubscriptionTypeSchema>;
+export type InsertSubscriptionType = z.infer<
+  typeof insertSubscriptionTypeSchema
+>;
 export type SubscriptionType = typeof subscriptionTypes.$inferSelect;
 
 // Instructor Types (Aliased to Member for backward compatibility)
@@ -299,7 +315,9 @@ export const activityStatuses = mysqlTable("act_statuses", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const insertActivityStatusSchema = createInsertSchema(activityStatuses).omit({
+export const insertActivityStatusSchema = createInsertSchema(
+  activityStatuses,
+).omit({
   id: true,
   createdAt: true,
 });
@@ -333,11 +351,15 @@ export const enrollmentDetails = mysqlTable("enroll_details", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const insertEnrollmentDetailSchema = createInsertSchema(enrollmentDetails).omit({
+export const insertEnrollmentDetailSchema = createInsertSchema(
+  enrollmentDetails,
+).omit({
   id: true,
   createdAt: true,
 });
-export type InsertEnrollmentDetail = z.infer<typeof insertEnrollmentDetailSchema>;
+export type InsertEnrollmentDetail = z.infer<
+  typeof insertEnrollmentDetailSchema
+>;
 export type EnrollmentDetail = typeof enrollmentDetails.$inferSelect;
 
 // Participant Types (Tipi Partecipante)
@@ -350,7 +372,9 @@ export const participantTypes = mysqlTable("participant_types", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const insertParticipantTypeSchema = createInsertSchema(participantTypes).omit({
+export const insertParticipantTypeSchema = createInsertSchema(
+  participantTypes,
+).omit({
   id: true,
   createdAt: true,
 });
@@ -389,9 +413,16 @@ export const courses = mysqlTable("courses", {
   activityType: varchar("activity_type", { length: 50 }),
   description: text("description"),
   categoryId: int("category_id"),
-  studioId: int("studio_id").references(() => studios.id, { onDelete: "set null" }), // Studio/sala
-  instructorId: int("instructor_id").references(() => members.id, { onDelete: "set null" }), // Insegnante primario
-  secondaryInstructor1Id: int("secondary_instructor1_id").references(() => members.id, { onDelete: "set null" }), // Insegnante secondario 1
+  studioId: int("studio_id").references(() => studios.id, {
+    onDelete: "set null",
+  }), // Studio/sala
+  instructorId: int("instructor_id").references(() => members.id, {
+    onDelete: "set null",
+  }), // Insegnante primario
+  secondaryInstructor1Id: int("secondary_instructor1_id").references(
+    () => members.id,
+    { onDelete: "set null" },
+  ), // Insegnante secondario 1
 
   price: decimal("price", { precision: 10, scale: 2 }),
   maxCapacity: int("max_capacity"),
@@ -406,7 +437,7 @@ export const courses = mysqlTable("courses", {
   startDate: date("start_date"),
   endDate: date("end_date"),
   totalOccurrences: int("total_occurrences"),
-  activeOnHolidays: tinyint('active_on_holidays').notNull().default(0),
+  activeOnHolidays: tinyint("active_on_holidays").notNull().default(0),
   level: varchar("level", { length: 100 }), // Livello (es. Base, Intermedio, Avanzato)
   ageGroup: varchar("age_group", { length: 100 }), // Fascia d'età (es. Bambini 3-5 anni)
   lessonType: json("lesson_type").$type<string[]>().default([]), // Tipologia Multipla (es. [Preparazione Gara, Tecnica])
@@ -415,8 +446,12 @@ export const courses = mysqlTable("courses", {
   internalTags: json("internal_tags").$type<string[]>().default([]),
   active: boolean("active").default(true),
   googleEventId: varchar("google_event_id", { length: 255 }),
-  seasonId: int("season_id").references(() => seasons.id, { onDelete: "set null" }),
-  quoteId: int("quote_id").references(() => quotes.id, { onDelete: "set null" }),
+  seasonId: int("season_id").references(() => seasons.id, {
+    onDelete: "set null",
+  }),
+  quoteId: int("quote_id").references(() => quotes.id, {
+    onDelete: "set null",
+  }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -461,41 +496,28 @@ export type Course = typeof courses.$inferSelect;
 // WORKSHOPS (identical structure to courses)
 // ============================================================================
 
-
-
 // ============================================================================
 // PAID TRIALS (identical structure to workshops, uses categories)
 // ============================================================================
-
-
 
 // ============================================================================
 // FREE TRIALS (identical structure to workshops, uses categories)
 // ============================================================================
 
-
-
 // ============================================================================
 // SINGLE LESSONS (identical structure to workshops, uses categories)
 // ============================================================================
-
-
 
 // ============================================================================
 // CAMPUS ACTIVITIES (identical structure to workshops, uses campusCategories)
 // ============================================================================
 
-
-
 // ============================================================================
 // VACATION STUDIES (identical structure to workshops, uses vacationCategories)
 // ============================================================================
 
-
-
 // Members (iscritti)
 export const members = mysqlTable("members", {
-
   legacyAthenaId: varchar("legacy_athena_id", { length: 50 }),
   legacyMasterId: varchar("legacy_master_id", { length: 50 }),
   genitore1FirstName: varchar("genitore1_first_name", { length: 100 }),
@@ -509,24 +531,13 @@ export const members = mysqlTable("members", {
   extraData: json("extra_data"),
   attachmentsUrl: text("attachments_url"),
 
-
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-
   id: int("id").primaryKey().autoincrement(),
-  userId: varchar("user_id", { length: 255 }).references(() => users.id, { onDelete: "set null" }),
+  userId: varchar("user_id", { length: 255 }).references(() => users.id, {
+    onDelete: "set null",
+  }),
   firstName: varchar("first_name", { length: 255 }).notNull(),
   lastName: varchar("last_name", { length: 255 }).notNull(),
-  fiscalCode: varchar('fiscal_code', { length: 16 }).unique(), // Codice fiscale
+  fiscalCode: varchar("fiscal_code", { length: 16 }).unique(), // Codice fiscale
   dateOfBirth: date("date_of_birth"),
   placeOfBirth: varchar("place_of_birth", { length: 255 }), // Luogo di nascita
   birthProvince: varchar("birth_province", { length: 2 }),
@@ -535,7 +546,10 @@ export const members = mysqlTable("members", {
   phone: varchar("phone", { length: 50 }), // Telefono fisso
   mobile: varchar("mobile", { length: 50 }), // Cellulare
   categoryId: int("category_id"), // Categoria partecipante (Tipologia Partecipante)
-  subscriptionTypeId: int("subscription_type_id").references(() => subscriptionTypes.id, { onDelete: "set null" }), // Tipo Iscrizione
+  subscriptionTypeId: int("subscription_type_id").references(
+    () => subscriptionTypes.id,
+    { onDelete: "set null" },
+  ), // Tipo Iscrizione
 
   // Dati tessera
   cardNumber: varchar("card_number", { length: 100 }), // Numero tessera
@@ -577,7 +591,47 @@ export const members = mysqlTable("members", {
   tesserinoTecnicoIssueDate: date("tesserino_tecnico_date"),
   privacyAccepted: boolean("privacy_accepted").default(false),
   regulationsAccepted: boolean("regulations_accepted").default(false),
-  membershipApplicationSigned: boolean("membership_application_signed").default(false),
+  membershipApplicationSigned: boolean("membership_application_signed").default(
+    false,
+  ),
+
+  statusLifecycle: mysqlEnum("status_lifecycle", [
+    "attivo",
+    "sospeso",
+    "dimesso",
+    "deceduto",
+  ]).default("attivo"),
+  dataIscrizione: date("data_iscrizione"),
+  dataDimissione: date("data_dimissione"),
+  causaDimissione: text("causa_dimissione"),
+  codiceDestinatario: varchar("codice_destinatario", { length: 7 }),
+  pec: varchar("pec", { length: 255 }),
+  iban: varchar("iban", { length: 34 }),
+  intestatarioIban: varchar("intestatario_iban", { length: 255 }),
+  modPagamentoPreferita: mysqlEnum("mod_pagamento_preferita", [
+    "contanti",
+    "bonifico",
+    "pos",
+    "sdd",
+    "assegno",
+    "altro",
+  ]),
+  dataCertificatoMedico: date("data_certificato_medico"),
+  tipologiaCertificato: mysqlEnum("tipologia_certificato", [
+    "non_agonistico",
+    "agonistico",
+    "sportivo",
+  ]),
+  allergie: text("allergie"),
+  patologie: text("patologie"),
+  farmaci: text("farmaci"),
+  noteSanitarie: text("note_sanitarie"),
+  tagliaAbbigliamento: varchar("taglia_abbigliamento", { length: 10 }),
+  numeroScarpe: varchar("numero_scarpe", { length: 10 }),
+  societyProvenienzaId: int("society_provenienza_id"),
+  dataTesseramentoPrecedente: date("data_tesseramento_precedente"),
+  noteProvenienza: text("note_provenienza"),
+  flagMinoreProtetto: tinyint("flag_minore_protetto").default(0),
   attachmentMetadata: json("attachment_metadata"),
   giftMetadata: json("gift_metadata"),
   tessereMetadata: json("tessere_metadata"),
@@ -596,7 +650,9 @@ export const members = mysqlTable("members", {
 
   address: text("address"), // Mantenuto per retrocompatibilità
   notes: text("notes"),
-  previousMembershipNumber: varchar("previous_membership_number", { length: 50 }),
+  previousMembershipNumber: varchar("previous_membership_number", {
+    length: 50,
+  }),
 
   // ANAGRAFICA
   title: varchar("title", { length: 20 }),
@@ -642,7 +698,6 @@ export const members = mysqlTable("members", {
 
   // DATI BANCARI
   bankName: varchar("bank_name", { length: 100 }),
-  iban: varchar("iban", { length: 34 }),
 
   // TAGLIE
   sizeShirt: varchar("size_shirt", { length: 10 }),
@@ -720,30 +775,39 @@ export const members = mysqlTable("members", {
   crmProfileReason: varchar("crm_profile_reason", { length: 255 }),
 
   // GemStaff fields
-  staffStatus: mysqlEnum("staff_status", ["attivo", "inattivo", "archivio"]).notNull().default("attivo"),
-  lezioniPrivateAutorizzate: boolean("lezioni_private_autorizzate").notNull().default(false),
+  staffStatus: mysqlEnum("staff_status", ["attivo", "inattivo", "archivio"])
+    .notNull()
+    .default("attivo"),
+  lezioniPrivateAutorizzate: boolean("lezioni_private_autorizzate")
+    .notNull()
+    .default(false),
   lezioniPrivateAutorizzateAt: datetime("lezioni_private_autorizzate_at"),
-  lezioniPrivateAutorizzateBy: varchar("lezioni_private_autorizzate_by", { length: 100 }),
+  lezioniPrivateAutorizzateBy: varchar("lezioni_private_autorizzate_by", {
+    length: 100,
+  }),
   lezioniPrivateNote: text("lezioni_private_note"),
 
   active: boolean("active").default(true),
-  enrollmentStatus: mysqlEnum("enrollment_status", ["attivo", "non_attivo"]).default("non_attivo"),
+  enrollmentStatus: mysqlEnum("enrollment_status", [
+    "attivo",
+    "non_attivo",
+  ]).default("non_attivo"),
   createdBy: varchar("created_by", { length: 255 }),
   updatedBy: varchar("updated_by", { length: 255 }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 
-  birthNation: varchar('birth_nation', { length: 100 }),
-  secondaryEmail: varchar('secondary_email', { length: 255 }),
-  profession: varchar('profession', { length: 100 }),
-  documentType: varchar('document_type', { length: 50 }),
-  documentExpiry: date('document_expiry'),
-  privacyDate: date('privacy_date'),
-  consentNewsletter: tinyint('consent_newsletter').default(0).notNull(),
-  adminNotes: text('admin_notes'),
-  healthNotes: text('health_notes'),
-  foodAlerts: varchar('food_alerts', { length: 255 }),
-  tags: varchar('tags', { length: 500 }),
+  birthNation: varchar("birth_nation", { length: 100 }),
+  secondaryEmail: varchar("secondary_email", { length: 255 }),
+  profession: varchar("profession", { length: 100 }),
+  documentType: varchar("document_type", { length: 50 }),
+  documentExpiry: date("document_expiry"),
+  privacyDate: date("privacy_date"),
+  consentNewsletter: tinyint("consent_newsletter").default(0).notNull(),
+  adminNotes: text("admin_notes"),
+  healthNotes: text("health_notes"),
+  foodAlerts: varchar("food_alerts", { length: 255 }),
+  tags: varchar("tags", { length: 500 }),
 });
 
 export const membersRelations = relations(members, ({ one, many }) => ({
@@ -764,22 +828,24 @@ export const insertMemberSchema = createInsertSchema(members, {
   medicalCertificateExpiry: z.coerce.date().nullish(),
   insertionDate: z.coerce.date().nullish(),
   tesserinoTecnicoIssueDate: z.coerce.date().nullish(),
-}).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-}).extend({
-  active: z.boolean().optional(),
-  hasMedicalCertificate: z.boolean().optional(),
-  isMinor: z.boolean().optional(),
-  privacyAccepted: z.boolean().optional(),
-  regulationsAccepted: z.boolean().optional(),
-  membershipApplicationSigned: z.boolean().optional(),
-  attachmentMetadata: z.any().optional(),
-  giftMetadata: z.any().optional(),
-  tessereMetadata: z.any().optional(),
-  certificatoMedicoMetadata: z.any().optional(),
-});
+})
+  .omit({
+    id: true,
+    createdAt: true,
+    updatedAt: true,
+  })
+  .extend({
+    active: z.boolean().optional(),
+    hasMedicalCertificate: z.boolean().optional(),
+    isMinor: z.boolean().optional(),
+    privacyAccepted: z.boolean().optional(),
+    regulationsAccepted: z.boolean().optional(),
+    membershipApplicationSigned: z.boolean().optional(),
+    attachmentMetadata: z.any().optional(),
+    giftMetadata: z.any().optional(),
+    tessereMetadata: z.any().optional(),
+    certificatoMedicoMetadata: z.any().optional(),
+  });
 export type InsertMember = z.infer<typeof insertMemberSchema>;
 export type Member = typeof members.$inferSelect;
 
@@ -787,50 +853,85 @@ export type Member = typeof members.$inferSelect;
 // DUPLICATE EXCLUSIONS
 // ============================================================================
 
-export const memberDuplicateExclusions = mysqlTable("member_duplicate_exclusions", {
-  id: int("id").primaryKey().autoincrement(),
-  memberId1: int("member_id_1").notNull(),
-  memberId2: int("member_id_2").notNull(),
-  excludedBy: varchar("excluded_by", { length: 255 }),
-  excludedAt: timestamp("excluded_at").defaultNow(),
-}, (table) => [
-  index("idx_pair").on(table.memberId1, table.memberId2)
-]);
+export const memberDuplicateExclusions = mysqlTable(
+  "member_duplicate_exclusions",
+  {
+    id: int("id").primaryKey().autoincrement(),
+    memberId1: int("member_id_1").notNull(),
+    memberId2: int("member_id_2").notNull(),
+    excludedBy: varchar("excluded_by", { length: 255 }),
+    excludedAt: timestamp("excluded_at").defaultNow(),
+  },
+  (table) => [index("idx_pair").on(table.memberId1, table.memberId2)],
+);
 
 // ============================================================================
 // GEMSTAFF TABLES
 // ============================================================================
 
-export const staffContractsCompliance = mysqlTable("staff_contracts_compliance", {
-  id: int("id").primaryKey().autoincrement(),
-  memberId: int("member_id").notNull().references(() => members.id, { onDelete: "cascade" }),
-  docType: mysqlEnum("doc_type", ["diploma_tesserino", "carta_identita", "codice_fiscale", "permesso_soggiorno", "foto_id", "video_promo"]).notNull(),
-  docValue: text("doc_value"),
-  hasDoc: boolean("has_doc").notNull().default(false),
-  expiresAt: date("expires_at"),
-  notes: text("notes"),
-  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
-}, (table) => [
-  index("idx_member_doc").on(table.memberId, table.docType)
-]);
+export const staffContractsCompliance = mysqlTable(
+  "staff_contracts_compliance",
+  {
+    id: int("id").primaryKey().autoincrement(),
+    memberId: int("member_id")
+      .notNull()
+      .references(() => members.id, { onDelete: "cascade" }),
+    docType: mysqlEnum("doc_type", [
+      "diploma_tesserino",
+      "carta_identita",
+      "codice_fiscale",
+      "permesso_soggiorno",
+      "foto_id",
+      "video_promo",
+    ]).notNull(),
+    docValue: text("doc_value"),
+    hasDoc: boolean("has_doc").notNull().default(false),
+    expiresAt: date("expires_at"),
+    notes: text("notes"),
+    updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
+  },
+  (table) => [index("idx_member_doc").on(table.memberId, table.docType)],
+);
 
-export const staffDocumentSignatures = mysqlTable("staff_document_signatures", {
-  id: int("id").primaryKey().autoincrement(),
-  memberId: int("member_id").notNull().references(() => members.id, { onDelete: "cascade" }),
-  docType: mysqlEnum("doc_type", ["regolamento_staff", "codice_disciplinare_staff"]).notNull(),
-  docVersion: varchar("doc_version", { length: 10 }).notNull(),
-  signedAt: datetime("signed_at").notNull(),
-  signedBy: varchar("signed_by", { length: 100 }).notNull(),
-  method: mysqlEnum("method", ["manual", "kiosk"]).notNull().default("manual"),
-  notes: text("notes"),
-}, (table) => [
-  uniqueIndex("uk_member_doc_ver").on(table.memberId, table.docType, table.docVersion)
-]);
+export const staffDocumentSignatures = mysqlTable(
+  "staff_document_signatures",
+  {
+    id: int("id").primaryKey().autoincrement(),
+    memberId: int("member_id")
+      .notNull()
+      .references(() => members.id, { onDelete: "cascade" }),
+    docType: mysqlEnum("doc_type", [
+      "regolamento_staff",
+      "codice_disciplinare_staff",
+    ]).notNull(),
+    docVersion: varchar("doc_version", { length: 10 }).notNull(),
+    signedAt: datetime("signed_at").notNull(),
+    signedBy: varchar("signed_by", { length: 100 }).notNull(),
+    method: mysqlEnum("method", ["manual", "kiosk"])
+      .notNull()
+      .default("manual"),
+    notes: text("notes"),
+  },
+  (table) => [
+    uniqueIndex("uk_member_doc_ver").on(
+      table.memberId,
+      table.docType,
+      table.docVersion,
+    ),
+  ],
+);
 
 export const staffDisciplinaryLog = mysqlTable("staff_disciplinary_log", {
   id: int("id").primaryKey().autoincrement(),
-  memberId: int("member_id").notNull().references(() => members.id, { onDelete: "cascade" }),
-  eventType: mysqlEnum("event_type", ["richiamo_verbale", "ammonizione_scritta", "sospensione", "interruzione_rapporto"]).notNull(),
+  memberId: int("member_id")
+    .notNull()
+    .references(() => members.id, { onDelete: "cascade" }),
+  eventType: mysqlEnum("event_type", [
+    "richiamo_verbale",
+    "ammonizione_scritta",
+    "sospensione",
+    "interruzione_rapporto",
+  ]).notNull(),
   eventDate: date("event_date").notNull(),
   description: text("description").notNull(),
   staffResponse: text("staff_response"),
@@ -843,12 +944,18 @@ export const staffDisciplinaryLog = mysqlTable("staff_disciplinary_log", {
 
 export const staffPresenze = mysqlTable("staff_presenze", {
   id: int("id").primaryKey().autoincrement(),
-  memberId: int("member_id").notNull().references(() => members.id, { onDelete: "cascade" }),
-  courseId: int("course_id").references(() => courses.id, { onDelete: "set null" }),
+  memberId: int("member_id")
+    .notNull()
+    .references(() => members.id, { onDelete: "cascade" }),
+  courseId: int("course_id").references(() => courses.id, {
+    onDelete: "set null",
+  }),
   date: date("date").notNull(),
   hours: decimal("hours", { precision: 4, scale: 2 }).notNull().default("1.00"),
   source: mysqlEnum("source", ["auto", "manual"]).notNull().default("auto"),
-  status: mysqlEnum("status", ["bozza", "confermato"]).notNull().default("bozza"),
+  status: mysqlEnum("status", ["bozza", "confermato"])
+    .notNull()
+    .default("bozza"),
   confirmedBy: varchar("confirmed_by", { length: 100 }),
   confirmedAt: datetime("confirmed_at"),
   notes: text("notes"),
@@ -857,12 +964,20 @@ export const staffPresenze = mysqlTable("staff_presenze", {
 
 export const staffSostituzioni = mysqlTable("staff_sostituzioni", {
   id: int("id").primaryKey().autoincrement(),
-  absentMemberId: int("absent_member_id").notNull().references(() => members.id, { onDelete: "cascade" }),
-  substituteMemberId: int("substitute_member_id").references(() => members.id, { onDelete: "set null" }),
-  courseId: int("course_id").references(() => courses.id, { onDelete: "set null" }),
+  absentMemberId: int("absent_member_id")
+    .notNull()
+    .references(() => members.id, { onDelete: "cascade" }),
+  substituteMemberId: int("substitute_member_id").references(() => members.id, {
+    onDelete: "set null",
+  }),
+  courseId: int("course_id").references(() => courses.id, {
+    onDelete: "set null",
+  }),
   absenceDate: date("absence_date").notNull(),
   lessonDescription: varchar("lesson_description", { length: 255 }),
-  paymentTo: mysqlEnum("payment_to", ["assente", "sostituto", "nessuno"]).notNull().default("sostituto"),
+  paymentTo: mysqlEnum("payment_to", ["assente", "sostituto", "nessuno"])
+    .notNull()
+    .default("sostituto"),
   amountOverride: decimal("amount_override", { precision: 8, scale: 2 }),
   notes: text("notes"),
   vistoSegreteria: boolean("visto_segreteria").notNull().default(false),
@@ -871,72 +986,107 @@ export const staffSostituzioni = mysqlTable("staff_sostituzioni", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const payslips = mysqlTable("payslips", {
-  id: int("id").primaryKey().autoincrement(),
-  memberId: int("member_id").notNull().references(() => members.id, { onDelete: "cascade" }),
-  month: tinyint("month").notNull(),
-  year: smallint("year").notNull(),
-  hoursTaught: decimal("hours_taught", { precision: 6, scale: 2 }).notNull().default("0.00"),
-  rate: decimal("rate", { precision: 8, scale: 2 }),
-  total: decimal("total", { precision: 10, scale: 2 }).notNull().default("0.00"),
-  status: mysqlEnum("status", ["bozza", "confermato", "pagato"]).notNull().default("bozza"),
-  notes: text("notes"),
-  confirmedBy: varchar("confirmed_by", { length: 100 }),
-  confirmedAt: datetime("confirmed_at"),
-  createdAt: timestamp("created_at").defaultNow(),
-}, (table) => [
-  uniqueIndex("uk_member_mese_anno").on(table.memberId, table.month, table.year)
-]);
+export const payslips = mysqlTable(
+  "payslips",
+  {
+    id: int("id").primaryKey().autoincrement(),
+    memberId: int("member_id")
+      .notNull()
+      .references(() => members.id, { onDelete: "cascade" }),
+    month: tinyint("month").notNull(),
+    year: smallint("year").notNull(),
+    hoursTaught: decimal("hours_taught", { precision: 6, scale: 2 })
+      .notNull()
+      .default("0.00"),
+    rate: decimal("rate", { precision: 8, scale: 2 }),
+    total: decimal("total", { precision: 10, scale: 2 })
+      .notNull()
+      .default("0.00"),
+    status: mysqlEnum("status", ["bozza", "confermato", "pagato"])
+      .notNull()
+      .default("bozza"),
+    notes: text("notes"),
+    confirmedBy: varchar("confirmed_by", { length: 100 }),
+    confirmedAt: datetime("confirmed_at"),
+    createdAt: timestamp("created_at").defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("uk_member_mese_anno").on(
+      table.memberId,
+      table.month,
+      table.year,
+    ),
+  ],
+);
 
 // ============================================================================
 
 // Member Relationships (relazioni tra partecipanti - genitori/figli/tutori)
 export const memberRelationships = mysqlTable("member_relationships", {
   id: int("id").primaryKey().autoincrement(),
-  memberId: int("member_id").notNull().references(() => members.id, { onDelete: "cascade" }), // Il minorenne
-  relatedMemberId: int("related_member_id").notNull().references(() => members.id, { onDelete: "cascade" }), // Il genitore/tutore
+  memberId: int("member_id")
+    .notNull()
+    .references(() => members.id, { onDelete: "cascade" }), // Il minorenne
+  relatedMemberId: int("related_member_id")
+    .notNull()
+    .references(() => members.id, { onDelete: "cascade" }), // Il genitore/tutore
   relationshipType: varchar("relationship_type", { length: 50 }).notNull(), // 'mother', 'father', 'guardian'
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const memberRelationshipsRelations = relations(memberRelationships, ({ one }) => ({
-  member: one(members, {
-    fields: [memberRelationships.memberId],
-    references: [members.id],
-    relationName: "childRelationships",
+export const memberRelationshipsRelations = relations(
+  memberRelationships,
+  ({ one }) => ({
+    member: one(members, {
+      fields: [memberRelationships.memberId],
+      references: [members.id],
+      relationName: "childRelationships",
+    }),
+    relatedMember: one(members, {
+      fields: [memberRelationships.relatedMemberId],
+      references: [members.id],
+      relationName: "guardianRelationships",
+    }),
   }),
-  relatedMember: one(members, {
-    fields: [memberRelationships.relatedMemberId],
-    references: [members.id],
-    relationName: "guardianRelationships",
-  }),
-}));
+);
 
-export const insertMemberRelationshipSchema = createInsertSchema(memberRelationships).omit({
+export const insertMemberRelationshipSchema = createInsertSchema(
+  memberRelationships,
+).omit({
   id: true,
   createdAt: true,
 });
-export type InsertMemberRelationship = z.infer<typeof insertMemberRelationshipSchema>;
+export type InsertMemberRelationship = z.infer<
+  typeof insertMemberRelationshipSchema
+>;
 export type MemberRelationship = typeof memberRelationships.$inferSelect;
 
 // Enrollments (iscrizioni ai corsi)
 export const enrollments = mysqlTable("enrollments", {
   id: int("id").primaryKey().autoincrement(),
-  memberId: int("member_id").notNull().references(() => members.id, { onDelete: "cascade" }),
-  courseId: int("course_id").notNull().references(() => courses.id, { onDelete: "cascade" }),
-  participationType: varchar("participation_type", { length: 50 }).default("STANDARD_COURSE"), // 'STANDARD_COURSE', 'FREE_TRIAL', 'PAID_TRIAL', 'SINGLE_LESSON'
+  memberId: int("member_id")
+    .notNull()
+    .references(() => members.id, { onDelete: "cascade" }),
+  courseId: int("course_id")
+    .notNull()
+    .references(() => courses.id, { onDelete: "cascade" }),
+  participationType: varchar("participation_type", { length: 50 }).default(
+    "STANDARD_COURSE",
+  ), // 'STANDARD_COURSE', 'FREE_TRIAL', 'PAID_TRIAL', 'SINGLE_LESSON'
   sourceFile: varchar("source_file", { length: 50 }),
   targetDate: date("target_date"), // Riferimento temporale specifico per lezioni singole e prove
   status: varchar("status", { length: 50 }).notNull().default("active"), // 'active', 'waitlist', 'completed', 'cancelled'
   enrollmentDate: timestamp("enrollment_date").defaultNow(),
   notes: text("notes"),
   details: json("details").$type<string[]>().default([]),
-  seasonId: int("season_id").references(() => seasons.id, { onDelete: "set null" }),
+  seasonId: int("season_id").references(() => seasons.id, {
+    onDelete: "set null",
+  }),
   onlineSource: boolean("online_source").default(false),
   pendingMedicalCert: boolean("pending_medical_cert").default(false),
   pendingMembership: boolean("pending_membership").default(false),
   completionNotes: text("completion_notes"),
-  
+
   // STORICO IMPORTAZIONI
   athenaStatoIscrizione: varchar("athena_stato_iscrizione", { length: 100 }),
   athenaNote: text("athena_note"),
@@ -944,9 +1094,8 @@ export const enrollments = mysqlTable("enrollments", {
   gsheetNotePagamenti: text("gsheet_note_pagamenti"),
   gsheetChiScrive: varchar("gsheet_chi_scrive", { length: 255 }),
   gsheetVendita: varchar("gsheet_vendita", { length: 255 }),
-  
-  createdAt: timestamp("created_at").defaultNow(),
 
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const enrollmentsRelations = relations(enrollments, ({ one, many }) => ({
@@ -961,24 +1110,24 @@ export const enrollmentsRelations = relations(enrollments, ({ one, many }) => ({
   payments: many(payments),
 }));
 
-export const insertEnrollmentSchema = createInsertSchema(enrollments).omit({
-  id: true,
-  enrollmentDate: true,
-  createdAt: true,
-}).extend({
-  athenaStatoIscrizione: z.string().optional().nullable(),
-  athenaNote: z.string().optional().nullable(),
-  gsheetDescrizioneQuota: z.string().optional().nullable(),
-  gsheetNotePagamenti: z.string().optional().nullable(),
-  gsheetChiScrive: z.string().optional().nullable(),
-  gsheetVendita: z.string().optional().nullable(),
-});
+export const insertEnrollmentSchema = createInsertSchema(enrollments)
+  .omit({
+    id: true,
+    enrollmentDate: true,
+    createdAt: true,
+  })
+  .extend({
+    athenaStatoIscrizione: z.string().optional().nullable(),
+    athenaNote: z.string().optional().nullable(),
+    gsheetDescrizioneQuota: z.string().optional().nullable(),
+    gsheetNotePagamenti: z.string().optional().nullable(),
+    gsheetChiScrive: z.string().optional().nullable(),
+    gsheetVendita: z.string().optional().nullable(),
+  });
 export type InsertEnrollment = z.infer<typeof insertEnrollmentSchema>;
 export type Enrollment = typeof enrollments.$inferSelect;
 
 // Workshop Attendances (presenze ai workshop)
-
-
 
 // Memberships (tessere associative)
 // --- Member Packages (Lezioni Individuali) ---
@@ -1003,7 +1152,9 @@ export const memberPackagesRelations = relations(memberPackages, ({ one }) => ({
   }),
 }));
 
-export const insertMemberPackageSchema = createInsertSchema(memberPackages).omit({
+export const insertMemberPackageSchema = createInsertSchema(
+  memberPackages,
+).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
@@ -1013,9 +1164,15 @@ export type InsertMemberPackage = z.infer<typeof insertMemberPackageSchema>;
 
 export const memberships = mysqlTable("memberships", {
   id: int("id").primaryKey().autoincrement(),
-  memberId: int("member_id").notNull().references(() => members.id, { onDelete: "cascade" }),
-  membershipNumber: varchar("membership_number", { length: 100 }).notNull().unique(),
-  previousMembershipNumber: varchar("previous_membership_number", { length: 100 }),
+  memberId: int("member_id")
+    .notNull()
+    .references(() => members.id, { onDelete: "cascade" }),
+  membershipNumber: varchar("membership_number", { length: 100 })
+    .notNull()
+    .unique(),
+  previousMembershipNumber: varchar("previous_membership_number", {
+    length: 100,
+  }),
   barcode: varchar("barcode", { length: 100 }).notNull().unique(),
   issueDate: date("issue_date").notNull(),
   expiryDate: date("expiry_date").notNull(),
@@ -1032,7 +1189,7 @@ export const memberships = mysqlTable("memberships", {
   renewedFromId: int("renewed_from_id"),
   notes: text("notes"),
   dataQualityFlag: varchar("data_quality_flag", { length: 50 }),
-  entityCardNumber: varchar("entity_card_number", { length: 100 }), 
+  entityCardNumber: varchar("entity_card_number", { length: 100 }),
   entityCardExpiryDate: date("entity_card_expiry_date"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -1045,30 +1202,34 @@ export const membershipsRelations = relations(memberships, ({ one }) => ({
   }),
 }));
 
-export const insertMembershipSchema = createInsertSchema(memberships).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-  seasonStartYear: true, // Server-side calculated
-  seasonEndYear: true, // Server-side calculated
-}).extend({
-  membershipNumber: z.string().optional(), // Auto-generated by backend
-  barcode: z.string().optional(), // Auto-generated by backend
-  issueDate: z.coerce.date(),
-  expiryDate: z.coerce.date(), // Reverted to not optional to fix server/storage.ts
-  membershipType: z.enum(["NUOVO", "RINNOVO"]).optional(),
-  seasonCompetence: z.enum(["CORRENTE", "SUCCESSIVA"]).optional(),
-  isRenewal: z.boolean().optional(),
-  renewedFromId: z.number().optional().nullable(),
-  notes: z.string().optional().nullable(),
-});
+export const insertMembershipSchema = createInsertSchema(memberships)
+  .omit({
+    id: true,
+    createdAt: true,
+    updatedAt: true,
+    seasonStartYear: true, // Server-side calculated
+    seasonEndYear: true, // Server-side calculated
+  })
+  .extend({
+    membershipNumber: z.string().optional(), // Auto-generated by backend
+    barcode: z.string().optional(), // Auto-generated by backend
+    issueDate: z.coerce.date(),
+    expiryDate: z.coerce.date(), // Reverted to not optional to fix server/storage.ts
+    membershipType: z.enum(["NUOVO", "RINNOVO"]).optional(),
+    seasonCompetence: z.enum(["CORRENTE", "SUCCESSIVA"]).optional(),
+    isRenewal: z.boolean().optional(),
+    renewedFromId: z.number().optional().nullable(),
+    notes: z.string().optional().nullable(),
+  });
 export type InsertMembership = z.infer<typeof insertMembershipSchema>;
 export type Membership = typeof memberships.$inferSelect;
 
 // Medical Certificates
 export const medicalCertificates = mysqlTable("medical_certificates", {
   id: int("id").primaryKey().autoincrement(),
-  memberId: int("member_id").notNull().references(() => members.id, { onDelete: "cascade" }),
+  memberId: int("member_id")
+    .notNull()
+    .references(() => members.id, { onDelete: "cascade" }),
   issueDate: date("issue_date").notNull(),
   expiryDate: date("expiry_date").notNull(),
   doctorName: varchar("doctor_name", { length: 255 }),
@@ -1078,25 +1239,34 @@ export const medicalCertificates = mysqlTable("medical_certificates", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-export const medicalCertificatesRelations = relations(medicalCertificates, ({ one }) => ({
-  member: one(members, {
-    fields: [medicalCertificates.memberId],
-    references: [members.id],
+export const medicalCertificatesRelations = relations(
+  medicalCertificates,
+  ({ one }) => ({
+    member: one(members, {
+      fields: [medicalCertificates.memberId],
+      references: [members.id],
+    }),
   }),
-}));
+);
 
-export const insertMedicalCertificateSchema = createInsertSchema(medicalCertificates).omit({
+export const insertMedicalCertificateSchema = createInsertSchema(
+  medicalCertificates,
+).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
 });
-export type InsertMedicalCertificate = z.infer<typeof insertMedicalCertificateSchema>;
+export type InsertMedicalCertificate = z.infer<
+  typeof insertMedicalCertificateSchema
+>;
 export type MedicalCertificate = typeof medicalCertificates.$inferSelect;
 
 // Access Logs (controllo accessi con barcode)
 export const accessLogs = mysqlTable("access_logs", {
   id: int("id").primaryKey().autoincrement(),
-  memberId: int("member_id").references(() => members.id, { onDelete: "set null" }),
+  memberId: int("member_id").references(() => members.id, {
+    onDelete: "set null",
+  }),
   barcode: varchar("barcode", { length: 100 }).notNull(),
   accessTime: timestamp("access_time").defaultNow().notNull(),
   accessType: varchar("access_type", { length: 50 }).notNull().default("entry"), // 'entry', 'exit'
@@ -1128,7 +1298,9 @@ export const paymentMethods = mysqlTable("payment_methods", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-export const insertPaymentMethodSchema = createInsertSchema(paymentMethods).omit({
+export const insertPaymentMethodSchema = createInsertSchema(
+  paymentMethods,
+).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
@@ -1138,48 +1310,83 @@ export type PaymentMethod = typeof paymentMethods.$inferSelect;
 
 // Payments
 export const payments = mysqlTable("payments", {
-
   payerId: int("payer_id"),
-  payerType: mysqlEnum("payer_type", ['member','society','external']),
+  payerType: mysqlEnum("payer_type", ["member", "society", "external"]),
   billingSubjectId: int("billing_subject_id"),
-  billingSubjectType: mysqlEnum("billing_subject_type", ['member','society','external']),
-  documentType: mysqlEnum("document_type", ['ricevuta_istituzionale','fattura','booking_only','gift_card']).default('ricevuta_istituzionale'),
+  billingSubjectType: mysqlEnum("billing_subject_type", [
+    "member",
+    "society",
+    "external",
+  ]),
+  documentType: mysqlEnum("document_type", [
+    "ricevuta_istituzionale",
+    "fattura",
+    "booking_only",
+    "gift_card",
+  ]).default("ricevuta_istituzionale"),
   paymentGroupId: varchar("payment_group_id", { length: 36 }),
-  giftCardAmount: decimal("gift_card_amount", { precision: 10, scale: 2 }).default('0'),
-  balanceAmount: decimal("balance_amount", { precision: 10, scale: 2 }).default('0'),
+  giftCardAmount: decimal("gift_card_amount", {
+    precision: 10,
+    scale: 2,
+  }).default("0"),
+  balanceAmount: decimal("balance_amount", { precision: 10, scale: 2 }).default(
+    "0",
+  ),
 
   id: int("id").primaryKey().autoincrement(),
-  memberId: int("member_id").references(() => members.id, { onDelete: "set null" }),
+  memberId: int("member_id").references(() => members.id, {
+    onDelete: "set null",
+  }),
   // Legacy Enrollment FKs (To be removed completely in Phase 3)
-  enrollmentId: int("enrollment_id").references(() => enrollments.id, { onDelete: "cascade" }),
-  
+  enrollmentId: int("enrollment_id").references(() => enrollments.id, {
+    onDelete: "cascade",
+  }),
+
   // NEW STI Enrollment Bridge
-  globalEnrollmentId: int("global_enrollment_id").references(() => globalEnrollments.id, { onDelete: "cascade" }),
-  
+  globalEnrollmentId: int("global_enrollment_id").references(
+    () => globalEnrollments.id,
+    { onDelete: "cascade" },
+  ),
+
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
   type: varchar("type", { length: 100 }).notNull(), // 'course', 'membership', 'other'
   description: text("description"),
   status: varchar("status", { length: 50 }).notNull().default("pending"), // 'pending', 'paid', 'overdue', 'cancelled'
   dueDate: date("due_date"),
   paidDate: date("paid_date"),
-  paymentMethodId: int("payment_method_id").references(() => paymentMethods.id, { onDelete: "set null" }), // Riferimento a tabella payment_methods
+  paymentMethodId: int("payment_method_id").references(
+    () => paymentMethods.id,
+    { onDelete: "set null" },
+  ), // Riferimento a tabella payment_methods
   paymentMethod: varchar("payment_method", { length: 100 }), // Legacy - mantenuto per compatibilità
   notes: text("notes"),
   accountingCode: varchar("accounting_code", { length: 20 }), // Codice conto es. 4010-RicaviCorsi
   vatCode: varchar("vat_code", { length: 10 }).default("ESENTE"), // Codice IVA: ESENTE|IVA22|IVA10|IVA4
   costCenterCode: varchar("cost_center_code", { length: 50 }), // Centro di costo: CORSI|AFFITTI|PRIVATI|TESSERE
   source: varchar("source", { length: 20 }).default("sede"),
-  seasonId: int("season_id").references(() => seasons.id, { onDelete: "set null" }),
-  createdById: varchar("created_by_id", { length: 255 }).references(() => users.id, { onDelete: "set null" }),
+  seasonId: int("season_id").references(() => seasons.id, {
+    onDelete: "set null",
+  }),
+  createdById: varchar("created_by_id", { length: 255 }).references(
+    () => users.id,
+    { onDelete: "set null" },
+  ),
   operatorName: varchar("operator_name", { length: 100 }), // Legacy operator import
   gbrhNumero: varchar("gbrh_numero", { length: 50 }),
   gbrhDataEmissione: date("gbrh_data_emissione"),
   gbrhDataScadenza: date("gbrh_data_scadenza"),
   gbrhDataUtilizzo: date("gbrh_data_utilizzo"),
   gbrhIban: varchar("gbrh_iban", { length: 34 }),
-  updatedById: varchar("updated_by_id", { length: 255 }).references(() => users.id, { onDelete: "set null" }),
-  bookingId: int("booking_id").references(() => studioBookings.id, { onDelete: "cascade" }),
-  membershipId: int("membership_id").references(() => memberships.id, { onDelete: "cascade" }),
+  updatedById: varchar("updated_by_id", { length: 255 }).references(
+    () => users.id,
+    { onDelete: "set null" },
+  ),
+  bookingId: int("booking_id").references(() => studioBookings.id, {
+    onDelete: "cascade",
+  }),
+  membershipId: int("membership_id").references(() => memberships.id, {
+    onDelete: "cascade",
+  }),
 
   // Maschera Generale Fields
   quantity: int("quantity").default(1),
@@ -1188,7 +1395,10 @@ export const payments = mysqlTable("payments", {
   totalQuota: decimal("total_quota", { precision: 10, scale: 2 }),
   discountCode: varchar("discount_code", { length: 100 }),
   discountValue: decimal("discount_value", { precision: 10, scale: 2 }),
-  discountPercentage: decimal("discount_percentage", { precision: 5, scale: 2 }),
+  discountPercentage: decimal("discount_percentage", {
+    precision: 5,
+    scale: 2,
+  }),
   promoCode: varchar("promo_code", { length: 100 }),
   promoValue: decimal("promo_value", { precision: 10, scale: 2 }),
   promoPercentage: decimal("promo_percentage", { precision: 5, scale: 2 }),
@@ -1197,7 +1407,9 @@ export const payments = mysqlTable("payments", {
   receiptsCount: int("receipts_count"),
   transferConfirmationDate: date("transfer_confirmation_date"),
   paymentNoteLabels: json("payment_note_labels").$type<string[]>().default([]),
-  enrollmentDetailLabels: json("enrollment_detail_labels").$type<string[]>().default([]),
+  enrollmentDetailLabels: json("enrollment_detail_labels")
+    .$type<string[]>()
+    .default([]),
 
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -1213,7 +1425,7 @@ export const paymentsRelations = relations(payments, ({ one }) => ({
     fields: [payments.enrollmentId],
     references: [enrollments.id],
   }),
-  
+
   // RELATIONS: STI V2
   globalEnrollment: one(globalEnrollments, {
     fields: [payments.globalEnrollmentId],
@@ -1241,13 +1453,21 @@ export type Payment = typeof payments.$inferSelect;
 // Attendances (Presenze)
 export const attendances = mysqlTable("attendances", {
   id: int("id").primaryKey().autoincrement(),
-  memberId: int("member_id").notNull().references(() => members.id, { onDelete: "cascade" }),
-  courseId: int("course_id").references(() => courses.id, { onDelete: "set null" }),
-  enrollmentId: int("enrollment_id").references(() => enrollments.id, { onDelete: "set null" }),
+  memberId: int("member_id")
+    .notNull()
+    .references(() => members.id, { onDelete: "cascade" }),
+  courseId: int("course_id").references(() => courses.id, {
+    onDelete: "set null",
+  }),
+  enrollmentId: int("enrollment_id").references(() => enrollments.id, {
+    onDelete: "set null",
+  }),
   attendanceDate: timestamp("attendance_date").notNull().defaultNow(),
   type: varchar("type", { length: 50 }).notNull().default("manual"), // 'manual', 'barcode', 'auto'
   notes: text("notes"),
-  seasonId: int("season_id").references(() => seasons.id, { onDelete: "set null" }),
+  seasonId: int("season_id").references(() => seasons.id, {
+    onDelete: "set null",
+  }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -1267,18 +1487,23 @@ export const attendancesRelations = relations(attendances, ({ one }) => ({
   }),
 }));
 
-export const insertAttendanceSchema = createInsertSchema(attendances).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-}).extend({
-  attendanceDate: z.string().or(z.date()).transform((val) => {
-    if (typeof val === 'string') {
-      return new Date(val);
-    }
-    return val;
-  }),
-});
+export const insertAttendanceSchema = createInsertSchema(attendances)
+  .omit({
+    id: true,
+    createdAt: true,
+    updatedAt: true,
+  })
+  .extend({
+    attendanceDate: z
+      .string()
+      .or(z.date())
+      .transform((val) => {
+        if (typeof val === "string") {
+          return new Date(val);
+        }
+        return val;
+      }),
+  });
 export type InsertAttendance = z.infer<typeof insertAttendanceSchema>;
 export type Attendance = typeof attendances.$inferSelect;
 
@@ -1292,7 +1517,10 @@ export const customReports = mysqlTable("custom_reports", {
   description: text("description"),
   entityType: varchar("entity_type", { length: 100 }).notNull(), // 'members', 'courses', 'payments', 'enrollments', 'workshops', 'attendances', 'instructors'
   selectedFields: json("selected_fields").notNull().$type<string[]>(), // Array of field names
-  filters: json("filters").$type<{ field: string; operator: string; value: string }[]>(), // Filter conditions
+  filters:
+    json("filters").$type<
+      { field: string; operator: string; value: string }[]
+    >(), // Filter conditions
   sortField: varchar("sort_field", { length: 100 }),
   sortDirection: varchar("sort_direction", { length: 10 }).default("asc"), // 'asc' or 'desc'
   createdBy: varchar("created_by", { length: 255 }),
@@ -1426,21 +1654,15 @@ export type Todo = typeof todos.$inferSelect;
 // MERCHANDISING
 // ============================================================================
 
-
-
 // ============================================================================
 // RENTAL CATEGORIES (Affitti)
 // ============================================================================
-
-
-
 
 // ============================================================================
 // BOOKING TABLES & ACTIVITY LOGS (From V59)
 // ============================================================================
 
 // Booking Service Categories
-
 
 // Booking Services (Servizi prenotabili, es. Affitto, PT, ecc.)
 export const bookingServices = mysqlTable("booking_services", {
@@ -1454,20 +1676,31 @@ export const bookingServices = mysqlTable("booking_services", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const insertBookingServiceSchema = createInsertSchema(bookingServices).omit({ id: true, createdAt: true });
+export const insertBookingServiceSchema = createInsertSchema(
+  bookingServices,
+).omit({ id: true, createdAt: true });
 export type InsertBookingService = z.infer<typeof insertBookingServiceSchema>;
 export type BookingService = typeof bookingServices.$inferSelect;
 
-export const bookingServicesRelations = relations(bookingServices, ({ one, many }) => ({
-  priceItems: many(priceListItems),
-}));
+export const bookingServicesRelations = relations(
+  bookingServices,
+  ({ one, many }) => ({
+    priceItems: many(priceListItems),
+  }),
+);
 
 // Studio Bookings (Prenotazioni sale)
 export const studioBookings = mysqlTable("studio_bookings", {
   id: int("id").primaryKey().autoincrement(),
-  memberId: int("member_id").references(() => members.id, { onDelete: "set null" }),
-  studioId: int("studio_id").notNull().references(() => studios.id, { onDelete: "cascade" }),
-  serviceId: int("service_id").references(() => bookingServices.id, { onDelete: "set null" }),
+  memberId: int("member_id").references(() => members.id, {
+    onDelete: "set null",
+  }),
+  studioId: int("studio_id")
+    .notNull()
+    .references(() => studios.id, { onDelete: "cascade" }),
+  serviceId: int("service_id").references(() => bookingServices.id, {
+    onDelete: "set null",
+  }),
   title: varchar("title", { length: 255 }), // Fallback title if no member or for general notes
   description: text("description"),
   bookingDate: date("booking_date").notNull(),
@@ -1477,8 +1710,12 @@ export const studioBookings = mysqlTable("studio_bookings", {
   paid: boolean("paid").default(false),
   amount: decimal("amount", { precision: 10, scale: 2 }),
   googleEventId: varchar("google_event_id", { length: 255 }),
-  instructorId: int("instructor_id").references(() => members.id, { onDelete: "set null" }),
-  seasonId: int("season_id").references(() => seasons.id, { onDelete: "set null" }),
+  instructorId: int("instructor_id").references(() => members.id, {
+    onDelete: "set null",
+  }),
+  seasonId: int("season_id").references(() => seasons.id, {
+    onDelete: "set null",
+  }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
 });
@@ -1508,14 +1745,21 @@ export const studioBookingsRelations = relations(studioBookings, ({ one }) => ({
 
 export const insertStudioBookingSchema = createInsertSchema(studioBookings, {
   bookingDate: z.coerce.date().nullish(),
-}).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-}).extend({
-  bookingDate: z.coerce.date(),
-  amount: z.string().or(z.number()).transform((val) => val.toString()).nullable().optional(),
-});
+})
+  .omit({
+    id: true,
+    createdAt: true,
+    updatedAt: true,
+  })
+  .extend({
+    bookingDate: z.coerce.date(),
+    amount: z
+      .string()
+      .or(z.number())
+      .transform((val) => val.toString())
+      .nullable()
+      .optional(),
+  });
 export type InsertStudioBooking = z.infer<typeof insertStudioBookingSchema>;
 export type StudioBooking = typeof studioBookings.$inferSelect;
 
@@ -1527,7 +1771,10 @@ export const systemConfigs = mysqlTable("system_configs", {
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
 });
 
-export const insertSystemConfigSchema = createInsertSchema(systemConfigs).omit({ id: true, updatedAt: true });
+export const insertSystemConfigSchema = createInsertSchema(systemConfigs).omit({
+  id: true,
+  updatedAt: true,
+});
 export type SystemConfig = typeof systemConfigs.$inferSelect;
 export type InsertSystemConfig = z.infer<typeof insertSystemConfigSchema>;
 
@@ -1543,14 +1790,19 @@ export const userActivityLogs = mysqlTable("user_activity_logs", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-export const userActivityLogsRelations = relations(userActivityLogs, ({ one }) => ({
-  user: one(users, {
-    fields: [userActivityLogs.userId],
-    references: [users.id],
+export const userActivityLogsRelations = relations(
+  userActivityLogs,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [userActivityLogs.userId],
+      references: [users.id],
+    }),
   }),
-}));
+);
 
-export const insertUserActivityLogSchema = createInsertSchema(userActivityLogs).omit({
+export const insertUserActivityLogSchema = createInsertSchema(
+  userActivityLogs,
+).omit({
   id: true,
   createdAt: true,
 });
@@ -1558,14 +1810,14 @@ export const insertUserActivityLogSchema = createInsertSchema(userActivityLogs).
 export type InsertUserActivityLog = z.infer<typeof insertUserActivityLogSchema>;
 export type UserActivityLog = typeof userActivityLogs.$inferSelect;
 
-/* 
+/*
  * ============================================================================
  * SEASONS (STAGIONI) - LIFECYCLE BUSINESS RULES (PROMEMORIA PER IL TEAM)
  * ============================================================================
  * Il sistema prevede un ciclo vitale rigido per la rotazione delle stagioni:
- * 1. FEBBRAIO: Da febbraio di ogni anno, il frontend autogenera la `Stagione Successiva` (es. 2026/2027) 
+ * 1. FEBBRAIO: Da febbraio di ogni anno, il frontend autogenera la `Stagione Successiva` (es. 2026/2027)
  *    con `active = false`. Questo sblocca la Programmazione Date e il Planning a lunghissimo termine.
- * 2. 1° AGOSTO: Avviene la promozione. La `Stagione Successiva` viene promossa a `Stagione Attuale` 
+ * 2. 1° AGOSTO: Avviene la promozione. La `Stagione Successiva` viene promossa a `Stagione Attuale`
  *    (`active = true`), mentre la precedente viene disattivata.
  * 3. ROLL-OVER: Subito dopo lo switch del 1° agosto, viene creata immediatamente la nuova `Stagione Successiva`
  *    per l'anno sportivo seguente.
@@ -1590,14 +1842,16 @@ export const seasonsRelations = relations(seasons, ({ many }) => ({
 export const insertSeasonSchema = createInsertSchema(seasons, {
   startDate: z.coerce.date().nullish(),
   endDate: z.coerce.date().nullish(),
-}).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-}).extend({
-  startDate: z.coerce.date(),
-  endDate: z.coerce.date(),
-});
+})
+  .omit({
+    id: true,
+    createdAt: true,
+    updatedAt: true,
+  })
+  .extend({
+    startDate: z.coerce.date(),
+    endDate: z.coerce.date(),
+  });
 export type InsertSeason = z.infer<typeof insertSeasonSchema>;
 export type Season = typeof seasons.$inferSelect;
 // ============================================================================
@@ -1640,30 +1894,44 @@ export type Quote = typeof quotes.$inferSelect;
 // ============================================================================
 export const courseQuotesGrid = mysqlTable("course_quotes_grid", {
   id: int("id").primaryKey().autoincrement(),
-  seasonId: int("season_id").references(() => seasons.id, { onDelete: "cascade" }),
-  activityType: varchar("activity_type", { length: 50 }).notNull().default('corsi'), //corsi, workshop, domeniche...
+  seasonId: int("season_id").references(() => seasons.id, {
+    onDelete: "cascade",
+  }),
+  activityType: varchar("activity_type", { length: 50 })
+    .notNull()
+    .default("corsi"), //corsi, workshop, domeniche...
   category: varchar("category", { length: 100 }).notNull(), // OPEN, ADULTI, AEREAL, BAMBINI, PROVE
   description: varchar("description", { length: 255 }).notNull(),
   details: text("details"),
   corsiWeek: int("corsi_week"), // Parametro W: numero corsi a settimana
-  monthsData: json("months_data").notNull().$type<Record<string, { quota: number | null; lezioni: number | null }>>(),
+  monthsData: json("months_data")
+    .notNull()
+    .$type<Record<string, { quota: number | null; lezioni: number | null }>>(),
   sortOrder: int("sort_order").notNull().default(0),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
 });
 
-export const insertCourseQuotesGridSchema = createInsertSchema(courseQuotesGrid).omit({
+export const insertCourseQuotesGridSchema = createInsertSchema(
+  courseQuotesGrid,
+).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
 });
-export type InsertCourseQuotesGrid = z.infer<typeof insertCourseQuotesGridSchema>;
+export type InsertCourseQuotesGrid = z.infer<
+  typeof insertCourseQuotesGridSchema
+>;
 export type CourseQuotesGrid = typeof courseQuotesGrid.$inferSelect;
 
 export const priceListItems = mysqlTable("price_list_items", {
   id: int("id").primaryKey().autoincrement(),
-  priceListId: int("price_list_id").notNull().references(() => priceLists.id, { onDelete: "cascade" }),
-  quoteId: int("quote_id").references(() => quotes.id, { onDelete: "set null" }), // Link alla quota standard
+  priceListId: int("price_list_id")
+    .notNull()
+    .references(() => priceLists.id, { onDelete: "cascade" }),
+  quoteId: int("quote_id").references(() => quotes.id, {
+    onDelete: "set null",
+  }), // Link alla quota standard
   entityType: varchar("entity_type", { length: 50 }).notNull(), // 'course', 'workshop', 'booking_service', 'paid_trial'
   entityId: int("entity_id").notNull(),
   price: decimal("price", { precision: 10, scale: 2 }).notNull(),
@@ -1702,7 +1970,9 @@ export const insertPriceListSchema = createInsertSchema(priceLists, {
   updatedAt: true,
 });
 
-export const insertPriceListItemSchema = createInsertSchema(priceListItems).omit({
+export const insertPriceListItemSchema = createInsertSchema(
+  priceListItems,
+).omit({
   id: true,
   createdAt: true,
 });
@@ -1778,26 +2048,33 @@ export type Tenant = typeof tenants.$inferSelect;
 
 // 2. ACTIVITY MACRO-CATEGORIES
 
-
 // 3. LA SUPER-TABELLA: ACTIVITIES (Unifies 11 Silos)
 export const activities = mysqlTable("activities", {
   id: int("id").primaryKey().autoincrement(),
-  tenantId: int("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
+  tenantId: int("tenant_id").references(() => tenants.id, {
+    onDelete: "cascade",
+  }),
   categoryId: int("category_id"),
-  locationId: int("location_id").references(() => studios.id, { onDelete: "set null" }),
+  locationId: int("location_id").references(() => studios.id, {
+    onDelete: "set null",
+  }),
   name: varchar("name", { length: 255 }).notNull(),
-  
+
   // Condivisi
   startTime: timestamp("start_time"),
   endTime: timestamp("end_time"),
-  instructorId: int("instructor_id").references(() => members.id, { onDelete: "set null" }),
-  
+  instructorId: int("instructor_id").references(() => members.id, {
+    onDelete: "set null",
+  }),
+
   // Business Rules
   maxCapacity: int("max_capacity"),
-  basePrice: decimal("base_price", { precision: 10, scale: 2 }).notNull().default("0.00"),
+  basePrice: decimal("base_price", { precision: 10, scale: 2 })
+    .notNull()
+    .default("0.00"),
   isPunchCard: boolean("is_punch_card").default(false),
   punchCardTotalAccesses: int("punch_card_total_accesses"),
-  
+
   // Extra Metadata
   extraInfoOverrides: json("extra_info_overrides"),
   createdAt: timestamp("created_at").defaultNow(),
@@ -1805,9 +2082,18 @@ export const activities = mysqlTable("activities", {
 });
 
 export const activitiesRelations = relations(activities, ({ one, many }) => ({
-  tenant: one(tenants, { fields: [activities.tenantId], references: [tenants.id] }),
-  location: one(studios, { fields: [activities.locationId], references: [studios.id] }),
-  instructor: one(members, { fields: [activities.instructorId], references: [members.id] }),
+  tenant: one(tenants, {
+    fields: [activities.tenantId],
+    references: [tenants.id],
+  }),
+  location: one(studios, {
+    fields: [activities.locationId],
+    references: [studios.id],
+  }),
+  instructor: one(members, {
+    fields: [activities.instructorId],
+    references: [members.id],
+  }),
   globalEnrollments: many(globalEnrollments),
 }));
 
@@ -1819,37 +2105,61 @@ export const insertActivitySchema = createInsertSchema(activities).omit({
 export type InsertActivity = z.infer<typeof insertActivitySchema>;
 export type Activity = typeof activities.$inferSelect;
 
-// 4. LA SUPER-TABELLA: GLOBAL ENROLLMENTS 
+// 4. LA SUPER-TABELLA: GLOBAL ENROLLMENTS
 export const globalEnrollments = mysqlTable("global_enrollments", {
   id: int("id").primaryKey().autoincrement(),
-  tenantId: int("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
-  activityId: int("activity_id").references(() => activities.id, { onDelete: "cascade" }),
-  memberId: int("member_id").notNull().references(() => members.id, { onDelete: "cascade" }),
-  
+  tenantId: int("tenant_id").references(() => tenants.id, {
+    onDelete: "cascade",
+  }),
+  activityId: int("activity_id").references(() => activities.id, {
+    onDelete: "cascade",
+  }),
+  memberId: int("member_id")
+    .notNull()
+    .references(() => members.id, { onDelete: "cascade" }),
+
   status: varchar("status", { length: 50 }).notNull().default("active"),
-  
+
   remainingPunchCards: int("remaining_punch_cards"),
-  walletCredit: decimal("wallet_credit", { precision: 10, scale: 2 }).default("0.00"),
-  
+  walletCredit: decimal("wallet_credit", { precision: 10, scale: 2 }).default(
+    "0.00",
+  ),
+
   extraInfoData: json("extra_info_data"),
-  
+
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
 });
 
-export const globalEnrollmentsRelations = relations(globalEnrollments, ({ one, many }) => ({
-  tenant: one(tenants, { fields: [globalEnrollments.tenantId], references: [tenants.id] }),
-  activity: one(activities, { fields: [globalEnrollments.activityId], references: [activities.id] }),
-  member: one(members, { fields: [globalEnrollments.memberId], references: [members.id] }),
-  payments: many(payments),
-}));
+export const globalEnrollmentsRelations = relations(
+  globalEnrollments,
+  ({ one, many }) => ({
+    tenant: one(tenants, {
+      fields: [globalEnrollments.tenantId],
+      references: [tenants.id],
+    }),
+    activity: one(activities, {
+      fields: [globalEnrollments.activityId],
+      references: [activities.id],
+    }),
+    member: one(members, {
+      fields: [globalEnrollments.memberId],
+      references: [members.id],
+    }),
+    payments: many(payments),
+  }),
+);
 
-export const insertGlobalEnrollmentSchema = createInsertSchema(globalEnrollments).omit({
+export const insertGlobalEnrollmentSchema = createInsertSchema(
+  globalEnrollments,
+).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
 });
-export type InsertGlobalEnrollment = z.infer<typeof insertGlobalEnrollmentSchema>;
+export type InsertGlobalEnrollment = z.infer<
+  typeof insertGlobalEnrollmentSchema
+>;
 export type GlobalEnrollment = typeof globalEnrollments.$inferSelect;
 
 // ============================================================================
@@ -1858,9 +2168,15 @@ export type GlobalEnrollment = typeof globalEnrollments.$inferSelect;
 
 export const teamShifts = mysqlTable("team_shifts", {
   id: int("id").primaryKey().autoincrement(),
-  tenantId: int("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
-  userId: varchar("user_id", { length: 255 }).notNull().references(() => users.id, { onDelete: "cascade" }),
-  locationId: int("location_id").references(() => studios.id, { onDelete: "set null" }),
+  tenantId: int("tenant_id").references(() => tenants.id, {
+    onDelete: "cascade",
+  }),
+  userId: varchar("user_id", { length: 255 })
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  locationId: int("location_id").references(() => studios.id, {
+    onDelete: "set null",
+  }),
   shiftStart: timestamp("shift_start").notNull(),
   shiftEnd: timestamp("shift_end").notNull(),
   isAttendanceVerified: boolean("is_attendance_verified").default(false),
@@ -1882,42 +2198,49 @@ export type TeamShift = typeof teamShifts.$inferSelect;
 // CANONICAL CALENDAR DTO (Fase 15/16)
 // ============================================================================
 export interface UnifiedCalendarEventDTO {
-    id: string; // Es. "course_12_2026-03-25"
-    activityFamily: 'course' | 'workshop' | 'rental' | 'campus' | 'sunday' | 'recital' | 'trial';
-    activityType: string;
-    
-    // Titoli e UI
-    title: string;
-    sku: string | null;           // [RECUPERATO] Es. "CRS-19"
-    statusLabels: string[];       // [RECUPERATO] Es. ["waiting_list"]
-    isActive: boolean;            
-    
-    // Dati Categoria Pieni
-    categoryId: number | null;    
-    categoryName: string;         
-    categoryTag: string;          // Es. "CRS", "WKS"
-    colorProps: {
-        backgroundColor?: string;
-        borderLeftColor?: string;
-        color?: string;
-        className?: string;       // Fallback Tailwind
-    };
-    
-    // Dati Insegnanti
-    instructorIds: number[];
-    instructorNames: string[];    // Array (permette futuri docenti doppi)
-    
-    // Logistica
-    studioId: number | null;
-    studioName: string;
-    
-    // Date Assolute Locali
-    startDatetime: string;        // ISO format garantito non null
-    endDatetime: string;          // ISO format
-    
-    // Engine UI Form
-    uiRenderingType: string;      // Es. "STANDARD_COURSE_FORM" per istruire la Modale onclick
-    rawPayload: any;              // Legacy info di supporto per la transizione
+  id: string; // Es. "course_12_2026-03-25"
+  activityFamily:
+    | "course"
+    | "workshop"
+    | "rental"
+    | "campus"
+    | "sunday"
+    | "recital"
+    | "trial";
+  activityType: string;
+
+  // Titoli e UI
+  title: string;
+  sku: string | null; // [RECUPERATO] Es. "CRS-19"
+  statusLabels: string[]; // [RECUPERATO] Es. ["waiting_list"]
+  isActive: boolean;
+
+  // Dati Categoria Pieni
+  categoryId: number | null;
+  categoryName: string;
+  categoryTag: string; // Es. "CRS", "WKS"
+  colorProps: {
+    backgroundColor?: string;
+    borderLeftColor?: string;
+    color?: string;
+    className?: string; // Fallback Tailwind
+  };
+
+  // Dati Insegnanti
+  instructorIds: number[];
+  instructorNames: string[]; // Array (permette futuri docenti doppi)
+
+  // Logistica
+  studioId: number | null;
+  studioName: string;
+
+  // Date Assolute Locali
+  startDatetime: string; // ISO format garantito non null
+  endDatetime: string; // ISO format
+
+  // Engine UI Form
+  uiRenderingType: string; // Es. "STANDARD_COURSE_FORM" per istruire la Modale onclick
+  rawPayload: any; // Legacy info di supporto per la transizione
 }
 
 // ============================================================================
@@ -1931,32 +2254,47 @@ export const strategicEvents = mysqlTable("strategic_events", {
   startDate: date("start_date").notNull(),
   endDate: date("end_date"),
   allDay: boolean("all_day").default(true),
-  seasonId: int("season_id").references(() => seasons.id, { onDelete: "set null" }),
+  seasonId: int("season_id").references(() => seasons.id, {
+    onDelete: "set null",
+  }),
   status: varchar("status", { length: 50 }).default("active"),
   affectsCalendar: boolean("affects_calendar").default(true),
   affectsPlanning: boolean("affects_planning").default(true),
   affectsPayments: boolean("affects_payments").default(false),
-  studioId: int("studio_id").references(() => studios.id, { onDelete: "set null" }),
+  studioId: int("studio_id").references(() => studios.id, {
+    onDelete: "set null",
+  }),
   color: varchar("color", { length: 50 }),
   isPublicHoliday: boolean("is_public_holiday").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
 });
 
-export const strategicEventsRelations = relations(strategicEvents, ({ one }) => ({
-  season: one(seasons, {
-    fields: [strategicEvents.seasonId],
-    references: [seasons.id],
+export const strategicEventsRelations = relations(
+  strategicEvents,
+  ({ one }) => ({
+    season: one(seasons, {
+      fields: [strategicEvents.seasonId],
+      references: [seasons.id],
+    }),
+    studio: one(studios, {
+      fields: [strategicEvents.studioId],
+      references: [studios.id],
+    }),
   }),
-  studio: one(studios, {
-    fields: [strategicEvents.studioId],
-    references: [studios.id],
-  }),
-}));
+);
 
 export const insertStrategicEventSchema = createInsertSchema(strategicEvents, {
-  startDate: z.string().or(z.date()).transform((val) => (typeof val === "string" ? new Date(val) : val)),
-  endDate: z.string().or(z.date()).transform((val) => (typeof val === "string" ? new Date(val) : val)).or(z.null()).optional(),
+  startDate: z
+    .string()
+    .or(z.date())
+    .transform((val) => (typeof val === "string" ? new Date(val) : val)),
+  endDate: z
+    .string()
+    .or(z.date())
+    .transform((val) => (typeof val === "string" ? new Date(val) : val))
+    .or(z.null())
+    .optional(),
 }).omit({
   id: true,
   createdAt: true,
@@ -1970,316 +2308,411 @@ export type StrategicEvent = typeof strategicEvents.$inferSelect;
 // MODULO QUOTE E PROMO
 // ============================================================================
 
-export const promoRules = mysqlTable("promo_rules", {
-  id: int("id").autoincrement().primaryKey(),
-  tenantId: int("tenant_id").notNull().default(1),
-  code: varchar("code", { length: 50 }).notNull(),
-  label: varchar("label", { length: 120 }).notNull(),
-  ruleType: mysqlEnum("rule_type", [
-    "percentage", "fixed", "blocked_price"
-  ]).notNull(),
-  value: decimal("value", { precision: 8, scale: 2 }).notNull(),
-  validFrom: date("valid_from"),
-  validTo: date("valid_to"),
-  maxUses: int("max_uses"),
-  usedCount: int("used_count").default(0),
-  excludeOpen: boolean("exclude_open").default(false),
-  notCumulative: boolean("not_cumulative").default(false),
-  targetType: varchar("target_type", { length: 30 })
-    .notNull().default("public"),
-  companyName: varchar("company_name", { length: 120 }),
-  memberId: int("member_id")
-    .references(() => members.id, { onDelete: "set null" }),
-  approvedBy: varchar("approved_by", { length: 50 }),
-  seasonId: int("season_id").references(() => seasons.id, { onDelete: "set null" }),
-  internalNotes: text("internal_notes"),
-  metadata: json("metadata"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at")
-    .defaultNow().onUpdateNow(),
-}, (table) => ({
-  uniqueCodePerTenant: uniqueIndex("uq_promo_tenant_code")
-    .on(table.tenantId, table.code),
-}));
+export const promoRules = mysqlTable(
+  "promo_rules",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    tenantId: int("tenant_id").notNull().default(1),
+    code: varchar("code", { length: 50 }).notNull(),
+    label: varchar("label", { length: 120 }).notNull(),
+    ruleType: mysqlEnum("rule_type", [
+      "percentage",
+      "fixed",
+      "blocked_price",
+    ]).notNull(),
+    value: decimal("value", { precision: 8, scale: 2 }).notNull(),
+    validFrom: date("valid_from"),
+    validTo: date("valid_to"),
+    maxUses: int("max_uses"),
+    usedCount: int("used_count").default(0),
+    excludeOpen: boolean("exclude_open").default(false),
+    notCumulative: boolean("not_cumulative").default(false),
+    targetType: varchar("target_type", { length: 30 })
+      .notNull()
+      .default("public"),
+    companyName: varchar("company_name", { length: 120 }),
+    memberId: int("member_id").references(() => members.id, {
+      onDelete: "set null",
+    }),
+    approvedBy: varchar("approved_by", { length: 50 }),
+    seasonId: int("season_id").references(() => seasons.id, {
+      onDelete: "set null",
+    }),
+    internalNotes: text("internal_notes"),
+    metadata: json("metadata"),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
+  },
+  (table) => ({
+    uniqueCodePerTenant: uniqueIndex("uq_promo_tenant_code").on(
+      table.tenantId,
+      table.code,
+    ),
+  }),
+);
 
-export const welfareProviders = mysqlTable("welfare_providers", {
-  id: int("id").autoincrement().primaryKey(),
-  tenantId: int("tenant_id").notNull().default(1),
-  name: varchar("name", { length: 80 }).notNull(),
-  requiresMembershipFee: boolean("requires_membership_fee")
-    .default(true),
-  requiresMedicalCert: boolean("requires_medical_cert")
-    .default(true),
-  extraFeePercent: decimal("extra_fee_percent",
-    { precision: 5, scale: 2 }).default("0"),
-  availableCategories: text("available_categories"),
-  seasonId: int("season_id").references(() => seasons.id, { onDelete: "set null" }),
-  operativeNotes: text("operative_notes"),
-  isActive: boolean("is_active").default(true),
-  metadata: json("metadata"),
-  updatedAt: timestamp("updated_at")
-    .defaultNow().onUpdateNow(),
-}, (table) => ({
-  uniqueNamePerTenant: uniqueIndex("uq_welfare_tenant_name")
-    .on(table.tenantId, table.name),
-}));
+export const welfareProviders = mysqlTable(
+  "welfare_providers",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    tenantId: int("tenant_id").notNull().default(1),
+    name: varchar("name", { length: 80 }).notNull(),
+    requiresMembershipFee: boolean("requires_membership_fee").default(true),
+    requiresMedicalCert: boolean("requires_medical_cert").default(true),
+    extraFeePercent: decimal("extra_fee_percent", {
+      precision: 5,
+      scale: 2,
+    }).default("0"),
+    availableCategories: text("available_categories"),
+    seasonId: int("season_id").references(() => seasons.id, {
+      onDelete: "set null",
+    }),
+    operativeNotes: text("operative_notes"),
+    isActive: boolean("is_active").default(true),
+    metadata: json("metadata"),
+    updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
+  },
+  (table) => ({
+    uniqueNamePerTenant: uniqueIndex("uq_welfare_tenant_name").on(
+      table.tenantId,
+      table.name,
+    ),
+  }),
+);
 
 export const carnetWallets = mysqlTable("carnet_wallets", {
   id: int("id").autoincrement().primaryKey(),
-  memberId: int("member_id").notNull()
+  memberId: int("member_id")
+    .notNull()
     .references(() => members.id, { onDelete: "cascade" }),
-  walletTypeId: int("wallet_type_id").notNull()
+  walletTypeId: int("wallet_type_id")
+    .notNull()
     .references(() => customListItems.id),
   totalUnits: tinyint("total_units").notNull().default(10),
   usedUnits: tinyint("used_units").notNull().default(0),
   expiryDays: tinyint("expiry_days").notNull(),
-  paymentId: int("payment_id")
-    .references(() => payments.id, { onDelete: "set null" }),
+  paymentId: int("payment_id").references(() => payments.id, {
+    onDelete: "set null",
+  }),
   trialDate: date("trial_date"),
   purchasedAt: date("purchased_at").notNull(),
   expiresAt: date("expires_at").notNull(),
   isActive: boolean("is_active").default(true),
   notes: text("notes"),
-  seasonId: int("season_id").references(() => seasons.id, { onDelete: "set null" }),
+  seasonId: int("season_id").references(() => seasons.id, {
+    onDelete: "set null",
+  }),
   groupSize: tinyint("group_size").default(1),
-  locationType: varchar("location_type", {length:30}).default("in_sede"),
-  pricePerUnit: decimal("price_per_unit", {precision:8,scale:2}),
-  totalPaid: decimal("total_paid", {precision:8,scale:2}),
+  locationType: varchar("location_type", { length: 30 }).default("in_sede"),
+  pricePerUnit: decimal("price_per_unit", { precision: 8, scale: 2 }),
+  totalPaid: decimal("total_paid", { precision: 8, scale: 2 }),
   bonusUnits: tinyint("bonus_units").default(0),
   createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at")
-    .defaultNow().onUpdateNow(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
 });
 
-export const carnetSessions = mysqlTable("carnet_sessions", {
-  id: int("id").autoincrement().primaryKey(),
-  walletId: int("wallet_id").notNull()
-    .references(() => carnetWallets.id, 
-      { onDelete: "cascade" }),
-  sessionNumber: tinyint("session_number").notNull(),
-  sessionDate: date("session_date").notNull(),
-  sessionTimeStart: time("session_time_start"),
-  sessionTimeEnd: time("session_time_end"),
-  instructorId: int("instructor_id")
-    .references(() => members.id, { onDelete: "set null" }),
-  isBonus: boolean("is_bonus").default(false),
-  notes: varchar("notes", { length: 255 }),
-  createdAt: timestamp("created_at").defaultNow(),
-}, (table) => ({
-  uniqueSession: uniqueIndex("uq_wallet_session")
-    .on(table.walletId, table.sessionNumber),
-}));
+export const carnetSessions = mysqlTable(
+  "carnet_sessions",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    walletId: int("wallet_id")
+      .notNull()
+      .references(() => carnetWallets.id, { onDelete: "cascade" }),
+    sessionNumber: tinyint("session_number").notNull(),
+    sessionDate: date("session_date").notNull(),
+    sessionTimeStart: time("session_time_start"),
+    sessionTimeEnd: time("session_time_end"),
+    instructorId: int("instructor_id").references(() => members.id, {
+      onDelete: "set null",
+    }),
+    isBonus: boolean("is_bonus").default(false),
+    notes: varchar("notes", { length: 255 }),
+    createdAt: timestamp("created_at").defaultNow(),
+  },
+  (table) => ({
+    uniqueSession: uniqueIndex("uq_wallet_session").on(
+      table.walletId,
+      table.sessionNumber,
+    ),
+  }),
+);
 
 export const instructorAgreements = mysqlTable("instructor_agreements", {
   id: int("id").autoincrement().primaryKey(),
   tenantId: int("tenant_id").notNull().default(1),
-  memberId: int("member_id").notNull()
+  memberId: int("member_id")
+    .notNull()
     .references(() => members.id, { onDelete: "restrict" }),
-  seasonId: int("season_id")
-    .references(() => seasons.id, { onDelete: "set null" }),
+  seasonId: int("season_id").references(() => seasons.id, {
+    onDelete: "set null",
+  }),
   agreementType: mysqlEnum("agreement_type", [
-    "flat_monthly", "pack_hours", "variable_monthly"
+    "flat_monthly",
+    "pack_hours",
+    "variable_monthly",
   ]).notNull(),
-  baseMonthlyAmount: decimal("base_monthly_amount",
-    { precision: 8, scale: 2 }),
+  baseMonthlyAmount: decimal("base_monthly_amount", { precision: 8, scale: 2 }),
   packHours: tinyint("pack_hours"),
-  speseMensili: decimal("spese_mensili",
-    { precision: 8, scale: 2 }).default("0"),
+  speseMensili: decimal("spese_mensili", { precision: 8, scale: 2 }).default(
+    "0",
+  ),
   billingDay: tinyint("billing_day").default(1),
   paymentMode: mysqlEnum("payment_mode", [
-    "contanti", "bonifico", "fattura", "pos"
+    "contanti",
+    "bonifico",
+    "fattura",
+    "pos",
   ]).notNull(),
-  studioId: int("studio_id")
-    .references(() => studios.id, { onDelete: "set null" }),
+  studioId: int("studio_id").references(() => studios.id, {
+    onDelete: "set null",
+  }),
   scheduleNotes: text("schedule_notes"),
   notes: text("notes"),
   isActive: boolean("is_active").default(true),
   metadata: json("metadata"),
   createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at")
-    .defaultNow().onUpdateNow(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
 });
 
-export const agreementMonthlyOverrides = mysqlTable("agreement_monthly_overrides", {
-  id: int("id").autoincrement().primaryKey(),
-  agreementId: int("agreement_id").notNull()
-    .references(() => instructorAgreements.id,
-      { onDelete: "cascade" }),
-  seasonId: int("season_id")
-    .references(() => seasons.id, { onDelete: "set null" }),
-  month: tinyint("month").notNull(),
-  overrideAmount: decimal("override_amount",
-    { precision: 8, scale: 2 }).notNull(),
-  notes: varchar("notes", { length: 255 }),
-}, (table) => ({
-  uniqueMonthPerAgreement: uniqueIndex("uq_override_month")
-    .on(table.agreementId, table.seasonId, table.month),
-}));
+export const agreementMonthlyOverrides = mysqlTable(
+  "agreement_monthly_overrides",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    agreementId: int("agreement_id")
+      .notNull()
+      .references(() => instructorAgreements.id, { onDelete: "cascade" }),
+    seasonId: int("season_id").references(() => seasons.id, {
+      onDelete: "set null",
+    }),
+    month: tinyint("month").notNull(),
+    overrideAmount: decimal("override_amount", {
+      precision: 8,
+      scale: 2,
+    }).notNull(),
+    notes: varchar("notes", { length: 255 }),
+  },
+  (table) => ({
+    uniqueMonthPerAgreement: uniqueIndex("uq_override_month").on(
+      table.agreementId,
+      table.seasonId,
+      table.month,
+    ),
+  }),
+);
 
-export const pagodilTiers = mysqlTable("pagodil_tiers", {
-  id: int("id").autoincrement().primaryKey(),
-  tenantId: int("tenant_id").notNull().default(1),
-  providerName: varchar("provider_name", { length: 50 })
-    .notNull().default("pagodil"),
-  rangeMin: decimal("range_min",
-    { precision: 8, scale: 2 }).notNull(),
-  rangeMax: decimal("range_max",
-    { precision: 8, scale: 2 }).notNull(),
-  feeAmount: decimal("fee_amount",
-    { precision: 8, scale: 2 }).notNull(),
-  feeType: varchar("fee_type", { length: 20 })
-    .notNull().default("fixed"),
-  installmentsMax: tinyint("installments_max").notNull(),
-  isActive: boolean("is_active").default(true),
-}, (table) => ({
-  uniqueTier: uniqueIndex("uq_pagodil_tier")
-    .on(table.tenantId, table.providerName, table.rangeMin),
-}));
+export const pagodilTiers = mysqlTable(
+  "pagodil_tiers",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    tenantId: int("tenant_id").notNull().default(1),
+    providerName: varchar("provider_name", { length: 50 })
+      .notNull()
+      .default("pagodil"),
+    rangeMin: decimal("range_min", { precision: 8, scale: 2 }).notNull(),
+    rangeMax: decimal("range_max", { precision: 8, scale: 2 }).notNull(),
+    feeAmount: decimal("fee_amount", { precision: 8, scale: 2 }).notNull(),
+    feeType: varchar("fee_type", { length: 20 }).notNull().default("fixed"),
+    installmentsMax: tinyint("installments_max").notNull(),
+    isActive: boolean("is_active").default(true),
+  },
+  (table) => ({
+    uniqueTier: uniqueIndex("uq_pagodil_tier").on(
+      table.tenantId,
+      table.providerName,
+      table.rangeMin,
+    ),
+  }),
+);
 
 // ============================================================================
 // STRUTTURA CONTABILE BASE
 // ============================================================================
 
-export const costCenters = mysqlTable("cost_centers",{
-  id: int("id").autoincrement().primaryKey(),
-  tenantId: int("tenant_id").notNull().default(1),
-  code: varchar("code",{length:30}).notNull(),
-  label: varchar("label",{length:120}).notNull(),
-  description: text("description"),
-  isActive: boolean("is_active").default(true),
-  createdAt: timestamp("created_at").defaultNow(),
-},(t)=>({
-  uqCode: uniqueIndex("uq_cost_center_code")
-    .on(t.tenantId, t.code),
-}));
+export const costCenters = mysqlTable(
+  "cost_centers",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    tenantId: int("tenant_id").notNull().default(1),
+    code: varchar("code", { length: 30 }).notNull(),
+    label: varchar("label", { length: 120 }).notNull(),
+    description: text("description"),
+    isActive: boolean("is_active").default(true),
+    createdAt: timestamp("created_at").defaultNow(),
+  },
+  (t) => ({
+    uqCode: uniqueIndex("uq_cost_center_code").on(t.tenantId, t.code),
+  }),
+);
 
 export const accountingPeriods = mysqlTable(
-  "accounting_periods",{
-  id: int("id").autoincrement().primaryKey(),
-  tenantId: int("tenant_id").notNull().default(1),
-  seasonId: int("season_id").references(() => seasons.id, { onDelete: 'set null' }),
-  year: smallint("year").notNull(),
-  month: tinyint("month").notNull(),
-  label: varchar("label",{length:50}).notNull(),
-  isClosed: boolean("is_closed").default(false),
-  closedAt: timestamp("closed_at"),
-  notes: text("notes"),
-  createdAt: timestamp("created_at").defaultNow(),
-},(t)=>({
-  uqPeriod: uniqueIndex("uq_accounting_period")
-    .on(t.tenantId, t.year, t.month),
-}));
+  "accounting_periods",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    tenantId: int("tenant_id").notNull().default(1),
+    seasonId: int("season_id").references(() => seasons.id, {
+      onDelete: "set null",
+    }),
+    year: smallint("year").notNull(),
+    month: tinyint("month").notNull(),
+    label: varchar("label", { length: 50 }).notNull(),
+    isClosed: boolean("is_closed").default(false),
+    closedAt: timestamp("closed_at"),
+    notes: text("notes"),
+    createdAt: timestamp("created_at").defaultNow(),
+  },
+  (t) => ({
+    uqPeriod: uniqueIndex("uq_accounting_period").on(
+      t.tenantId,
+      t.year,
+      t.month,
+    ),
+  }),
+);
 
-export const journalEntries = mysqlTable(
-  "journal_entries",{
+export const journalEntries = mysqlTable("journal_entries", {
   id: int("id").autoincrement().primaryKey(),
   tenantId: int("tenant_id").notNull().default(1),
-  periodId: int("period_id")
-    .references(()=>accountingPeriods.id,
-      {onDelete:"restrict"}),
-  paymentId: int("payment_id")
-    .references(()=>payments.id,
-      {onDelete:"set null"}),
+  periodId: int("period_id").references(() => accountingPeriods.id, {
+    onDelete: "restrict",
+  }),
+  paymentId: int("payment_id").references(() => payments.id, {
+    onDelete: "set null",
+  }),
   entryDate: date("entry_date").notNull(),
-  description: varchar("description",
-    {length:255}).notNull(),
-  debitAccount: varchar("debit_account",{length:50}),
-  creditAccount: varchar("credit_account",{length:50}),
-  amount: decimal("amount",
-    {precision:10,scale:2}).notNull(),
-  vatAmount: decimal("vat_amount",
-    {precision:10,scale:2}).default("0"),
-  vatCode: varchar("vat_code",{length:10})
-    .default("ESENTE"),
-  costCenterId: int("cost_center_id")
-    .references(()=>costCenters.id,
-      {onDelete:"set null"}),
+  description: varchar("description", { length: 255 }).notNull(),
+  debitAccount: varchar("debit_account", { length: 50 }),
+  creditAccount: varchar("credit_account", { length: 50 }),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  vatAmount: decimal("vat_amount", { precision: 10, scale: 2 }).default("0"),
+  vatCode: varchar("vat_code", { length: 10 }).default("ESENTE"),
+  costCenterId: int("cost_center_id").references(() => costCenters.id, {
+    onDelete: "set null",
+  }),
   isAuto: boolean("is_auto").default(true),
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow(),
-  createdById: varchar("created_by_id",{length:50}),
+  createdById: varchar("created_by_id", { length: 50 }),
 });
 export const companyAgreements = mysqlTable(
-  "company_agreements", {
-  id: int("id").autoincrement().primaryKey(),
-  tenantId: int("tenant_id").notNull().default(1),
-  companyName: varchar("company_name",{length:150}).notNull(),
-  companyType: varchar("company_type",{length:50}),
-  seasonId: int("season_id").references(() => seasons.id, { onDelete: "set null" }),
-  discountCourses: decimal("discount_courses",{precision:5,scale:2}).default("0"),
-  discountMerch: decimal("discount_merch",{precision:5,scale:2}).default("0"),
-  discountOther: decimal("discount_other",{precision:5,scale:2}).default("0"),
-  excludeOpen: boolean("exclude_open").default(true),
-  excludeOtherPromos: boolean("exclude_other_promos").default(true),
-  eligibleWho: text("eligible_who"),
-  specialRules: text("special_rules"),
-  promoRuleId: int("promo_rule_id").references(()=>promoRules.id,{onDelete:"set null"}),
-  validFrom: date("valid_from"),
-  validTo: date("valid_to"),
-  isActive: boolean("is_active").default(true),
-  approvedBy: varchar("approved_by",{length:50}).default("Direzione"),
-  requiresVerification: boolean("requires_verification").default(true),
-  verificationNotes: text("verification_notes"),
-  metadata: json("metadata"),
-  notes: text("notes"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
-},(t)=>({
-  idxName: index("idx_company_agreements_name").on(t.tenantId, t.companyName),
-  idxActive: index("idx_company_agreements_active").on(t.tenantId, t.isActive),
-}));
+  "company_agreements",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    tenantId: int("tenant_id").notNull().default(1),
+    companyName: varchar("company_name", { length: 150 }).notNull(),
+    companyType: varchar("company_type", { length: 50 }),
+    seasonId: int("season_id").references(() => seasons.id, {
+      onDelete: "set null",
+    }),
+    discountCourses: decimal("discount_courses", {
+      precision: 5,
+      scale: 2,
+    }).default("0"),
+    discountMerch: decimal("discount_merch", {
+      precision: 5,
+      scale: 2,
+    }).default("0"),
+    discountOther: decimal("discount_other", {
+      precision: 5,
+      scale: 2,
+    }).default("0"),
+    excludeOpen: boolean("exclude_open").default(true),
+    excludeOtherPromos: boolean("exclude_other_promos").default(true),
+    eligibleWho: text("eligible_who"),
+    specialRules: text("special_rules"),
+    promoRuleId: int("promo_rule_id").references(() => promoRules.id, {
+      onDelete: "set null",
+    }),
+    validFrom: date("valid_from"),
+    validTo: date("valid_to"),
+    isActive: boolean("is_active").default(true),
+    approvedBy: varchar("approved_by", { length: 50 }).default("Direzione"),
+    requiresVerification: boolean("requires_verification").default(true),
+    verificationNotes: text("verification_notes"),
+    metadata: json("metadata"),
+    notes: text("notes"),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
+  },
+  (t) => ({
+    idxName: index("idx_company_agreements_name").on(t.tenantId, t.companyName),
+    idxActive: index("idx_company_agreements_active").on(
+      t.tenantId,
+      t.isActive,
+    ),
+  }),
+);
 
 export const memberDiscounts = mysqlTable(
-  "member_discounts", {
-  id: int("id").autoincrement().primaryKey(),
-  tenantId: int("tenant_id").notNull().default(1),
-  memberId: int("member_id").notNull().references(()=>members.id,{onDelete:"cascade"}),
-  promoRuleId: int("promo_rule_id").references(()=>promoRules.id,{onDelete:"set null"}),
-  discountType: varchar("discount_type",{length:30}).notNull(),
-  discountValue: decimal("discount_value",{precision:8,scale:2}),
-  discountPercent: decimal("discount_percent",{precision:5,scale:2}),
-  approvedBy: varchar("approved_by",{length:50}),
-  approvedAt: date("approved_at"),
-  validForSeasonId: int("valid_for_season_id").references(()=>seasons.id,{onDelete:"set null"}),
-  validFrom: date("valid_from"),
-  validTo: date("valid_to"),
-  isUsed: boolean("is_used").default(false),
-  usedAt: timestamp("used_at"),
-  paymentId: int("payment_id").references(()=>payments.id,{onDelete:"set null"}),
-  bonusNote: text("bonus_note"),
-  internalNotes: text("internal_notes"),
-  companyAgreementId: int("company_agreement_id").references(()=>companyAgreements.id, {onDelete:"set null"}),
-  metadata: json("metadata"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
-  createdById: varchar("created_by_id",{length:50}),
-},(t)=>({
-  idxMember: index("idx_member_discounts_member").on(t.memberId),
-  idxPromo: index("idx_member_discounts_promo").on(t.promoRuleId),
-  idxUsed: index("idx_member_discounts_used").on(t.isUsed, t.tenantId),
-}));
+  "member_discounts",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    tenantId: int("tenant_id").notNull().default(1),
+    memberId: int("member_id")
+      .notNull()
+      .references(() => members.id, { onDelete: "cascade" }),
+    promoRuleId: int("promo_rule_id").references(() => promoRules.id, {
+      onDelete: "set null",
+    }),
+    discountType: varchar("discount_type", { length: 30 }).notNull(),
+    discountValue: decimal("discount_value", { precision: 8, scale: 2 }),
+    discountPercent: decimal("discount_percent", { precision: 5, scale: 2 }),
+    approvedBy: varchar("approved_by", { length: 50 }),
+    approvedAt: date("approved_at"),
+    validForSeasonId: int("valid_for_season_id").references(() => seasons.id, {
+      onDelete: "set null",
+    }),
+    validFrom: date("valid_from"),
+    validTo: date("valid_to"),
+    isUsed: boolean("is_used").default(false),
+    usedAt: timestamp("used_at"),
+    paymentId: int("payment_id").references(() => payments.id, {
+      onDelete: "set null",
+    }),
+    bonusNote: text("bonus_note"),
+    internalNotes: text("internal_notes"),
+    companyAgreementId: int("company_agreement_id").references(
+      () => companyAgreements.id,
+      { onDelete: "set null" },
+    ),
+    metadata: json("metadata"),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
+    createdById: varchar("created_by_id", { length: 50 }),
+  },
+  (t) => ({
+    idxMember: index("idx_member_discounts_member").on(t.memberId),
+    idxPromo: index("idx_member_discounts_promo").on(t.promoRuleId),
+    idxUsed: index("idx_member_discounts_used").on(t.isUsed, t.tenantId),
+  }),
+);
 
-export const staffRates = mysqlTable("staff_rates",{
-  id: int("id").autoincrement().primaryKey(),
-  tenantId: int("tenant_id").notNull().default(1),
-  serviceCode: varchar("service_code",{length:50}).notNull(),
-  serviceLabel: varchar("service_label",{length:120}).notNull(),
-  amount: decimal("amount",{precision:8,scale:2}).notNull(),
-  rateType: varchar("rate_type",{length:20}).notNull().default("annual"),
-  applicableTo: varchar("applicable_to",{length:50}).default("all_staff"),
-  seasonId: int("season_id").references(() => seasons.id, { onDelete: "set null" }),
-  studioRestriction: text("studio_restriction"),
-  requiresMembership: boolean("requires_membership").default(true),
-  requiresMedicalCert: boolean("requires_medical_cert").default(true),
-  maxSessionsPerWeek: tinyint("max_sessions_per_week"),
-  isActive: boolean("is_active").default(true),
-  notes: text("notes"),
-  metadata: json("metadata"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
-},(t)=>({
-  uqCode: uniqueIndex("uq_staff_rate_code").on(t.tenantId, t.serviceCode),
-}));
+export const staffRates = mysqlTable(
+  "staff_rates",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    tenantId: int("tenant_id").notNull().default(1),
+    serviceCode: varchar("service_code", { length: 50 }).notNull(),
+    serviceLabel: varchar("service_label", { length: 120 }).notNull(),
+    amount: decimal("amount", { precision: 8, scale: 2 }).notNull(),
+    rateType: varchar("rate_type", { length: 20 }).notNull().default("annual"),
+    applicableTo: varchar("applicable_to", { length: 50 }).default("all_staff"),
+    seasonId: int("season_id").references(() => seasons.id, {
+      onDelete: "set null",
+    }),
+    studioRestriction: text("studio_restriction"),
+    requiresMembership: boolean("requires_membership").default(true),
+    requiresMedicalCert: boolean("requires_medical_cert").default(true),
+    maxSessionsPerWeek: tinyint("max_sessions_per_week"),
+    isActive: boolean("is_active").default(true),
+    notes: text("notes"),
+    metadata: json("metadata"),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
+  },
+  (t) => ({
+    uqCode: uniqueIndex("uq_staff_rate_code").on(t.tenantId, t.serviceCode),
+  }),
+);
 
 export type MemberDiscount = typeof memberDiscounts.$inferSelect;
 export type InsertMemberDiscount = typeof memberDiscounts.$inferInsert;
@@ -2288,15 +2721,14 @@ export type InsertCompanyAgreement = typeof companyAgreements.$inferInsert;
 export type AttendanceLog = typeof attendances.$inferSelect;
 export type InsertAttendanceLog = typeof attendances.$inferInsert;
 
-export const webhookLogs = mysqlTable(
-  "webhook_logs", {
+export const webhookLogs = mysqlTable("webhook_logs", {
   id: int("id").autoincrement().primaryKey(),
   tenantId: int("tenant_id").notNull().default(1),
-  source: varchar("source",{length:30}).notNull(),
-  eventType: varchar("event_type",{length:80}),
-  externalId: varchar("external_id",{length:120}),
+  source: varchar("source", { length: 30 }).notNull(),
+  eventType: varchar("event_type", { length: 80 }),
+  externalId: varchar("external_id", { length: 120 }),
   rawPayload: json("raw_payload"),
-  status: varchar("status",{length:20}).notNull().default("received"),
+  status: varchar("status", { length: 20 }).notNull().default("received"),
   processedAt: timestamp("processed_at"),
   errorMessage: text("error_message"),
   paymentId: int("payment_id"),
@@ -2306,7 +2738,6 @@ export const webhookLogs = mysqlTable(
 export type WebhookLog = typeof webhookLogs.$inferSelect;
 export type StaffRate = typeof staffRates.$inferSelect;
 export type InsertStaffRate = typeof staffRates.$inferInsert;
-
 
 export type InsertPromoRule = typeof promoRules.$inferInsert;
 
@@ -2320,19 +2751,23 @@ export type CarnetSession = typeof carnetSessions.$inferSelect;
 export type InsertCarnetSession = typeof carnetSessions.$inferInsert;
 
 export type InstructorAgreement = typeof instructorAgreements.$inferSelect;
-export type InsertInstructorAgreement = typeof instructorAgreements.$inferInsert;
+export type InsertInstructorAgreement =
+  typeof instructorAgreements.$inferInsert;
 
-export type AgreementMonthlyOverride = typeof agreementMonthlyOverrides.$inferSelect;
-export type InsertAgreementMonthlyOverride = typeof agreementMonthlyOverrides.$inferInsert;
+export type AgreementMonthlyOverride =
+  typeof agreementMonthlyOverrides.$inferSelect;
+export type InsertAgreementMonthlyOverride =
+  typeof agreementMonthlyOverrides.$inferInsert;
 
 // ============================================
 // CARNET E PREZZI DINAMICI
 // ============================================
-export const priceMatrix = mysqlTable(
-  "price_matrix", {
+export const priceMatrix = mysqlTable("price_matrix", {
   id: int("id").autoincrement().primaryKey(),
   tenantId: int("tenant_id").default(1),
-  seasonId: int("season_id").references(() => seasons.id, { onDelete: "set null" }),
+  seasonId: int("season_id").references(() => seasons.id, {
+    onDelete: "set null",
+  }),
   category: varchar("category", { length: 100 }),
   quantityType: varchar("quantity_type", { length: 50 }),
   courseCount: int("course_count"),
@@ -2348,29 +2783,36 @@ export type PriceMatrix = typeof priceMatrix.$inferSelect;
 export type InsertPriceMatrix = typeof priceMatrix.$inferInsert;
 
 export const pricingRules = mysqlTable(
-  "pricing_rules", {
-  id: int("id").autoincrement().primaryKey(),
-  tenantId: int("tenant_id").notNull().default(1),
-  ruleCode: varchar("rule_code",{length:50}).notNull(),
-  ruleLabel: varchar("rule_label",{length:120}).notNull(),
-  appliesTo: varchar("applies_to",{length:50}).notNull(),
-  ruleType: varchar("rule_type",{length:30}).notNull(),
-  triggerCondition: varchar("trigger_condition",{length:50}),
-  triggerValue: decimal("trigger_value",{precision:8,scale:2}),
-  effectType: varchar("effect_type",{length:30}).notNull(),
-  effectValue: decimal("effect_value",{precision:8,scale:2}),
-  requiresAuthorization: boolean("requires_authorization").default(false),
-  authorizedBy: varchar("authorized_by",{length:50}),
-  priority: tinyint("priority").default(10),
-  isActive: boolean("is_active").default(true),
-  notes: text("notes"),
-  metadata: json("metadata"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
-},(t)=>({
-  uqCode: uniqueIndex("uq_pricing_rule_code").on(t.tenantId, t.ruleCode),
-  idxApplies: index("idx_pricing_rules_applies").on(t.tenantId, t.appliesTo, t.isActive),
-}));
+  "pricing_rules",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    tenantId: int("tenant_id").notNull().default(1),
+    ruleCode: varchar("rule_code", { length: 50 }).notNull(),
+    ruleLabel: varchar("rule_label", { length: 120 }).notNull(),
+    appliesTo: varchar("applies_to", { length: 50 }).notNull(),
+    ruleType: varchar("rule_type", { length: 30 }).notNull(),
+    triggerCondition: varchar("trigger_condition", { length: 50 }),
+    triggerValue: decimal("trigger_value", { precision: 8, scale: 2 }),
+    effectType: varchar("effect_type", { length: 30 }).notNull(),
+    effectValue: decimal("effect_value", { precision: 8, scale: 2 }),
+    requiresAuthorization: boolean("requires_authorization").default(false),
+    authorizedBy: varchar("authorized_by", { length: 50 }),
+    priority: tinyint("priority").default(10),
+    isActive: boolean("is_active").default(true),
+    notes: text("notes"),
+    metadata: json("metadata"),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
+  },
+  (t) => ({
+    uqCode: uniqueIndex("uq_pricing_rule_code").on(t.tenantId, t.ruleCode),
+    idxApplies: index("idx_pricing_rules_applies").on(
+      t.tenantId,
+      t.appliesTo,
+      t.isActive,
+    ),
+  }),
+);
 
 export type PricingRule = typeof pricingRules.$inferSelect;
 export type InsertPricingRule = typeof pricingRules.$inferInsert;
@@ -2383,97 +2825,194 @@ export type PromoRule = typeof promoRules.$inferSelect;
 
 export const memberFormsSubmissions = mysqlTable("member_forms_submissions", {
   id: int("id").primaryKey().autoincrement(),
-  memberId: int("member_id").notNull().references(() => members.id),
+  memberId: int("member_id")
+    .notNull()
+    .references(() => members.id),
   formType: varchar("form_type", { length: 50 }).notNull(),
-  formVersion: varchar("form_version", { length: 20 }).notNull().default("2025-06-30"),
-  seasonId: int("season_id").references(() => seasons.id, { onDelete: "set null" }),
+  formVersion: varchar("form_version", { length: 20 })
+    .notNull()
+    .default("2025-06-30"),
+  seasonId: int("season_id").references(() => seasons.id, {
+    onDelete: "set null",
+  }),
   payloadData: json("payload_data"),
   signedAt: datetime("signed_at"),
   signedByIp: varchar("signed_by_ip", { length: 45 }),
   signatureHash: varchar("signature_hash", { length: 255 }),
   createdBy: int("created_by"),
-  createdAt: datetime("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: datetime("updated_at").notNull().default(sql`CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP`),
+  createdAt: datetime("created_at")
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: datetime("updated_at")
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP`),
 });
 
-export const memberFormsSubmissionsRelations = relations(memberFormsSubmissions, ({ one }) => ({
-  member: one(members, {
-    fields: [memberFormsSubmissions.memberId],
-    references: [members.id],
+export const memberFormsSubmissionsRelations = relations(
+  memberFormsSubmissions,
+  ({ one }) => ({
+    member: one(members, {
+      fields: [memberFormsSubmissions.memberId],
+      references: [members.id],
+    }),
+    season: one(seasons, {
+      fields: [memberFormsSubmissions.seasonId],
+      references: [seasons.id],
+    }),
   }),
-  season: one(seasons, {
-    fields: [memberFormsSubmissions.seasonId],
-    references: [seasons.id],
-  }),
-}));
+);
 
-export const insertMemberFormsSubmissionsSchema = createInsertSchema(memberFormsSubmissions).omit({
+export const insertMemberFormsSubmissionsSchema = createInsertSchema(
+  memberFormsSubmissions,
+).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
 });
-export type InsertMemberFormsSubmissions = z.infer<typeof insertMemberFormsSubmissionsSchema>;
+export type InsertMemberFormsSubmissions = z.infer<
+  typeof insertMemberFormsSubmissionsSchema
+>;
 export type MemberFormsSubmissions = typeof memberFormsSubmissions.$inferSelect;
 
 // ============================================================================
 // GEMTEAM MODULE
 // ============================================================================
 
-export const teamEmployees = mysqlTable("team_employees", {
+export const teamEmployees = mysqlTable(
+  "team_employees",
+  {
+    compensoOrario: decimal("compenso_orario", { precision: 8, scale: 2 }),
+    compensoMensile: decimal("compenso_mensile", { precision: 10, scale: 2 }),
+    tipologiaContratto: mysqlEnum("tipologia_contratto", [
+      "dipendente",
+      "collab_occasionale",
+      "collab_continuativa",
+      "partita_iva",
+      "volontario",
+    ]),
+    dataInizioCollaborazione: date("data_inizio_collaborazione"),
+    dataFineCollaborazione: date("data_fine_collaborazione"),
+    alboProfessionale: varchar("albo_professionale", { length: 255 }),
+    nIscrizioneAlbo: varchar("n_iscrizione_albo", { length: 100 }),
+    dataIscrizioneAlbo: date("data_iscrizione_albo"),
+    titoloStudio: varchar("titolo_studio", { length: 255 }),
+    istitutoDiploma: varchar("istituto_diploma", { length: 255 }),
+    annoDiploma: int("anno_diploma"),
+    certificazioni: text("certificazioni"),
+    linkedinUrl: varchar("linkedin_url", { length: 500 }),
+    instagramUrl: varchar("instagram_url", { length: 500 }),
+    facebookUrl: varchar("facebook_url", { length: 500 }),
+    website: varchar("website", { length: 500 }),
+    curriculumUrl: varchar("curriculum_url", { length: 500 }),
+    regolamentoUrl: varchar("regolamento_url", { length: 500 }),
+    bioBreve: text("bio_breve"),
+    specializzazione: varchar("specializzazione", { length: 255 }),
+    lingueParlate: varchar("lingue_parlate", { length: 255 }),
+    disponibilitaOraria: text("disponibilita_oraria"),
+    noteCompenso: text("note_compenso"),
+    fotoProfiloUrl: varchar("foto_profilo_url", { length: 500 }),
+    coloreCalendario: varchar("colore_calendario", { length: 7 }),
+    avatarUrl: varchar("avatar_url", { length: 500 }),
 
-  avatarUrl: varchar("avatar_url", { length: 500 }),
+    id: int("id").primaryKey().autoincrement(),
+    memberId: int("member_id")
+      .notNull()
+      .references(() => members.id, { onDelete: "restrict" }),
+    userId: varchar("user_id", { length: 255 }).references(() => users.id, {
+      onDelete: "set null",
+    }),
+    displayOrder: int("display_order").notNull().default(0),
+    team: mysqlEnum("team", [
+      "segreteria",
+      "ass_manutenzione",
+      "ufficio",
+      "amministrazione",
+      "comunicazione",
+      "direzione",
+    ]).notNull(),
+    tariffaOraria: decimal("tariffa_oraria", { precision: 5, scale: 2 }),
+    stipendioFissoMensile: decimal("stipendio_fisso_mensile", {
+      precision: 8,
+      scale: 2,
+    }),
+    dataAssunzione: date("data_assunzione"),
+    attivo: boolean("attivo").notNull().default(true),
+    noteHr: text("note_hr"),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
+  },
+  (t) => [index("idx_team").on(t.team), index("idx_attivo").on(t.attivo)],
+);
 
-  id: int("id").primaryKey().autoincrement(),
-  memberId: int("member_id").notNull().references(() => members.id, { onDelete: "restrict" }),
-  userId: varchar("user_id", { length: 255 }).references(() => users.id, { onDelete: "set null" }),
-  displayOrder: int("display_order").notNull().default(0),
-  team: mysqlEnum("team", ["segreteria","ass_manutenzione","ufficio","amministrazione","comunicazione","direzione"]).notNull(),
-  tariffaOraria: decimal("tariffa_oraria", { precision: 5, scale: 2 }),
-  stipendioFissoMensile: decimal("stipendio_fisso_mensile", { precision: 8, scale: 2 }),
-  dataAssunzione: date("data_assunzione"),
-  attivo: boolean("attivo").notNull().default(true),
-  noteHr: text("note_hr"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
-}, (t) => [
-  index("idx_team").on(t.team),
-  index("idx_attivo").on(t.attivo),
-]);
+export const teamShiftTemplates = mysqlTable(
+  "team_shift_templates",
+  {
+    id: int("id").primaryKey().autoincrement(),
+    employeeId: int("employee_id")
+      .notNull()
+      .references(() => teamEmployees.id, { onDelete: "cascade" }),
+    settimanaTipo: mysqlEnum("settimana_tipo", [
+      "A",
+      "B",
+      "C",
+      "D",
+      "E",
+    ]).notNull(),
+    giornoSettimana: tinyint("giorno_settimana").notNull(),
+    oraInizio: time("ora_inizio").notNull(),
+    oraFine: time("ora_fine").notNull(),
+    postazione: mysqlEnum("postazione", [
+      "RECEPTION",
+      "PRIMO",
+      "SECONDO",
+      "UFFICIO",
+      "AMM.ZIONE",
+      "PAUSA",
+      "RIPOSO",
+      "RIUNIONE",
+      "STUDIO_1",
+      "STUDIO_2",
+      "MALATTIA",
+      "PERMESSO",
+      "WORKSHOP",
+    ]).notNull(),
+    note: text("note"),
+    createdAt: timestamp("created_at").defaultNow(),
+  },
+  (t) => [index("idx_settimana").on(t.settimanaTipo, t.giornoSettimana)],
+);
 
-export const teamShiftTemplates = mysqlTable("team_shift_templates", {
-  id: int("id").primaryKey().autoincrement(),
-  employeeId: int("employee_id").notNull().references(() => teamEmployees.id, { onDelete: "cascade" }),
-  settimanaTipo: mysqlEnum("settimana_tipo", ["A","B","C","D","E"]).notNull(),
-  giornoSettimana: tinyint("giorno_settimana").notNull(),
-  oraInizio: time("ora_inizio").notNull(),
-  oraFine: time("ora_fine").notNull(),
-  postazione: mysqlEnum("postazione", ["RECEPTION","PRIMO","SECONDO","UFFICIO","AMM.ZIONE","PAUSA","RIPOSO","RIUNIONE","STUDIO_1","STUDIO_2","MALATTIA","PERMESSO","WORKSHOP"]).notNull(),
-  note: text("note"),
-  createdAt: timestamp("created_at").defaultNow(),
-}, (t) => [
-  index("idx_settimana").on(t.settimanaTipo, t.giornoSettimana),
-]);
-
-export const teamScheduledShifts = mysqlTable("team_scheduled_shifts", {
-  id: int("id").primaryKey().autoincrement(),
-  employeeId: int("employee_id").notNull().references(() => teamEmployees.id, { onDelete: "cascade" }),
-  data: date("data").notNull(),
-  oraInizio: time("ora_inizio").notNull(),
-  oraFine: time("ora_fine").notNull(),
-  postazione: varchar("postazione", { length: 50 }).notNull(),
-  note: varchar("note", { length: 255 }),
-  // templateId: int("template_id").references(() => teamShiftTemplates.id, { onDelete: "set null" }), // removed by prompt definition
-  createdByUserId: varchar("created_by_user_id", { length: 255 }).references(() => users.id, { onDelete: "set null" }),
-  modifiedByUserId: varchar("modified_by_user_id", { length: 255 }).references(() => users.id, { onDelete: "set null" }),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
-}, (t) => [
-  uniqueIndex("uq_shift").on(t.employeeId, t.data, t.oraInizio)
-]);
+export const teamScheduledShifts = mysqlTable(
+  "team_scheduled_shifts",
+  {
+    id: int("id").primaryKey().autoincrement(),
+    employeeId: int("employee_id")
+      .notNull()
+      .references(() => teamEmployees.id, { onDelete: "cascade" }),
+    data: date("data").notNull(),
+    oraInizio: time("ora_inizio").notNull(),
+    oraFine: time("ora_fine").notNull(),
+    postazione: varchar("postazione", { length: 50 }).notNull(),
+    note: varchar("note", { length: 255 }),
+    // templateId: int("template_id").references(() => teamShiftTemplates.id, { onDelete: "set null" }), // removed by prompt definition
+    createdByUserId: varchar("created_by_user_id", { length: 255 }).references(
+      () => users.id,
+      { onDelete: "set null" },
+    ),
+    modifiedByUserId: varchar("modified_by_user_id", {
+      length: 255,
+    }).references(() => users.id, { onDelete: "set null" }),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
+  },
+  (t) => [uniqueIndex("uq_shift").on(t.employeeId, t.data, t.oraInizio)],
+);
 
 export const teamActivityTypes = mysqlTable("team_activity_types", {
   id: int("id").primaryKey().autoincrement(),
-  team: mysqlEnum("team", ["segreteria","ass_manutenzione","tutti"]).notNull().default("tutti"),
+  team: mysqlEnum("team", ["segreteria", "ass_manutenzione", "tutti"])
+    .notNull()
+    .default("tutti"),
   label: varchar("label", { length: 200 }).notNull(),
   categoria: varchar("categoria", { length: 50 }),
   attivo: boolean("attivo").notNull().default(true),
@@ -2481,224 +3020,364 @@ export const teamActivityTypes = mysqlTable("team_activity_types", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const teamShiftDiaryEntries = mysqlTable("team_shift_diary_entries", {
-  id: int("id").primaryKey().autoincrement(),
-  employeeId: int("employee_id").notNull().references(() => teamEmployees.id, { onDelete: "cascade" }),
-  shiftId: int("shift_id").references(() => teamScheduledShifts.id, { onDelete: "set null" }),
-  data: date("data").notNull(),
-  oraSlot: time("ora_slot").notNull(),
-  postazione: mysqlEnum("postazione", ["RECEPTION","PRIMO","SECONDO","UFFICIO","AMM.ZIONE","PAUSA","RIPOSO","RIUNIONE","STUDIO_1","STUDIO_2","MALATTIA","PERMESSO","WORKSHOP"]).notNull(),
-  activityTypeId: int("activity_type_id").references(() => teamActivityTypes.id, { onDelete: "set null" }),
-  attivitaLibera: varchar("attivita_libera", { length: 300 }),
-  quantita: int("quantita"),
-  minuti: smallint("minuti"),
-  note: text("note"),
-  okFlag: boolean("ok_flag").notNull().default(false),
-  createdAt: timestamp("created_at").defaultNow(),
-}, (t) => [
-  index("idx_employee_data").on(t.employeeId, t.data),
-]);
+export const teamShiftDiaryEntries = mysqlTable(
+  "team_shift_diary_entries",
+  {
+    id: int("id").primaryKey().autoincrement(),
+    employeeId: int("employee_id")
+      .notNull()
+      .references(() => teamEmployees.id, { onDelete: "cascade" }),
+    shiftId: int("shift_id").references(() => teamScheduledShifts.id, {
+      onDelete: "set null",
+    }),
+    data: date("data").notNull(),
+    oraSlot: time("ora_slot").notNull(),
+    postazione: mysqlEnum("postazione", [
+      "RECEPTION",
+      "PRIMO",
+      "SECONDO",
+      "UFFICIO",
+      "AMM.ZIONE",
+      "PAUSA",
+      "RIPOSO",
+      "RIUNIONE",
+      "STUDIO_1",
+      "STUDIO_2",
+      "MALATTIA",
+      "PERMESSO",
+      "WORKSHOP",
+    ]).notNull(),
+    activityTypeId: int("activity_type_id").references(
+      () => teamActivityTypes.id,
+      { onDelete: "set null" },
+    ),
+    attivitaLibera: varchar("attivita_libera", { length: 300 }),
+    quantita: int("quantita"),
+    minuti: smallint("minuti"),
+    note: text("note"),
+    okFlag: boolean("ok_flag").notNull().default(false),
+    createdAt: timestamp("created_at").defaultNow(),
+  },
+  (t) => [index("idx_employee_data").on(t.employeeId, t.data)],
+);
 
-export const teamAttendanceLogs = mysqlTable("team_attendance_logs", {
-  id: int("id").primaryKey().autoincrement(),
-  employeeId: int("employee_id").notNull().references(() => teamEmployees.id, { onDelete: "cascade" }),
-  data: date("data").notNull(),
-  oreLavorate: decimal("ore_lavorate", { precision: 4, scale: 2 }),
-  tipoAssenza: mysqlEnum("tipo_assenza", ["FE","PE","ML","F","AI","AG","MT","IN"]),
-  checkIn: datetime("check_in"),
-  checkOut: datetime("check_out"),
-  note: text("note"),
-  modifiedByAdmin: varchar("modified_by_admin", { length: 255 }).references(() => users.id, { onDelete: "set null" }),
-  modifiedAt: datetime("modified_at"),
-  createdAt: timestamp("created_at").defaultNow(),
-}, (t) => [
-  uniqueIndex("uq_employee_data").on(t.employeeId, t.data),
-  index("idx_data").on(t.data),
-]);
+export const teamAttendanceLogs = mysqlTable(
+  "team_attendance_logs",
+  {
+    id: int("id").primaryKey().autoincrement(),
+    employeeId: int("employee_id")
+      .notNull()
+      .references(() => teamEmployees.id, { onDelete: "cascade" }),
+    data: date("data").notNull(),
+    oreLavorate: decimal("ore_lavorate", { precision: 4, scale: 2 }),
+    tipoAssenza: mysqlEnum("tipo_assenza", [
+      "FE",
+      "PE",
+      "ML",
+      "F",
+      "AI",
+      "AG",
+      "MT",
+      "IN",
+    ]),
+    checkIn: datetime("check_in"),
+    checkOut: datetime("check_out"),
+    note: text("note"),
+    modifiedByAdmin: varchar("modified_by_admin", { length: 255 }).references(
+      () => users.id,
+      { onDelete: "set null" },
+    ),
+    modifiedAt: datetime("modified_at"),
+    createdAt: timestamp("created_at").defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("uq_employee_data").on(t.employeeId, t.data),
+    index("idx_data").on(t.data),
+  ],
+);
 
-export const teamCheckinEvents = mysqlTable("team_checkin_events", {
-  id: int("id").primaryKey().autoincrement(),
-  employeeId: int("employee_id").notNull().references(() => teamEmployees.id, { onDelete: "cascade" }),
-  timestamp: datetime("timestamp").notNull(),
-  tipo: mysqlEnum("tipo", ["IN","OUT"]).notNull(),
-  postazione: varchar("postazione", { length: 50 }),
-  device: varchar("device", { length: 100 }),
-  overrideAdmin: boolean("override_admin").notNull().default(false),
-  note: text("note"),
-}, (t) => [
-  index("idx_employee_ts").on(t.employeeId, t.timestamp),
-]);
+export const teamCheckinEvents = mysqlTable(
+  "team_checkin_events",
+  {
+    id: int("id").primaryKey().autoincrement(),
+    employeeId: int("employee_id")
+      .notNull()
+      .references(() => teamEmployees.id, { onDelete: "cascade" }),
+    timestamp: datetime("timestamp").notNull(),
+    tipo: mysqlEnum("tipo", ["IN", "OUT"]).notNull(),
+    postazione: varchar("postazione", { length: 50 }),
+    device: varchar("device", { length: 100 }),
+    overrideAdmin: boolean("override_admin").notNull().default(false),
+    note: text("note"),
+  },
+  (t) => [index("idx_employee_ts").on(t.employeeId, t.timestamp)],
+);
 
-export const teamLeaveRequests = mysqlTable("team_leave_requests", {
-  id: int("id").primaryKey().autoincrement(),
-  employeeId: int("employee_id").notNull().references(() => teamEmployees.id, { onDelete: "cascade" }),
-  tipo: mysqlEnum("tipo", ["FE","PE","ML","altro"]).notNull(),
-  dataInizio: date("data_inizio").notNull(),
-  dataFine: date("data_fine").notNull(),
-  oreTotali: decimal("ore_totali", { precision: 4, scale: 2 }).notNull(),
-  status: mysqlEnum("status", ["pending","approved","rejected"]).notNull().default("pending"),
-  approvedBy: varchar("approved_by", { length: 255 }).references(() => users.id, { onDelete: "set null" }),
-  approvedAt: datetime("approved_at"),
-  noteDipendente: text("note_dipendente"),
-  noteAdmin: text("note_admin"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
-}, (t) => [
-  index("idx_status").on(t.status),
-  index("idx_employee").on(t.employeeId),
-]);
-export const teamMonthlyReports = mysqlTable("team_monthly_reports", {
-  id: int("id").primaryKey().autoincrement(),
-  employeeId: int("employee_id").notNull().references(() => teamEmployees.id, { onDelete: "cascade" }),
-  anno: int("anno").notNull(), // YEAR mapped to int
-  mese: tinyint("mese").notNull(),
-  oreTotali: decimal("ore_totali", { precision: 6, scale: 2 }).notNull().default("0"),
-  giorniLavorati: tinyint("giorni_lavorati").notNull().default(0),
-  stipendioFisso: decimal("stipendio_fisso", { precision: 8, scale: 2 }),
-  oreExtraPos: decimal("ore_extra_pos", { precision: 5, scale: 2 }).notNull().default("0"),
-  oreExtraNeg: decimal("ore_extra_neg", { precision: 5, scale: 2 }).notNull().default("0"),
-  importoExtra: decimal("importo_extra", { precision: 8, scale: 2 }),
-  cntFE: tinyint("cnt_FE").notNull().default(0),
-  cntPE: tinyint("cnt_PE").notNull().default(0),
-  cntML: tinyint("cnt_ML").notNull().default(0),
-  cntF: tinyint("cnt_F").notNull().default(0),
-  cntAI: tinyint("cnt_AI").notNull().default(0),
-  cntAG: tinyint("cnt_AG").notNull().default(0),
-  cntMT: tinyint("cnt_MT").notNull().default(0),
-  cntIN: tinyint("cnt_IN").notNull().default(0),
-  exportAt: datetime("export_at"),
-  locked: boolean("locked").notNull().default(false),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
-}, (t) => [
-  uniqueIndex("uq_employee_mese").on(t.employeeId, t.anno, t.mese),
-]);
-export const teamDocuments = mysqlTable("team_documents", {
-  id: int("id").primaryKey().autoincrement(),
-  memberId: int("member_id").notNull().references(() => members.id, { onDelete: "cascade" }),
-  tipo: mysqlEnum("tipo", ["carta_identita","codice_fiscale","permesso_soggiorno","patente","certificato_medico","diploma","contratto","busta_paga","report_mensile","comunicazione","altro"]).notNull(),
-  titolo: varchar("titolo", { length: 200 }).notNull(),
-  caricatoDa: mysqlEnum("caricato_da", ["employee","admin"]).notNull(),
-  visibileDipendente: boolean("visibile_dipendente").notNull().default(true),
-  isCurrent: boolean("is_current").notNull().default(true),
-  scadenza: date("scadenza"),
-  createdAt: timestamp("created_at").defaultNow(),
-}, (t) => [
-  index("idx_member").on(t.memberId),
-  index("idx_scadenza").on(t.scadenza),
-]);
+export const teamLeaveRequests = mysqlTable(
+  "team_leave_requests",
+  {
+    id: int("id").primaryKey().autoincrement(),
+    employeeId: int("employee_id")
+      .notNull()
+      .references(() => teamEmployees.id, { onDelete: "cascade" }),
+    tipo: mysqlEnum("tipo", ["FE", "PE", "ML", "altro"]).notNull(),
+    dataInizio: date("data_inizio").notNull(),
+    dataFine: date("data_fine").notNull(),
+    oreTotali: decimal("ore_totali", { precision: 4, scale: 2 }).notNull(),
+    status: mysqlEnum("status", ["pending", "approved", "rejected"])
+      .notNull()
+      .default("pending"),
+    approvedBy: varchar("approved_by", { length: 255 }).references(
+      () => users.id,
+      { onDelete: "set null" },
+    ),
+    approvedAt: datetime("approved_at"),
+    noteDipendente: text("note_dipendente"),
+    noteAdmin: text("note_admin"),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
+  },
+  (t) => [
+    index("idx_status").on(t.status),
+    index("idx_employee").on(t.employeeId),
+  ],
+);
+export const teamMonthlyReports = mysqlTable(
+  "team_monthly_reports",
+  {
+    id: int("id").primaryKey().autoincrement(),
+    employeeId: int("employee_id")
+      .notNull()
+      .references(() => teamEmployees.id, { onDelete: "cascade" }),
+    anno: int("anno").notNull(), // YEAR mapped to int
+    mese: tinyint("mese").notNull(),
+    oreTotali: decimal("ore_totali", { precision: 6, scale: 2 })
+      .notNull()
+      .default("0"),
+    giorniLavorati: tinyint("giorni_lavorati").notNull().default(0),
+    stipendioFisso: decimal("stipendio_fisso", { precision: 8, scale: 2 }),
+    oreExtraPos: decimal("ore_extra_pos", { precision: 5, scale: 2 })
+      .notNull()
+      .default("0"),
+    oreExtraNeg: decimal("ore_extra_neg", { precision: 5, scale: 2 })
+      .notNull()
+      .default("0"),
+    importoExtra: decimal("importo_extra", { precision: 8, scale: 2 }),
+    cntFE: tinyint("cnt_FE").notNull().default(0),
+    cntPE: tinyint("cnt_PE").notNull().default(0),
+    cntML: tinyint("cnt_ML").notNull().default(0),
+    cntF: tinyint("cnt_F").notNull().default(0),
+    cntAI: tinyint("cnt_AI").notNull().default(0),
+    cntAG: tinyint("cnt_AG").notNull().default(0),
+    cntMT: tinyint("cnt_MT").notNull().default(0),
+    cntIN: tinyint("cnt_IN").notNull().default(0),
+    exportAt: datetime("export_at"),
+    locked: boolean("locked").notNull().default(false),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
+  },
+  (t) => [uniqueIndex("uq_employee_mese").on(t.employeeId, t.anno, t.mese)],
+);
+export const teamDocuments = mysqlTable(
+  "team_documents",
+  {
+    id: int("id").primaryKey().autoincrement(),
+    memberId: int("member_id")
+      .notNull()
+      .references(() => members.id, { onDelete: "cascade" }),
+    tipo: mysqlEnum("tipo", [
+      "carta_identita",
+      "codice_fiscale",
+      "permesso_soggiorno",
+      "patente",
+      "certificato_medico",
+      "diploma",
+      "contratto",
+      "busta_paga",
+      "report_mensile",
+      "comunicazione",
+      "altro",
+    ]).notNull(),
+    titolo: varchar("titolo", { length: 200 }).notNull(),
+    caricatoDa: mysqlEnum("caricato_da", ["employee", "admin"]).notNull(),
+    visibileDipendente: boolean("visibile_dipendente").notNull().default(true),
+    isCurrent: boolean("is_current").notNull().default(true),
+    scadenza: date("scadenza"),
+    createdAt: timestamp("created_at").defaultNow(),
+  },
+  (t) => [
+    index("idx_member").on(t.memberId),
+    index("idx_scadenza").on(t.scadenza),
+  ],
+);
 
 export const teamDocumentVersions = mysqlTable("team_document_versions", {
   id: int("id").primaryKey().autoincrement(),
-  documentId: int("document_id").notNull().references(() => teamDocuments.id, { onDelete: "cascade" }),
+  documentId: int("document_id")
+    .notNull()
+    .references(() => teamDocuments.id, { onDelete: "cascade" }),
   versioneNumero: tinyint("versione_numero").notNull().default(1),
   fileUrl: varchar("file_url", { length: 500 }).notNull(),
   fileName: varchar("file_name", { length: 200 }).notNull(),
   fileSize: int("file_size"),
   mimeType: varchar("mime_type", { length: 100 }),
   hashFile: varchar("hash_file", { length: 64 }),
-  uploadedBy: varchar("uploaded_by", { length: 255 }).references(() => users.id, { onDelete: "set null" }),
+  uploadedBy: varchar("uploaded_by", { length: 255 }).references(
+    () => users.id,
+    { onDelete: "set null" },
+  ),
   uploadedAt: timestamp("uploaded_at").defaultNow(),
   noteVersione: text("note_versione"),
 });
 
-export const teamDocumentAlerts = mysqlTable("team_document_alerts", {
-  id: int("id").primaryKey().autoincrement(),
-  documentId: int("document_id").references(() => teamDocuments.id, { onDelete: "cascade" }),
-  employeeId: int("employee_id").notNull().references(() => teamEmployees.id, { onDelete: "cascade" }),
-  tipo: mysqlEnum("tipo", ["scadenza","mancante","aggiornamento_richiesto"]).notNull(),
-  dataAlert: date("data_alert").notNull(),
-  inviatoAt: datetime("inviato_at"),
-  risolto: boolean("risolto").notNull().default(false),
-  createdAt: timestamp("created_at").defaultNow(),
-}, (t) => [
-  index("idx_data_alert").on(t.dataAlert),
-  index("idx_risolto").on(t.risolto),
-]);
+export const teamDocumentAlerts = mysqlTable(
+  "team_document_alerts",
+  {
+    id: int("id").primaryKey().autoincrement(),
+    documentId: int("document_id").references(() => teamDocuments.id, {
+      onDelete: "cascade",
+    }),
+    employeeId: int("employee_id")
+      .notNull()
+      .references(() => teamEmployees.id, { onDelete: "cascade" }),
+    tipo: mysqlEnum("tipo", [
+      "scadenza",
+      "mancante",
+      "aggiornamento_richiesto",
+    ]).notNull(),
+    dataAlert: date("data_alert").notNull(),
+    inviatoAt: datetime("inviato_at"),
+    risolto: boolean("risolto").notNull().default(false),
+    createdAt: timestamp("created_at").defaultNow(),
+  },
+  (t) => [
+    index("idx_data_alert").on(t.dataAlert),
+    index("idx_risolto").on(t.risolto),
+  ],
+);
 
-export const teamEmployeeActivityLog = mysqlTable("team_employee_activity_log", {
-  id: int("id").primaryKey().autoincrement(),
-  employeeId: int("employee_id").notNull().references(() => teamEmployees.id, { onDelete: "cascade" }),
-  eseguitaDa: varchar("eseguita_da", { length: 255 }).references(() => users.id, { onDelete: "set null" }),
-  azione: varchar("azione", { length: 100 }).notNull(),
-  entitaModificata: varchar("entita_modificata", { length: 50 }),
-  entitaId: int("entita_id"),
-  valorePrima: text("valore_prima"),
-  valoreDopo: text("valore_dopo"),
-  ipAddress: varchar("ip_address", { length: 45 }),
-  createdAt: timestamp("created_at").defaultNow(),
-}, (t) => [
-  index("idx_employee").on(t.employeeId),
-  index("idx_created").on(t.createdAt),
-]);
-
+export const teamEmployeeActivityLog = mysqlTable(
+  "team_employee_activity_log",
+  {
+    id: int("id").primaryKey().autoincrement(),
+    employeeId: int("employee_id")
+      .notNull()
+      .references(() => teamEmployees.id, { onDelete: "cascade" }),
+    eseguitaDa: varchar("eseguita_da", { length: 255 }).references(
+      () => users.id,
+      { onDelete: "set null" },
+    ),
+    azione: varchar("azione", { length: 100 }).notNull(),
+    entitaModificata: varchar("entita_modificata", { length: 50 }),
+    entitaId: int("entita_id"),
+    valorePrima: text("valore_prima"),
+    valoreDopo: text("valore_dopo"),
+    ipAddress: varchar("ip_address", { length: 45 }),
+    createdAt: timestamp("created_at").defaultNow(),
+  },
+  (t) => [
+    index("idx_employee").on(t.employeeId),
+    index("idx_created").on(t.createdAt),
+  ],
+);
 
 // ============================================================================
 // GEMCHAT E GEMPORTAL
 // ============================================================================
 
-export const gemConversations = mysqlTable("gem_conversations", {
-  id: int("id").autoincrement().primaryKey(),
-  channel: mysqlEnum("channel", ["member", "staff"]).notNull(),
-  participantId: int("participant_id").notNull().references(() => members.id),
-  participantUserId: varchar("participant_user_id", { length: 255 }),
-  status: mysqlEnum("status", ["bot", "human", "closed"]).default("bot"),
-  assignedTo: varchar("assigned_to", { length: 255 }),
-  botContext: json("bot_context"),
-  lastMessageAt: datetime("last_message_at"),
-  unreadTeam: int("unread_team").default(0),
-  unreadParticipant: int("unread_participant").default(0),
-  createdAt: datetime("created_at").default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: datetime("updated_at").default(sql`CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP`)
-}, (table) => ({
-  channelIdx: index("idx_channel").on(table.channel),
-  participantIdIdx: index("idx_participant_id").on(table.participantId),
-  statusIdx: index("idx_status").on(table.status),
-  lastMessageAtIdx: index("idx_last_message_at").on(table.lastMessageAt),
-  assignedToIdx: index("idx_assigned_to").on(table.assignedTo)
-}));
+export const gemConversations = mysqlTable(
+  "gem_conversations",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    channel: mysqlEnum("channel", ["member", "staff"]).notNull(),
+    participantId: int("participant_id")
+      .notNull()
+      .references(() => members.id),
+    participantUserId: varchar("participant_user_id", { length: 255 }),
+    status: mysqlEnum("status", ["bot", "human", "closed"]).default("bot"),
+    assignedTo: varchar("assigned_to", { length: 255 }),
+    botContext: json("bot_context"),
+    lastMessageAt: datetime("last_message_at"),
+    unreadTeam: int("unread_team").default(0),
+    unreadParticipant: int("unread_participant").default(0),
+    createdAt: datetime("created_at").default(sql`CURRENT_TIMESTAMP`),
+    updatedAt: datetime("updated_at").default(
+      sql`CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP`,
+    ),
+  },
+  (table) => ({
+    channelIdx: index("idx_channel").on(table.channel),
+    participantIdIdx: index("idx_participant_id").on(table.participantId),
+    statusIdx: index("idx_status").on(table.status),
+    lastMessageAtIdx: index("idx_last_message_at").on(table.lastMessageAt),
+    assignedToIdx: index("idx_assigned_to").on(table.assignedTo),
+  }),
+);
 
-export const gemMessages = mysqlTable("gem_messages", {
-  id: int("id").autoincrement().primaryKey(),
-  conversationId: int("conversation_id").notNull().references(() => gemConversations.id, { onDelete: "cascade" }),
-  senderType: mysqlEnum("sender_type", ["member", "staff", "team", "bot"]).notNull(),
-  senderId: varchar("sender_id", { length: 255 }), // Logical ref -> users.id if team
-  content: text("content").notNull(),
-  attachmentUrl: varchar("attachment_url", { length: 500 }),
-  attachmentName: varchar("attachment_name", { length: 255 }),
-  attachmentSize: int("attachment_size"),
-  quickLinkType: mysqlEnum("quick_link_type", ["corso", "tessera", "pagamento"]),
-  quickLinkId: int("quick_link_id"),
-  isRead: tinyint("is_read").default(0),
-  createdAt: datetime("created_at").default(sql`CURRENT_TIMESTAMP`)
-}, (table) => ({
-  conversationIdIdx: index("idx_conversation_id").on(table.conversationId),
-  senderTypeIdx: index("idx_sender_type").on(table.senderType),
-  isReadIdx: index("idx_is_read").on(table.isRead),
-  createdAtIdx: index("idx_created_at").on(table.createdAt)
-}));
+export const gemMessages = mysqlTable(
+  "gem_messages",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    conversationId: int("conversation_id")
+      .notNull()
+      .references(() => gemConversations.id, { onDelete: "cascade" }),
+    senderType: mysqlEnum("sender_type", [
+      "member",
+      "staff",
+      "team",
+      "bot",
+    ]).notNull(),
+    senderId: varchar("sender_id", { length: 255 }), // Logical ref -> users.id if team
+    content: text("content").notNull(),
+    attachmentUrl: varchar("attachment_url", { length: 500 }),
+    attachmentName: varchar("attachment_name", { length: 255 }),
+    attachmentSize: int("attachment_size"),
+    quickLinkType: mysqlEnum("quick_link_type", [
+      "corso",
+      "tessera",
+      "pagamento",
+    ]),
+    quickLinkId: int("quick_link_id"),
+    isRead: tinyint("is_read").default(0),
+    createdAt: datetime("created_at").default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => ({
+    conversationIdIdx: index("idx_conversation_id").on(table.conversationId),
+    senderTypeIdx: index("idx_sender_type").on(table.senderType),
+    isReadIdx: index("idx_is_read").on(table.isRead),
+    createdAtIdx: index("idx_created_at").on(table.createdAt),
+  }),
+);
 
-
-export const memberUploads = mysqlTable("member_uploads", {
-  id: int("id").autoincrement().primaryKey(),
-  memberId: int("member_id").notNull().references(() => members.id),
-  documentType: mysqlEnum("document_type", ["certificato_medico", "documento_identita", "altro"]).notNull(),
-  filename: varchar("filename", { length: 255 }).notNull(),
-  fileUrl: varchar("file_url", { length: 500 }).notNull(),
-  fileSize: int("file_size"),
-  mimeType: varchar("mime_type", { length: 100 }),
-  uploadedAt: datetime("uploaded_at").default(sql`CURRENT_TIMESTAMP`),
-  verifiedBy: varchar("verified_by", { length: 255 }),
-  verifiedAt: datetime("verified_at"),
-  notes: text("notes"),
-  seasonId: int("season_id").references(() => seasons.id)
-}, (table) => ({
-  memberIdIdx: index("idx_member_id").on(table.memberId),
-  documentTypeIdx: index("idx_document_type").on(table.documentType),
-  verifiedByIdx: index("idx_verified_by").on(table.verifiedBy),
-  seasonIdIdx: index("idx_season_id").on(table.seasonId)
-}));
-
+export const memberUploads = mysqlTable(
+  "member_uploads",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    memberId: int("member_id")
+      .notNull()
+      .references(() => members.id),
+    documentType: mysqlEnum("document_type", [
+      "certificato_medico",
+      "documento_identita",
+      "altro",
+    ]).notNull(),
+    filename: varchar("filename", { length: 255 }).notNull(),
+    fileUrl: varchar("file_url", { length: 500 }).notNull(),
+    fileSize: int("file_size"),
+    mimeType: varchar("mime_type", { length: 100 }),
+    uploadedAt: datetime("uploaded_at").default(sql`CURRENT_TIMESTAMP`),
+    verifiedBy: varchar("verified_by", { length: 255 }),
+    verifiedAt: datetime("verified_at"),
+    notes: text("notes"),
+    seasonId: int("season_id").references(() => seasons.id),
+  },
+  (table) => ({
+    memberIdIdx: index("idx_member_id").on(table.memberId),
+    documentTypeIdx: index("idx_document_type").on(table.documentType),
+    verifiedByIdx: index("idx_verified_by").on(table.verifiedBy),
+    seasonIdIdx: index("idx_season_id").on(table.seasonId),
+  }),
+);
 
 export const teamWeekAssignments = mysqlTable("team_week_assignments", {
   id: int("id").primaryKey().autoincrement(),
@@ -2712,7 +3391,9 @@ export const teamWeekAssignments = mysqlTable("team_week_assignments", {
 
 export const teamNotifications = mysqlTable("team_notifications", {
   id: int("id").primaryKey().autoincrement(),
-  employeeId: int("employee_id").notNull().references(() => teamEmployees.id, { onDelete: "cascade" }),
+  employeeId: int("employee_id")
+    .notNull()
+    .references(() => teamEmployees.id, { onDelete: "cascade" }),
   tipo: varchar("tipo", { length: 50 }).notNull(),
   titolo: varchar("titolo", { length: 255 }).notNull(),
   messaggio: text("messaggio"),
@@ -2725,61 +3406,150 @@ export const teamPostazioni = mysqlTable("team_postazioni", {
   id: int("id").primaryKey().autoincrement(),
   nome: varchar("nome", { length: 50 }).notNull().unique(),
   contaOre: boolean("conta_ore").notNull().default(true),
-  colore: varchar("colore", { length: 7 }).default('#888888'),
+  colore: varchar("colore", { length: 7 }).default("#888888"),
   attiva: boolean("attiva").notNull().default(true),
   ordine: int("ordine").default(0),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
 // Migrated categories to custom_list_items
-export const insertClientCategorySchema = z.object({ name: z.string(), description: z.string().nullable().optional(), color: z.string().nullable().optional(), sortOrder: z.number().optional() });
-export type ClientCategory = { id: number, name: string, description: string | null, color: string | null, sortOrder: number };
+export const insertClientCategorySchema = z.object({
+  name: z.string(),
+  description: z.string().nullable().optional(),
+  color: z.string().nullable().optional(),
+  sortOrder: z.number().optional(),
+});
+export type ClientCategory = {
+  id: number;
+  name: string;
+  description: string | null;
+  color: string | null;
+  sortOrder: number;
+};
 
-export const insertRentalCategorySchema = z.object({ name: z.string(), description: z.string().nullable().optional(), color: z.string().nullable().optional(), sortOrder: z.number().optional() });
-export type RentalCategory = { id: number, name: string, description: string | null, color: string | null, sortOrder: number };
+export const insertRentalCategorySchema = z.object({
+  name: z.string(),
+  description: z.string().nullable().optional(),
+  color: z.string().nullable().optional(),
+  sortOrder: z.number().optional(),
+});
+export type RentalCategory = {
+  id: number;
+  name: string;
+  description: string | null;
+  color: string | null;
+  sortOrder: number;
+};
 
-export const insertBookingServiceCategorySchema = z.object({ name: z.string(), description: z.string().nullable().optional(), color: z.string().nullable().optional(), sortOrder: z.number().optional() });
-export type BookingServiceCategory = { id: number, name: string, description: string | null, color: string | null, sortOrder: number };
+export const insertBookingServiceCategorySchema = z.object({
+  name: z.string(),
+  description: z.string().nullable().optional(),
+  color: z.string().nullable().optional(),
+  sortOrder: z.number().optional(),
+});
+export type BookingServiceCategory = {
+  id: number;
+  name: string;
+  description: string | null;
+  color: string | null;
+  sortOrder: number;
+};
 
-export const insertMerchandisingCategorySchema = z.object({ name: z.string(), description: z.string().nullable().optional(), color: z.string().nullable().optional(), sortOrder: z.number().optional() });
-export type MerchandisingCategory = { id: number, name: string, description: string | null, color: string | null, sortOrder: number };
+export const insertMerchandisingCategorySchema = z.object({
+  name: z.string(),
+  description: z.string().nullable().optional(),
+  color: z.string().nullable().optional(),
+  sortOrder: z.number().optional(),
+});
+export type MerchandisingCategory = {
+  id: number;
+  name: string;
+  description: string | null;
+  color: string | null;
+  sortOrder: number;
+};
 
-export const insertCategorySchema = z.object({ name: z.string(), description: z.string().nullable().optional(), color: z.string().nullable().optional(), sortOrder: z.number().optional() });
-export type Category = { id: number, name: string, description: string | null, color: string | null, sortOrder: number };
+export const insertCategorySchema = z.object({
+  name: z.string(),
+  description: z.string().nullable().optional(),
+  color: z.string().nullable().optional(),
+  sortOrder: z.number().optional(),
+});
+export type Category = {
+  id: number;
+  name: string;
+  description: string | null;
+  color: string | null;
+  sortOrder: number;
+};
 
 export const dossiers = mysqlTable("dossiers", {
   id: int("id").primaryKey().autoincrement(),
   memberId: int("member_id").notNull(),
-  dossierType: mysqlEnum("dossier_type", ['nuovo_iscritto','rinnovo','trial_to_member','modifica_dati','iscrizione_corso','acquisto_carnet','acquisto_eventi','altro']).notNull(),
-  status: mysqlEnum("status", ['bozza','in_compilazione','in_pagamento','completato','annullato']).notNull().default('bozza'),
+  dossierType: mysqlEnum("dossier_type", [
+    "nuovo_iscritto",
+    "rinnovo",
+    "trial_to_member",
+    "modifica_dati",
+    "iscrizione_corso",
+    "acquisto_carnet",
+    "acquisto_eventi",
+    "altro",
+  ]).notNull(),
+  status: mysqlEnum("status", [
+    "bozza",
+    "in_compilazione",
+    "in_pagamento",
+    "completato",
+    "annullato",
+  ])
+    .notNull()
+    .default("bozza"),
   createdBy: varchar("created_by", { length: 255 }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
   completedAt: timestamp("completed_at"),
   paymentGroupId: varchar("payment_group_id", { length: 36 }),
-  tenantId: varchar("tenant_id", { length: 50 }).notNull().default('1'),
-  extraData: json("extra_data")
+  tenantId: varchar("tenant_id", { length: 50 }).notNull().default("1"),
+  extraData: json("extra_data"),
 });
 
 export const dossierSteps = mysqlTable("dossier_steps", {
   id: int("id").primaryKey().autoincrement(),
   dossierId: int("dossier_id").notNull(),
-  stepName: mysqlEnum("step_name", ['anagrafica','tutori','certificato_medico','documenti','pagamento','tesseramento','iscrizione_attivita']).notNull(),
-  status: mysqlEnum("status", ['pending','completed','blocked','skipped']).notNull().default('pending'),
+  stepName: mysqlEnum("step_name", [
+    "anagrafica",
+    "tutori",
+    "certificato_medico",
+    "documenti",
+    "pagamento",
+    "tesseramento",
+    "iscrizione_attivita",
+  ]).notNull(),
+  status: mysqlEnum("status", ["pending", "completed", "blocked", "skipped"])
+    .notNull()
+    .default("pending"),
   completedAt: timestamp("completed_at"),
   blockingReason: text("blocking_reason"),
   completedBy: varchar("completed_by", { length: 255 }),
-  tenantId: varchar("tenant_id", { length: 50 }).notNull().default('1')
+  tenantId: varchar("tenant_id", { length: 50 }).notNull().default("1"),
 });
 
 export const dossierAuditLog = mysqlTable("dossier_audit_log", {
   id: int("id").primaryKey().autoincrement(),
   dossierId: int("dossier_id").notNull(),
-  action: mysqlEnum("action", ['created','step_completed','step_blocked','status_changed','annullato','completed']).notNull(),
+  action: mysqlEnum("action", [
+    "created",
+    "step_completed",
+    "step_blocked",
+    "status_changed",
+    "annullato",
+    "completed",
+  ]).notNull(),
   performedBy: varchar("performed_by", { length: 255 }),
   performedAt: timestamp("performed_at").defaultNow(),
   details: json("details"),
-  tenantId: varchar("tenant_id", { length: 50 }).notNull().default('1')
+  tenantId: varchar("tenant_id", { length: 50 }).notNull().default("1"),
 });
 
 export const externalPayers = mysqlTable("external_payers", {
@@ -2789,8 +3559,8 @@ export const externalPayers = mysqlTable("external_payers", {
   vatNumber: varchar("vat_number", { length: 20 }),
   address: text("address"),
   notes: text("notes"),
-  tenantId: varchar("tenant_id", { length: 50 }).notNull().default('1'),
-  createdAt: timestamp("created_at").defaultNow()
+  tenantId: varchar("tenant_id", { length: 50 }).notNull().default("1"),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const societies = mysqlTable("societies", {
@@ -2800,24 +3570,47 @@ export const societies = mysqlTable("societies", {
   vatNumber: varchar("vat_number", { length: 20 }),
   address: text("address"),
   isWelfareProvider: boolean("is_welfare_provider").default(false),
-  welfareFormula: mysqlEnum("welfare_formula", ['sconto','pacchetto_prepagato','tessera_collettiva','voucher_esterno','mix']),
+  welfareFormula: mysqlEnum("welfare_formula", [
+    "sconto",
+    "pacchetto_prepagato",
+    "tessera_collettiva",
+    "voucher_esterno",
+    "mix",
+  ]),
   voucherProvider: varchar("voucher_provider", { length: 100 }),
-  billingFrequency: mysqlEnum("billing_frequency", ['mensile','trimestrale','annuale','on_demand']),
+  billingFrequency: mysqlEnum("billing_frequency", [
+    "mensile",
+    "trimestrale",
+    "annuale",
+    "on_demand",
+  ]),
   active: boolean("active").default(true),
-  tenantId: varchar("tenant_id", { length: 50 }).notNull().default('1'),
-  createdAt: timestamp("created_at").defaultNow()
+  tenantId: varchar("tenant_id", { length: 50 }).notNull().default("1"),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const paymentParticipants = mysqlTable("payment_participants", {
   id: int("id").primaryKey().autoincrement(),
   paymentId: int("payment_id").notNull(),
   memberId: int("member_id").notNull(),
-  activityType: mysqlEnum("activity_type", ['corso','tesseramento','lezione_individuale','workshop','campus','affitto','merchandising','altro']).notNull(),
+  activityType: mysqlEnum("activity_type", [
+    "corso",
+    "tesseramento",
+    "lezione_individuale",
+    "workshop",
+    "campus",
+    "affitto",
+    "merchandising",
+    "altro",
+  ]).notNull(),
   activityId: int("activity_id"),
-  amountAttributed: decimal("amount_attributed", { precision: 10, scale: 2 }).notNull(),
+  amountAttributed: decimal("amount_attributed", {
+    precision: 10,
+    scale: 2,
+  }).notNull(),
   notes: text("notes"),
-  tenantId: varchar("tenant_id", { length: 50 }).notNull().default('1'),
-  createdAt: timestamp("created_at").defaultNow()
+  tenantId: varchar("tenant_id", { length: 50 }).notNull().default("1"),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const importBatches = mysqlTable("import_batches", {
@@ -2828,12 +3621,10 @@ export const importBatches = mysqlTable("import_batches", {
   recordsImported: int("records_imported").default(0),
   recordsSkipped: int("records_skipped").default(0),
   recordsUpdated: int("records_updated").default(0),
-  errorsLog: json("errors_log")
+  errorsLog: json("errors_log"),
 });
 
 export type Dossier = typeof dossiers.$inferSelect;
 export type DossierStep = typeof dossierSteps.$inferSelect;
 export type ExternalPayer = typeof externalPayers.$inferSelect;
 export type Society = typeof societies.$inferSelect;
-
-

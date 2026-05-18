@@ -1,0 +1,24 @@
+ALTER TABLE members ADD COLUMN IF NOT EXISTS status_lifecycle ENUM('attivo','sospeso','dimesso','deceduto') DEFAULT 'attivo';
+ALTER TABLE members ADD COLUMN IF NOT EXISTS data_iscrizione DATE NULL;
+ALTER TABLE members ADD COLUMN IF NOT EXISTS data_dimissione DATE NULL;
+ALTER TABLE members ADD COLUMN IF NOT EXISTS causa_dimissione TEXT NULL;
+ALTER TABLE members ADD COLUMN IF NOT EXISTS codice_destinatario VARCHAR(7) NULL;
+ALTER TABLE members ADD COLUMN IF NOT EXISTS pec VARCHAR(255) NULL;
+ALTER TABLE members ADD COLUMN IF NOT EXISTS iban VARCHAR(34) NULL;
+ALTER TABLE members ADD COLUMN IF NOT EXISTS intestatario_iban VARCHAR(255) NULL;
+ALTER TABLE members ADD COLUMN IF NOT EXISTS mod_pagamento_preferita ENUM('contanti','bonifico','pos','sdd','assegno','altro') NULL;
+ALTER TABLE members ADD COLUMN IF NOT EXISTS data_certificato_medico DATE NULL;
+ALTER TABLE members ADD COLUMN IF NOT EXISTS tipologia_certificato ENUM('non_agonistico','agonistico','sportivo') NULL;
+ALTER TABLE members ADD COLUMN IF NOT EXISTS allergie TEXT NULL;
+ALTER TABLE members ADD COLUMN IF NOT EXISTS patologie TEXT NULL;
+ALTER TABLE members ADD COLUMN IF NOT EXISTS farmaci TEXT NULL;
+ALTER TABLE members ADD COLUMN IF NOT EXISTS note_sanitarie TEXT NULL;
+ALTER TABLE members ADD COLUMN IF NOT EXISTS taglia_abbigliamento VARCHAR(10) NULL;
+ALTER TABLE members ADD COLUMN IF NOT EXISTS numero_scarpe VARCHAR(10) NULL;
+ALTER TABLE members ADD COLUMN IF NOT EXISTS society_provenienza_id INT NULL;
+ALTER TABLE members ADD COLUMN IF NOT EXISTS data_tesseramento_precedente DATE NULL;
+ALTER TABLE members ADD COLUMN IF NOT EXISTS note_provenienza TEXT NULL;
+ALTER TABLE members ADD COLUMN IF NOT EXISTS flag_minore_protetto TINYINT(1) DEFAULT 0;
+
+ALTER TABLE members DROP FOREIGN KEY IF EXISTS fk_members_society_provenienza;
+ALTER TABLE members ADD CONSTRAINT fk_members_society_provenienza FOREIGN KEY (society_provenienza_id) REFERENCES societies(id) ON DELETE SET NULL;
