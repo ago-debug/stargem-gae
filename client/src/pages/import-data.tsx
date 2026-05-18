@@ -82,7 +82,6 @@ const MEMBER_FIELDS = [
   { key: "domicileCity", label: "Città Domicilio" },
   { key: "domicileProvince", label: "Provincia Domicilio" },
   { key: "domicilePostalCode", label: "CAP Domicilio" },
-  
 
   // Contatti e Residenza
   { key: "email", label: "Email" },
@@ -186,6 +185,29 @@ const MEMBER_FIELDS = [
   { key: "domicileProvince", label: "Provincia Domicilio" },
   { key: "domicileCountry", label: "Nazione Domicilio" },
 
+  // Nuovi Campi F1-030
+  { key: "statusLifecycle", label: "Stato Utente" },
+  { key: "dataIscrizione", label: "Data Iscrizione" },
+  { key: "dataDimissione", label: "Data Dimissione" },
+  { key: "causaDimissione", label: "Causa Dimissione" },
+  { key: "codiceDestinatario", label: "Codice SDI" },
+  { key: "pec", label: "PEC" },
+  { key: "iban", label: "IBAN" },
+  { key: "intestatarioIban", label: "Intestatario Conto" },
+  { key: "modPagamentoPreferita", label: "Modalità Pag. Preferita" },
+  { key: "dataCertificatoMedico", label: "Data Cert. Medico" },
+  { key: "tipologiaCertificato", label: "Tipo Certificato" },
+  { key: "allergie", label: "Allergie" },
+  { key: "patologie", label: "Patologie" },
+  { key: "farmaci", label: "Farmaci" },
+  { key: "noteSanitarie", label: "Note Sanitarie" },
+  { key: "tagliaAbbigliamento", label: "Taglia Abbigliamento" },
+  { key: "numeroScarpe", label: "Numero Scarpe" },
+  { key: "societyProvenienzaId", label: "Società Provenienza ID" },
+  { key: "dataTesseramentoPrecedente", label: "Data Tess. Precedente" },
+  { key: "noteProvenienza", label: "Note Provenienza" },
+  { key: "flagMinoreProtetto", label: "Minore Protetto" },
+
   // Dati Bancari
   { key: "iban", label: "IBAN" },
   { key: "bankName", label: "Banca" },
@@ -268,10 +290,11 @@ interface ImportResult {
   errors?: any[];
 }
 
-
 function normalizeColumnName(str: string): string {
-  return str.toLowerCase()
-    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+  return str
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-z0-9]/g, "");
 }
 
@@ -288,7 +311,10 @@ function levenshtein(a: string, b: string): number {
       if (b.charAt(i - 1) == a.charAt(j - 1)) {
         matrix[i][j] = matrix[i - 1][j - 1];
       } else {
-        matrix[i][j] = Math.min(matrix[i - 1][j - 1] + 1, Math.min(matrix[i][j - 1] + 1, matrix[i - 1][j] + 1));
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j - 1] + 1,
+          Math.min(matrix[i][j - 1] + 1, matrix[i - 1][j] + 1),
+        );
       }
     }
   }
@@ -296,21 +322,114 @@ function levenshtein(a: string, b: string): number {
 }
 
 const aliasDictionary: Record<string, string[]> = {
+  codiceDestinatario: ["codice destinatario", "codice sdi", "sdi"],
+  dataCertificatoMedico: ["cert. medico", "data cert", "certificato"],
+  iban: ["iban", "coordinate bancarie"],
+  societyProvenienzaId: [
+    "società di provenienza",
+    "provenienza",
+    "soc. prec.",
+    "societa provenienza",
+  ],
+  statusLifecycle: ["status", "stato_lifecycle", "stato_utente"],
+  dataIscrizione: ["data iscrizione", "data_iscr"],
+  dataDimissione: ["data dimissione", "dimesso_il"],
+  causaDimissione: ["causa dimissione", "motivo dimissione"],
+  pec: ["pec", "posta elettronica certificata"],
+  intestatarioIban: ["intestatario iban", "intestatario conto"],
+  modPagamentoPreferita: [
+    "mod pagamento preferita",
+    "mod. pagamento",
+    "pagamento pref",
+  ],
+  tipologiaCertificato: ["tipologia certificato", "tipo cert"],
+  allergie: ["allergie", "intolleranze"],
+  patologie: ["patologie"],
+  farmaci: ["farmaci"],
+  noteSanitarie: ["note sanitarie", "info mediche"],
+  tagliaAbbigliamento: [
+    "taglia abbigliamento",
+    "taglia maglia",
+    "taglia pantaloni",
+    "misura",
+  ],
+  numeroScarpe: ["numero scarpe", "scarpe", "misura scarpe"],
+  dataTesseramentoPrecedente: [
+    "data tesseramento prec",
+    "tess. prec.",
+    "tesseramento precedente",
+  ],
+  noteProvenienza: ["note provenienza"],
+  flagMinoreProtetto: ["minore protetto", "flag minore protetto"],
   fiscalCode: ["cod fiscale", "codice fiscale", "cf", "cod fisc"],
   lastName: ["cognome"],
   firstName: ["nome"],
   dateOfBirth: ["data di nascita", "data nascita", "datanascita", "data nas"],
   gender: ["sesso"],
-  birthCountry: ["nazione nasc", "nazione di nascita", "nazionenasc", "naz nascita", "nazione nasc."],
-  placeOfBirth: ["citta nasc", "luogo nascita", "cittanasc", "città nasc.", "città nasc"],
-  birthProvince: ["prov nasc", "provincia nascita", "provnasc", "prv nasc", "prov. nasc"],
-  country: ["nazione", "nazionedomic", "nazionedomicilio", "nazione residenza", "nazione domic.", "nazione domic"],
+  birthCountry: [
+    "nazione nasc",
+    "nazione di nascita",
+    "nazionenasc",
+    "naz nascita",
+    "nazione nasc.",
+  ],
+  placeOfBirth: [
+    "citta nasc",
+    "luogo nascita",
+    "cittanasc",
+    "città nasc.",
+    "città nasc",
+  ],
+  birthProvince: [
+    "prov nasc",
+    "provincia nascita",
+    "provnasc",
+    "prv nasc",
+    "prov. nasc",
+  ],
+  country: [
+    "nazione",
+    "nazionedomic",
+    "nazionedomicilio",
+    "nazione residenza",
+    "nazione domic.",
+    "nazione domic",
+  ],
   citizenship: ["cittadinanza"],
   nationality: ["nazionalità"],
-  address: ["indirizzo", "indirdomicilio", "indirizzodomicilio", "indir. domicilio"],
-  postalCode: ["cap", "capdomic", "capdomicilio", "cap domic.", "cap domic", "cap residenza"],
-  city: ["cittaresid", "cittaresidenza", "cittadomicilio", "cittaresid", "città resid.", "citta resid.", "citta resid", "citta domicilio", "città domicilio"],
-  province: ["provincia", "provinciadomic", "provinciadomicilio", "prov", "provincia domic.", "provincia domicilio"],
+  address: [
+    "indirizzo",
+    "indirdomicilio",
+    "indirizzodomicilio",
+    "indir. domicilio",
+  ],
+  postalCode: [
+    "cap",
+    "capdomic",
+    "capdomicilio",
+    "cap domic.",
+    "cap domic",
+    "cap residenza",
+  ],
+  city: [
+    "cittaresid",
+    "cittaresidenza",
+    "cittadomicilio",
+    "cittaresid",
+    "città resid.",
+    "citta resid.",
+    "citta resid",
+    "citta domicilio",
+    "città domicilio",
+  ],
+  province: [
+    "provincia",
+    "provinciadomic",
+    "provinciadomicilio",
+    "prov",
+    "provincia domic.",
+    "provincia domicilio",
+  ],
   region: ["regione"],
   mobile: ["cellulare", "cell", "mobile"],
   phone: ["telefono", "tel", "telefono fisso"],
@@ -318,16 +437,49 @@ const aliasDictionary: Record<string, string[]> = {
   athenaId: ["athenaid", "legacyathenaid", "id athena"],
   cardNumber: ["numerotessera", "num tessera", "numero tessera"],
   entityCardNumber: ["athenatessera", "num tessera ente"],
-  document_issued_by: ["documentorilasciatoda", "docrilasciatoda", "documento rilasciato da", "doc rilasciato da"],
-  document_issue_date: ["datarildoc", "datarilasciodoc", "data ril doc", "data ril. doc."],
+  document_issued_by: [
+    "documentorilasciatoda",
+    "docrilasciatoda",
+    "documento rilasciato da",
+    "doc rilasciato da",
+  ],
+  document_issue_date: [
+    "datarildoc",
+    "datarilasciodoc",
+    "data ril doc",
+    "data ril. doc.",
+  ],
   document_expiry: ["scadenzadocumento", "scaddoc", "scadenza documento"],
-  cardExpiryDate: ["scadtesserasocio", "scadenzatessera", "scad. tessera socio"],
-  newsletter_consent: ["consensoinvio", "newsletter", "privacy", "consenso invio"],
-  firstEnrollmentDate: ["data iscrizione", "data richi. iscri.", "data richi iscri", "data prima iscrizione"],
+  cardExpiryDate: [
+    "scadtesserasocio",
+    "scadenzatessera",
+    "scad. tessera socio",
+  ],
+  newsletter_consent: [
+    "consensoinvio",
+    "newsletter",
+    "privacy",
+    "consenso invio",
+  ],
+  firstEnrollmentDate: [
+    "data iscrizione",
+    "data richi. iscri.",
+    "data richi iscri",
+    "data prima iscrizione",
+  ],
   lastRenewalDate: ["data rinnovo", "ultimo rinnovo"],
-  medicalCertificateExpiry: ["scadenza visita", "scad visita", "scadenza certificato"],
+  medicalCertificateExpiry: [
+    "scadenza visita",
+    "scad visita",
+    "scadenza certificato",
+  ],
   sedeRiferimento: ["sede riferimento", "sede rif"],
-  codiceCatastale: ["cod. catast. comune", "cod comune", "codice catastale", "cod. comune"],
+  codiceCatastale: [
+    "cod. catast. comune",
+    "cod comune",
+    "codice catastale",
+    "cod. comune",
+  ],
   mastroC: ["mastro c.", "mastro c"],
   mastroCol: ["mastro col.", "mastro col"],
   privacyAccepted: ["privacy", "consenso privacy", "cons. privacy"],
@@ -336,7 +488,13 @@ const aliasDictionary: Record<string, string[]> = {
   consentMarketing: ["consenso invio", "newsletter"],
   genitore1FirstName: ["nometutore", "nometutore1", "nome tutore"],
   genitore1LastName: ["cognometutore", "cognometutore1", "cognome tutore"],
-  genitore1FiscalCode: ["codfisctutore", "cftutore", "codfisc tutore", "codicefisc tutore", "cod.fisc. tutore"],
+  genitore1FiscalCode: [
+    "codfisctutore",
+    "cftutore",
+    "codfisc tutore",
+    "codicefisc tutore",
+    "cod.fisc. tutore",
+  ],
   genitore1Address: ["indirizzo tutore", "ind. tutore"],
   genitore1City: ["città tutore", "citta tutore"],
   genitore1Province: ["provincia tutore", "prov. tutore"],
@@ -347,7 +505,11 @@ const aliasDictionary: Record<string, string[]> = {
   genitore1BirthPlace: ["luogo nascita tutore"],
   genitore2FirstName: ["nome tutore 2"],
   genitore2LastName: ["cognome tutore 2"],
-  genitore2FiscalCode: ["cod.fisc. tutore 2", "cf tutore 2", "cod fisc tutore 2"],
+  genitore2FiscalCode: [
+    "cod.fisc. tutore 2",
+    "cf tutore 2",
+    "cod fisc tutore 2",
+  ],
   genitore2Address: ["indirizzo tutore 2", "ind. tutore 2"],
   genitore2City: ["città tutore 2", "citta tutore 2"],
   genitore2Province: ["provincia tutore 2", "prov. tutore 2"],
@@ -355,7 +517,7 @@ const aliasDictionary: Record<string, string[]> = {
   genitore2Phone: ["telefono tutore 2", "tel tutore 2"],
   genitore2Email: ["email tutore 2", "e-mail tutore 2"],
   genitore2BirthDate: ["data nascita tutore 2"],
-  genitore2BirthPlace: ["luogo nascita tutore 2"]
+  genitore2BirthPlace: ["luogo nascita tutore 2"],
 };
 
 const normalizedAliases: Record<string, string[]> = {};
@@ -363,12 +525,16 @@ for (const key of Object.keys(aliasDictionary)) {
   normalizedAliases[key] = aliasDictionary[key].map(normalizeColumnName);
 }
 
-function calculateAutoMapping(headers: any[], fields: any[], savedMap: Record<string, number> = {}): Record<string, number | null> {
+function calculateAutoMapping(
+  headers: any[],
+  fields: any[],
+  savedMap: Record<string, number> = {},
+): Record<string, number | null> {
   const initialMapping: Record<string, number | null> = {};
   const usedIndexes = new Set<number>();
 
   // Prima passa i salvati
-  fields.forEach(field => {
+  fields.forEach((field) => {
     if (savedMap[field.key] !== undefined && savedMap[field.key] !== null) {
       initialMapping[field.key] = savedMap[field.key];
       usedIndexes.add(savedMap[field.key]);
@@ -378,9 +544,9 @@ function calculateAutoMapping(headers: any[], fields: any[], savedMap: Record<st
   });
 
   // Poi calcola per i non mappati
-  fields.forEach(field => {
+  fields.forEach((field) => {
     if (initialMapping[field.key] !== null) return;
-    
+
     const fieldKeyNorm = normalizeColumnName(field.key);
     const fieldLabelNorm = normalizeColumnName(field.label);
     const aliases = normalizedAliases[field.key] || [];
@@ -388,56 +554,60 @@ function calculateAutoMapping(headers: any[], fields: any[], savedMap: Record<st
     let bestMatchIndex = -1;
     let bestMatchScore = 999;
 
-    headers.forEach(h => {
+    headers.forEach((h) => {
       if (usedIndexes.has(h.index)) return;
       const hNorm = normalizeColumnName(h.name);
-      
-      const isNascita = hNorm.includes('nasc');
-      const isDomicilio = hNorm.includes('domic');
+
+      const isNascita = hNorm.includes("nasc");
+      const isDomicilio = hNorm.includes("domic");
       const isResidenza = !isNascita && !isDomicilio;
-      
+
       // Strict constraints for Ambiguous Fields
-      if (field.key === 'country' && !isResidenza) return;
-      if (field.key === 'postalCode' && !isResidenza) return;
-      if (field.key === 'city' && !isResidenza) return;
-      if (field.key === 'province' && !isResidenza) return;
-      
-      if (field.key === 'birthCountry' && !isNascita) return;
-      if (field.key === 'domicileCountry' && !isDomicilio) return;
-      if (field.key === 'domicileCity' && !isDomicilio) return;
-      if (field.key === 'domicilePostalCode' && !isDomicilio) return;
-      if (field.key === 'domicileProvince' && !isDomicilio) return;
+      if (field.key === "country" && !isResidenza) return;
+      if (field.key === "postalCode" && !isResidenza) return;
+      if (field.key === "city" && !isResidenza) return;
+      if (field.key === "province" && !isResidenza) return;
+
+      if (field.key === "birthCountry" && !isNascita) return;
+      if (field.key === "domicileCountry" && !isDomicilio) return;
+      if (field.key === "domicileCity" && !isDomicilio) return;
+      if (field.key === "domicilePostalCode" && !isDomicilio) return;
+      if (field.key === "domicileProvince" && !isDomicilio) return;
 
       // Exact match
-      if (hNorm === fieldKeyNorm || hNorm === fieldLabelNorm || aliases.includes(hNorm)) {
+      if (
+        hNorm === fieldKeyNorm ||
+        hNorm === fieldLabelNorm ||
+        aliases.includes(hNorm)
+      ) {
         if (bestMatchScore > 0) {
-            bestMatchIndex = h.index;
-            bestMatchScore = 0;
+          bestMatchIndex = h.index;
+          bestMatchScore = 0;
         }
         return;
       }
-      
+
       // Subset match
       if (hNorm.length > 4 && bestMatchScore > 0) {
         if (hNorm.includes(fieldLabelNorm) || fieldLabelNorm.includes(hNorm)) {
-            bestMatchIndex = h.index;
-            bestMatchScore = 1;
+          bestMatchIndex = h.index;
+          bestMatchScore = 1;
         } else {
-            // fuzzy match
-            const dist = levenshtein(hNorm, fieldLabelNorm);
-            if (dist <= 2 && dist < bestMatchScore) {
+          // fuzzy match
+          const dist = levenshtein(hNorm, fieldLabelNorm);
+          if (dist <= 2 && dist < bestMatchScore) {
+            bestMatchIndex = h.index;
+            bestMatchScore = dist;
+          }
+          for (const alias of aliases) {
+            if (alias.length > 4) {
+              const d = levenshtein(hNorm, alias);
+              if (d <= 2 && d < bestMatchScore) {
                 bestMatchIndex = h.index;
-                bestMatchScore = dist;
+                bestMatchScore = d;
+              }
             }
-            for (const alias of aliases) {
-                if (alias.length > 4) {
-                    const d = levenshtein(hNorm, alias);
-                    if (d <= 2 && d < bestMatchScore) {
-                        bestMatchIndex = h.index;
-                        bestMatchScore = d;
-                    }
-                }
-            }
+          }
         }
       }
     });
@@ -960,7 +1130,9 @@ export default function ImportData() {
 
         for (let i = 0; i < totalChunks; i++) {
           if (cancelRef.current) {
-            setImportStatus("Importazione annullata. Sono stati salvati i record fino al chunk precedente.");
+            setImportStatus(
+              "Importazione annullata. Sono stati salvati i record fino al chunk precedente.",
+            );
             break;
           }
 
@@ -2142,14 +2314,19 @@ export default function ImportData() {
                               <span>{importStatus}</span>
                               <span>{importProgress}%</span>
                             </div>
-                            <Progress value={importProgress} className="h-4 w-full" />
+                            <Progress
+                              value={importProgress}
+                              className="h-4 w-full"
+                            />
                             <div className="flex justify-center pt-2">
                               <Button
                                 variant="destructive"
                                 size="sm"
                                 onClick={() => {
                                   cancelRef.current = true;
-                                  setImportStatus("Richiesta di annullamento in corso...");
+                                  setImportStatus(
+                                    "Richiesta di annullamento in corso...",
+                                  );
                                 }}
                               >
                                 Annulla Chunk Successivi
@@ -2208,11 +2385,11 @@ export default function ImportData() {
                     <div className="text-center">
                       <div className="mb-4 inline-block rounded-lg bg-destructive/10 px-4 py-2 text-sm font-medium text-destructive">
                         Attenzione: Si sono verificati{" "}
-                        {importResult.errors.length} errori o conflitti durante la
-                        procedura.
+                        {importResult.errors.length} errori o conflitti durante
+                        la procedura.
                       </div>
                       <br />
-                      <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                      <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
                         <Button
                           variant="outline"
                           className="border-destructive text-destructive hover:bg-destructive hover:text-white"
@@ -2230,7 +2407,9 @@ export default function ImportData() {
                                       `${e.row || ""},${e.cf || ""},"${(e.message || e.error || "").replace(/"/g, '""')}"`,
                                   )
                                   .join("\n");
-                              const blob = new Blob([csv], { type: "text/csv" });
+                              const blob = new Blob([csv], {
+                                type: "text/csv",
+                              });
                               const url = window.URL.createObjectURL(blob);
                               const a = document.createElement("a");
                               a.href = url;
@@ -2239,17 +2418,19 @@ export default function ImportData() {
                             }
                           }}
                         >
-                          <Download className="mr-2 size-4" /> 📥 Scarica scarti CSV
+                          <Download className="mr-2 size-4" /> 📥 Scarica scarti
+                          CSV
                         </Button>
                         <Button
                           variant="outline"
                           onClick={() => {
-                             if (importResult.batchId) {
-                               window.location.href = `/api/import/batch/${importResult.batchId}/conflicts`;
-                             }
+                            if (importResult.batchId) {
+                              window.location.href = `/api/import/batch/${importResult.batchId}/conflicts`;
+                            }
                           }}
                         >
-                           <Download className="mr-2 size-4" /> 📥 Scarica log conflitti CSV
+                          <Download className="mr-2 size-4" /> 📥 Scarica log
+                          conflitti CSV
                         </Button>
                       </div>
 
