@@ -28,7 +28,7 @@ import { MultiSelectPaymentNotes } from "@/components/multi-select-payment-notes
 import { MultiSelectParticipantType } from "@/components/multi-select-participant-type";
 import { MultiSelectEnrollmentDetails, EnrollmentDetailBadge } from "@/components/multi-select-enrollment-details";
 import { PaymentDialog, type PaymentData } from "@/components/payment-dialog";
-import { NuovoPagamentoModal } from "@/components/nuovo-pagamento-modal";
+import { NuovoPagamentoModal as NuovoPagamentoModalMC3 } from "@/components/payments/NuovoPagamentoModal";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { SortableTableHead, useSortableTable } from "@/components/sortable-table-head";
 import { cn } from "@/lib/utils";
@@ -48,6 +48,7 @@ import { TabMarketing } from "@/components/crm/TabMarketing";
 import { TabAllegati } from "@/components/crm/TabAllegati";
 import { TabGift } from "@/components/crm/TabGift";
 import { TabTessere } from "@/components/crm/TabTessere";
+import StoriaProvenienzaTab from "@/components/dossiers/StoriaProvenienzaTab";
 import { getActiveActivities } from "@/config/activities";
 function useBarcodeScanner(onScan: (barcode: string) => void) {
   useEffect(() => {
@@ -1891,12 +1892,11 @@ function MascheraInputGeneraleContent(props?: any) {
               )}
             </div>
 
-            {/* Nuovo Pagamento Modal (Unificato) */}
-            <NuovoPagamentoModal
+            {/* Nuovo Pagamento Modal (Unificato MC3) */}
+            <NuovoPagamentoModalMC3
               isOpen={isNuovoPagamentoOpen}
               onClose={() => setIsNuovoPagamentoOpen(false)}
               defaultMemberId={selectedMemberId ? Number(selectedMemberId) : undefined}
-              defaultIncludeTessera={initialAction === 'rinnova-tessera'}
             />
 
             <PaymentDialog
@@ -1934,6 +1934,7 @@ function MascheraInputGeneraleContent(props?: any) {
 
         <TabIscrizioni />
         <TabRicevute />
+        {selectedMemberId && <StoriaProvenienzaTab memberId={Number(selectedMemberId)} />}
 
         </div>
         
